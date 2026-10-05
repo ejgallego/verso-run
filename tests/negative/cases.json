@@ -1,0 +1,10 @@
+{
+  "MissingEntry": "Named argument 'entry'",
+  "UnknownEntry": "Unknown constant",
+  "Unmarked": "must carry @[vir_export]",
+  "Unsupported": "supports exactly",
+  "Discarded": "keep",
+  "ErrorExpected": "error",
+  "Unavailable": "missing IR",
+  "Private": "private"
+}

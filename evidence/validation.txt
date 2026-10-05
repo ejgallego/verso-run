@@ -1,0 +1,22 @@
+Verso base: cad4b633 (v4.34.0)
+Lean: leanprover/lean4:v4.34.0
+VIR: e92d95db62b14db88669394791f6f981161d5674
+
+Feature worktree root: lake build passed (1114 jobs).
+Feature worktree root: lake test passed (647 passed, 0 failed, 0 errors; 10 interactive LSP checks passed).
+Optional package: lake test -- --mutations passed (25 native/browser/author/resource checks).
+Browser: installed Google Chrome, headless Chromium via Playwright.
+Acceptance regenerates single-page/multi-page HTML and TeX, checks copied HTTP outputs,
+and restores original chapter/helper sources and publication identity after mutations.
+
+Full local logs:
+/tmp/verso-lean-run-regression-build-retry.log
+/tmp/verso-lean-run-regression-test-retry.log
+/tmp/verso-lean-run-final-acceptance.log
+
+Not exercised: Firefox, Safari, mobile or assistive-technology audits.
+This feature branch targets the compatible Verso release, not current main
+with Lean 4.35.0-rc3. No dependency/toolchain migration is included.
+Standalone worker gate: create, call both interfaces, dispose, recreate, call, dispose; passed.
+Cached-page handler exercised with a persisted PageTransitionEvent; actual browser cache
+restoration across different browsers is not qualified.

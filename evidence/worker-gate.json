@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "first": [
+    "Hello, Unicode 🌍",
+    "18014398509481986"
+  ],
+  "second": "Hello, again",
+  "worker": true
+}

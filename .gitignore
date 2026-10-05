@@ -1,0 +1,5 @@
+.lake/
+.vir-generated/
+.beam/
+_out/
+__pycache__/
