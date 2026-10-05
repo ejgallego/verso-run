@@ -1,5 +1,5 @@
 """Real native/browser acceptance; run from the optional package with uv/Playwright."""
-import argparse, functools, http.server, json, shutil, subprocess, tempfile, threading, time
+import argparse, copy, functools, http.server, json, shutil, subprocess, tempfile, threading, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -39,6 +39,17 @@ generate(site)
 command([str(ROOT/'.lake/build/bin/lean-run-demo'), '--output', str(OUTPUT/'native-only'), '--with-html-single'], 'native-outside-checkout', cwd=OUTPUT)
 record('native publisher runs with only a project marker and embedded assets')
 plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
+assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
+assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
+published = plan['programs']['LeanRunGate.Chapter']
+for declaration, type_name in [('greet', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
+    contract = published['LeanRunGate.'+declaration]['expectedExport']
+    assert contract['declaration'] == 'LeanRunGate.'+declaration
+    assert contract['signature']['effect'] == 'pure'
+    assert len(contract['signature']['args']) == 1
+    assert contract['signature']['args'][0]['type'] == type_name
+    assert contract['signature']['result']['type'] == type_name
+record('compiler signatures survive both publication layouts and native-only generation')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
     output = command(['lake','env','lean',f'tests/negative/{name}.lean'], 'negative-'+name, expected=1)
     assert expected.lower() in output.lower(), output
@@ -95,6 +106,52 @@ with sync_playwright() as p:
         assert call(greeting,value) == oracle('greet',value)
         assert greeting.locator('.lean-run-output img').count() == 0
     record('native/browser String oracle: empty, edited, Unicode, HTML text')
+
+    # Change only the independently published expectation, keeping the real program
+    # bytes and resource identity intact. VIR must reject before invoking Lean.
+    for field, value in [
+        ('args', published['LeanRunGate.double']['expectedExport']['signature']['args']),
+        ('result', published['LeanRunGate.double']['expectedExport']['signature']['result']),
+        ('args', []),
+        ('effect', 'io'),
+        (None, None),
+    ]:
+        altered = copy.deepcopy(plan)
+        binding = altered['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']
+        if field is None:
+            del binding['expectedExport']
+        else:
+            binding['expectedExport']['signature'][field] = value
+        page.route('**/lean-run/publication.json', lambda route: route.fulfill(
+            content_type='application/json', body=json.dumps(altered)))
+        page.goto(base+'single/')
+        page.wait_for_selector('.lean-run[data-enhanced]')
+        greeting = form_for('LeanRunGate.greet')
+        greeting.evaluate('''e => {
+            e.observedStates = [];
+            new MutationObserver(() => e.observedStates.push(e.dataset.state))
+                .observe(e, {attributes: true, attributeFilter: ['data-state']});
+        }''')
+        count = len(workers)
+        greeting.locator('input').fill('must not run')
+        greeting.locator('[type=submit]').click()
+        page.wait_for_function('(e) => e.dataset.state === "failed"',
+            arg=greeting.element_handle(), timeout=20000)
+        assert 'running' not in greeting.evaluate('e => e.observedStates')
+        if field is None:
+            assert 'No published VIR signature' in greeting.locator('.lean-run-output').text_content()
+            assert len(workers) == count
+            name = 'missing published signature'
+        else:
+            assert 'expected callable signature' in greeting.locator('.lean-run-output').text_content()
+            name = 'arity' if value == [] else field
+        record('reject '+name+' before invocation')
+        page.unroute('**/lean-run/publication.json')
+    page.goto(base+'single/')
+    page.wait_for_selector('.lean-run[data-enhanced]')
+    greeting = form_for('LeanRunGate.greet')
+    assert call(greeting,'<img src=x onerror=alert(1)>') == oracle('greet','<img src=x onerror=alert(1)>')
+
     for value in ['0','7','9007199254740993','9'*128]:
         assert call(numeric,value) == oracle('double',value)
     record('native/browser exact Nat oracle: zero, edited, large integers')

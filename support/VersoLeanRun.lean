@@ -7,6 +7,7 @@ module
 public import VersoManual
 public meta import Vir.Attributes
 public meta import Vir.Interface.Classify.Signature
+public meta import Vir.GeneratePackage.Interface.Encode
 public meta import VersoManual.InlineLean
 public meta import VersoManual.InlineLean.Scopes
 
@@ -22,6 +23,8 @@ structure Experiment where
   program : String
   declaration : String
   shape : String
+  /-- VIR's canonical callable signature, serialized during document elaboration. -/
+  signature : String
   sourceLine : Nat
   sourceColumn : Nat
   deriving ToJson, FromJson
@@ -73,11 +76,16 @@ meta def leanRun : CodeBlockExpanderOf Config
         | #[{ type := .nat, .. }], .nat, .pure => pure "nat"
         | _, _, _ => throwErrorAt config.entry "Lean Run supports exactly String → String and Nat → Nat (one explicit argument, pure and monomorphic); entry '{name}' does not match"
       let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
+      let signature := Vir.GeneratePackage.jsonObject #[
+        ("args", Vir.GeneratePackage.jsonArray (callSignature.args.map (·.type.toJson))),
+        ("result", callSignature.result.toJson),
+        ("effect", Vir.GeneratePackage.jsonString callSignature.effect.label)]
       let experiment : Experiment := {
-        program := env.mainModule.toString, declaration := name.toString, shape,
+        program := env.mainModule.toString, declaration := name.toString, shape, signature,
         sourceLine := pos.line, sourceColumn := pos.column }
       let source ← toHighlightedLeanBlock shouldShow hls str
       let description ← `(VersoLeanRun.Experiment.mk
         $(quote experiment.program) $(quote experiment.declaration) $(quote experiment.shape)
+        $(quote experiment.signature)
         $(quote experiment.sourceLine) $(quote experiment.sourceColumn))
       ``(Verso.Doc.Block.other (VersoLeanRun.Block.leanRun $description) #[$source])

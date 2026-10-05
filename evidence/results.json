@@ -5,6 +5,10 @@
       "result": "pass"
     },
     {
+      "test": "compiler signatures survive both publication layouts and native-only generation",
+      "result": "pass"
+    },
+    {
       "test": "author MissingEntry",
       "result": "pass"
     },
@@ -46,6 +50,26 @@
     },
     {
       "test": "native/browser String oracle: empty, edited, Unicode, HTML text",
+      "result": "pass"
+    },
+    {
+      "test": "reject args before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject result before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject arity before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject effect before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject missing published signature before invocation",
       "result": "pass"
     },
     {
@@ -107,14 +131,65 @@
     "programs": {
       "LeanRunGate.Chapter": {
         "LeanRunGate.double": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.double",
+            "interfaceId": "verso-nat-nat-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            }
+          },
           "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
           "role": "double"
         },
         "LeanRunGate.greet": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.greet",
+            "interfaceId": "verso-string-string-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            }
+          },
           "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
           "role": "greet"
         },
         "LeanRunGate.spin": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.spin",
+            "interfaceId": "verso-nat-nat-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            }
+          },
           "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
           "role": "spin"
         }

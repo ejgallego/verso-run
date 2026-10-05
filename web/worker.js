@@ -1,5 +1,5 @@
 // One worker owns one VIR program. Terminating this worker cancels synchronous calls.
-import { expectedExport, validateInput, formatResult } from "./contract.js";
+import { validateInput, formatResult } from "./contract.js";
 let program = null;
 let description = null;
 let creating = null;
@@ -24,7 +24,7 @@ onmessage = async ({ data }) => {
         runtimeManifestUrl: new URL(data.publication.runtimeManifest),
         programManifestUrl: new URL(data.publication.programManifest),
         signal: creating.signal,
-        expectedExports: { [data.publication.role]: expectedExport(description) },
+        expectedExports: { [data.publication.role]: data.publication.expectedExport },
       });
       creating = null;
     }

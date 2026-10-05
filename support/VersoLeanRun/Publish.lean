@@ -39,7 +39,8 @@ against the recipe before writing execution assets; no producer files are reopen
 def publish (runtime : Bundle) (programs : Array (String × Bundle)) : ExtraStep := fun mode config _ text => do
   let resources : ResourceSet := { runtime, programs := programs.map (·.2) }
   let bundles ← IO.ofExcept <| resources.bundles.mapError reprStr
-  for experiment in (← IO.ofExcept <| experiments text) do
+  let rendered ← IO.ofExcept <| experiments text
+  for experiment in rendered do
     let provenance := s!"{experiment.program}:{experiment.sourceLine}:{experiment.sourceColumn}"
     let some (_, program) := programs.find? (·.1 == experiment.program)
       | throw <| IO.userError s!"{provenance}: no compiled Lean Run program for {experiment.declaration}"
@@ -65,10 +66,20 @@ def publish (runtime : Bundle) (programs : Array (String × Bundle)) : ExtraStep
       IO.FS.writeBinFile path file.bytes
   let some runtimeModule := runtime.entryPath? "runtimeModule"
     | throw <| IO.userError "missing VIR runtime module"
-  let programsJson := programs.map fun (moduleName, program) =>
-    (moduleName, Lean.Json.mkObj <| program.descriptor.exports.toList.map fun item =>
-      (item.declaration, Lean.Json.mkObj [
-        ("role", .str item.role), ("manifest", .str (base ++ program.contentId ++ "/bundle.json"))]))
+  let programsJson ← programs.mapM fun (moduleName, program) => do
+    let exportsJson ← program.descriptor.exports.mapM fun item => do
+      let mut fields := [
+        ("role", Lean.Json.str item.role),
+        ("manifest", .str (base ++ program.contentId ++ "/bundle.json"))]
+      if let some experiment := rendered.find? fun e =>
+          e.program == moduleName && e.declaration == item.declaration then
+        let signature ← IO.ofExcept <| (Lean.Json.parse experiment.signature).mapError fun error =>
+          s!"{moduleName}:{experiment.sourceLine}:{experiment.sourceColumn}: invalid compiled VIR signature: {error}"
+        fields := fields ++ [("expectedExport", Lean.Json.mkObj [
+          ("declaration", .str item.declaration), ("interfaceId", .str item.interfaceId),
+          ("signature", signature)])]
+      return (item.declaration, Lean.Json.mkObj fields)
+    return (moduleName, Lean.Json.mkObj exportsJson.toList)
   let plan := Lean.Json.mkObj [
     ("runtimeModule", .str (base ++ runtime.contentId ++ "/" ++ runtimeModule)),
     ("runtimeManifest", .str (base ++ runtime.contentId ++ "/bundle.json")),

@@ -34,9 +34,11 @@ export class ExperimentHost {
       if (generation !== this.generation) return await promise;
       const binding = plan.programs[this.description.program]?.[this.description.declaration];
       if (!binding) throw new Error(`No published program for ${this.description.declaration}`);
+      if (!binding.expectedExport) throw new Error(`No published VIR signature for ${this.description.declaration}`);
       const url = path => new URL(path, new URL("../", import.meta.url)).href;
       const publication = { role: binding.role, runtimeModule: url(plan.runtimeModule),
-        runtimeManifest: url(plan.runtimeManifest), programManifest: url(binding.manifest) };
+        runtimeManifest: url(plan.runtimeManifest), programManifest: url(binding.manifest),
+        expectedExport: binding.expectedExport };
       if (!this.worker) {
         const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
         this.worker = worker;
