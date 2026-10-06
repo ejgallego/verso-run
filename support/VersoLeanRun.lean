@@ -23,6 +23,8 @@ structure Experiment where
   program : String
   declaration : String
   shape : String
+  initialInput : String
+  collapsed : Bool
   /-- VIR's canonical callable signature, serialized during document elaboration. -/
   signature : String
   sourceLine : Nat
@@ -38,10 +40,13 @@ block_extension Block.leanRun (experiment : Experiment) where
       | reportError "Invalid Lean Run experiment description" *> pure .empty
     let source ← contents.mapM go
     let label := if experiment.shape == "nat" then "Natural number" else "Text"
-    let initial := if experiment.shape == "nat" then "0" else ""
+    let initial := experiment.initialInput
     let placeholder := if experiment.shape == "nat" then "0" else "Enter text"
+    let sourcePanel := if experiment.collapsed then
+      {{ <details class="lean-run-source"><summary> "View Lean implementation" </summary> {{source}} </details> }}
+      else {{ <div class="lean-run-source"> {{source}} </div> }}
     pure {{ <section class="lean-run" data-experiment={{data.compress}} data-instance={{toString id}}>
-      <div class="lean-run-source"> {{source}} </div>
+      {{sourcePanel}}
       <div class="lean-run-console">
         <form>
           <label> {{label}} <input type="text" value={{initial}} placeholder={{placeholder}} maxlength="4096" autocomplete="off"/> </label>
@@ -58,9 +63,12 @@ block_extension Block.leanRun (experiment : Experiment) where
 
 structure Config where
   entry : Ident
+  input : Option String
+  collapsed : Bool
 
 meta instance : FromArgs Config DocElabM where
-  fromArgs := Config.mk <$> .named `entry .ident false
+  fromArgs := Config.mk <$> .named `entry .ident false <*> .named `input .string true <*>
+    .flag `collapsed false
 
 /-- Elaborate ordinary retained commands, then resolve and classify the selected entry. -/
 @[code_block]
@@ -85,10 +93,14 @@ meta def leanRun : CodeBlockExpanderOf Config
         ("effect", Vir.GeneratePackage.jsonString callSignature.effect.label)]
       let experiment : Experiment := {
         program := env.mainModule.toString, declaration := name.toString, shape, signature,
+        initialInput := config.input.getD (if shape == "nat" then "0" else ""),
+        collapsed := config.collapsed,
         sourceLine := pos.line, sourceColumn := pos.column }
       let source ← toHighlightedLeanBlock shouldShow hls str
       let description ← `(VersoLeanRun.Experiment.mk
         $(quote experiment.program) $(quote experiment.declaration) $(quote experiment.shape)
+        $(quote experiment.initialInput)
+        $(quote experiment.collapsed)
         $(quote experiment.signature)
         $(quote experiment.sourceLine) $(quote experiment.sourceColumn))
       ``(Verso.Doc.Block.other (VersoLeanRun.Block.leanRun $description) #[$source])

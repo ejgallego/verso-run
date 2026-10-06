@@ -42,7 +42,7 @@ plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
 assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
+for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert contract['declaration'] == 'LeanRunGate.'+declaration
     assert contract['signature']['effect'] == 'pure'
@@ -114,12 +114,53 @@ with sync_playwright() as p:
     numeric = form_for('LeanRunGate.double')
     other = form_for('LeanRunGate.greet', 1)
     spin = form_for('LeanRunGate.spin')
+    calculator = form_for('LeanRunGate.Stack.run')
+    assert calculator.locator('details').get_attribute('open') is None
+    calculator.locator('summary').press('Enter')
+    assert calculator.locator('details').get_attribute('open') is not None
+    assert 'public inductive Instruction' in calculator.locator('.lean-run-source').inner_text()
+    calculator.locator('summary').press('Enter')
+    assert calculator.locator('details').get_attribute('open') is None
     assert not workers, 'Runtime must be lazy'
     record('no runtime on page load')
     for value in ['', 'Ada', 'Unicode λ 🌍', '<img src=x onerror=alert(1)>']:
         assert call(greeting,value) == oracle('greet',value)
         assert greeting.locator('.lean-run-output img').count() == 0
     record('native/browser String oracle: empty, edited, Unicode, HTML text')
+
+    assert calculator.locator('input').input_value() == '6 7 * 2 +'
+    calculator.locator('[type=submit]').click()
+    page.wait_for_function('(e) => e.dataset.state === "success"', arg=calculator.element_handle(), timeout=20000)
+    assert calculator.locator('.lean-run-output').text_content() == (
+        'Start: []\n6  →  [6]\n7  →  [6, 7]\n*  →  [42]\n2  →  [42, 2]\n+  →  [44]\n\nResult: 44')
+    record('stack calculator preset runs the displayed program with a complete trace')
+    for value, expected in [
+        ('3 4 + 5 *', 35), ('5 dup *', 25), ('2 3 swap dup * +', 7),
+        ('9007199254740993 2 *', 18014398509481986), ('  3   4 +  ', 7),
+    ]:
+        output = call(calculator, value)
+        assert output == oracle('stack', value)
+        assert output.endswith('Result: '+str(expected)), output
+    record('stack calculator native/browser arithmetic, dup, swap and exact large integers')
+    for value, expected in [
+        ('', 'Enter a program'), ('2 +', "Error at '+': not enough values"),
+        ('dup', "Error at 'dup': not enough values"), ('word', "Error at 'word': unknown instruction"),
+        ('-1', "Error at '-1': unknown instruction"), ('2 3', 'Finish with exactly one value'),
+    ]:
+        output = call(calculator, value)
+        assert output == oracle('stack', value)
+        assert expected in output, output
+    record('stack calculator reports parse errors, stack underflow and unfinished programs')
+    for value, expected in [
+        (' '.join(['1']*33), 'Use at most 32 instructions'),
+        (' '.join(['1']*17), 'Stack or number limit reached'),
+        ('9'*81, 'Stack or number limit reached'),
+        ('9'*80+' 2 *', 'Stack or number limit reached'),
+    ]:
+        output = call(calculator, value)
+        assert output == oracle('stack', value)
+        assert expected in output, output
+    record('stack calculator bounds instructions, stack depth and arithmetic growth')
 
     # Change only the independently published expectation, keeping the real program
     # bytes and resource identity intact. VIR must reject before invoking Lean.
@@ -171,7 +212,7 @@ with sync_playwright() as p:
     record('native/browser exact Nat oracle: zero, edited, large integers')
     assert call(other,'independent') == oracle('greet','independent')
     assert greeting.locator('.lean-run-output').text_content() == oracle('greet','<img src=x onerror=alert(1)>')
-    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 4
+    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 5
     record('independent repeated placements')
     for value in ['-1','1.5','abc','',' 1','1e3','9'*257]:
         numeric.locator('input').fill(value)
@@ -254,11 +295,14 @@ with sync_playwright() as p:
     assert 'public def LeanRunGate.greet' in plain.locator('body').inner_text()
     assert '#check Nat.add' in plain.locator('body').inner_text()
     assert plain.locator('.lean-run [type=submit]').first.is_disabled()
-    assert plain.locator('.lean-run noscript').count() == 4
+    assert plain.locator('.lean-run noscript').count() == 5
     assert all('Enable JavaScript' in text for text in plain.locator('.lean-run noscript').all_text_contents())
+    plain_calculator = plain.locator('.lean-run[data-experiment*="LeanRunGate.Stack.run"]')
+    plain_calculator.locator('summary').click()
+    assert 'public inductive Instruction' in plain_calculator.locator('.lean-run-source').inner_text()
     context.close()
     tex=(site/'tex/main.tex').read_text()
-    assert 'LeanRunGate' in tex and 'Nat.add' in tex
+    assert 'LeanRunGate' in tex and 'Nat.add' in tex and 'Instruction' in tex
     record('JavaScript-disabled highlighting and TeX source fallback')
     assert not errors, errors
 

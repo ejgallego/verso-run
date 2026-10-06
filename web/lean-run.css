@@ -9,6 +9,22 @@
   padding: 1rem;
 }
 
+.lean-run-source summary {
+  color: #40546a;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lean-run-source[open] summary {
+  margin-bottom: 1rem;
+}
+
+.lean-run-source summary:focus-visible {
+  outline: 2px solid #4777ff;
+  outline-offset: 4px;
+}
+
 .lean-run .lean-run-source .hl.lean.block {
   display: block;
   margin: 0;

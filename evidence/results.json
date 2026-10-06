@@ -61,6 +61,22 @@
       "result": "pass"
     },
     {
+      "test": "stack calculator preset runs the displayed program with a complete trace",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator native/browser arithmetic, dup, swap and exact large integers",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator reports parse errors, stack underflow and unfinished programs",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator bounds instructions, stack depth and arithmetic growth",
+      "result": "pass"
+    },
+    {
       "test": "reject args before invocation",
       "result": "pass"
     },
@@ -123,12 +139,12 @@
     {
       "test": "implementation invalidation greet",
       "result": "pass",
-      "program": "lean-run/resources/d8fb68ad2b15277501619681f0a8e0787e39fd73dad88495c7ee7d03d53caf94/bundle.json"
+      "program": "lean-run/resources/ad2784fa88b21a55b406d9b749b5dd6cc9857cec101804a20cd28a87fecb8405/bundle.json"
     },
     {
       "test": "implementation invalidation double",
       "result": "pass",
-      "program": "lean-run/resources/e5d53774699945d9a4630d0c27d8e05a35c74ff7a06b0dc32ec3544123dc7bb8/bundle.json"
+      "program": "lean-run/resources/5ef302afb2ea8e7c991cee43c92819477d3a797c8205a58c87c936cd6cde6f51/bundle.json"
     },
     {
       "test": "ambiguous recipe roles report declaration and source provenance",
@@ -146,6 +162,27 @@
   "publication": {
     "programs": {
       "LeanRunGate.Chapter": {
+        "LeanRunGate.Stack.run": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.Stack.run",
+            "interfaceId": "verso-string-string-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            }
+          },
+          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
+          "role": "stack"
+        },
         "LeanRunGate.double": {
           "expectedExport": {
             "declaration": "LeanRunGate.double",
@@ -164,7 +201,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
+          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
           "role": "double"
         },
         "LeanRunGate.greet": {
@@ -185,7 +222,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
+          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
           "role": "greet"
         },
         "LeanRunGate.spin": {
@@ -206,7 +243,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
+          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
           "role": "spin"
         }
       }

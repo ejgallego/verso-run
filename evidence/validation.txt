@@ -51,3 +51,12 @@ Screenshots visually inspected. Publication/runtime/program identities unchanged
 Logs: /tmp/verso-lean-run-design-build.log and
 /tmp/verso-lean-run-design-acceptance.log. Visual review artifacts:
 /tmp/verso-lean-run-design-review/.
+
+Stack-calculator follow-up: all 39 final acceptance/mutation checks pass.
+Preset and source-disclosure support verified with keyboard and without JS.
+Native/browser traces agree for arithmetic, dup, swap, exact large integers,
+parse errors, underflow, leftover values and instruction/stack/number limits.
+The program now has nine package members, 111 declarations and four exports;
+content ID 9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c.
+Runtime remains unchanged. Logs: /tmp/verso-lean-run-stack-final-build.log and
+/tmp/verso-lean-run-stack-final-acceptance.log; screenshots visually inspected.
