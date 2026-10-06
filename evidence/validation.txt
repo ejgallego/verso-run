@@ -1,24 +1,31 @@
 Verso base: cad4b633 (Lean 4.34.0)
 VIR: PR #217 head ff65dc8823e3c6be1ff5c549d89c3683c18e7fd9
 Runtime: 832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d
-Program: 6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377
+Program: d4d568f503e6bc86c00688ff059f3a02c683d9530aa6a3925da35a1fd2ec9ef2
+17 package members, 610 declarations (566 Lean IR / 44 native externs), five exports.
+The archived complete site is 1,558,069 bytes; its CRC and publication were verified.
 
 Current validation:
 Root lake build passed (1114 jobs).
 Root lake test passed (647 tests, 0 failures/errors; 10 interactive editor checks).
-Optional lake test -- --mutations passed all 44 acceptance checks.
+Optional lake test -- --mutations passed all 49 acceptance checks.
 Tests cover native/browser String and exact Nat calls, the longer stack-language
-interpreter, expected contracts, invalid author configurations, HTML/native markup
-agreement, escaped reader input, iframe origin isolation, preview cleanup/error
+interpreter, expected contracts, invalid author configurations, generated HTML
+adapter reuse/collision diagnostics, non-executable/private HTML rejection,
+HTML/native markup agreement, escaped reader input, iframe origin isolation, preview cleanup/error
 recovery, independent forms, real Stop, stale outcomes, resource errors, native-only
 publication, copied output, no-JavaScript/TeX source, resource invalidation, custom
 carrier source/build roots, registration ambiguity, and restored program identity.
 
 Long example: a typed instruction language, parser, bounded stack interpreter and
 trace, with preset input and a keyboard-accessible native source disclosure.
-HTML example: String-returning Lean greeting with explicit output="html"; static
-markup in a sandboxed iframe with restricted embedded resources. Normal text
-output and runtime errors use textContent. No parent DOM insertion of result HTML.
+HTML example: public String → Verso.Output.Html greeting using Verso HTML syntax.
+The block generates a marked scalar String → String wrapper at <entry>.leanRunHtml
+and calls Html.asString. The original function needs no vir_export marker; the
+recipe selects the generated wrapper. HTML preview is inferred; explicit text
+presentation is rejected. Legacy String markup plus output="html" still elaborates.
+The frame retains its existing sandbox and restricted embedded resources.
+Normal text output and runtime errors use textContent. No parent DOM insertion of result HTML.
 
 Desktop/mobile calculator and HTML screenshots were visually inspected.
 The previous design review also covers 1280px, 390px and 320px, keyboard focus,
@@ -27,16 +34,16 @@ A clean complete HTML-multi archive is available at _out/lean-run-demo.zip;
 ZIP entries/CRC checked. Its source tree is the current acceptance output.
 
 Current logs:
-/tmp/verso-lean-run-html-build.log
-/tmp/verso-lean-run-html-acceptance.log
-/tmp/verso-lean-run-html-root-build.log
-/tmp/verso-lean-run-html-root-test.log
-/tmp/verso-lean-run-html-demo-build.log
+/tmp/verso-lean-run-typed-html-build.log
+/tmp/verso-lean-run-typed-html-acceptance.log
+/tmp/verso-lean-run-typed-html-root-build.log
+/tmp/verso-lean-run-typed-html-root-test.log
+/tmp/verso-lean-run-typed-html-acceptance/generate-site.log
 Screenshots: /tmp/verso-lean-run-html-review/ and /tmp/verso-lean-run-stack-review/.
 
 Historical design and standalone worker-gate evidence remains separately retained.
 The standalone create/call/dispose/recreate gate passed on the PR #217 integration
-before the new examples. The final 44-check campaign executes the current program.
+before the new examples. The final 49-check campaign executes the current program.
 Run root and optional Lake checks sequentially because they share root outputs.
 Keep compiler.postponeCompile false pending compiler-maintainer discussion.
 No toolchain migration, new VIR patch, remote push, or PR.

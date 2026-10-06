@@ -42,7 +42,7 @@ plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
 assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
+for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert contract['declaration'] == 'LeanRunGate.'+declaration
     assert contract['signature']['effect'] == 'pure'
@@ -64,6 +64,8 @@ missing = command(['lake', 'exe', 'lean-run-publication-check', 'missing', '--ou
     str(OUTPUT/'missing-registration')], 'missing-registration', expected=1)
 assert 'LeanRunGate.Chapter:' in missing and 'no published recipe export for LeanRunGate.greet' in missing
 record('missing program registration reports declaration and source provenance')
+command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
+record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
     output = command(['lake','env','lean',f'tests/negative/{name}.lean'], 'negative-'+name, expected=1)
     assert expected.lower() in output.lower(), output
@@ -115,7 +117,7 @@ with sync_playwright() as p:
     other = form_for('LeanRunGate.greet', 1)
     spin = form_for('LeanRunGate.spin')
     calculator = form_for('LeanRunGate.Stack.run')
-    html_form = form_for('LeanRunGate.htmlGreeting')
+    html_form = form_for('LeanRunGate.htmlGreeting.leanRunHtml')
     assert calculator.locator('details').get_attribute('open') is None
     calculator.locator('summary').press('Enter')
     assert calculator.locator('details').get_attribute('open') is not None
@@ -187,7 +189,7 @@ with sync_playwright() as p:
 
     page.reload()
     page.wait_for_selector('.lean-run[data-enhanced]')
-    html_form = form_for('LeanRunGate.htmlGreeting')
+    html_form = form_for('LeanRunGate.htmlGreeting.leanRunHtml')
     page.route('**/program.irpkg', lambda route: route.fulfill(status=404, body='missing'))
     html_form.locator('[type=submit]').click()
     page.wait_for_function('e => e.dataset.state === "failed"', arg=html_form.element_handle(), timeout=20000)

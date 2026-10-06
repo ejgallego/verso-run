@@ -17,6 +17,10 @@
       "result": "pass"
     },
     {
+      "test": "typed HTML adapter serializes escaped text and reuses repeated entry placements",
+      "result": "pass"
+    },
+    {
       "test": "author MissingEntry",
       "result": "pass"
     },
@@ -54,6 +58,22 @@
     },
     {
       "test": "author NatHtml",
+      "result": "pass"
+    },
+    {
+      "test": "author HtmlText",
+      "result": "pass"
+    },
+    {
+      "test": "author PrivateHtml",
+      "result": "pass"
+    },
+    {
+      "test": "author HtmlCollision",
+      "result": "pass"
+    },
+    {
+      "test": "author NonExecutableHtml",
       "result": "pass"
     },
     {
@@ -159,12 +179,12 @@
     {
       "test": "implementation invalidation greet",
       "result": "pass",
-      "program": "lean-run/resources/a46f445c83a8a7b04abb6fc5f19f2e2ddd5b9a2aa426f86c79bc750b19d0e9dd/bundle.json"
+      "program": "lean-run/resources/d66c441f5f67e2c4b9ea730cf2bcb7db66e7b861a6ec67c1c76d1fd345e01028/bundle.json"
     },
     {
       "test": "implementation invalidation double",
       "result": "pass",
-      "program": "lean-run/resources/7419a286912c3c363bab42b7ca4a839293fa0418e036eb63d11d3d8a5b46bdf3/bundle.json"
+      "program": "lean-run/resources/c321532fd0dad1b9d623285e94f0421b625ca7783f8eb3af829100fe3a209d86/bundle.json"
     },
     {
       "test": "ambiguous recipe roles report declaration and source provenance",
@@ -200,7 +220,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
+          "manifest": "lean-run/resources/d4d568f503e6bc86c00688ff059f3a02c683d9530aa6a3925da35a1fd2ec9ef2/bundle.json",
           "role": "stack"
         },
         "LeanRunGate.double": {
@@ -221,7 +241,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
+          "manifest": "lean-run/resources/d4d568f503e6bc86c00688ff059f3a02c683d9530aa6a3925da35a1fd2ec9ef2/bundle.json",
           "role": "double"
         },
         "LeanRunGate.greet": {
@@ -242,12 +262,12 @@
               }
             }
           },
-          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
+          "manifest": "lean-run/resources/d4d568f503e6bc86c00688ff059f3a02c683d9530aa6a3925da35a1fd2ec9ef2/bundle.json",
           "role": "greet"
         },
-        "LeanRunGate.htmlGreeting": {
+        "LeanRunGate.htmlGreeting.leanRunHtml": {
           "expectedExport": {
-            "declaration": "LeanRunGate.htmlGreeting",
+            "declaration": "LeanRunGate.htmlGreeting.leanRunHtml",
             "interfaceId": "verso-string-string-v1",
             "signature": {
               "args": [
@@ -263,7 +283,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
+          "manifest": "lean-run/resources/d4d568f503e6bc86c00688ff059f3a02c683d9530aa6a3925da35a1fd2ec9ef2/bundle.json",
           "role": "htmlGreeting"
         },
         "LeanRunGate.spin": {
@@ -284,7 +304,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
+          "manifest": "lean-run/resources/d4d568f503e6bc86c00688ff059f3a02c683d9530aa6a3925da35a1fd2ec9ef2/bundle.json",
           "role": "spin"
         }
       }

@@ -6,7 +6,7 @@ def main (args : List String) : IO Unit := do
   let result ← match role with
     | "greet" => pure <| LeanRunGate.greet input
     | "stack" => pure <| LeanRunGate.Stack.run input
-    | "htmlGreeting" => pure <| LeanRunGate.htmlGreeting input
+    | "htmlGreeting" => pure <| (LeanRunGate.htmlGreeting input).asString
     | "double" => do
       let some n := input.toNat? | throw <| IO.userError "invalid Nat"
       pure <| toString (LeanRunGate.double n)

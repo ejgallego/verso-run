@@ -70,11 +70,40 @@ structure Config where
   entry : Ident
   input : Option String
   collapsed : Bool
-  output : String
+  output : Option String
 
 meta instance : FromArgs Config DocElabM where
   fromArgs := Config.mk <$> .named `entry .ident false <*> .named `input .string true <*>
-    .flag `collapsed false <*> .namedD `output .string "text"
+    .flag `collapsed false <*> .named `output .string true
+
+/-- Adapt the document's typed HTML function at the existing scalar VIR boundary.
+The stable suffix is also the declaration selected in the program recipe. -/
+private meta def htmlAdapter (entry : Ident) (name : Name) : DocElabM Name := withRef entry do
+  if isNoncomputable (← getEnv) name then
+    throwErrorAt entry "Lean Run HTML entry '{name}' is non-executable"
+  let adapter := name ++ `leanRunHtml
+  let string := mkConst ``String
+  let type ← mkArrow string string
+  let value := mkLambda `input .default string <|
+    mkApp3 (mkConst ``Verso.Output.Html.asString)
+      (mkApp (mkConst name) (.bvar 0)) (mkNatLit 0) (mkConst ``Bool.true)
+  if let some existing := (← getEnv).find? adapter then
+    unless existing.type == type && existing.value? == some value &&
+        (vir_export.getState (← getEnv)).contains adapter do
+      throwErrorAt entry "Lean Run HTML adapter name '{adapter}' is already in use"
+  else
+    withExporting do
+      addAndCompile (.defnDecl {
+        name := adapter
+        levelParams := []
+        type := type
+        value := value
+        hints := .abbrev
+        safety := .safe }) (logCompileErrors := false)
+      let .ok attr := getAttributeImpl (← getEnv) `vir_export
+        | throwError "Missing VIR export attribute"
+      attr.add adapter (← `(attr| vir_export)) .global
+  return adapter
 
 /-- Elaborate ordinary retained commands, then resolve and classify the selected entry. -/
 @[code_block]
@@ -82,6 +111,21 @@ meta def leanRun : CodeBlockExpanderOf Config
   | config, str => do
     elabCommands { «show» := true, keep := true, name := none, error := false, fresh := false } str fun shouldShow hls str => do
       let name ← liftM <| Scopes.runWithOpenDecls <| Lean.Elab.realizeGlobalConstNoOverloadWithInfo config.entry
+      if isPrivateName name then
+        throwErrorAt config.entry "Lean Run entry '{name}' is private"
+      let info ← getConstInfo name
+      let entryType ← Lean.Meta.whnf info.type
+      let isHtml := match entryType with
+        | .forallE _ domain result .default =>
+          info.levelParams.isEmpty && domain.isConstOf ``String &&
+            result.isConstOf ``Verso.Output.Html
+        | _ => false
+      let output := config.output.getD (if isHtml then "html" else "text")
+      unless output == "text" || output == "html" do
+        throwErrorAt config.entry "Lean Run output must be 'text' or 'html'"
+      if isHtml && output != "html" then
+        throwErrorAt config.entry "Lean Run String → Html entries require HTML output"
+      let name ← if isHtml then htmlAdapter config.entry name else pure name
       let env ← getEnv
       unless (vir_export.getState env).contains name do
         throwErrorAt config.entry "Lean Run entry '{name}' must carry @[vir_export]"
@@ -92,9 +136,7 @@ meta def leanRun : CodeBlockExpanderOf Config
         | #[{ type := .string, .. }], .string, .pure => pure "string"
         | #[{ type := .nat, .. }], .nat, .pure => pure "nat"
         | _, _, _ => throwErrorAt config.entry "Lean Run supports exactly String → String and Nat → Nat (one explicit argument, pure and monomorphic); entry '{name}' does not match"
-      unless config.output == "text" || config.output == "html" do
-        throwErrorAt config.entry "Lean Run output must be 'text' or 'html'"
-      if config.output == "html" && shape != "string" then
+      if output == "html" && shape != "string" then
         throwErrorAt config.entry "Lean Run HTML output requires a String result"
       let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
       let signature := Vir.GeneratePackage.jsonObject #[
@@ -105,7 +147,7 @@ meta def leanRun : CodeBlockExpanderOf Config
         program := env.mainModule.toString, declaration := name.toString, shape, signature,
         initialInput := config.input.getD (if shape == "nat" then "0" else ""),
         collapsed := config.collapsed,
-        output := config.output,
+        output,
         sourceLine := pos.line, sourceColumn := pos.column }
       let source ← toHighlightedLeanBlock shouldShow hls str
       let description ← `(VersoLeanRun.Experiment.mk

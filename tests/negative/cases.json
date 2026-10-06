@@ -8,5 +8,9 @@
   "Unavailable": "missing IR",
   "Private": "private",
   "InvalidOutput": "output must be",
-  "NatHtml": "HTML output requires a String result"
+  "NatHtml": "HTML output requires a String result",
+  "HtmlText": "require HTML output",
+  "PrivateHtml": "private",
+  "HtmlCollision": "already in use",
+  "NonExecutableHtml": "non-executable"
 }

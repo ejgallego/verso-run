@@ -20,7 +20,7 @@ For the longer internal-demo example, open <http://127.0.0.1:8794/Stack-calculat
 
 A clean complete copy for sharing is available at `_out/lean-run-demo.zip`. Unpack it, then run `python3 -m http.server 8794 --directory lean-run-demo` and open `/Stack-calculator/` or `/HTML-greeting/`. The recipient needs no Lean installation.
 
-Open <http://127.0.0.1:8794/HTML-greeting/> for a small HTML example. Its Lean function escapes the name and returns markup for a styled greeting card. The usual `String → String` interface is checked, and `(output := "html")` selects the HTML preview explicitly.
+Open <http://127.0.0.1:8794/HTML-greeting/> for a small HTML example. Its Lean function returns Verso’s `Html` type for a styled greeting card. The block generates a scalar export using `Html.asString` and selects the HTML preview automatically. Verso’s HTML syntax escapes interpolated names.
 
 The optional package's test driver uses the repository's Python/Playwright browser tooling. Install `uv` and a Chromium browser first. Tests use installed `google-chrome` when available, otherwise Playwright's installed Chromium:
 
@@ -56,13 +56,34 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-`entry` is mandatory and resolves through Lean's actual declaration identity and the retained example scopes. The selected declaration must carry `@[vir_export]`. VIR classifies its interface; this form admits only pure, monomorphic `String → String` and `Nat → Nat`, each with one explicit argument. Missing, unmarked, private, unsupported, non-executable, and unavailable standard-runtime dependencies have negative tests. Other block arguments, including `-keep` and `+error`, are rejected. Ordinary `lean` blocks retain their existing behavior.
+`entry` is mandatory and resolves through Lean's actual declaration identity and the retained example scopes. Scalar declarations must carry `@[vir_export]`. VIR classifies their interfaces; this form admits pure, monomorphic `String → String` and `Nat → Nat`, each with one explicit argument. A public `String → Verso.Output.Html` function is adapted automatically, without an author-side `@[vir_export]` marker. Missing, unmarked, private, unsupported, non-executable, and unavailable standard-runtime dependencies have negative tests. Other block arguments, including `-keep` and `+error`, are rejected. Ordinary `lean` blocks retain their existing behavior.
 
 The optional `(input := "...")` argument supplies the form's initial text, without running it on page load. For example, the stack calculator uses `(input := "6 7 * 2 +")`. Readers can edit or clear it normally, and ordinary input validation still applies when they run it.
 
 For a longer example, `+collapsed` puts its source in a native expandable “View Lean implementation” panel. It starts closed so the input is easy to reach; readers can open it with a mouse or keyboard, including without JavaScript. The source remains fully present in HTML and TeX, and all declarations are still elaborated and retained normally.
 
-Output defaults to plain text. `(output := "html")` requires a String result and displays the markup in an isolated, sandboxed frame. This preview supports static HTML, inline CSS, and data images; scripts and external embedded resources are disabled. A function interpolating reader input into markup should escape it for the chosen context, as the greeting does for text. Input edits, Stop, pending calls and failures clear the previous preview. Runtime errors remain plain text, and the result-size limit still applies. The frame has a fixed height with scrolling for larger documents.
+Scalar output defaults to plain text. `(output := "html")` requires a String result and displays the markup in an isolated, sandboxed frame. Typed HTML entries select this mode automatically; explicit `output := "text"` is rejected. This preview supports static HTML, inline CSS, and data images; scripts and external embedded resources are disabled. String functions interpolating reader input into markup should escape it for the chosen context. Typed HTML functions can use Verso’s HTML syntax to escape text and attributes automatically; raw HTML nodes remain an explicit author choice. Input edits, Stop, pending calls and failures clear the previous preview. Runtime errors remain plain text, and the result-size limit still applies. The frame has a fixed height with scrolling for larger documents.
+
+For a typed HTML entry, the block generates a public `String → String` wrapper named
+`<entry>.leanRunHtml`, calling `Verso.Output.Html.asString`. Select this wrapper in the
+VIR recipe, while the block's `entry` stays the original function:
+
+````lean
+```leanRun (entry := Demo.card) (input := "Ada")
+open Verso.Output.Html
+public def Demo.card (name : String) : Verso.Output.Html :=
+  {{ <h2> "Hello, " {{name}} "!" </h2> }}
+```
+````
+
+```json
+{ "role": "card", "declaration": "Demo.card.leanRunHtml",
+  "interfaceId": "verso-string-string-v1" }
+```
+
+The generated wrapper receives the usual `vir_export` validation, including its
+compiled dependency closure. Repeated placements reuse it; conflicting declarations
+at that name produce an author diagnostic. Neither VIR's ABI nor the renderer changes.
 
 `leanRun` uses ordinary command elaboration and the shared highlighted-block constructor, retaining source locations, hovers, and example links. The only core Verso change exposes `toHighlightedLeanBlock` for this reuse. The extension support lives in this optional package because Verso's package-wide native precompilation attempts to compile VIR's browser extern symbols as C when VIR is added directly to that package.
 
@@ -113,6 +134,6 @@ Forms group the highlighted source above a quiet input/result area, with aligned
 
 ## Retained evidence
 
-`evidence/results.json` records the 44 final acceptance checks and exact publication identities; `evidence/manual.png` is a browser capture. `evidence/worker-gate.json` retains the independent public API create/call/dispose/recreate gate, and `evidence/validation.txt` records root regression results. The browser checks cover edited inputs, Unicode, exact integers above JavaScript's safe range, repeated placements, real long-running interruption, pending-load cancellation, ignored stale outcomes, missing resources with explicit recovery, root/nested copied publication, disabled JavaScript, TeX, body/helper invalidation, restored identity, compiler-signature publication in both layouts and native-only generation, rejection of mismatched or missing expectations before invocation, duplicate/missing/ambiguous registration, and carrier relocation across source/build roots with unchanged publication. Screenshots supplement those execution checks. `evidence/design-results.json` records the 30 non-mutation interaction checks repeated after the visual refinement; `design-desktop.png`, `design-mobile.png`, and the other `design-*.png` captures show the final layout. Chromium reviews cover 1280px, 390px, and 320px widths, keyboard submission/focus, long exact-Nat wrapping, narrow-screen search, and the JavaScript-disabled fallback. The 44-check campaign in `results.json` additionally covers the calculator preset/trace, arithmetic, errors, bounds, source disclosure, HTML preview/native markup agreement, escaped input, isolation, cleanup, and failure recovery. `calculator-*.png` captures the longer example with its source panel closed and open.
+`evidence/results.json` records the 49 final acceptance checks and exact publication identities; `evidence/manual.png` is a browser capture. `evidence/worker-gate.json` retains the independent public API create/call/dispose/recreate gate, and `evidence/validation.txt` records root regression results. The browser checks cover edited inputs, Unicode, exact integers above JavaScript's safe range, repeated placements, real long-running interruption, pending-load cancellation, ignored stale outcomes, missing resources with explicit recovery, root/nested copied publication, disabled JavaScript, TeX, body/helper invalidation, restored identity, compiler-signature publication in both layouts and native-only generation, rejection of mismatched or missing expectations before invocation, duplicate/missing/ambiguous registration, and carrier relocation across source/build roots with unchanged publication. Screenshots supplement those execution checks. `evidence/design-results.json` records the 30 non-mutation interaction checks repeated after the visual refinement; `design-desktop.png`, `design-mobile.png`, and the other `design-*.png` captures show the final layout. Chromium reviews cover 1280px, 390px, and 320px widths, keyboard submission/focus, long exact-Nat wrapping, narrow-screen search, and the JavaScript-disabled fallback. The 49-check campaign in `results.json` additionally covers the calculator preset/trace, arithmetic, errors, bounds, source disclosure, typed HTML adapter reuse and collision checks, non-executable/private entry rejection, HTML preview/native markup agreement, escaped input, isolation, cleanup, and failure recovery. `calculator-*.png` captures the longer example with its source panel closed and open.
 
 Browser execution is qualified here in Chromium. Firefox, Safari, physical mobile devices, and assistive-technology audits were not exercised. The cached-page lifecycle handler is checked with a persisted `PageTransitionEvent`; actual back-cache restoration across browsers remains unqualified. Porting to current Verso main's Lean 4.35.0-rc3 requires a compatible VIR/runtime release and is not included.

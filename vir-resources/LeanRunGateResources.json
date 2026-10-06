@@ -15,7 +15,7 @@
     },
     {
       "role": "htmlGreeting",
-      "declaration": "LeanRunGate.htmlGreeting",
+      "declaration": "LeanRunGate.htmlGreeting.leanRunHtml",
       "interfaceId": "verso-string-string-v1"
     },
     {
