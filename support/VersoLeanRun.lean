@@ -25,6 +25,7 @@ structure Experiment where
   shape : String
   initialInput : String
   collapsed : Bool
+  output : String
   /-- VIR's canonical callable signature, serialized during document elaboration. -/
   signature : String
   sourceLine : Nat
@@ -45,6 +46,9 @@ block_extension Block.leanRun (experiment : Experiment) where
     let sourcePanel := if experiment.collapsed then
       {{ <details class="lean-run-source"><summary> "View Lean implementation" </summary> {{source}} </details> }}
       else {{ <div class="lean-run-source"> {{source}} </div> }}
+    let preview := if experiment.output == "html" then
+      {{ <iframe class="lean-run-preview" title="HTML result" sandbox="" referrerpolicy="no-referrer" hidden="hidden"/> }}
+      else .empty
     pure {{ <section class="lean-run" data-experiment={{data.compress}} data-instance={{toString id}}>
       {{sourcePanel}}
       <div class="lean-run-console">
@@ -55,6 +59,7 @@ block_extension Block.leanRun (experiment : Experiment) where
         </form>
         <p class="lean-run-status" role="status" aria-live="polite"> "Ready" </p>
         <pre class="lean-run-output" aria-label="Result"/>
+        {{preview}}
         <noscript> "Enable JavaScript to run this compiled Lean example." </noscript>
       </div>
     </section> }}
@@ -65,10 +70,11 @@ structure Config where
   entry : Ident
   input : Option String
   collapsed : Bool
+  output : String
 
 meta instance : FromArgs Config DocElabM where
   fromArgs := Config.mk <$> .named `entry .ident false <*> .named `input .string true <*>
-    .flag `collapsed false
+    .flag `collapsed false <*> .namedD `output .string "text"
 
 /-- Elaborate ordinary retained commands, then resolve and classify the selected entry. -/
 @[code_block]
@@ -86,6 +92,10 @@ meta def leanRun : CodeBlockExpanderOf Config
         | #[{ type := .string, .. }], .string, .pure => pure "string"
         | #[{ type := .nat, .. }], .nat, .pure => pure "nat"
         | _, _, _ => throwErrorAt config.entry "Lean Run supports exactly String → String and Nat → Nat (one explicit argument, pure and monomorphic); entry '{name}' does not match"
+      unless config.output == "text" || config.output == "html" do
+        throwErrorAt config.entry "Lean Run output must be 'text' or 'html'"
+      if config.output == "html" && shape != "string" then
+        throwErrorAt config.entry "Lean Run HTML output requires a String result"
       let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
       let signature := Vir.GeneratePackage.jsonObject #[
         ("args", Vir.GeneratePackage.jsonArray (callSignature.args.map (·.type.toJson))),
@@ -95,12 +105,14 @@ meta def leanRun : CodeBlockExpanderOf Config
         program := env.mainModule.toString, declaration := name.toString, shape, signature,
         initialInput := config.input.getD (if shape == "nat" then "0" else ""),
         collapsed := config.collapsed,
+        output := config.output,
         sourceLine := pos.line, sourceColumn := pos.column }
       let source ← toHighlightedLeanBlock shouldShow hls str
       let description ← `(VersoLeanRun.Experiment.mk
         $(quote experiment.program) $(quote experiment.declaration) $(quote experiment.shape)
         $(quote experiment.initialInput)
         $(quote experiment.collapsed)
+        $(quote experiment.output)
         $(quote experiment.signature)
         $(quote experiment.sourceLine) $(quote experiment.sourceColumn))
       ``(Verso.Doc.Block.other (VersoLeanRun.Block.leanRun $description) #[$source])

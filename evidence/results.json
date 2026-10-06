@@ -49,6 +49,14 @@
       "result": "pass"
     },
     {
+      "test": "author InvalidOutput",
+      "result": "pass"
+    },
+    {
+      "test": "author NatHtml",
+      "result": "pass"
+    },
+    {
       "test": "unavailable executable dependency fails with declaration provenance",
       "result": "pass"
     },
@@ -74,6 +82,18 @@
     },
     {
       "test": "stack calculator bounds instructions, stack depth and arithmetic growth",
+      "result": "pass"
+    },
+    {
+      "test": "HTML greeting matches native markup and renders inline styles with escaped reader input",
+      "result": "pass"
+    },
+    {
+      "test": "HTML preview is isolated and cleared on input changes before a fresh invocation",
+      "result": "pass"
+    },
+    {
+      "test": "HTML resource failure stays plain text and explicit retry restores the preview",
       "result": "pass"
     },
     {
@@ -139,12 +159,12 @@
     {
       "test": "implementation invalidation greet",
       "result": "pass",
-      "program": "lean-run/resources/ad2784fa88b21a55b406d9b749b5dd6cc9857cec101804a20cd28a87fecb8405/bundle.json"
+      "program": "lean-run/resources/a46f445c83a8a7b04abb6fc5f19f2e2ddd5b9a2aa426f86c79bc750b19d0e9dd/bundle.json"
     },
     {
       "test": "implementation invalidation double",
       "result": "pass",
-      "program": "lean-run/resources/5ef302afb2ea8e7c991cee43c92819477d3a797c8205a58c87c936cd6cde6f51/bundle.json"
+      "program": "lean-run/resources/7419a286912c3c363bab42b7ca4a839293fa0418e036eb63d11d3d8a5b46bdf3/bundle.json"
     },
     {
       "test": "ambiguous recipe roles report declaration and source provenance",
@@ -180,7 +200,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
+          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
           "role": "stack"
         },
         "LeanRunGate.double": {
@@ -201,7 +221,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
+          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
           "role": "double"
         },
         "LeanRunGate.greet": {
@@ -222,8 +242,29 @@
               }
             }
           },
-          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
+          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
           "role": "greet"
+        },
+        "LeanRunGate.htmlGreeting": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.htmlGreeting",
+            "interfaceId": "verso-string-string-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            }
+          },
+          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
+          "role": "htmlGreeting"
         },
         "LeanRunGate.spin": {
           "expectedExport": {
@@ -243,7 +284,7 @@
               }
             }
           },
-          "manifest": "lean-run/resources/9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c/bundle.json",
+          "manifest": "lean-run/resources/6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377/bundle.json",
           "role": "spin"
         }
       }

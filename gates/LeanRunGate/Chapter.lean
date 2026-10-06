@@ -88,6 +88,24 @@ The stack's top is on the right. `+` and `*` combine two values, `dup` copies on
 and `swap` exchanges two. A complete program leaves exactly one result.
 The demo accepts at most 32 instructions, 16 stack values, and 80 decimal digits per value.
 
+# HTML greeting
+
+Lean can also return HTML. Change the name and run this example to build a small greeting card.
+The function returns a string of markup; the form renders it as a separate HTML preview.
+
+```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada") (output := "html") +collapsed
+public def LeanRunGate.escapeHtml (text : String) : String :=
+  text.replace "&" "&amp;" |>.replace "<" "&lt;" |>.replace ">" "&gt;"
+
+@[vir_export]
+public def LeanRunGate.htmlGreeting (name : String) : String :=
+  let name := if name.isEmpty then "friend" else LeanRunGate.escapeHtml name
+  "<section style='padding:1.25rem;background:#edf5ff;border-radius:8px'>" ++
+  "<p style='margin:0 0 .5rem;color:#536273;font-size:.8rem'>A greeting from Lean</p>" ++
+  "<h2 style='margin:0;color:#285575'>Hello, " ++ name ++ "!</h2>" ++
+  "<p style='margin:.75rem 0 0'>Welcome to the demo.</p></section>"
+```
+
 # Exact natural numbers
 
 ```leanRun (entry := LeanRunGate.double)

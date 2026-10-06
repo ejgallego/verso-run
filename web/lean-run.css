@@ -164,6 +164,21 @@
   display: none;
 }
 
+.lean-run .lean-run-preview {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 190px;
+  margin-top: .7rem;
+  border: 1px solid #dce3e9;
+  border-radius: 5px;
+  background: white;
+}
+
+.lean-run .lean-run-preview[hidden] {
+  display: none;
+}
+
 .lean-run noscript {
   display: block;
   margin-top: .75rem;

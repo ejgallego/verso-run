@@ -6,5 +6,7 @@
   "Discarded": "keep",
   "ErrorExpected": "error",
   "Unavailable": "missing IR",
-  "Private": "private"
+  "Private": "private",
+  "InvalidOutput": "output must be",
+  "NatHtml": "HTML output requires a String result"
 }

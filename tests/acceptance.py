@@ -42,7 +42,7 @@ plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
 assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
+for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert contract['declaration'] == 'LeanRunGate.'+declaration
     assert contract['signature']['effect'] == 'pure'
@@ -115,6 +115,7 @@ with sync_playwright() as p:
     other = form_for('LeanRunGate.greet', 1)
     spin = form_for('LeanRunGate.spin')
     calculator = form_for('LeanRunGate.Stack.run')
+    html_form = form_for('LeanRunGate.htmlGreeting')
     assert calculator.locator('details').get_attribute('open') is None
     calculator.locator('summary').press('Enter')
     assert calculator.locator('details').get_attribute('open') is not None
@@ -161,6 +162,41 @@ with sync_playwright() as p:
         assert output == oracle('stack', value)
         assert expected in output, output
     record('stack calculator bounds instructions, stack depth and arithmetic growth')
+
+    preview = html_form.locator('iframe')
+    assert preview.is_hidden() and preview.get_attribute('sandbox') == ''
+    for name in ['Ada', '', 'Unicode λ 🌍', '<img src=x onerror=alert(1)>', '& <script>alert(1)</script>']:
+        assert call(html_form, name) == ''
+        markup = oracle('htmlGreeting', name)
+        assert markup in preview.get_attribute('srcdoc')
+        heading = html_form.frame_locator('iframe').locator('h2')
+        assert heading.inner_text() == 'Hello, '+(name or 'friend')+'!'
+        assert html_form.frame_locator('iframe').locator('img,script').count() == 0
+        assert heading.evaluate('e => getComputedStyle(e).color') == 'rgb(40, 85, 117)'
+    record('HTML greeting matches native markup and renders inline styles with escaped reader input')
+    assert html_form.evaluate('''e => {
+        try { void e.querySelector('iframe').contentWindow.document; return false; }
+        catch (error) { return error.name === 'SecurityError'; }
+    }''')
+    assert "default-src 'none'" in preview.get_attribute('srcdoc')
+    html_form.locator('input').fill('changed')
+    assert preview.is_hidden() and preview.get_attribute('srcdoc') is None
+    assert call(html_form,'after edit') == ''
+    assert html_form.frame_locator('iframe').locator('h2').inner_text() == 'Hello, after edit!'
+    record('HTML preview is isolated and cleared on input changes before a fresh invocation')
+
+    page.reload()
+    page.wait_for_selector('.lean-run[data-enhanced]')
+    html_form = form_for('LeanRunGate.htmlGreeting')
+    page.route('**/program.irpkg', lambda route: route.fulfill(status=404, body='missing'))
+    html_form.locator('[type=submit]').click()
+    page.wait_for_function('e => e.dataset.state === "failed"', arg=html_form.element_handle(), timeout=20000)
+    assert html_form.locator('iframe').is_hidden()
+    assert '404' in html_form.locator('.lean-run-output').text_content()
+    page.unroute('**/program.irpkg')
+    assert call(html_form,'recovered') == ''
+    assert html_form.frame_locator('iframe').locator('h2').inner_text() == 'Hello, recovered!'
+    record('HTML resource failure stays plain text and explicit retry restores the preview')
 
     # Change only the independently published expectation, keeping the real program
     # bytes and resource identity intact. VIR must reject before invoking Lean.
@@ -212,7 +248,7 @@ with sync_playwright() as p:
     record('native/browser exact Nat oracle: zero, edited, large integers')
     assert call(other,'independent') == oracle('greet','independent')
     assert greeting.locator('.lean-run-output').text_content() == oracle('greet','<img src=x onerror=alert(1)>')
-    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 5
+    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 6
     record('independent repeated placements')
     for value in ['-1','1.5','abc','',' 1','1e3','9'*257]:
         numeric.locator('input').fill(value)
@@ -295,7 +331,7 @@ with sync_playwright() as p:
     assert 'public def LeanRunGate.greet' in plain.locator('body').inner_text()
     assert '#check Nat.add' in plain.locator('body').inner_text()
     assert plain.locator('.lean-run [type=submit]').first.is_disabled()
-    assert plain.locator('.lean-run noscript').count() == 5
+    assert plain.locator('.lean-run noscript').count() == 6
     assert all('Enable JavaScript' in text for text in plain.locator('.lean-run noscript').all_text_contents())
     plain_calculator = plain.locator('.lean-run[data-experiment*="LeanRunGate.Stack.run"]')
     plain_calculator.locator('summary').click()

@@ -10,6 +10,12 @@ addEventListener("pagehide", event => {
   if (!event.persisted) owners.clear();
 });
 let instance = 0;
+function htmlDocument(markup) {
+  return '<!doctype html><html><head><meta charset="utf-8">' +
+    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">' +
+    '<style>body{margin:0;font:16px system-ui,sans-serif;color:#1e2936;overflow-wrap:anywhere}</style>' +
+    '</head><body>' + markup + '</body></html>';
+}
 export function enhance(element) {
   if (element.dataset.enhanced) return;
   element.dataset.enhanced = "true";
@@ -21,6 +27,12 @@ export function enhance(element) {
   const stop = form.querySelector(".lean-run-stop");
   const status = element.querySelector(".lean-run-status");
   const output = element.querySelector(".lean-run-output");
+  const preview = element.querySelector(".lean-run-preview");
+  const clearPreview = () => {
+    if (!preview) return;
+    preview.hidden = true;
+    preview.removeAttribute("srcdoc");
+  };
   let busy = false;
   const host = new ExperimentHost(description, (state, value = "") => {
     element.dataset.state = state;
@@ -29,6 +41,12 @@ export function enhance(element) {
     stop.disabled = !busy;
     status.textContent = state === "idle" ? "Ready" : state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
+    clearPreview();
+    if (state === "success" && preview) {
+      output.textContent = "";
+      preview.srcdoc = htmlDocument(value);
+      preview.hidden = false;
+    }
   });
   owners.add(host);
   run.disabled = false;
@@ -37,6 +55,7 @@ export function enhance(element) {
     if (busy) return;
     try { validateInput(description.shape, input.value); }
     catch (error) {
+      clearPreview();
       element.dataset.state = "invalid input";
       status.textContent = "Invalid input";
       output.textContent = error.message;

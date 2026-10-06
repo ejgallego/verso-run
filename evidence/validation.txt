@@ -1,62 +1,45 @@
-Verso base: cad4b633 (v4.34.0)
-Lean: leanprover/lean4:v4.34.0
+Verso base: cad4b633 (Lean 4.34.0)
 VIR: PR #217 head ff65dc8823e3c6be1ff5c549d89c3683c18e7fd9
+Runtime: 832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d
+Program: 6717d647959722bc62b432ecb0f40b933e10fc51dfdb121b6d9cc1da682c1377
 
-Feature worktree root: lake build passed (1114 jobs).
-Feature worktree root: lake test passed (647 passed, 0 failed, 0 errors; 10 interactive LSP checks passed).
-Optional package: lake test -- --mutations passed (35 native/browser/author/resource/contract/registration checks).
-Browser: installed Google Chrome, headless Chromium via Playwright.
-Acceptance regenerates single-page/multi-page HTML and TeX, checks copied HTTP outputs,
-and restores original chapter/helper sources and publication identity after mutations.
+Current validation:
+Root lake build passed (1114 jobs).
+Root lake test passed (647 tests, 0 failures/errors; 10 interactive editor checks).
+Optional lake test -- --mutations passed all 44 acceptance checks.
+Tests cover native/browser String and exact Nat calls, the longer stack-language
+interpreter, expected contracts, invalid author configurations, HTML/native markup
+agreement, escaped reader input, iframe origin isolation, preview cleanup/error
+recovery, independent forms, real Stop, stale outcomes, resource errors, native-only
+publication, copied output, no-JavaScript/TeX source, resource invalidation, custom
+carrier source/build roots, registration ambiguity, and restored program identity.
 
-Full local logs:
-/tmp/verso-lean-run-registration-root-build.log
-/tmp/verso-lean-run-registration-root-test.log
-/tmp/verso-lean-run-registration-acceptance.log
+Long example: a typed instruction language, parser, bounded stack interpreter and
+trace, with preset input and a keyboard-accessible native source disclosure.
+HTML example: String-returning Lean greeting with explicit output="html"; static
+markup in a sandboxed iframe with restricted embedded resources. Normal text
+output and runtime errors use textContent. No parent DOM insertion of result HTML.
 
-Not exercised: Firefox, Safari, physical mobile devices, or assistive-technology audits.
-This feature branch targets the compatible Verso release, not current main
-with Lean 4.35.0-rc3. No dependency/toolchain migration is included.
-Standalone worker gate: create, call both interfaces, dispose, recreate, call, dispose; passed.
-Cached-page handler exercised with a persisted PageTransitionEvent; actual browser cache
-restoration across different browsers is not qualified.
+Desktop/mobile calculator and HTML screenshots were visually inspected.
+The previous design review also covers 1280px, 390px and 320px, keyboard focus,
+long exact-Nat wrapping, narrow-screen search and JavaScript-disabled output.
+A clean complete HTML-multi archive is available at _out/lean-run-demo.zip;
+ZIP entries/CRC checked. Its source tree is the current acceptance output.
 
-Compiler-contract follow-up: use VIR classification and canonical type encoding in
-the compiled document, publish expectedExport, and pass it directly to expectedExports.
-Rejection checks change only the independent publication expectation, retaining
-real program bytes: arguments, result, arity, effect, and missing signature.
-All failures occur before invocation; missing signature also prevents worker creation.
-Run standard root build/test and the optional mutation suite sequentially: they
-share root Lake outputs. Original runtime/program identities are unchanged.
+Current logs:
+/tmp/verso-lean-run-html-build.log
+/tmp/verso-lean-run-html-acceptance.log
+/tmp/verso-lean-run-html-root-build.log
+/tmp/verso-lean-run-html-root-test.log
+/tmp/verso-lean-run-html-demo-build.log
+Screenshots: /tmp/verso-lean-run-html-review/ and /tmp/verso-lean-run-stack-review/.
 
-Author-registration follow-up: use include_vir_library and ResourceSet.forSite
-from the exact current PR #217 head. Register bundles with publish #[bundle];
-the publisher supplies the locked runtime and binds actual declaration names.
-Real missing/duplicate/ambiguous registration and custom source/build-root
-checks pass. Publication and runtime/program identities match the previous demo.
-The compiler.postponeCompile false requirement remains intentionally deferred.
-
-PR #217 standalone gate: create, call String/exact Nat, dispose, recreate,
-call, dispose; passed. Logs: /tmp/verso-lean-run-registration-gate-build.log
-and /tmp/verso-lean-run-registration-worker-gate.log.
-
-Visual follow-up: source/controls grouped in a quiet card; responsive inputs and
-44px controls, visible keyboard focus, wrapping results, and compact demo-only
-mobile title/search styling. Simplify reader instructions and rename the Stop
-example. All 30 non-mutation acceptance checks pass on the final design; the
-35-check mutation/registration campaign passed before these presentation edits.
-Chromium visual review: 1280px, 390px and 320px; keyboard submission/focus,
-long exact Nat, mobile search popup, and JavaScript-disabled output passed.
-Screenshots visually inspected. Publication/runtime/program identities unchanged.
-Logs: /tmp/verso-lean-run-design-build.log and
-/tmp/verso-lean-run-design-acceptance.log. Visual review artifacts:
-/tmp/verso-lean-run-design-review/.
-
-Stack-calculator follow-up: all 39 final acceptance/mutation checks pass.
-Preset and source-disclosure support verified with keyboard and without JS.
-Native/browser traces agree for arithmetic, dup, swap, exact large integers,
-parse errors, underflow, leftover values and instruction/stack/number limits.
-The program now has nine package members, 111 declarations and four exports;
-content ID 9ea12e5e608c2d98664496fd21e28a5a637358770868fbd2724d4cbef81b9e4c.
-Runtime remains unchanged. Logs: /tmp/verso-lean-run-stack-final-build.log and
-/tmp/verso-lean-run-stack-final-acceptance.log; screenshots visually inspected.
+Historical design and standalone worker-gate evidence remains separately retained.
+The standalone create/call/dispose/recreate gate passed on the PR #217 integration
+before the new examples. The final 44-check campaign executes the current program.
+Run root and optional Lake checks sequentially because they share root outputs.
+Keep compiler.postponeCompile false pending compiler-maintainer discussion.
+No toolchain migration, new VIR patch, remote push, or PR.
+Not exercised: Firefox, Safari, physical mobile devices, assistive-technology audits.
+Cached-page handler verified by a persisted PageTransitionEvent; actual cross-browser
+back-cache restoration remains unqualified.
