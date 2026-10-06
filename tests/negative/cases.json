@@ -12,5 +12,8 @@
   "HtmlText": "require HTML output",
   "PrivateHtml": "private",
   "HtmlCollision": "already in use",
-  "NonExecutableHtml": "non-executable"
+  "NonExecutableHtml": "non-executable",
+  "IlluminateHashing": "Float.toBits",
+  "IlluminateCompile": "Float.atan",
+  "IlluminateAsin": "Float.asin"
 }

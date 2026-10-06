@@ -19,6 +19,11 @@
       "interfaceId": "verso-string-string-v1"
     },
     {
+      "role": "diagram",
+      "declaration": "LeanRunGate.diagram.leanRunHtml",
+      "interfaceId": "verso-string-string-v1"
+    },
+    {
       "role": "double",
       "declaration": "LeanRunGate.double",
       "interfaceId": "verso-nat-nat-v1"

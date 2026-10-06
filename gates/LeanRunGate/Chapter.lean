@@ -1,6 +1,10 @@
 module
 public import VersoLeanRun
 import LeanRunGate.Helper
+public import Illuminate.Render.Svg
+public import Illuminate.Geometry.PathData
+public import Illuminate.Geometry.Matrix
+public import Illuminate.Style.Color
 
 open Verso Genre Manual InlineLean VersoLeanRun
 
@@ -105,6 +109,60 @@ public def LeanRunGate.htmlGreeting (name : String) : Verso.Output.Html :=
     <p style="margin:.75rem 0 0"> "Welcome to the demo." </p>
   </section> }}
 ```
+
+# Illuminate diagrams
+
+Choose a number from 1 to 8, then Run to build a chain of numbered nodes.
+Try `1`, `4`, and `8`: the labels, links, and layout are computed by Lean in your browser.
+
+```leanRun (entry := LeanRunGate.diagram) (input := "4") +collapsed
+open Illuminate Verso.Output.Html
+
+public def LeanRunGate.diagram (input : String) : Verso.Output.Html :=
+  let message := "Choose a whole number of nodes from 1 to 8."
+  match input.toNat? with
+  | none => {{ <p role="alert"> {{message}} </p> }}
+  | some count =>
+    if count < 1 || count > 8 then
+      {{ <p role="alert"> {{message}} </p> }}
+    else
+      let ink := Color.rgb 40 85 117
+      let stroke : Stroke := {color := ink, width := 2}
+      let circle := PathData.circle 20
+      let commands : Array (DrawCmd Empty) :=
+        (List.range count).foldl (init := #[]) fun commands n =>
+          let x := n.toFloat * 60
+          let commands := commands
+            |>.push (.pushTransform (Matrix.translate x 0))
+            |>.push (.fillPath circle
+              (.solid {color := Color.rgb 237 245 255}) none)
+            |>.push (.strokePath circle stroke)
+            |>.push (.drawTextRun (toString (n + 1))
+              {fontSize := 16, color := ink} ⟨0, 0⟩)
+            |>.push .popTransform
+          if n + 1 < count then
+            commands.push (.strokePath
+              (PathData.line ⟨x + 21, 0⟩ ⟨x + 39, 0⟩) stroke)
+          else commands
+      let svg := Svg.render commands {
+        minX := -29, minY := -29
+        width := (count - 1).toFloat * 60 + 58
+        height := 58
+      } "chain_"
+      let width := s!"width:100%;max-width:{count * 64 + 16}px;margin:1rem auto"
+      {{ <section style="padding:1rem;background:#f5f8fc">
+        <p style="margin:0;color:#536273">
+          {{s!"{count} nodes, {count - 1} links"}}
+        </p>
+        <div style={{width}}>
+          {{Verso.Output.Html.text false svg}}
+        </div>
+      </section> }}
+```
+
+Lean positions the circles, labels, and links using Illuminate drawing commands.
+Illuminate renders them to SVG.
+Open the implementation to see the library calls. Values outside 1–8 produce a helpful message.
 
 # Exact natural numbers
 

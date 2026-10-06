@@ -42,7 +42,7 @@ plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
 assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
+for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('diagram.leanRunHtml', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert contract['declaration'] == 'LeanRunGate.'+declaration
     assert contract['signature']['effect'] == 'pure'
@@ -118,6 +118,7 @@ with sync_playwright() as p:
     spin = form_for('LeanRunGate.spin')
     calculator = form_for('LeanRunGate.Stack.run')
     html_form = form_for('LeanRunGate.htmlGreeting.leanRunHtml')
+    diagram_form = form_for('LeanRunGate.diagram.leanRunHtml')
     assert calculator.locator('details').get_attribute('open') is None
     calculator.locator('summary').press('Enter')
     assert calculator.locator('details').get_attribute('open') is not None
@@ -187,6 +188,39 @@ with sync_playwright() as p:
     assert html_form.frame_locator('iframe').locator('h2').inner_text() == 'Hello, after edit!'
     record('HTML preview is isolated and cleared on input changes before a fresh invocation')
 
+    assert diagram_form.locator('input').input_value() == '4'
+    diagram_widths = []
+    for count in [1, 4, 8, 2]:
+        assert call(diagram_form, str(count)) == ''
+        markup = oracle('diagram', str(count))
+        assert markup in diagram_form.locator('iframe').get_attribute('srcdoc')
+        frame = diagram_form.frame_locator('iframe')
+        svg = frame.locator('svg')
+        assert svg.count() == 1
+        assert svg.locator('text').all_text_contents() == [str(i+1) for i in range(count)]
+        assert svg.locator('path[fill="none"]').count() == 2 * count - 1
+        assert svg.locator('path[fill="rgb(237,245,255)"]').count() == count
+        assert f'{count} nodes, {count-1} links' in frame.locator('body').inner_text()
+        assert svg.locator('script').count() == 0
+        assert svg.evaluate('e => e.getBoundingClientRect().width > 0')
+        bounds = [float(x) for x in svg.get_attribute('viewBox').split()]
+        assert bounds == [-29, -29, (count-1)*60+58, 58]
+        diagram_widths.append(bounds[2])
+    assert diagram_widths[0] < diagram_widths[1] < diagram_widths[2]
+    record('Illuminate SVG drawing commands execute in Wasm with native markup, labels, links and changing geometry')
+    for value in ['', '0', '9', '-1', '1.5', 'nodes', '100000000000000000000']:
+        assert call(diagram_form, value) == ''
+        assert oracle('diagram', value) in diagram_form.locator('iframe').get_attribute('srcdoc')
+        frame = diagram_form.frame_locator('iframe')
+        assert 'from 1 to 8' in frame.locator('[role=alert]').inner_text()
+        assert frame.locator('svg').count() == 0
+    assert call(diagram_form, '3') == ''
+    assert diagram_form.frame_locator('iframe').locator('svg text').count() == 3
+    diagram_form.locator('input').fill('5')
+    assert diagram_form.locator('iframe').is_hidden()
+    assert call(diagram_form, '5') == ''
+    record('Illuminate validates bounded node counts and clears/recreates its preview after edits')
+
     page.reload()
     page.wait_for_selector('.lean-run[data-enhanced]')
     html_form = form_for('LeanRunGate.htmlGreeting.leanRunHtml')
@@ -250,7 +284,7 @@ with sync_playwright() as p:
     record('native/browser exact Nat oracle: zero, edited, large integers')
     assert call(other,'independent') == oracle('greet','independent')
     assert greeting.locator('.lean-run-output').text_content() == oracle('greet','<img src=x onerror=alert(1)>')
-    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 6
+    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 7
     record('independent repeated placements')
     for value in ['-1','1.5','abc','',' 1','1e3','9'*257]:
         numeric.locator('input').fill(value)
@@ -327,20 +361,32 @@ with sync_playwright() as p:
         page.wait_for_selector('.lean-run[data-enhanced]')
         assert call(form_for('LeanRunGate.greet'),'relocated') == oracle('greet','relocated')
     record('copied output executes from root and nested page/prefix')
+    for path in ['root/Illuminate-diagrams/', 'nested/prefix/manual/Illuminate-diagrams/']:
+        page.goto(base+path)
+        page.wait_for_selector('.lean-run[data-enhanced]')
+        form = form_for('LeanRunGate.diagram.leanRunHtml')
+        assert call(form, '6') == ''
+        assert oracle('diagram', '6') in form.locator('iframe').get_attribute('srcdoc')
+        assert form.frame_locator('iframe').locator('svg text').count() == 6
+    record('Illuminate executes from copied root and nested HTTP deployments')
     context = browser.new_context(java_script_enabled=False)
     plain = context.new_page()
     plain.goto(base+'single/')
     assert 'public def LeanRunGate.greet' in plain.locator('body').inner_text()
     assert '#check Nat.add' in plain.locator('body').inner_text()
     assert plain.locator('.lean-run [type=submit]').first.is_disabled()
-    assert plain.locator('.lean-run noscript').count() == 6
+    assert plain.locator('.lean-run noscript').count() == 7
     assert all('Enable JavaScript' in text for text in plain.locator('.lean-run noscript').all_text_contents())
     plain_calculator = plain.locator('.lean-run[data-experiment*="LeanRunGate.Stack.run"]')
     plain_calculator.locator('summary').click()
     assert 'public inductive Instruction' in plain_calculator.locator('.lean-run-source').inner_text()
+    plain_diagram = plain.locator('.lean-run[data-experiment*="LeanRunGate.diagram.leanRunHtml"]')
+    plain_diagram.locator('summary').click()
+    assert 'public def LeanRunGate.diagram' in plain_diagram.locator('.lean-run-source').inner_text()
+    assert 'Svg.render' in plain_diagram.locator('.lean-run-source').inner_text()
     context.close()
     tex=(site/'tex/main.tex').read_text()
-    assert 'LeanRunGate' in tex and 'Nat.add' in tex and 'Instruction' in tex
+    assert 'LeanRunGate' in tex and 'Nat.add' in tex and 'Instruction' in tex and 'Svg.render' in tex
     record('JavaScript-disabled highlighting and TeX source fallback')
     assert not errors, errors
 
