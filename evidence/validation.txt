@@ -1,18 +1,18 @@
 Verso base: cad4b633 (v4.34.0)
 Lean: leanprover/lean4:v4.34.0
-VIR: e92d95db62b14db88669394791f6f981161d5674
+VIR: PR #217 head ff65dc8823e3c6be1ff5c549d89c3683c18e7fd9
 
 Feature worktree root: lake build passed (1114 jobs).
 Feature worktree root: lake test passed (647 passed, 0 failed, 0 errors; 10 interactive LSP checks passed).
-Optional package: lake test -- --mutations passed (31 native/browser/author/resource/contract checks).
+Optional package: lake test -- --mutations passed (35 native/browser/author/resource/contract/registration checks).
 Browser: installed Google Chrome, headless Chromium via Playwright.
 Acceptance regenerates single-page/multi-page HTML and TeX, checks copied HTTP outputs,
 and restores original chapter/helper sources and publication identity after mutations.
 
 Full local logs:
-/tmp/verso-lean-run-contract-root-build.log
-/tmp/verso-lean-run-contract-root-test.log
-/tmp/verso-lean-run-contract-acceptance.log
+/tmp/verso-lean-run-registration-root-build.log
+/tmp/verso-lean-run-registration-root-test.log
+/tmp/verso-lean-run-registration-acceptance.log
 
 Not exercised: Firefox, Safari, mobile or assistive-technology audits.
 This feature branch targets the compatible Verso release, not current main
@@ -28,3 +28,14 @@ real program bytes: arguments, result, arity, effect, and missing signature.
 All failures occur before invocation; missing signature also prevents worker creation.
 Run standard root build/test and the optional mutation suite sequentially: they
 share root Lake outputs. Original runtime/program identities are unchanged.
+
+Author-registration follow-up: use include_vir_library and ResourceSet.forSite
+from the exact current PR #217 head. Register bundles with publish #[bundle];
+the publisher supplies the locked runtime and binds actual declaration names.
+Real missing/duplicate/ambiguous registration and custom source/build-root
+checks pass. Publication and runtime/program identities match the previous demo.
+The compiler.postponeCompile false requirement remains intentionally deferred.
+
+PR #217 standalone gate: create, call String/exact Nat, dispose, recreate,
+call, dispose; passed. Logs: /tmp/verso-lean-run-registration-gate-build.log
+and /tmp/verso-lean-run-registration-worker-gate.log.

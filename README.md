@@ -2,7 +2,7 @@
 
 This optional package adds a first Run form to Verso Manual. Lean elaborates and compiles the displayed declarations during the document build. A dedicated browser worker calls those retained declarations through VIR's public resource API. Readers edit inputs, not Lean source.
 
-The package stays on Verso release `cad4b633` and Lean **4.34.0**, with VIR pinned to `e92d95db62b14db88669394791f6f981161d5674`. It does not migrate current Verso main's toolchain. The matching runtime is content ID `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d`; its compatibility binds Lean source revision `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` and VIR compatibility version 1. Lake acquires and verifies the runtime selected by VIR's lock; no separate SDK installation or Wasm build is required.
+The package stays on Verso release `cad4b633` and Lean **4.34.0**, with VIR pinned to [PR #217](https://github.com/ejgallego/lean-vir/pull/217) head `ff65dc8823e3c6be1ff5c549d89c3683c18e7fd9`. It does not migrate current Verso main's toolchain. The matching runtime is content ID `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d`; its compatibility binds Lean source revision `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` and VIR compatibility version 1. Lake acquires and verifies the runtime selected by VIR's lock; no separate SDK installation or Wasm build is required.
 
 ## Build, generate, serve, test
 
@@ -22,7 +22,7 @@ The optional package's test driver uses the repository's Python/Playwright brows
 lake test -- --mutations
 ```
 
-This builds the native generator/oracle, generates both HTML layouts and TeX, runs negative author fixtures, and executes the real program in Chromium. `--mutations` additionally changes the greeting body and a reached helper body, rebuilds and compares browser results to the native oracle, and restores source and program identity in `finally`. Evidence defaults to `/tmp/verso-lean-run-acceptance`; `--output PATH` selects another directory. Root repository regression commands remain `lake build` and `lake test` from the feature worktree root.
+This builds the native generator/oracle, generates both HTML layouts and TeX, checks missing and duplicate bundle registration, runs negative author fixtures, and executes the real program in Chromium. `--mutations` additionally changes the greeting body and a reached helper body, checks ambiguous recipe roles, relocates the carrier source/build directories without editing its library-key include, and restores sources and program identity in `finally`. Evidence defaults to `/tmp/verso-lean-run-acceptance`; `--output PATH` selects another directory. Root repository regression commands remain `lake build` and `lake test` from the feature worktree root. Run root and optional commands sequentially because they share root Lake outputs.
 
 The smaller worker gate can be repeated independently:
 
@@ -62,10 +62,30 @@ Follow VIR's public resource workflow, as demonstrated by this package's lakefil
 
 1. Register the module chapter as a program library. Its marked declarations are the executable roots; the ordinary compiled-module producer acquires their dependency closure.
 2. Register a separate carrier library with a `:virResourcePack` prerequisite and a recipe naming the chapter module and selected roles/declarations. Use `verso-string-string-v1` or `verso-nat-nat-v1` as the corresponding recipe interface ID.
-3. Embed the prepared bundle with `include_vir_bundle` in the carrier. The chapter imports extension support, never its carrier.
-4. In the native generator, import the carrier, `Vir.Resources.Runtime`, and `VersoLeanRun.Publish`. Supply `VersoLeanRun.publish runtimeBundle #[("Actual.Chapter.Module", programBundle)]` as an extra step to `manualMain`.
+3. Embed the prepared bundle by its owning library name. The chapter imports extension support, never its carrier:
 
-The resulting graph is extension support → chapter/helper → compiled program preparation → carrier → native generator. Resource preparation is a normal Lake dependency. Neither per-block packaging nor a second frontend pass is used. The publisher validates every rendered experiment against its owning program and recipe, with module/line/column provenance, before writing execution assets. It embeds UI support files in the native executable as well as program/runtime bytes. It runs outside the checkout without reading producer files; the existing Verso generator still requires a `lean-toolchain` project marker in its working directory or a parent.
+   ```lean
+   module
+   public import Vir.Resources.Embed
+
+   public def MySite.program : Vir.Resources.Bundle :=
+     include_vir_library MyResources
+   ```
+
+   `MyResources` is the literal Lake library name from step 2. Custom source/build directories require no generated-path changes; the library's prerequisite prepares the pack before elaboration.
+
+4. In the native generator, import the chapter, carrier, and `VersoLeanRun.Publish`, then register the embedded bundles:
+
+   ```lean
+   def main := manualMain (%doc MyChapter)
+     (extraSteps := [VersoLeanRun.publish #[MySite.program]])
+   ```
+
+   The publisher uses VIR's locked runtime by default. A resource set with several chapters uses the same call with several bundles. No runtime import or module-to-bundle mapping is needed. An application supplying its own compatible runtime can use the named `runtime` argument.
+
+The resulting graph is extension support → chapter/helper → compiled program preparation → carrier → native generator. Resource preparation is a normal Lake dependency. Neither per-block packaging nor a second frontend pass is used. The publisher binds each form's actual declaration to an export role in the supplied bundles and checks the interface ID, with module/line/column provenance, before writing execution assets. Missing exports or multiple matching recipe roles produce errors; repeated references to an identical bundle are deduplicated. Keep each runnable declaration in one supplied recipe role. VIR's `ResourceSet.forSite` owns bundle validation, deduplication, complete file inventory, manifest envelopes, and loader paths. Verso writes that inventory through its normal output step and adds the form bindings and worker UI files.
+
+The native executable embeds UI support files as well as program/runtime bytes. It runs outside the checkout without reading producer files; the existing Verso generator still requires a `lean-toolchain` project marker in its working directory or a parent. VIR still requires the library registration and JSON recipe from steps 1–2; this integration adds no alternative recipe format or Lake DSL. The demo retains `compiler.postponeCompile false` pending discussion with the compiler maintainer.
 
 During document elaboration, VIR's `analyzeExportInterface` classifies the selected declaration. Its canonical `InterfaceType.toJson` encoder supplies the argument and result descriptors, including ABI tags; VIR also supplies the effect label. The compiled document retains this serialized signature. The native publisher combines it with the recipe's declaration and interface ID in `publication.json`, and the worker passes that `expectedExport` directly to VIR's existing `expectedExports` checker. The JavaScript adapter owns input and display policy; it no longer reconstructs ABI descriptors from the form's shape.
 
@@ -81,6 +101,6 @@ Forms have labels, keyboard submission, accessible status updates, escaped text 
 
 ## Retained evidence
 
-`evidence/results.json` records the 31 final acceptance checks and exact publication identities; `evidence/manual.png` is a browser capture. `evidence/worker-gate.json` retains the independent public API create/call/dispose/recreate gate, and `evidence/validation.txt` records root regression results. The browser checks cover edited inputs, Unicode, exact integers above JavaScript's safe range, repeated placements, real long-running interruption, pending-load cancellation, ignored stale outcomes, missing resources with explicit recovery, root/nested copied publication, disabled JavaScript, TeX, body/helper invalidation, restored identity, compiler-signature publication in both layouts and native-only generation, and rejection of mismatched or missing expectations before invocation. Screenshots supplement those execution checks.
+`evidence/results.json` records the 35 final acceptance checks and exact publication identities; `evidence/manual.png` is a browser capture. `evidence/worker-gate.json` retains the independent public API create/call/dispose/recreate gate, and `evidence/validation.txt` records root regression results. The browser checks cover edited inputs, Unicode, exact integers above JavaScript's safe range, repeated placements, real long-running interruption, pending-load cancellation, ignored stale outcomes, missing resources with explicit recovery, root/nested copied publication, disabled JavaScript, TeX, body/helper invalidation, restored identity, compiler-signature publication in both layouts and native-only generation, rejection of mismatched or missing expectations before invocation, duplicate/missing/ambiguous registration, and carrier relocation across source/build roots with unchanged publication. Screenshots supplement those execution checks.
 
 Browser execution is qualified here in Chromium. Firefox, Safari, mobile layouts, and assistive-technology audits were not exercised. The cached-page lifecycle handler is checked with a persisted `PageTransitionEvent`; actual back-cache restoration across browsers remains unqualified. Porting to current Verso main's Lean 4.35.0-rc3 requires a compatible VIR/runtime release and is not included.

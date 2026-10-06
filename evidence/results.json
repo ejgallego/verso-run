@@ -9,6 +9,14 @@
       "result": "pass"
     },
     {
+      "test": "repeated bundle registration deduplicates resources and keeps declaration bindings",
+      "result": "pass"
+    },
+    {
+      "test": "missing program registration reports declaration and source provenance",
+      "result": "pass"
+    },
+    {
       "test": "author MissingEntry",
       "result": "pass"
     },
@@ -121,6 +129,14 @@
       "test": "implementation invalidation double",
       "result": "pass",
       "program": "lean-run/resources/e5d53774699945d9a4630d0c27d8e05a35c74ff7a06b0dc32ec3544123dc7bb8/bundle.json"
+    },
+    {
+      "test": "ambiguous recipe roles report declaration and source provenance",
+      "result": "pass"
+    },
+    {
+      "test": "library-key carrier survives custom source/build roots with identical browser publication",
+      "result": "pass"
     },
     {
       "test": "restored program identity matches original",

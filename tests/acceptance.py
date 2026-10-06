@@ -50,6 +50,20 @@ for declaration, type_name in [('greet', 'String'), ('double', 'Nat'), ('spin', 
     assert contract['signature']['args'][0]['type'] == type_name
     assert contract['signature']['result']['type'] == type_name
 record('compiler signatures survive both publication layouts and native-only generation')
+duplicates = OUTPUT/'duplicate-registration'
+command(['lake', 'exe', 'lean-run-publication-check', 'duplicate', '--output', str(duplicates)],
+    'duplicate-registration')
+assert plan == json.loads((duplicates/'html-multi/lean-run/publication.json').read_text())
+original_files = {p.relative_to(site/'html-multi/lean-run/resources')
+    for p in (site/'html-multi/lean-run/resources').rglob('*') if p.is_file()}
+duplicate_files = {p.relative_to(duplicates/'html-multi/lean-run/resources')
+    for p in (duplicates/'html-multi/lean-run/resources').rglob('*') if p.is_file()}
+assert original_files == duplicate_files
+record('repeated bundle registration deduplicates resources and keeps declaration bindings')
+missing = command(['lake', 'exe', 'lean-run-publication-check', 'missing', '--output',
+    str(OUTPUT/'missing-registration')], 'missing-registration', expected=1)
+assert 'LeanRunGate.Chapter:' in missing and 'no published recipe export for LeanRunGate.greet' in missing
+record('missing program registration reports declaration and source provenance')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
     output = command(['lake','env','lean',f'tests/negative/{name}.lean'], 'negative-'+name, expected=1)
     assert expected.lower() in output.lower(), output
@@ -251,7 +265,11 @@ with sync_playwright() as p:
     if args.mutations:
         chapter=ROOT/'gates/LeanRunGate/Chapter.lean'
         helper=ROOT/'gates/LeanRunGate/Helper.lean'
-        originals={chapter:chapter.read_text(),helper:helper.read_text()}
+        lakefile=ROOT/'lakefile.lean'
+        recipe=ROOT/'vir-resources/LeanRunGateResources.json'
+        resources=ROOT/'resources'
+        moved=ROOT/'_registration-layout/resources'
+        originals={p:p.read_text() for p in [chapter, helper, lakefile, recipe]}
         identity=plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest']
         try:
             for source, before, after, role, value in [
@@ -270,7 +288,44 @@ with sync_playwright() as p:
                 assert call(form_for('LeanRunGate.'+role),value) == oracle(role,value)
                 record('implementation invalidation '+role, program=changed_plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest'])
                 source.write_text(originals[source])
+
+            # The same real compiled program may legitimately have multiple recipe
+            # roles. Automatic declaration binding must report that ambiguity.
+            ambiguous=json.loads(originals[recipe])
+            ambiguous['exports'].append(dict(ambiguous['exports'][0], role='greet-again'))
+            recipe.write_text(json.dumps(ambiguous,indent=2)+'\n')
+            command(['lake','build'],'ambiguous-recipe-build')
+            failed=command(['lake','exe','lean-run-demo','--output',str(OUTPUT/'ambiguous')],
+                'ambiguous-recipe-publication',expected=1)
+            assert 'LeanRunGate.Chapter:' in failed and 'ambiguous published recipe export for LeanRunGate.greet' in failed
+            record('ambiguous recipe roles report declaration and source provenance')
+            recipe.write_text(originals[recipe])
+
+            # Change source and build roots without changing the library-key include.
+            # No prepared pack is moved to the new root: its prerequisite repairs it.
+            moved.parent.mkdir(exist_ok=True)
+            assert not moved.exists()
+            resources.rename(moved)
+            staged=moved/'.vir-generated'
+            if staged.exists():
+                staged.rename(Path(tempfile.mkdtemp(prefix='old-prepared-', dir=moved.parent))/'packs')
+            layout=originals[lakefile].replace('package verso_lean_run\n',
+                'package verso_lean_run where\n  buildDir := ".lake/registration-build"\n')
+            layout=layout.replace('srcDir := "resources"', 'srcDir := "_registration-layout/resources"')
+            lakefile.write_text(layout)
+            command(['lake','build'],'custom-carrier-layout-build')
+            changed=OUTPUT/'custom-carrier-layout'
+            generate(changed)
+            changed_plan=json.loads((changed/'html-single/lean-run/publication.json').read_text())
+            assert changed_plan == plan
+            assert (moved/'.vir-generated/LeanRunGateResources.virres').is_file()
+            shutil.copytree(changed/'html-single',server_root/'custom-carrier-layout',dirs_exist_ok=True)
+            page.goto(base+'custom-carrier-layout/')
+            page.wait_for_selector('.lean-run[data-enhanced]')
+            assert call(form_for('LeanRunGate.greet'),'library key') == oracle('greet','library key')
+            record('library-key carrier survives custom source/build roots with identical browser publication')
         finally:
+            if moved.exists(): moved.rename(resources)
             for source, text in originals.items(): source.write_text(text)
             command(['lake','build'],'restore-build')
             generate(site)

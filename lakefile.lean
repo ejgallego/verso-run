@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 require verso from "../.."
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "e92d95db62b14db88669394791f6f981161d5674"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "ff65dc8823e3c6be1ff5c549d89c3683c18e7fd9"
 package verso_lean_run
 lean_lib LeanRunGateProgram where
   srcDir := "gates"
@@ -13,6 +13,9 @@ lean_lib LeanRunGateResources where
 
 lean_exe «lean-run-gate» where
   root := `GateMain
+
+lean_exe «lean-run-publication-check» where
+  root := `PublicationMain
 
 input_dir leanRunWeb where
   path := "web"
