@@ -1,0 +1,195 @@
+{
+  "checks": [
+    {
+      "test": "native publisher runs with only a project marker and embedded assets",
+      "result": "pass"
+    },
+    {
+      "test": "compiler signatures survive both publication layouts and native-only generation",
+      "result": "pass"
+    },
+    {
+      "test": "repeated bundle registration deduplicates resources and keeps declaration bindings",
+      "result": "pass"
+    },
+    {
+      "test": "missing program registration reports declaration and source provenance",
+      "result": "pass"
+    },
+    {
+      "test": "author MissingEntry",
+      "result": "pass"
+    },
+    {
+      "test": "author UnknownEntry",
+      "result": "pass"
+    },
+    {
+      "test": "author Unmarked",
+      "result": "pass"
+    },
+    {
+      "test": "author Unsupported",
+      "result": "pass"
+    },
+    {
+      "test": "author Discarded",
+      "result": "pass"
+    },
+    {
+      "test": "author ErrorExpected",
+      "result": "pass"
+    },
+    {
+      "test": "author Unavailable",
+      "result": "pass"
+    },
+    {
+      "test": "author Private",
+      "result": "pass"
+    },
+    {
+      "test": "unavailable executable dependency fails with declaration provenance",
+      "result": "pass"
+    },
+    {
+      "test": "no runtime on page load",
+      "result": "pass"
+    },
+    {
+      "test": "native/browser String oracle: empty, edited, Unicode, HTML text",
+      "result": "pass"
+    },
+    {
+      "test": "reject args before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject result before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject arity before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject effect before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject missing published signature before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "native/browser exact Nat oracle: zero, edited, large integers",
+      "result": "pass"
+    },
+    {
+      "test": "independent repeated placements",
+      "result": "pass"
+    },
+    {
+      "test": "invalid natural inputs rejected before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "changed input clears prior result",
+      "result": "pass"
+    },
+    {
+      "test": "real long-running Wasm interrupted and fresh runtime rerun",
+      "result": "pass"
+    },
+    {
+      "test": "pending creation stop and stale completion suppression",
+      "result": "pass"
+    },
+    {
+      "test": "resource failure is useful and never automatically replayed",
+      "result": "pass"
+    },
+    {
+      "test": "cached-page lifecycle handler discards runtime and permits fresh invocation",
+      "result": "pass"
+    },
+    {
+      "test": "copied output executes from root and nested page/prefix",
+      "result": "pass"
+    },
+    {
+      "test": "JavaScript-disabled highlighting and TeX source fallback",
+      "result": "pass"
+    }
+  ],
+  "publication": {
+    "programs": {
+      "LeanRunGate.Chapter": {
+        "LeanRunGate.double": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.double",
+            "interfaceId": "verso-nat-nat-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            }
+          },
+          "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
+          "role": "double"
+        },
+        "LeanRunGate.greet": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.greet",
+            "interfaceId": "verso-string-string-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            }
+          },
+          "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
+          "role": "greet"
+        },
+        "LeanRunGate.spin": {
+          "expectedExport": {
+            "declaration": "LeanRunGate.spin",
+            "interfaceId": "verso-nat-nat-v1",
+            "signature": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            }
+          },
+          "manifest": "lean-run/resources/517d8dad20e425de5d9b8bd2fd655fa1a1319be3226079c89a15c889fd2631e7/bundle.json",
+          "role": "spin"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d/bundle.json",
+    "runtimeModule": "lean-run/resources/832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d/runtime.js"
+  }
+}

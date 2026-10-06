@@ -27,7 +27,7 @@ export function enhance(element) {
     busy = state === "loading" || state === "running";
     run.disabled = busy;
     stop.disabled = !busy;
-    status.textContent = state[0].toUpperCase() + state.slice(1);
+    status.textContent = state === "idle" ? "Ready" : state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
   });
   owners.add(host);

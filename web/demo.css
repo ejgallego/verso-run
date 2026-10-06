@@ -1,0 +1,15 @@
+/* Keep the demo title readable beside search on a narrow screen. */
+@media screen and (max-width: 700px) {
+  .header-title {
+    font-size: 1.2rem;
+  }
+
+  #search-wrapper {
+    --search-bar-width: clamp(5rem, 25vw, 9rem);
+  }
+
+  #search-wrapper ul[role="listbox"] {
+    right: 0;
+    width: min(22rem, calc(100vw - 2rem));
+  }
+}

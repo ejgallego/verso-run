@@ -8,8 +8,8 @@ set_option compiler.postponeCompile false
 
 #doc (Manual) "Run compiled Lean" =>
 
-Change an input and run the declaration compiled from the highlighted source.
-Each form owns a separate worker. Stop terminates that worker; the next Run creates a fresh runtime.
+Try the Lean functions shown below. Change an input, then choose Run to see the result.
+Use Stop to interrupt a calculation.
 
 # Greeting
 
@@ -39,10 +39,10 @@ public def LeanRunGate.double (n : Nat) : Nat :=
 #check Nat.add
 ```
 
-# Interruption fixture
+# Try Stop
 
-This bounded-interface fixture deliberately performs work proportional to its input.
-Try a small number, or use a very large number and press Stop.
+This function counts up to the number you enter. Try a small number first.
+Then enter `1000000000000`, choose Run, and press Stop to interrupt it.
 
 ```leanRun (entry := LeanRunGate.spin)
 public def LeanRunGate.spinLoop (n acc : Nat) : Nat :=

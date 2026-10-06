@@ -39,19 +39,22 @@ block_extension Block.leanRun (experiment : Experiment) where
     let source ← contents.mapM go
     let label := if experiment.shape == "nat" then "Natural number" else "Text"
     let initial := if experiment.shape == "nat" then "0" else ""
+    let placeholder := if experiment.shape == "nat" then "0" else "Enter text"
     pure {{ <section class="lean-run" data-experiment={{data.compress}} data-instance={{toString id}}>
-      {{source}}
-      <form>
-        <label> {{label}} <input type="text" value={{initial}} maxlength="4096" autocomplete="off"/> </label>
-        <button type="submit" disabled="disabled"> "Run" </button>
-        <button type="button" class="lean-run-stop" disabled="disabled"> "Stop" </button>
-      </form>
-      <p class="lean-run-status" role="status" aria-live="polite"> "Idle" </p>
-      <pre class="lean-run-output" aria-label="Result"/>
-      <noscript> "Enable JavaScript to run this compiled Lean example." </noscript>
+      <div class="lean-run-source"> {{source}} </div>
+      <div class="lean-run-console">
+        <form>
+          <label> {{label}} <input type="text" value={{initial}} placeholder={{placeholder}} maxlength="4096" autocomplete="off"/> </label>
+          <button type="submit" disabled="disabled"> "Run" </button>
+          <button type="button" class="lean-run-stop" disabled="disabled"> "Stop" </button>
+        </form>
+        <p class="lean-run-status" role="status" aria-live="polite"> "Ready" </p>
+        <pre class="lean-run-output" aria-label="Result"/>
+        <noscript> "Enable JavaScript to run this compiled Lean example." </noscript>
+      </div>
     </section> }}
   extraJs := [include_str "../web/bootstrap.js"]
-  extraCss := [".lean-run { margin: 1.2em 0; } .lean-run form { display: flex; gap: .5em; flex-wrap: wrap; align-items: end; } .lean-run label { display: flex; flex-direction: column; } .lean-run input, .lean-run button { font: inherit; padding: .35em .6em; } .lean-run input { min-width: 16em; } .lean-run-output { white-space: pre-wrap; overflow-wrap: anywhere; }"]
+  extraCss := [include_str "../web/lean-run.css"]
 
 structure Config where
   entry : Ident

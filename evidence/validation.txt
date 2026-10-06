@@ -14,7 +14,7 @@ Full local logs:
 /tmp/verso-lean-run-registration-root-test.log
 /tmp/verso-lean-run-registration-acceptance.log
 
-Not exercised: Firefox, Safari, mobile or assistive-technology audits.
+Not exercised: Firefox, Safari, physical mobile devices, or assistive-technology audits.
 This feature branch targets the compatible Verso release, not current main
 with Lean 4.35.0-rc3. No dependency/toolchain migration is included.
 Standalone worker gate: create, call both interfaces, dispose, recreate, call, dispose; passed.
@@ -39,3 +39,15 @@ The compiler.postponeCompile false requirement remains intentionally deferred.
 PR #217 standalone gate: create, call String/exact Nat, dispose, recreate,
 call, dispose; passed. Logs: /tmp/verso-lean-run-registration-gate-build.log
 and /tmp/verso-lean-run-registration-worker-gate.log.
+
+Visual follow-up: source/controls grouped in a quiet card; responsive inputs and
+44px controls, visible keyboard focus, wrapping results, and compact demo-only
+mobile title/search styling. Simplify reader instructions and rename the Stop
+example. All 30 non-mutation acceptance checks pass on the final design; the
+35-check mutation/registration campaign passed before these presentation edits.
+Chromium visual review: 1280px, 390px and 320px; keyboard submission/focus,
+long exact Nat, mobile search popup, and JavaScript-disabled output passed.
+Screenshots visually inspected. Publication/runtime/program identities unchanged.
+Logs: /tmp/verso-lean-run-design-build.log and
+/tmp/verso-lean-run-design-acceptance.log. Visual review artifacts:
+/tmp/verso-lean-run-design-review/.

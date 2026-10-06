@@ -1,0 +1,171 @@
+.lean-run {
+  margin: 1.25rem 0 1.75rem;
+  border: 1px solid #dce3e9;
+  border-radius: 8px;
+  font-family: var(--verso-text-font-family, sans-serif);
+}
+
+.lean-run-source {
+  padding: 1rem;
+}
+
+.lean-run .lean-run-source .hl.lean.block {
+  display: block;
+  margin: 0;
+  padding: 0;
+  font-size: .9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lean-run-console {
+  padding: 1rem;
+  border-top: 1px solid #e1e7ed;
+  border-radius: 0 0 8px 8px;
+  background: #f7f9fb;
+}
+
+.lean-run form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: flex-end;
+  margin: 0;
+}
+
+.lean-run label {
+  display: flex;
+  flex: 1 1 15rem;
+  flex-direction: column;
+  gap: .4rem;
+  min-width: 0;
+  color: #536273;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.lean-run input,
+.lean-run button {
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid #b9c6d2;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: .95rem;
+  line-height: 1.25;
+}
+
+.lean-run input {
+  width: 100%;
+  min-width: 0;
+  padding: .6rem .75rem;
+  background: white;
+  color: #1e2936;
+}
+
+.lean-run input::placeholder {
+  color: #738191;
+  font-weight: 400;
+}
+
+.lean-run button {
+  padding: .6rem 1rem;
+  background: white;
+  color: #40546a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lean-run button[type="submit"] {
+  border-color: #285575;
+  background: #285575;
+  color: white;
+}
+
+.lean-run button:not(:disabled):hover {
+  border-color: #285575;
+  background: #edf2f7;
+}
+
+.lean-run button[type="submit"]:not(:disabled):hover {
+  background: #1e415b;
+}
+
+.lean-run button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.lean-run input:focus-visible,
+.lean-run button:focus-visible {
+  outline: 2px solid #4777ff;
+  outline-offset: 3px;
+}
+
+.lean-run .lean-run-status {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  margin: .85rem 0 0;
+  color: #536273;
+  font-size: .8rem;
+  line-height: 1.5;
+}
+
+.lean-run-status::before {
+  width: .4rem;
+  height: .4rem;
+  border-radius: 50%;
+  background: currentcolor;
+  content: "";
+}
+
+.lean-run[data-state="success"] .lean-run-status {
+  color: #26613f;
+}
+
+.lean-run[data-state="failed"] .lean-run-status,
+.lean-run[data-state="invalid input"] .lean-run-status {
+  color: #9c3b31;
+}
+
+.lean-run .lean-run-output {
+  margin: .7rem 0 0;
+  padding: .75rem;
+  border: 1px solid #dce3e9;
+  border-radius: 5px;
+  background: white;
+  color: #1e2936;
+  font-family: var(--verso-code-font-family, monospace);
+  font-size: .9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lean-run-output:empty {
+  display: none;
+}
+
+.lean-run noscript {
+  display: block;
+  margin-top: .75rem;
+  color: #536273;
+  font-size: .85rem;
+}
+
+@media (max-width: 540px) {
+  .lean-run-source,
+  .lean-run-console {
+    padding: .85rem;
+  }
+
+  .lean-run label {
+    flex-basis: 100%;
+  }
+
+  .lean-run button {
+    flex: 1;
+  }
+}
