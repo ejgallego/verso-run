@@ -1,6 +1,8 @@
-# verso-vir
+# verso-lab
 
-verso-vir provides compiled Run forms for Verso Manual. Lean elaborates and compiles the displayed declarations during the document build. A dedicated browser worker calls those retained declarations through VIR's public resource API. Readers edit inputs, not Lean source.
+*Interactive Lean examples for Verso documents.*
+
+verso-lab provides compiled Run forms for Verso Manual. Lean elaborates and compiles the displayed declarations during the document build. A dedicated browser worker calls those retained declarations through VIR's public resource API. Readers edit inputs, not Lean source.
 
 The package uses Lean **4.34.0** and a minimal Verso fork revision `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` based on release `cad4b633`. That fork exposes the existing `toHighlightedLeanBlock` helper; it contains no demo code. VIR is pinned to [PR #217](https://github.com/ejgallego/lean-vir/pull/217) head `1ed079ca2ab8306ae877ed4920f7d55d392365f8`. It does not migrate current Verso main's toolchain. The matching runtime is content ID `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d`; its compatibility binds Lean source revision `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` and VIR compatibility version 1. Lake acquires and verifies the runtime selected by VIR's lock; no separate SDK installation or Wasm build is required.
 
@@ -9,8 +11,8 @@ The package uses Lean **4.34.0** and a minimal Verso fork revision `3f6366aa8045
 Install [elan](https://github.com/leanprover/elan), [uv](https://docs.astral.sh/uv/), and a Chromium browser for tests. Lean is selected by `lean-toolchain`. Then run these commands:
 
 ```sh
-git clone https://github.com/ejgallego/verso-vir.git
-cd verso-vir
+git clone https://github.com/ejgallego/verso-lab.git
+cd verso-lab
 lake build
 lake exe lean-run-demo --with-html-single --with-tex --depth 2
 python3 -m http.server 8794 --directory _out/html-multi
@@ -20,7 +22,7 @@ Open <http://127.0.0.1:8794/Greeting/>. Single-page output is in `_out/html-sing
 
 For the longer internal-demo example, open <http://127.0.0.1:8794/Stack-calculator/>. It implements a small typed instruction language, parser, stack evaluator, and execution trace in the displayed Lean code. Run the supplied `6 7 * 2 +` program, then try `5 dup *`, `2 3 swap dup * +`, or `9007199254740993 2 *`. An empty program, unknown instruction, or stack underflow returns a readable explanation. The demo bounds programs to 32 instructions, stacks to 16 values, and numbers to 80 decimal digits, including intermediate results.
 
-After generating the site, run `python3 scripts/package-demo.py` to create a complete copy at `_out/verso-vir-demo.zip`. Unpack it, then run `python3 -m http.server 8794 --directory verso-vir-demo` and open `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/`. The recipient needs no Lean installation.
+After generating the site, run `python3 scripts/package-demo.py` to create a complete copy at `_out/verso-lab-demo.zip`. Unpack it, then run `python3 -m http.server 8794 --directory verso-lab-demo` and open `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/`. The recipient needs no Lean installation.
 
 Open <http://127.0.0.1:8794/HTML-greeting/> for a small HTML example. Its Lean function returns Verso’s `Html` type for a styled greeting card. The block generates a scalar export using `Html.asString` and selects the HTML preview automatically. Verso’s HTML syntax escapes interpolated names.
 
@@ -153,10 +155,13 @@ The extraction source is Verso commit `06860e5e`; original evidence is retained.
 The Verso dependency isolates the one-line highlighting hook from that prototype.
 
 Use `VersoLeanRun` and `VersoLeanRun.Publish` as the library imports. The Lean
-package is named `verso_vir`; the existing module and executable names are retained.
+package is named `verso_lab`; the existing module and executable names are retained.
 Library support lives under `support/`, browser support under `web/`, and demo
 code under `gates/` and `resources/`. Illuminate code belongs to the examples.
 
 See [LICENSE](LICENSE) for the Apache-2.0 license and [AGENTS.md](AGENTS.md) for
 contributor notes. GitHub CI builds from the exact dependency pins and runs all
 acceptance/mutation checks, retaining the generated site and test evidence.
+
+The project was initially published as `verso-vir` and renamed to `verso-lab`.
+The public `VersoLeanRun` module API and existing executable names are retained.

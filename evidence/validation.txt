@@ -1,3 +1,19 @@
+Project rename validated 2026-10-07.
+Current project: verso-lab / https://github.com/ejgallego/verso-lab
+Current local checkout: ~/lean/verso-lab
+Current Lean package: verso_lab; public VersoLeanRun module API retained.
+Tagline: Interactive Lean examples for Verso documents.
+
+After the rename, lake build passes (709 jobs) and all 55 native/browser
+acceptance and mutation checks pass, including resource-library registration
+and relocated carrier roots. Program/runtime identities exactly match the
+original standalone publication below. Normal demo generation and the renamed
+ZIP pass; its CRC and publication were verified. Dependencies remain pinned.
+Logs: /tmp/verso-lab-rename-{update,build,test,demo}.log
+Archive: _out/verso-lab-demo.zip, 1623554 bytes.
+
+Historical extraction validation:
+
 Standalone verso-vir extraction, validated 2026-10-07.
 
 Local repository: ~/lean/verso-vir

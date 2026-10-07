@@ -437,8 +437,8 @@ with sync_playwright() as p:
             staged=moved/'.vir-generated'
             if staged.exists():
                 staged.rename(Path(tempfile.mkdtemp(prefix='old-prepared-', dir=moved.parent))/'packs')
-            layout=originals[lakefile].replace('package verso_vir\n',
-                'package verso_vir where\n  buildDir := ".lake/registration-build"\n')
+            layout=originals[lakefile].replace('package verso_lab\n',
+                'package verso_lab where\n  buildDir := ".lake/registration-build"\n')
             layout=layout.replace('srcDir := "resources"', 'srcDir := "_registration-layout/resources"')
             lakefile.write_text(layout)
             command(['lake','build'],'custom-carrier-layout-build')
