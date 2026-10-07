@@ -1,3 +1,20 @@
+Final project name validated 2026-10-07.
+Current project: verso-run / https://github.com/ejgallego/verso-run
+Current local checkout: ~/lean/verso-run
+Current Lean package: verso_run; public VersoLeanRun module API retained.
+Reserve verso-lab for the future project with editor support, as requested.
+
+After the rename, lake build passes (709 jobs) and all 55 native/browser
+acceptance and mutation checks pass. Publication exactly matches the retained
+prototype evidence, including program/runtime identities. Normal generation
+and ZIP packaging pass, including archive CRC, root name and publication.
+Dependencies remain pinned. The running demo responds on port 8795.
+Logs: /tmp/verso-run-rename-{build,test,demo}.log
+Acceptance: _out/run-rename-acceptance/results.json
+Archive: _out/verso-run-demo.zip, 1623554 bytes.
+
+Historical verso-lab rename validation:
+
 Project rename validated 2026-10-07.
 Current project: verso-lab / https://github.com/ejgallego/verso-lab
 Current local checkout: ~/lean/verso-lab

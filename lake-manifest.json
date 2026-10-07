@@ -71,6 +71,6 @@
    "inputRev": "main",
    "inherited": true,
    "configFile": "lakefile.lean"}],
- "name": "verso_lab",
+ "name": "verso_run",
  "lakeDir": ".lake",
  "fixedToolchain": false}
