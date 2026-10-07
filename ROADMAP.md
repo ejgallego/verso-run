@@ -34,12 +34,21 @@ be reviewed with the VIR owner during successor integration. See
 
 ## Verso anchors and multiple genres
 
-Review alignment with Verso's ANCHORS guidance and anchor/link behavior, then
-support Manual, slides, and blog documents. Separate the callable description,
-resource publication, and worker interaction from genre-specific elaboration,
-rendering, document traversal, and source highlighting. Preserve each genre's
-normal anchors, links, styling, and static fallback. Qualify an independent
-example in each genre before claiming support beyond Manual.
+The [source review and adapter plan](docs/multi-genre.md) identifies the shared
+Verso anchor loader and `ExternalCode` interface; Manual and Blog already supply
+instances. Source anchors, executable declarations, document links, and form
+instances have separate identities.
+
+The common model, classifier, console, AST collector, and publication planner
+are extracted behind the existing Manual API. `leanRunAnchor` reuses checked
+Verso anchors with an explicit imported scalar entry and a producer-owned bundle.
+The demo includes ordinary and runnable displays of the same source region.
+
+Next add a Blog adapter covering Page and Post. Select a compatible Slides
+revision before implementing its source, asset, and Reveal lifecycle adapter.
+Preserve each genre's native highlighted blocks, links, styling, and static
+fallback. Qualify an independent example in each genre before claiming support
+beyond Manual. Keep the public VIR integration gate separate.
 
 ## Later Verso upstreaming slice
 

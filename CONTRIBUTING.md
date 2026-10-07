@@ -65,6 +65,12 @@ uv run --with playwright python tests/worker-gate.py
 results. `PublicationMain.lean` checks resource registration with real bundles.
 Generated Lake, Beam, VIR, browser, and site outputs stay out of Git.
 
+Within `support/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
+`Collect`, and `Publication` hold the common machinery. `Manual` and `Publish`
+adapt it to Manual elaboration, native source blocks, and generator output.
+`VersoLeanRun` remains the compatibility facade. See the
+[genre review](docs/multi-genre.md) for the planned Blog and Slides adapters.
+
 ## Changing the code
 
 Keep `VersoLeanRun` and `VersoLeanRun.Publish` as the public imports. Keep document

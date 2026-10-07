@@ -78,7 +78,9 @@ can still reach an operation absent from the runtime; the build will reject it.
 See [troubleshooting](docs/troubleshooting.md) for examples and next steps.
 
 This experimental release supports **Verso Manual**. Slides and blog support are
-planned in [the roadmap](ROADMAP.md). Readers edit function inputs; source editing
+planned in [the roadmap](ROADMAP.md). Examples can use inline definitions or
+[checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module).
+Readers edit function inputs; source editing
 belongs to the future editor work. Ordinary highlighted Lean blocks keep working,
 and source remains readable without JavaScript and in TeX.
 
@@ -89,6 +91,7 @@ and source remains readable without JavaScript and in TeX.
 - [Internals](docs/internals.md): resource ownership, execution, limits, and exact pins.
 - [Contributing](CONTRIBUTING.md): build, test, and repository layout.
 - [Validation](docs/validation.md): qualification scope and retained evidence.
+- [Multiple genres](docs/multi-genre.md): anchor review and shared/adapter design.
 - [Roadmap](ROADMAP.md): upcoming diagnostics, anchors, genres, and integration work.
 
 The project grew from a Verso prototype; its [development history](docs/history.md)

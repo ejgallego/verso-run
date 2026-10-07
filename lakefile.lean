@@ -12,6 +12,11 @@ lean_lib LeanRunGateResources where
   roots := #[`LeanRunGate.Resources]
   needs := #[`@verso_run/LeanRunGateResources:virResourcePack]
 
+lean_lib LeanRunHelperResources where
+  srcDir := "resources"
+  roots := #[`LeanRunGate.HelperResources]
+  needs := #[`@verso_run/LeanRunHelperResources:virResourcePack]
+
 lean_exe «lean-run-gate» where
   root := `GateMain
 

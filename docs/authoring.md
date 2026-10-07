@@ -79,6 +79,57 @@ The generated wrapper receives the usual `vir_export` validation, including its
 compiled dependency closure. Repeated placements reuse it; conflicting declarations
 at that name produce an author diagnostic. Neither VIR's ABI nor the renderer changes.
 
+## Run an anchored example from an imported module
+
+The current checkout also provides `leanRunAnchor`. It displays a standard Verso
+source anchor and runs an explicitly selected function without redeclaring it in
+the document. The independently pinned starter currently demonstrates the older
+inline API; using anchors requires an extension revision containing this feature.
+
+In a producer module such as `Examples.Arithmetic`, mark the source region:
+
+```lean
+module
+public meta import Vir.Attributes
+
+-- ANCHOR: twice
+@[vir_export]
+public def Examples.twice (n : Nat) : Nat := n + n
+-- ANCHOR_END: twice
+```
+
+Import that module into the document, then include the checked source:
+
+````lean
+```leanRunAnchor twice (project := ".") (module := Examples.Arithmetic) (entry := Examples.twice) (input := "21")
+@[vir_export]
+public def Examples.twice (n : Nat) : Nat := n + n
+```
+````
+
+The function must be defined inside the selected anchor, public, executable, and
+marked for VIR. The block body must match the source region; stale or empty
+bodies receive Verso's usual replacement/fill-in suggestions. Anchor comments
+are omitted from the display. This first version requires the document's own
+project and an imported scalar producer; separate-project execution and automatic
+typed HTML adapter generation are not qualified here. A producer-owned exported
+`String → String` HTML serialization wrapper can use `(output := "html")`.
+
+Prepare a resource recipe owned by the producer module, naming the actual entry
+and corresponding scalar interface ID, then supply its embedded bundle to
+`VersoLeanRun.publish`. A chapter recipe cannot export an imported producer's
+root. The anchor name does not replace the entry or recipe declaration. Keep the
+producer separate from the chapter that loads its highlighting, and from the
+resource carrier. The [demo chapter](../gates/LeanRunGate/Chapter.lean)
+shows this arrangement with the [helper](../gates/LeanRunGate/Helper.lean).
+
+`+collapsed`, input, and output options work as for inline forms. Standard
+external-code options such as `-showProofStates` and `-defSite` remain available.
+Open `Verso.Code.External` when using the ordinary `anchor` block by its short name.
+Use `-defSite` for a repeated display when another block already owns the desired
+definition target. Each runnable placement still gets its own worker. An ordinary
+`anchor` block can display the same source without a Run form.
+
 ## Reuse and document integration
 
 `leanRun` uses ordinary command elaboration and the shared highlighted-block constructor,

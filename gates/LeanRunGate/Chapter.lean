@@ -7,6 +7,7 @@ public import Illuminate.Geometry.Matrix
 public import Illuminate.Style.Color
 
 open Verso Genre Manual InlineLean VersoLeanRun
+open Verso.Code.External
 
 set_option compiler.postponeCompile false
 
@@ -177,6 +178,26 @@ public def LeanRunGate.double (n : Nat) : Nat :=
 ```leanRun (entry := LeanRunGate.greet)
 #check LeanRunGate.greet
 ```
+
+# Anchored source
+
+This example displays an anchor from the imported helper module. The displayed
+definition and the compiled callable are selected separately, so the same source
+region can be reused in another document without redeclaring the function.
+
+```leanRunAnchor twice (project := ".") (module := LeanRunGate.Helper) (entry := LeanRunGate.Helper.twice) (input := "21")
+@[vir_export]
+public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
+```
+
+An ordinary anchored block can display that same source without a Run form:
+
+```anchor twice (project := ".") (module := LeanRunGate.Helper) -defSite
+@[vir_export]
+public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
+```
+
+The {name}`LeanRunGate.Helper.twice` reference uses the native source block's definition target.
 
 # Ordinary Lean
 

@@ -153,3 +153,42 @@ Physical mobile devices, Firefox/Safari and assistive-technology audits are not
 qualified. The persisted-page lifecycle test uses a PageTransitionEvent.
 
 Standalone ZIP: _out/verso-vir-demo.zip, 1623554 bytes.
+
+
+2026-10-07 — shared machinery and checked Manual anchors
+
+Public facades remain VersoLeanRun and VersoLeanRun.Publish. Common Model,
+Callable, Anchored, Render, Collect, and Publication modules do not import
+VersoManual. The Manual adapter retains inline scopes, native highlighted
+children, definition targets, and TeX fallback.
+
+leanRunAnchor reuses the existing withAnchored cache and standard anchor expander.
+The entry must be imported from the document's own project and occur as a
+semantic definition in the selected region. Empty/stale bodies retain Verso's
+fill-in/replacement suggestions. Separate-project execution and automatic
+anchored typed-HTML adapter creation are not qualified.
+
+VIR's module export boundary requires a separate helper recipe and carrier.
+Both embedded bundles are supplied to the existing publisher. Publication
+planning is pure and validates all bindings before output writes.
+
+Validation: Beam development checks, stop/clean, then batch lake build (727 jobs).
+lake test -- --mutations --output _out/anchors-acceptance: 77 checks passed.
+Seven new author fixtures; exact imported Nat execution; native definition
+links at root/nested paths; no-JavaScript/TeX fallback; duplicate, unclosed, and
+stale anchor rebuild rejection; helper invalidation and full restoration.
+The existing worker Stop, isolation, contract, HTML, Illuminate, registration,
+and carrier relocation checks remain green. Results: evidence/anchors-results.json.
+
+All dependency pins remain unchanged.
+Runtime: 832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d
+Original chapter program: f06bd7d9ca365c428788028ebbc9cbfd36ab1710e50bb5c6d88ae16c21ec49e7
+New helper program: b2f8029223d19daa412e8f692457ff1f706c9c22983aeafc570e607be5a471b4
+The original program and runtime identities are preserved. Eight Run forms.
+Blog/Slides remain unqualified; the hosted Pages MIME/adoption gate is unchanged.
+Logs: /tmp/verso-run-anchors-{build,tests,demo}.log; full command logs and
+current generated test site: _out/anchors-acceptance/.
+Normal demo generation refreshed both HTML layouts and TeX after restoration.
+The ZIP passed CRC and publication checks; the generated publication equals the
+accepted plan. Local HTTP demo verified at http://127.0.0.1:8795/Anchored-source/.
+Local documentation links and git diff --check passed.

@@ -42,7 +42,7 @@ plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
 assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('diagram.leanRunHtml', 'String'), ('double', 'Nat'), ('spin', 'Nat')]:
+for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('diagram.leanRunHtml', 'String'), ('double', 'Nat'), ('Helper.twice', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert contract['declaration'] == 'LeanRunGate.'+declaration
     assert contract['signature']['effect'] == 'pure'
@@ -134,6 +134,13 @@ with sync_playwright() as p:
     assert calculator.locator('details').get_attribute('open') is None
     assert not workers, 'Runtime must be lazy'
     record('no runtime on page load')
+    anchored = form_for('LeanRunGate.Helper.twice')
+    assert anchored.locator('input').input_value() == '21'
+    assert 'public def LeanRunGate.Helper.twice' in anchored.locator('.lean-run-source').inner_text()
+    assert 'ANCHOR:' not in anchored.locator('.lean-run-source').inner_text()
+    assert anchored.locator('.lean-run-source .hl').count() > 0
+    assert call(anchored, '9007199254740993') == oracle('double', '9007199254740993')
+    record('anchored imported scalar preserves native highlighting and exact worker execution')
     for value in ['', 'Ada', 'Unicode λ 🌍', '<img src=x onerror=alert(1)>']:
         assert call(greeting,value) == oracle('greet',value)
         assert greeting.locator('.lean-run-output img').count() == 0
@@ -291,7 +298,7 @@ with sync_playwright() as p:
     record('native/browser exact Nat oracle: zero, edited, large integers')
     assert call(other,'independent') == oracle('greet','independent')
     assert greeting.locator('.lean-run-output').text_content() == oracle('greet','<img src=x onerror=alert(1)>')
-    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 7
+    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 8
     record('independent repeated placements')
     for value in ['-1','1.5','abc','',' 1','1e3','9'*257]:
         numeric.locator('input').fill(value)
@@ -379,13 +386,23 @@ with sync_playwright() as p:
         assert oracle('diagram', '6') in form.locator('iframe').get_attribute('srcdoc')
         assert form.frame_locator('iframe').locator('svg text').count() == 6
     record('Illuminate executes from copied root and nested HTTP deployments')
+    for path in ['root/Anchored-source/', 'nested/prefix/manual/Anchored-source/']:
+        page.goto(base+path)
+        page.wait_for_selector('.lean-run[data-enhanced]')
+        link = page.locator('p code a').filter(has_text='LeanRunGate.Helper.twice').first
+        target = link.get_attribute('href').split('#')[1]
+        assert page.locator('[id="'+target+'"]').count() == 1
+        link.click()
+        page.wait_for_url('**/#'+target)
+        assert call(form_for('LeanRunGate.Helper.twice'), '21') == oracle('double', '21')
+    record('anchored definition links and execution work at root and nested Manual paths')
     context = browser.new_context(java_script_enabled=False)
     plain = context.new_page()
     plain.goto(base+'single/')
     assert 'public def LeanRunGate.greet' in plain.locator('body').inner_text()
     assert '#check Nat.add' in plain.locator('body').inner_text()
     assert plain.locator('.lean-run [type=submit]').first.is_disabled()
-    assert plain.locator('.lean-run noscript').count() == 7
+    assert plain.locator('.lean-run noscript').count() == 8
     assert all('Enable JavaScript' in text for text in plain.locator('.lean-run noscript').all_text_contents())
     plain_calculator = plain.locator('.lean-run[data-experiment*="LeanRunGate.Stack.run"]')
     plain_calculator.locator('summary').click()
@@ -394,9 +411,12 @@ with sync_playwright() as p:
     plain_diagram.locator('summary').click()
     assert 'public def LeanRunGate.diagram' in plain_diagram.locator('.lean-run-source').inner_text()
     assert 'Svg.render' in plain_diagram.locator('.lean-run-source').inner_text()
+    plain_anchor = plain.locator('.lean-run[data-experiment*="LeanRunGate.Helper.twice"]')
+    assert 'public def LeanRunGate.Helper.twice' in plain_anchor.locator('.lean-run-source').inner_text()
+    assert plain_anchor.locator('[type=submit]').is_disabled()
     context.close()
     tex=(site/'tex/main.tex').read_text()
-    assert 'LeanRunGate' in tex and 'Nat.add' in tex and 'Instruction' in tex and 'Svg.render' in tex
+    assert 'LeanRunGate' in tex and 'Nat.add' in tex and 'Instruction' in tex and 'Svg.render' in tex and 'Helper.twice' in tex
     record('JavaScript-disabled highlighting and TeX source fallback')
     assert not errors, errors
 
@@ -422,10 +442,25 @@ with sync_playwright() as p:
             chapter.write_text(originals[chapter])
             record('unsupported replacement fails before publishing over the last accepted site')
 
+            for name, changed_helper, expected in [
+                ('duplicate-anchor', originals[helper] + '\n-- ANCHOR: twice\n', 'Anchor already used: twice'),
+                ('unclosed-anchor', originals[helper].replace('-- ANCHOR_END: twice', ''), 'Unclosed anchors: twice'),
+                ('stale-anchor-body', originals[helper].replace('n + n', 'n + n + 1'), 'Mismatched code')]:
+                helper.write_text(changed_helper)
+                rejected = command(['lake', 'exe', 'lean-run-demo', '--output', str(site)],
+                    name + '-rebuild', expected=1)
+                assert expected in rejected, rejected
+                assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
+                helper.write_text(originals[helper])
+                record(name + ' rejects the rebuild and preserves the last accepted publication')
+
             for source, before, after, role, value in [
                 (chapter,'"Hello, "','"Welcome, "','greet','edited source'),
                 (helper,'n + n','n + n + 1','double','9007199254740993')]:
                 source.write_text(originals[source].replace(before,after))
+                if source == helper:
+                    # Both ordinary and runnable anchors enforce source equality.
+                    chapter.write_text(originals[chapter].replace(before, after))
                 command(['lake','build'],'mutate-'+role)
                 changed=OUTPUT/('mutation-'+role)
                 generate(changed)
@@ -436,8 +471,11 @@ with sync_playwright() as p:
                 page.goto(base+'mutation-'+role+'/')
                 page.wait_for_selector('.lean-run[data-enhanced]')
                 assert call(form_for('LeanRunGate.'+role),value) == oracle(role,value)
+                if source == helper:
+                    assert call(form_for('LeanRunGate.Helper.twice'), value) == oracle(role, value)
                 record('implementation invalidation '+role, program=changed_plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest'])
                 source.write_text(originals[source])
+                chapter.write_text(originals[chapter])
 
             wrong=json.loads(originals[recipe])
             wrong['exports'][0]['interfaceId']='verso-nat-nat-v1'

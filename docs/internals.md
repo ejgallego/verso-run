@@ -1,5 +1,19 @@
 # How verso-run fits together
 
+## Common machinery and Manual integration
+
+The common modules have no dependency on `VersoManual`: `Model` retains portable
+experiment data, `Callable` classifies entries and builds expected contracts,
+`Anchored` reuses standard checked source anchors, `Render` builds the console,
+`Collect` walks a genre's AST with its extension decoder, and `Publication`
+prepares the complete validated file inventory without writing it.
+
+`Manual` supplies inline scope handling and a Run wrapper with native highlighted
+source children. `Publish` decodes Manual wrappers and writes the common plan into
+the selected HTML layout. Public imports remain `VersoLeanRun` and
+`VersoLeanRun.Publish`. The [genre review](multi-genre.md) describes the remaining
+Blog and Slides work; only Manual is currently supported.
+
 ## Resource ownership and site integration
 
 Follow VIR's public resource workflow, as demonstrated by the

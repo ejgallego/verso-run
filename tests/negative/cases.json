@@ -4,7 +4,7 @@
   "Unmarked": {
     "contains": [
       "Lean Run entry 'unmarkedValue'",
-      "Type: Nat → Nat",
+      "Type: Nat \u2192 Nat",
       "must carry @[vir_export]",
       "fix the earlier VIR"
     ],
@@ -13,7 +13,7 @@
   "Unsupported": {
     "contains": [
       "Lean Run entry 'flag'",
-      "Bool → Bool",
+      "Bool \u2192 Bool",
       "supported by VIR, but not by this Run form",
       "Serialize structured"
     ],
@@ -35,7 +35,7 @@
   "Arity": {
     "contains": [
       "Lean Run entry 'combine'",
-      "String → String → String",
+      "String \u2192 String \u2192 String",
       "supported by VIR",
       "found 2",
       "wrapper taking one"
@@ -54,7 +54,7 @@
   "MixedShape": {
     "contains": [
       "Lean Run entry 'textLength'",
-      "String → Nat",
+      "String \u2192 Nat",
       "supports exactly",
       "Serialize structured"
     ],
@@ -63,7 +63,7 @@
   "Effectful": {
     "contains": [
       "Lean Run entry 'echoIo'",
-      "String → IO String",
+      "String \u2192 IO String",
       "supported by VIR",
       "effect: io",
       "Move I/O"
@@ -102,7 +102,7 @@
     "contains": [
       "Lean Run entry 'chosen'",
       "non-executable",
-      "Type: Nat → Nat",
+      "Type: Nat \u2192 Nat",
       "executable public definition"
     ],
     "line": 7
@@ -121,5 +121,45 @@
       "must carry"
     ],
     "line": 7
+  },
+  "AnchorMissing": {
+    "contains": [
+      "not found",
+      "missing"
+    ]
+  },
+  "AnchorMismatch": {
+    "contains": [
+      "Mismatched code"
+    ]
+  },
+  "AnchorEmpty": {
+    "contains": [
+      "Missing code"
+    ]
+  },
+  "AnchorEntryOutside": {
+    "contains": [
+      "entry 'Nat.add'",
+      "not defined in anchor 'twice'",
+      "LeanRunGate.Helper"
+    ]
+  },
+  "AnchorUnknownEntry": {
+    "contains": [
+      "Unknown constant"
+    ]
+  },
+  "AnchorUnimported": {
+    "contains": [
+      "Unknown constant",
+      "LeanRunGate.Helper.twice"
+    ]
+  },
+  "AnchorExternalProject": {
+    "contains": [
+      "document's own project",
+      "external-project execution is not yet qualified"
+    ]
   }
 }

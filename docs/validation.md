@@ -18,6 +18,8 @@ rather than treating successful loading as proof that an example works.
   registration, and relocated carrier source/build roots.
 - Rejected replacements and wrong recipe contracts after a successful build,
   including preservation of the last accepted publication.
+- Imported scalar anchors, semantic entry membership, checked source bodies,
+  native definition links, and duplicate/unclosed/stale-anchor rebuild rejection.
 
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
@@ -27,7 +29,8 @@ test isolation. CI also cold-builds the independently pinned
 
 | Record | Scope |
 | --- | --- |
-| [Diagnostics results](../evidence/diagnostics-results.json) | Current 65-check native/browser/mutation campaign |
+| [Anchor results](../evidence/anchors-results.json) | 77-check shared-core and anchored Manual native/browser/mutation campaign |
+| [Diagnostics results](../evidence/diagnostics-results.json) | Earlier 65-check native/browser/mutation campaign |
 | [Validation log](../evidence/validation.txt) | Dated campaigns, exact identities, commands and limitations |
 | [Prototype results](../evidence/results.json) | The earlier 55-check demo campaign |
 | [Starter results](../evidence/starter-results.json) | The published-dependency starter and its 11 checks |
