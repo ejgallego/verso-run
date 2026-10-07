@@ -1,4 +1,4 @@
-"""Real native/browser acceptance; run from the optional package with uv/Playwright."""
+"""Real native/browser acceptance; run from the repository root with uv/Playwright."""
 import argparse, copy, functools, http.server, json, shutil, subprocess, tempfile, threading, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--mutations', action='store_true')
 parser.add_argument('--output', default='/tmp/verso-lean-run-acceptance')
 args = parser.parse_args()
-OUTPUT = Path(args.output)
+OUTPUT = Path(args.output).resolve()
 OUTPUT.mkdir(parents=True, exist_ok=True)
 results = []
 
@@ -437,8 +437,8 @@ with sync_playwright() as p:
             staged=moved/'.vir-generated'
             if staged.exists():
                 staged.rename(Path(tempfile.mkdtemp(prefix='old-prepared-', dir=moved.parent))/'packs')
-            layout=originals[lakefile].replace('package verso_lean_run\n',
-                'package verso_lean_run where\n  buildDir := ".lake/registration-build"\n')
+            layout=originals[lakefile].replace('package verso_vir\n',
+                'package verso_vir where\n  buildDir := ".lake/registration-build"\n')
             layout=layout.replace('srcDir := "resources"', 'srcDir := "_registration-layout/resources"')
             lakefile.write_text(layout)
             command(['lake','build'],'custom-carrier-layout-build')

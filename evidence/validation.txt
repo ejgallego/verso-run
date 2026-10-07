@@ -1,68 +1,52 @@
-Verso base: cad4b633 (Lean 4.34.0)
-VIR: PR #217 head 1ed079ca2ab8306ae877ed4920f7d55d392365f8
+Standalone verso-vir extraction, validated 2026-10-07.
+
+Local repository: ~/lean/verso-vir
+Source prototype: Verso feat/lean-run commit 06860e5e
+Eight prototype development commits preserved with root-relative paths.
+The module API remains VersoLeanRun; the Lean package is verso_vir.
+
+Exact dependencies:
+Lean 4.34.0
+Verso: 3f6366aa8045b342b0b68c0373a8ebfce7d5611f
+  Base cad4b633 plus one-line public highlighting helper; no demo code.
+VIR PR #217: 1ed079ca2ab8306ae877ed4920f7d55d392365f8
+Illuminate: a1a61c9678da010e958ed24cdfa6f635b85f172a
 Runtime: 832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d
 Program: f06bd7d9ca365c428788028ebbc9cbfd36ab1710e50bb5c6d88ae16c21ec49e7
-32 package members, 978 declarations (904 Lean IR / 74 native externs), six exports.
-Illuminate: a1a61c9678da010e958ed24cdfa6f635b85f172a (Lean 4.34.0).
-The archived complete site is 1,623,236 bytes; its CRC and publication were verified.
+32 package members, 978 declarations (904 IR / 74 native), six exports.
+Program/runtime identities match the prototype exactly.
 
-Current validation:
-Root lake build passed (1114 jobs).
-Root lake test passed (647 tests, 0 failures/errors; 10 interactive editor checks).
-Optional lake test -- --mutations passed all 55 acceptance checks.
-Optional package outputs were cleaned before batch rebuilding. Beam was stopped;
-no server environment checkpoint was used as final build evidence.
-Tests cover native/browser String and exact Nat calls, the longer stack-language
-interpreter, expected contracts, invalid author configurations, generated HTML
-adapter reuse/collision diagnostics, non-executable/private HTML rejection,
-HTML/native markup agreement, escaped reader input, iframe origin isolation, preview cleanup/error
-recovery, independent forms, real Stop, stale outcomes, resource errors, native-only
-publication, copied output, no-JavaScript/TeX source, resource invalidation, custom
-carrier source/build roots, registration ambiguity, and restored program identity.
-Illuminate checks compare native/Wasm SVG markup, labels, path/link counts and
-changing view boxes for multiple edited inputs, reject malformed/out-of-range
-counts, clear/recreate previews, and run copied root/nested HTTP deployments.
-Three negative fixtures retain Float.toBits/atan/asin dependency diagnostics.
+Standalone validation:
+- Initially empty .lake; dependencies acquired from published Git revisions.
+- No sibling/parent checkout dependency, package symlink, or VIR override.
+- lake build passes (709 jobs).
+- lake test -- --mutations --output _out/acceptance: all 55 checks pass.
+  Relative output paths are resolved before native-only publication.
+- Normal lake exe lean-run-demo produces HTML-multi, HTML-single, and TeX.
+- Public worker create/call/dispose/recreate gate passes on this final program.
+- scripts/package-demo.py produces a complete ZIP with CRC/publication verified.
+- actionlint and git diff --check pass.
+- Isolated Verso hook: lake build passes (1114 jobs), lake test passes
+  (647 tests, no failures/errors; 10 interactive editor checks).
 
-Long example: a typed instruction language, parser, bounded stack interpreter and
-trace, with preset input and a keyboard-accessible native source disclosure.
-HTML example: public String → Verso.Output.Html greeting using Verso HTML syntax.
-The block generates a marked scalar String → String wrapper at <entry>.leanRunHtml
-and calls Html.asString. The original function needs no vir_export marker; the
-recipe selects the generated wrapper. HTML preview is inferred; explicit text
-presentation is rejected. Legacy String markup plus output="html" still elaborates.
-The frame retains its existing sandbox and restricted embedded resources.
-Normal text output and runtime errors use textContent. No parent DOM insertion of result HTML.
+CI configuration builds from exact dependency pins and runs the complete
+acceptance/mutation suite in a fresh GitHub checkout. Local logs:
+/tmp/verso-vir-standalone-{update,build,test,demo,worker-build,worker}.log
+/tmp/verso-vir-hook-{build,test}.log
 
-Illuminate example: String → Html function using public PathData, Matrix,
-DrawCmd, style, and Svg.render APIs; count bounds 1–8. The example computes
-coordinates/view boxes. No JavaScript geometry code or static SVG lookup.
-Default Diagram.renderDiagram/compile remain blocked by missing float providers;
-see evidence/illuminate-gates.md for exact reproduction and scope.
+The 55 checks include author diagnostics and compiler contracts, native/Wasm
+String and exact Nat calls, calculator traces/bounds/errors, typed HTML/escaping,
+SVG labels/links/geometry and count bounds, independent workers, real Stop,
+stale responses, resource recovery, native-only publication, copied root/nested
+HTTP sites, no-JS/TeX source, registration/relocation, body/helper invalidation,
+and restored program identity.
 
-Desktop/mobile/320px Illuminate screenshots were visually inspected; actual SVG
-bounds and lack of page/frame overflow were checked. New captures include counts
-4/8 and expanded source. Earlier calculator and HTML captures are retained.
-The previous design review also covers 1280px, 390px and 320px, keyboard focus,
-long exact-Nat wrapping, narrow-screen search and JavaScript-disabled output.
-A clean complete HTML-multi archive is available at _out/lean-run-demo.zip;
-ZIP entries/CRC checked. Its source tree is the current acceptance output.
+General Illuminate Diagram rendering retains the recorded Float.toBits/atan/asin
+gaps: evidence/illuminate-gates.md. The accepted path is drawing commands/SVG.
+Compiler scheduling and native precompilation remain deferred.
+Earlier design/viewport evidence and prototype qualification are historical:
+evidence/prototype-validation.txt and the retained PNGs.
+Physical mobile devices, Firefox/Safari and assistive-technology audits are not
+qualified. The persisted-page lifecycle test uses a PageTransitionEvent.
 
-Current logs:
-/tmp/verso-lean-run-illuminate-build.log
-/tmp/verso-lean-run-illuminate-acceptance.log
-/tmp/verso-lean-run-illuminate-root-build.log
-/tmp/verso-lean-run-illuminate-root-test.log
-/tmp/verso-lean-run-illuminate-acceptance/generate-site.log
-Screenshots: /tmp/verso-lean-run-illuminate-review/; earlier HTML/calculator
-reviews: /tmp/verso-lean-run-html-review/ and /tmp/verso-lean-run-stack-review/.
-
-Historical design and standalone worker-gate evidence remains separately retained.
-The standalone create/call/dispose/recreate gate passed on the PR #217 integration
-before the new examples. The final 55-check campaign executes the current program.
-Run root and optional Lake checks sequentially because they share root outputs.
-Keep compiler.postponeCompile false pending compiler-maintainer discussion.
-No toolchain migration, new VIR patch, remote push, or PR.
-Not exercised: Firefox, Safari, physical mobile devices, assistive-technology audits.
-Cached-page handler verified by a persisted PageTransitionEvent; actual cross-browser
-back-cache restoration remains unqualified.
+Standalone ZIP: _out/verso-vir-demo.zip, 1623554 bytes.

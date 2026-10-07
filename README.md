@@ -1,14 +1,16 @@
-# Compiled Lean Run for Manual
+# verso-vir
 
-This optional package adds a first Run form to Verso Manual. Lean elaborates and compiles the displayed declarations during the document build. A dedicated browser worker calls those retained declarations through VIR's public resource API. Readers edit inputs, not Lean source.
+verso-vir provides compiled Run forms for Verso Manual. Lean elaborates and compiles the displayed declarations during the document build. A dedicated browser worker calls those retained declarations through VIR's public resource API. Readers edit inputs, not Lean source.
 
-The package stays on Verso release `cad4b633` and Lean **4.34.0**, with VIR pinned to [PR #217](https://github.com/ejgallego/lean-vir/pull/217) head `1ed079ca2ab8306ae877ed4920f7d55d392365f8`. It does not migrate current Verso main's toolchain. The matching runtime is content ID `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d`; its compatibility binds Lean source revision `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` and VIR compatibility version 1. Lake acquires and verifies the runtime selected by VIR's lock; no separate SDK installation or Wasm build is required.
+The package uses Lean **4.34.0** and a minimal Verso fork revision `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` based on release `cad4b633`. That fork exposes the existing `toHighlightedLeanBlock` helper; it contains no demo code. VIR is pinned to [PR #217](https://github.com/ejgallego/lean-vir/pull/217) head `1ed079ca2ab8306ae877ed4920f7d55d392365f8`. It does not migrate current Verso main's toolchain. The matching runtime is content ID `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d`; its compatibility binds Lean source revision `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` and VIR compatibility version 1. Lake acquires and verifies the runtime selected by VIR's lock; no separate SDK installation or Wasm build is required.
 
 ## Build, generate, serve, test
 
-Run these commands from `experiments/lean-run` in this feature worktree:
+Install [elan](https://github.com/leanprover/elan), [uv](https://docs.astral.sh/uv/), and a Chromium browser for tests. Lean is selected by `lean-toolchain`. Then run these commands:
 
 ```sh
+git clone https://github.com/ejgallego/verso-vir.git
+cd verso-vir
 lake build
 lake exe lean-run-demo --with-html-single --with-tex --depth 2
 python3 -m http.server 8794 --directory _out/html-multi
@@ -18,7 +20,7 @@ Open <http://127.0.0.1:8794/Greeting/>. Single-page output is in `_out/html-sing
 
 For the longer internal-demo example, open <http://127.0.0.1:8794/Stack-calculator/>. It implements a small typed instruction language, parser, stack evaluator, and execution trace in the displayed Lean code. Run the supplied `6 7 * 2 +` program, then try `5 dup *`, `2 3 swap dup * +`, or `9007199254740993 2 *`. An empty program, unknown instruction, or stack underflow returns a readable explanation. The demo bounds programs to 32 instructions, stacks to 16 values, and numbers to 80 decimal digits, including intermediate results.
 
-A clean complete copy for sharing is available at `_out/lean-run-demo.zip`. Unpack it, then run `python3 -m http.server 8794 --directory lean-run-demo` and open `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/`. The recipient needs no Lean installation.
+After generating the site, run `python3 scripts/package-demo.py` to create a complete copy at `_out/verso-vir-demo.zip`. Unpack it, then run `python3 -m http.server 8794 --directory verso-vir-demo` and open `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/`. The recipient needs no Lean installation.
 
 Open <http://127.0.0.1:8794/HTML-greeting/> for a small HTML example. Its Lean function returns Verso’s `Html` type for a styled greeting card. The block generates a scalar export using `Html.asString` and selects the HTML preview automatically. Verso’s HTML syntax escapes interpolated names.
 
@@ -26,13 +28,13 @@ Open <http://127.0.0.1:8794/Illuminate-diagrams/> for the library example. Enter
 
 Illuminate is pinned to `a1a61c9678da010e958ed24cdfa6f635b85f172a`, the same Lean 4.34.0 revision used by this Verso release. The example uses its public `DrawCmd`, `PathData`, `Matrix`, style, and SVG APIs. Layout coordinates and the view box are computed in the example. It is qualified for this drawing-command path; general `Diagram.renderDiagram` and `Diagram.compile` still reach float operations absent from the locked VIR runtime. Reproducible author fixtures and details are in [`evidence/illuminate-gates.md`](evidence/illuminate-gates.md).
 
-The optional package's test driver uses the repository's Python/Playwright browser tooling. Install `uv` and a Chromium browser first. Tests use installed `google-chrome` when available, otherwise Playwright's installed Chromium:
+The test driver uses uv and Playwright. Tests use installed `google-chrome` when available, otherwise Playwright's Chromium. Install the latter with `uv run --with playwright playwright install chromium`:
 
 ```sh
 lake test -- --mutations
 ```
 
-This builds the native generator/oracle, generates both HTML layouts and TeX, checks missing and duplicate bundle registration, runs negative author fixtures, and executes the real program in Chromium. `--mutations` additionally changes the greeting body and a reached helper body, checks ambiguous recipe roles, relocates the carrier source/build directories without editing its library-key include, and restores sources and program identity in `finally`. Evidence defaults to `/tmp/verso-lean-run-acceptance`; `--output PATH` selects another directory. Root repository regression commands remain `lake build` and `lake test` from the feature worktree root. Run root and optional commands sequentially because they share root Lake outputs.
+This builds the native generator/oracle, generates both HTML layouts and TeX, checks missing and duplicate bundle registration, runs negative author fixtures, and executes the real program in Chromium. `--mutations` additionally changes the greeting body and a reached helper body, checks ambiguous recipe roles, relocates the carrier source/build directories without editing its library-key include, and restores sources and program identity in `finally`. Evidence defaults to `/tmp/verso-lean-run-acceptance`; `--output PATH` selects another directory. Run builds and mutation tests sequentially. Mutation tests temporarily edit sources and restore them in `finally`. The independent Verso hook has its own upstream build/test validation.
 
 The smaller worker gate can be repeated independently:
 
@@ -89,7 +91,7 @@ The generated wrapper receives the usual `vir_export` validation, including its
 compiled dependency closure. Repeated placements reuse it; conflicting declarations
 at that name produce an author diagnostic. Neither VIR's ABI nor the renderer changes.
 
-`leanRun` uses ordinary command elaboration and the shared highlighted-block constructor, retaining source locations, hovers, and example links. The only core Verso change exposes `toHighlightedLeanBlock` for this reuse. The extension support lives in this optional package because Verso's package-wide native precompilation attempts to compile VIR's browser extern symbols as C when VIR is added directly to that package.
+`leanRun` uses ordinary command elaboration and the shared highlighted-block constructor, retaining source locations, hovers, and example links. The only core Verso change exposes `toHighlightedLeanBlock` for this reuse. This standalone package leaves native precompilation disabled pending the separate VIR native-client fix. It uses the normal Verso package as a Git dependency.
 
 Repeated placements may select the same declaration, for example with `#check Demo.greet` as the displayed code. Each rendered placement has a distinct instance ID and its own worker/runtime.
 
@@ -140,4 +142,21 @@ Forms group the highlighted source above a quiet input/result area, with aligned
 
 `evidence/results.json` records the 55 final acceptance checks and exact publication identities; `evidence/manual.png` is a browser capture. `evidence/worker-gate.json` retains the independent public API create/call/dispose/recreate gate, and `evidence/validation.txt` records root regression results. The browser checks cover edited inputs, Unicode, exact integers above JavaScript's safe range, repeated placements, real long-running interruption, pending-load cancellation, ignored stale outcomes, missing resources with explicit recovery, root/nested copied publication, disabled JavaScript, TeX, body/helper invalidation, restored identity, compiler-signature publication in both layouts and native-only generation, rejection of mismatched or missing expectations before invocation, duplicate/missing/ambiguous registration, and carrier relocation across source/build roots with unchanged publication. Screenshots supplement those execution checks. `evidence/design-results.json` records the 30 non-mutation interaction checks repeated after the visual refinement; `design-desktop.png`, `design-mobile.png`, and the other `design-*.png` captures show the final layout. Chromium reviews cover 1280px, 390px, and 320px widths, keyboard submission/focus, long exact-Nat wrapping, narrow-screen search, and the JavaScript-disabled fallback. The 55-check campaign in `results.json` additionally covers the calculator preset/trace, arithmetic, errors, bounds, source disclosure, typed HTML adapter reuse and collision checks, non-executable/private entry rejection, HTML preview/native markup agreement, escaped input, isolation, cleanup, failure recovery, and Illuminate native/browser markup, drawing geometry, count bounds, and copied deployments. `illuminate-*.png` captures the new diagram on desktop and mobile. `calculator-*.png` captures the longer example with its source panel closed and open.
 
-Browser execution is qualified here in Chromium. Firefox, Safari, physical mobile devices, and assistive-technology audits were not exercised. The cached-page lifecycle handler is checked with a persisted `PageTransitionEvent`; actual back-cache restoration across browsers remains unqualified. Porting to current Verso main's Lean 4.35.0-rc3 requires a compatible VIR/runtime release and is not included.
+Browser execution is qualified here in Chromium. Firefox, Safari, physical mobile devices, and assistive-technology audits were not exercised. The cached-page lifecycle handler is checked with a persisted `PageTransitionEvent`; actual back-cache restoration across browsers remains unqualified. Moving to a newer Lean line requires compatible Verso, VIR, and runtime pins and is not part of this initial extraction.
+
+## Repository history
+
+This repository extracts the prototype previously developed in
+`experiments/lean-run` on Verso's local `feat/lean-run` branch. Its eight
+development commits are preserved with paths moved to the repository root.
+The extraction source is Verso commit `06860e5e`; original evidence is retained.
+The Verso dependency isolates the one-line highlighting hook from that prototype.
+
+Use `VersoLeanRun` and `VersoLeanRun.Publish` as the library imports. The Lean
+package is named `verso_vir`; the existing module and executable names are retained.
+Library support lives under `support/`, browser support under `web/`, and demo
+code under `gates/` and `resources/`. Illuminate code belongs to the examples.
+
+See [LICENSE](LICENSE) for the Apache-2.0 license and [AGENTS.md](AGENTS.md) for
+contributor notes. GitHub CI builds from the exact dependency pins and runs all
+acceptance/mutation checks, retaining the generated site and test evidence.
