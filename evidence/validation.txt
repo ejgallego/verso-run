@@ -1,3 +1,38 @@
+Author starter and Pages workflow validated 2026-10-07.
+
+Root lake build passes (709 jobs) and all 55 native/browser/mutation checks
+pass at _out/pages-acceptance. Demo generation and ZIP packaging pass; the
+publication matches the original program/runtime identities exactly.
+
+The independent author starter is committed under examples/manual-starter.
+Its only direct dependency is published verso-run revision
+55ebf56b49616462a81195efe1cbc1d1480dc088. Lean and transitive Git revisions are
+locked; no local package paths or package symlinks are used. A fresh copy under
+/tmp builds successfully (705 jobs). All 11 real Chromium checks pass: text
+and typed HTML functions, root/nested copied deployments, Unicode, escaping,
+isolated previews, input reset/rerun, compiler contracts in both layouts,
+no-JavaScript source, TeX, and absence of uncaught page errors.
+Retained results: evidence/starter-results.json.
+
+CI validates the starter before uploading the demo's Pages artifact. A separate
+main-only job deploys to the github-pages environment after acceptance succeeds.
+If Pages is disabled, deployment skips with a settings link; other API failures
+or an incorrect publishing source fail clearly. Pages Actions use pinned commits.
+actionlint and git diff --check pass. Pages was not enabled during this local
+validation; live GitHub Pages execution remains to be checked after activation.
+
+Follow-up slices are recorded in ROADMAP.md: unsupported-program diagnostics,
+Verso ANCHORS and Manual/slides/blog support, grouped Verso upstreaming later,
+and deferred browser/editor work. Compiler scheduling and native precompilation
+remain deferred; no dependency or core extension changes are made here.
+
+Logs: /tmp/verso-run-pages-{build,test,demo}.log,
+/tmp/verso-run-starter-{build,test}.log and _out/starter-acceptance/{build,generate}.log.
+The first starter HTML assertion was corrected to ignore serializer indentation;
+the final successful run preserves exact Unicode content and escaped markup.
+
+Earlier validation:
+
 Final project name validated 2026-10-07.
 Current project: verso-run / https://github.com/ejgallego/verso-run
 Current local checkout: ~/lean/verso-run

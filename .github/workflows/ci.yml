@@ -26,6 +26,8 @@ jobs:
         run: lake build
       - name: Native and browser acceptance
         run: lake test -- --mutations --output _out/acceptance
+      - name: Independent author starter
+        run: uv run --with playwright python tests/starter.py --output _out/starter-acceptance
       - name: Package demo
         run: |
           lake exe lean-run-demo --with-html-single --with-tex --depth 2
@@ -36,3 +38,54 @@ jobs:
           name: demo-and-acceptance
           path: _out/
           if-no-files-found: warn
+      - name: Upload validated Pages site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: _out/html-multi
+
+  pages:
+    needs: acceptance
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check Pages configuration
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(curl --silent --show-error \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            --output "$RUNNER_TEMP/pages.json" --write-out '%{http_code}' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pages")
+          case "$status" in
+            200)
+              python3 -c 'import json, os; p=json.load(open(os.environ["RUNNER_TEMP"] + "/pages.json")); assert p["build_type"] == "workflow", "Select GitHub Actions as the Pages source in repository settings"'
+              echo "enabled=true" >> "$GITHUB_OUTPUT"
+              ;;
+            404)
+              echo "enabled=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::Enable Pages with GitHub Actions at https://github.com/$GITHUB_REPOSITORY/settings/pages, then rerun this workflow."
+              ;;
+            *)
+              echo "::error::Cannot read Pages settings (HTTP $status)"
+              exit 1
+              ;;
+          esac
+      - name: Configure Pages
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Deploy demo
+        if: steps.pages.outputs.enabled == 'true'
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

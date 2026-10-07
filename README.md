@@ -4,6 +4,10 @@
 
 verso-run provides compiled Run forms for Verso Manual. Lean elaborates and compiles the displayed declarations during the document build. A dedicated browser worker calls those retained declarations through VIR's public resource API. Readers edit inputs, not Lean source.
 
+For your own document, copy the [minimal Manual starter](examples/manual-starter/README.md).
+It has a text function, a typed HTML function, and all the Lake/resource wiring,
+using the published Git dependency. Follow-up work is tracked in [ROADMAP.md](ROADMAP.md).
+
 The package uses Lean **4.34.0** and a minimal Verso fork revision `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` based on release `cad4b633`. That fork exposes the existing `toHighlightedLeanBlock` helper; it contains no demo code. VIR is pinned to [PR #217](https://github.com/ejgallego/lean-vir/pull/217) head `1ed079ca2ab8306ae877ed4920f7d55d392365f8`. It does not migrate current Verso main's toolchain. The matching runtime is content ID `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d`; its compatibility binds Lean source revision `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` and VIR compatibility version 1. Lake acquires and verifies the runtime selected by VIR's lock; no separate SDK installation or Wasm build is required.
 
 ## Build, generate, serve, test
@@ -44,6 +48,36 @@ The smaller worker gate can be repeated independently:
 lake exe lean-run-gate /tmp/verso-lean-run-gate-site
 uv run --with playwright python tests/worker-gate.py
 ```
+
+The author starter has its own independent build/browser check:
+
+```sh
+uv run --with playwright python tests/starter.py
+```
+
+It copies the starter into an isolated directory, fetches its dependencies from
+Git, and runs both functions in Chromium at root and nested deployment URLs.
+The 11 checks are retained in `evidence/starter-results.json`.
+
+## GitHub Pages
+
+Enable Pages at <https://github.com/ejgallego/verso-run/settings/pages> by selecting
+**GitHub Actions** under **Build and deployment → Source**. Then run the
+[Build and test workflow](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml)
+on `main`, or rerun its latest run. GitHub's
+[custom-workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+describes this publishing source.
+
+CI uploads the generated `_out/html-multi` site only after the build, demo
+acceptance, independent starter, and packaging succeed. A separate Pages job
+deploys that artifact on `main`; pull requests validate without deployment.
+If Pages is not configured yet, the job skips deployment and prints the settings
+link. Enable the Actions publishing source and rerun the workflow when ready.
+
+The default project URL will be <https://ejgallego.github.io/verso-run/>.
+Try `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/` beneath it.
+The generated paths are relative, and worker execution at nested prefixes is
+covered by acceptance checks. No generated site files are committed to Git.
 
 ## Authoring
 
