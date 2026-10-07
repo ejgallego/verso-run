@@ -81,7 +81,7 @@ remain the shared execution layer.
 1. **Displayed source:** project, module, and anchor. This can select several
    definitions or just part of a larger example.
 2. **Callable:** explicit full Lean declaration plus its compiled expected
-   signature. Publication finds its actual recipe export in supplied bundles.
+   signature. Publication selects its producer-module bundle; VIR admits the full declaration before invocation.
 3. **Document location:** the genre's normal labels, links, and rendered paths.
 4. **Form instance:** one placement and one worker owner. Displaying the same
    anchor or callable twice must still create independent forms.
@@ -94,15 +94,15 @@ External highlighting can use a different toolchain successfully; that alone
 does not establish execution compatibility.
 
 Retain both document-position and source-selection provenance in diagnostics.
-The existing `Experiment.program` is used as a document-owner/binding key; do
-not replace it with the anchor's module name. The publisher already matches
-exports by actual declaration, independently of that key.
+The existing `Experiment.program` remains a document-owner/binding key. The
+public-pair migration adds `producerModule` from Lean's actual declaration
+ownership, which selects the generated module bundle independently of that key.
 
 Typed HTML needs additional care: today's `leanRunHtml` wrapper is compiled in
 the document module. Selecting source from another module does not transfer that
 wrapper's ownership there. The first anchored example should use an already
 exported scalar function. Then qualify HTML with an explicitly owned compiled
-adapter and matching resource recipe, while keeping existing inline HTML working.
+adapter and registered producer bundle, while keeping existing inline HTML working.
 
 ## Adapter findings
 
@@ -162,8 +162,7 @@ their own supported static output; this proposal does not add TeX backends to th
    Qualify native fragments, asset-plan composition, and visibility-based Stop.
 
 Acceptance should cover missing/duplicate/unclosed anchors, stale block bodies,
-explicit entry resolution and unsupported interfaces, missing and ambiguous
-recipe exports, repeated placements of one callable, root and nested hosting,
+explicit entry resolution and unsupported interfaces, missing producer bundles, conflicting logical IDs, and missing root declarations, repeated placements of one callable, root and nested hosting,
 independent workers, actual Stop, and static source without JavaScript. Specify
 and test how an explicitly chosen entry relates to the displayed region; an
 anchor's name or token spelling is insufficient evidence of that relationship.

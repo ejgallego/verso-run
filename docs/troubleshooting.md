@@ -66,18 +66,22 @@ A failed rebuild must exit unsuccessfully and leave the previous accepted
 publication intact. Its retained output represents the earlier successful build,
 not the rejected replacement. CI deploys only after all checks pass.
 
-## The generator cannot find an export
+## A program bundle or callable is missing
 
-Check that the declaration is in the resource recipe and that the generator
-registers its embedded bundle with `VersoLeanRun.publish`. For typed HTML, the
-recipe selects `<entry>.leanRunHtml`; the block still selects the original entry.
+Register the producer's owner library/module pair in `virPrograms`, and supply
+its embedded bundle to `VersoLeanRun.publish`. Publication reports the declaration,
+producer module, and document position when no matching bundle is available.
+Identical bundles deduplicate; distinct bundles with the same module logical ID
+produce `LOGICAL_ID_CONFLICT` before writing execution resources.
 
-Register each declaration in one bundle/role. A mismatched `interfaceId` error
-shows the expected and found values. Use `verso-string-string-v1` for text and
-typed HTML, or `verso-nat-nat-v1` for natural numbers. The
-[starter](../examples/manual-starter/README.md) shows complete wiring.
+Each root interface exposes its own marked declarations, including generated
+`<entry>.leanRunHtml` adapters. Imported functions need their producer's bundle
+when called directly. At Run, `createProgram` checks the selected full declaration
+and independent signature before invoking Lean. A missing root declaration or
+signature mismatch belongs to program validation, not a native recipe check.
+The [starter](../examples/manual-starter/README.md) shows complete wiring.
 
-Rejected registration does not produce a new successful `publication.json`.
+Rejected native registration does not produce a new successful `publication.json`.
 When using an existing output directory, the previous accepted plan is preserved.
 
 ## The reader sees a failure
@@ -92,7 +96,6 @@ a next step, and the original diagnostic details. HTML previews are cleared on
 failure. Choose Run to retry; failures are never replayed automatically. If the
 problem persists, contact the document author with the details shown.
 
-On GitHub Pages, the current frozen loader rejects the server’s
-`application/javascript` MIME type. Use the local Python server while the public
-matching runtime update is pending. This is a hosting/runtime issue, independent
-of the example’s Lean type; see [hosting](hosting.md).
+The selected public runtime accepts GitHub Pages' JavaScript MIME spelling while
+retaining payload integrity checks. Hosted deployment qualification is recorded
+separately from local acceptance; see [hosting](hosting.md).

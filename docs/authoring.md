@@ -58,9 +58,10 @@ calls and failures clear the previous preview. Runtime errors remain plain text,
 result-size limit still applies. The frame has a fixed height with scrolling for larger
 documents.
 
-For a typed HTML entry, the block generates a public `String → String` wrapper named
-`<entry>.leanRunHtml`, calling `Verso.Output.Html.asString`. Select this wrapper in the
-VIR recipe, while the block's `entry` stays the original function:
+For a typed HTML entry, the block generates and marks a public `String → String`
+wrapper named `<entry>.leanRunHtml`, calling `Verso.Output.Html.asString`. The
+generated root interface exposes that full declaration; the block's `entry`
+stays the original function:
 
 ````lean
 ```leanRun (entry := Demo.card) (input := "Ada")
@@ -70,11 +71,6 @@ public def Demo.card (name : String) : Verso.Output.Html :=
 ```
 ````
 
-```json
-{ "role": "card", "declaration": "Demo.card.leanRunHtml",
-  "interfaceId": "verso-string-string-v1" }
-```
-
 The generated wrapper receives the usual `vir_export` validation, including its
 compiled dependency closure. Repeated placements reuse it; conflicting declarations
 at that name produce an author diagnostic. Neither VIR's ABI nor the renderer changes.
@@ -83,8 +79,8 @@ at that name produce an author diagnostic. Neither VIR's ABI nor the renderer ch
 
 The current checkout also provides `leanRunAnchor`. It displays a standard Verso
 source anchor and runs an explicitly selected function without redeclaring it in
-the document. The independently pinned starter currently demonstrates the older
-inline API; using anchors requires an extension revision containing this feature.
+the document. The independently pinned starter demonstrates the inline API. The same extension
+also provides checked anchors.
 
 In a producer module such as `Examples.Arithmetic`, mark the source region:
 
@@ -115,13 +111,13 @@ project and an imported scalar producer; separate-project execution and automati
 typed HTML adapter generation are not qualified here. A producer-owned exported
 `String → String` HTML serialization wrapper can use `(output := "html")`.
 
-Prepare a resource recipe owned by the producer module, naming the actual entry
-and corresponding scalar interface ID, then supply its embedded bundle to
-`VersoLeanRun.publish`. A chapter recipe cannot export an imported producer's
-root. The anchor name does not replace the entry or recipe declaration. Keep the
-producer separate from the chapter that loads its highlighting, and from the
-resource carrier. The [demo chapter](../gates/LeanRunGate/Chapter.lean)
-shows this arrangement with the [helper](../gates/LeanRunGate/Helper.lean).
+Register the producer module in `virPrograms` and supply its embedded bundle to
+`VersoLeanRun.publish`. The generated root interface includes its marked entries;
+a chapter bundle does not turn imported dependencies into call entrypoints. The
+anchor name does not replace the full entry declaration. Keep the producer
+separate from the chapter that loads its highlighting and from its resource
+carrier. The [demo chapter](../gates/LeanRunGate/Chapter.lean) shows the arrangement
+with the [helper](../gates/LeanRunGate/Helper.lean).
 
 `+collapsed`, input, and output options work as for inline forms. Standard
 external-code options such as `-showProofStates` and `-defSite` remain available.

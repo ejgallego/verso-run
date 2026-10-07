@@ -25,31 +25,16 @@ def preparePublication (rendered : Array Experiment) (programs : Array Bundle)
   let mut bindings : Array (String × (String × Lean.Json)) := #[]
   for experiment in rendered do
     let provenance := s!"{experiment.program}:{experiment.sourceLine}:{experiment.sourceColumn}"
-    -- Repeated references to the same bundle/role are one candidate. Distinct
-    -- recipes or roles selecting the same declaration require an explicit choice.
-    let mut candidates : Array (Nat × ProgramExport) := #[]
-    for i in [:programs.size] do
-      for entry in programs[i]!.descriptor.exports do
-        if entry.declaration == experiment.declaration && !candidates.any (fun (j, previous) =>
-            programs[j]!.contentId == programs[i]!.contentId && previous.role == entry.role) then
-          candidates := candidates.push (i, entry)
-    let (i, entry) ← match candidates with
-      | #[] => throw s!"{provenance}: no published recipe export for {experiment.declaration}. Add the declaration to your resource recipe and register its bundle with VersoLeanRun.publish."
-      | #[candidate] => pure candidate
-      | _ => throw s!"{provenance}: ambiguous published recipe export for {experiment.declaration}; publish one bundle and role for this declaration"
-    let expected ← match experiment.shape with
-      | "string" => pure "verso-string-string-v1"
-      | "nat" => pure "verso-nat-nat-v1"
-      | other => throw s!"{provenance}: unsupported Lean Run shape {other}"
-    unless entry.interfaceId == expected do
-      throw s!"{provenance}: resource recipe contract for {experiment.declaration} must be {expected}; found {entry.interfaceId}. Update this declaration's interfaceId in the resource recipe."
+    let producer := if experiment.producerModule.isEmpty then experiment.program else experiment.producerModule
+    -- forSite has already rejected distinct bundles with one logicalId.
+    -- Preserve the original index-to-manifest mapping for identical repetitions.
+    let some i := programs.findIdx? (fun bundle => bundle.descriptor.logicalId == producer)
+      | throw s!"{provenance}: no published program bundle for {experiment.declaration} (producer module {producer}). Register its owner/module with virPrograms and supply its bundle to VersoLeanRun.publish."
     let signature ← (Lean.Json.parse experiment.signature).mapError fun error =>
       s!"{provenance}: invalid compiled VIR signature: {error}"
     let binding := Lean.Json.mkObj [
-      ("role", .str entry.role), ("manifest", .str site.programManifests[i]!),
-      ("expectedExport", Lean.Json.mkObj [
-        ("declaration", .str entry.declaration), ("interfaceId", .str entry.interfaceId),
-        ("signature", signature)])]
+      ("manifest", .str site.programManifests[i]!),
+      ("expectedExport", signature)]
     bindings := bindings.push (experiment.program, (experiment.declaration, binding))
   let owners := rendered.foldl (init := #[]) fun names experiment =>
     if names.contains experiment.program then names else names.push experiment.program

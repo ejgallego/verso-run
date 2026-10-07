@@ -27,7 +27,7 @@ meta instance : FromArgs Config DocElabM where
     .flag `collapsed false <*> .named `output .string true
 
 /-- Adapt the document's typed HTML function at the existing scalar VIR boundary.
-The stable suffix is also the declaration selected in the program recipe. -/
+The stable suffix is the full declaration selected in the generated root interface. -/
 private meta def htmlAdapter (entry : Ident) (name : Name) : DocElabM Name := withRef entry do
   if isNoncomputable (← getEnv) name then
     throwErrorAt entry "Lean Run HTML entry '{name}' is non-executable"
@@ -121,6 +121,9 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
     ("effect", Vir.GeneratePackage.jsonString callSignature.effect.label)]
   let experiment : Experiment := {
     program := env.mainModule.toString, declaration := name.toString, shape, signature,
+    producerModule := match env.getModuleIdxFor? name with
+      | some idx => env.header.moduleNames[idx.toNat]!.toString
+      | none => env.mainModule.toString,
     initialInput := config.input.getD (if shape == "nat" then "0" else ""),
     collapsed := config.collapsed,
     output,
@@ -135,6 +138,7 @@ meta def quoteExperiment (experiment : Experiment) : DocElabM Term := do
     $(quote experiment.collapsed)
     $(quote experiment.output)
     $(quote experiment.signature)
-    $(quote experiment.sourceLine) $(quote experiment.sourceColumn))
+    $(quote experiment.sourceLine) $(quote experiment.sourceColumn)
+    $(quote experiment.producerModule))
 
 end VersoLeanRun

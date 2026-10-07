@@ -28,7 +28,7 @@ onmessage = async ({ data }) => {
         runtimeManifestUrl: new URL(data.publication.runtimeManifest),
         programManifestUrl: new URL(data.publication.programManifest),
         signal: creating.signal,
-        expectedExports: { [data.publication.role]: data.publication.expectedExport },
+        expectedExports: { [data.description.declaration]: data.publication.expectedExport },
       });
       creating = null;
     }
@@ -36,7 +36,7 @@ onmessage = async ({ data }) => {
       throw new Error("Worker experiment identity changed");
     }
     postMessage({ requestId, state: "running" });
-    const result = program.call(data.publication.role, data.input);
+    const result = program.call(description.declaration, data.input);
     postMessage({ requestId, state: "success", result: formatResult(description.shape, result) });
   } catch (error) {
     creating = null;

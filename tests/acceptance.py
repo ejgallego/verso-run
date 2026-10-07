@@ -44,11 +44,16 @@ assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.j
 published = plan['programs']['LeanRunGate.Chapter']
 for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('diagram.leanRunHtml', 'String'), ('double', 'Nat'), ('Helper.twice', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
-    assert contract['declaration'] == 'LeanRunGate.'+declaration
-    assert contract['signature']['effect'] == 'pure'
-    assert len(contract['signature']['args']) == 1
-    assert contract['signature']['args'][0]['type'] == type_name
-    assert contract['signature']['result']['type'] == type_name
+    assert set(contract) == {'args', 'result', 'effect'}
+    assert contract['effect'] == 'pure'
+    assert len(contract['args']) == 1
+    assert contract['args'][0]['type'] == type_name
+    assert contract['result']['type'] == type_name
+chapter_manifest = json.loads((site/'html-multi'/published['LeanRunGate.greet']['manifest']).read_text())
+helper_manifest = json.loads((site/'html-multi'/published['LeanRunGate.Helper.twice']['manifest']).read_text())
+assert chapter_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
+assert helper_manifest['descriptor']['logicalId'] == 'LeanRunGate.Helper'
+assert chapter_manifest['descriptor']['schemaVersion'] == helper_manifest['descriptor']['schemaVersion'] == 2
 record('compiler signatures survive both publication layouts and native-only generation')
 duplicates = OUTPUT/'duplicate-registration'
 command(['lake', 'exe', 'lean-run-publication-check', 'duplicate', '--output', str(duplicates)],
@@ -62,8 +67,8 @@ assert original_files == duplicate_files
 record('repeated bundle registration deduplicates resources and keeps declaration bindings')
 missing = command(['lake', 'exe', 'lean-run-publication-check', 'missing', '--output',
     str(OUTPUT/'missing-registration')], 'missing-registration', expected=1)
-assert 'LeanRunGate.Chapter:' in missing and 'no published recipe export for LeanRunGate.greet' in missing
-assert 'resource recipe' in missing and 'VersoLeanRun.publish' in missing
+assert 'LeanRunGate.Chapter:' in missing and 'no published program bundle for LeanRunGate.greet' in missing
+assert 'virPrograms' in missing and 'VersoLeanRun.publish' in missing
 assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').exists()
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
@@ -134,6 +139,15 @@ with sync_playwright() as p:
     assert calculator.locator('details').get_attribute('open') is None
     assert not workers, 'Runtime must be lazy'
     record('no runtime on page load')
+    assert page.evaluate('''async () => {
+        const {formatResult, MAX_OUTPUT} = await import(new URL('lean-run/contract.js', document.baseURI));
+        if (formatResult('nat', 0n) !== '0' || formatResult('nat', 9007199254740993n) !== '9007199254740993') return false;
+        for (const value of [-1n, 1, '1', 1.5, BigInt('9'.repeat(MAX_OUTPUT + 1))]) {
+            try { formatResult('nat', value); return false; } catch {}
+        }
+        return true;
+    }''')
+    record('Nat BigInt results retain exact display and reject negative, lossy, and oversized values')
     anchored = form_for('LeanRunGate.Helper.twice')
     assert anchored.locator('input').input_value() == '21'
     assert 'public def LeanRunGate.Helper.twice' in anchored.locator('.lean-run-source').inner_text()
@@ -251,8 +265,8 @@ with sync_playwright() as p:
     # Change only the independently published expectation, keeping the real program
     # bytes and resource identity intact. VIR must reject before invoking Lean.
     for field, value in [
-        ('args', published['LeanRunGate.double']['expectedExport']['signature']['args']),
-        ('result', published['LeanRunGate.double']['expectedExport']['signature']['result']),
+        ('args', published['LeanRunGate.double']['expectedExport']['args']),
+        ('result', published['LeanRunGate.double']['expectedExport']['result']),
         ('args', []),
         ('effect', 'io'),
         (None, None),
@@ -262,7 +276,7 @@ with sync_playwright() as p:
         if field is None:
             del binding['expectedExport']
         else:
-            binding['expectedExport']['signature'][field] = value
+            binding['expectedExport'][field] = value
         page.route('**/lean-run/publication.json', lambda route: route.fulfill(
             content_type='application/json', body=json.dumps(altered)))
         page.goto(base+'single/')
@@ -288,6 +302,25 @@ with sync_playwright() as p:
             name = 'arity' if value == [] else field
         record('reject '+name+' before invocation')
         page.unroute('**/lean-run/publication.json')
+    altered = copy.deepcopy(plan)
+    altered['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest'] = published['LeanRunGate.Helper.twice']['manifest']
+    page.route('**/lean-run/publication.json', lambda route: route.fulfill(
+        content_type='application/json', body=json.dumps(altered)))
+    page.goto(base+'single/')
+    page.wait_for_selector('.lean-run[data-enhanced]')
+    greeting = form_for('LeanRunGate.greet')
+    greeting.evaluate('''e => {
+        e.observedStates = [];
+        new MutationObserver(() => e.observedStates.push(e.dataset.state))
+            .observe(e, {attributes: true, attributeFilter: ['data-state']});
+    }''')
+    greeting.locator('[type=submit]').click()
+    page.wait_for_function('e => e.dataset.state === "failed"', arg=greeting.element_handle(), timeout=20000)
+    assert 'running' not in greeting.evaluate('e => e.observedStates')
+    assert 'missing program export LeanRunGate.greet' in greeting.locator('.lean-run-output').text_content()
+    page.unroute('**/lean-run/publication.json')
+    record('wrong root manifest rejects the requested full declaration before invocation')
+
     page.goto(base+'single/')
     page.wait_for_selector('.lean-run[data-enhanced]')
     greeting = form_for('LeanRunGate.greet')
@@ -424,10 +457,9 @@ with sync_playwright() as p:
         chapter=ROOT/'gates/LeanRunGate/Chapter.lean'
         helper=ROOT/'gates/LeanRunGate/Helper.lean'
         lakefile=ROOT/'lakefile.lean'
-        recipe=ROOT/'vir-resources/LeanRunGateResources.json'
         resources=ROOT/'resources'
         moved=ROOT/'_registration-layout/resources'
-        originals={p:p.read_text() for p in [chapter, helper, lakefile, recipe]}
+        originals={p:p.read_text() for p in [chapter, helper, lakefile]}
         identity=plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest']
         try:
             # A rejected replacement must not launch the generator or replace the
@@ -477,33 +509,31 @@ with sync_playwright() as p:
                 source.write_text(originals[source])
                 chapter.write_text(originals[chapter])
 
-            wrong=json.loads(originals[recipe])
-            wrong['exports'][0]['interfaceId']='verso-nat-nat-v1'
-            recipe.write_text(json.dumps(wrong,indent=2)+'\n')
-            command(['lake','build'],'wrong-recipe-build')
-            # Existing publication remains intact; a new destination gets no plan.
-            for destination in [site, OUTPUT/'wrong-contract']:
+            # Redirect the stock owner registration to a real but different module.
+            # The carrier still builds; publication must reject the missing Chapter bundle.
+            wrong = originals[lakefile].replace(
+                '(`LeanRunGateResources, `LeanRunGate.Chapter)',
+                '(`LeanRunGateResources, `LeanRunGate.Helper)')
+            lakefile.write_text(wrong)
+            command(['lake','build'],'wrong-root-build')
+            for destination in [site, OUTPUT/'wrong-root']:
                 failed=command(['lake','exe','lean-run-demo','--output',str(destination)],
-                    'wrong-recipe-'+destination.name,expected=1)
+                    'wrong-root-'+destination.name,expected=1)
                 assert 'LeanRunGate.Chapter:' in failed and 'LeanRunGate.greet' in failed
-                assert 'must be verso-string-string-v1; found verso-nat-nat-v1' in failed
-                assert 'Update this declaration' in failed
+                assert 'no published program bundle' in failed and 'virPrograms' in failed
             assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
-            assert not (OUTPUT/'wrong-contract/html-multi/lean-run/publication.json').exists()
-            recipe.write_text(originals[recipe])
-            record('wrong recipe contract gives an actionable error without a successful publication')
+            assert not (OUTPUT/'wrong-root/html-multi/lean-run/publication.json').exists()
+            lakefile.write_text(originals[lakefile])
+            command(['lake','build'],'restore-root-build')
+            record('wrong stock producer registration rejects publication and preserves the accepted site')
 
-            # The same real compiled program may legitimately have multiple recipe
-            # roles. Automatic declaration binding must report that ambiguity.
-            ambiguous=json.loads(originals[recipe])
-            ambiguous['exports'].append(dict(ambiguous['exports'][0], role='greet-again'))
-            recipe.write_text(json.dumps(ambiguous,indent=2)+'\n')
-            command(['lake','build'],'ambiguous-recipe-build')
-            failed=command(['lake','exe','lean-run-demo','--output',str(OUTPUT/'ambiguous')],
-                'ambiguous-recipe-publication',expected=1)
-            assert 'LeanRunGate.Chapter:' in failed and 'ambiguous published recipe export for LeanRunGate.greet' in failed
-            record('ambiguous recipe roles report declaration and source provenance')
-            recipe.write_text(originals[recipe])
+            for destination in [site, OUTPUT/'conflicting-bundles']:
+                failed=command(['lake','exe','lean-run-publication-check','conflict','--output',str(destination)],
+                    'conflicting-bundles-'+destination.name,expected=1)
+                assert 'LOGICAL_ID_CONFLICT' in failed and 'LeanRunGate.Chapter' in failed
+            assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
+            assert not (OUTPUT/'conflicting-bundles/html-multi/lean-run/publication.json').exists()
+            record('forSite rejects distinct valid same-module bundles with LOGICAL_ID_CONFLICT before writing')
 
             # Change source and build roots without changing the library-key include.
             # No prepared pack is moved to the new root: its prerequisite repairs it.

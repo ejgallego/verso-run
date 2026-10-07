@@ -36,7 +36,7 @@ export class ExperimentHost {
       if (!binding) throw new Error(`No published program for ${this.description.declaration}`);
       if (!binding.expectedExport) throw new Error(`No published VIR signature for ${this.description.declaration}`);
       const url = path => new URL(path, new URL("../", import.meta.url)).href;
-      const publication = { role: binding.role, runtimeModule: url(plan.runtimeModule),
+      const publication = { runtimeModule: url(plan.runtimeModule),
         runtimeManifest: url(plan.runtimeManifest), programManifest: url(binding.manifest),
         expectedExport: binding.expectedExport };
       if (!this.worker) {

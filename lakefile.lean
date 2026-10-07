@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 require verso from git "https://github.com/ejgallego/verso" @ "3f6366aa8045b342b0b68c0373a8ebfce7d5611f"
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "1ed079ca2ab8306ae877ed4920f7d55d392365f8"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "bda79d5c4ab7d061c971fcd8917f536393ec03ee"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "a1a61c9678da010e958ed24cdfa6f635b85f172a"
 package verso_run
 lean_lib LeanRunGateProgram where
@@ -16,6 +16,10 @@ lean_lib LeanRunHelperResources where
   srcDir := "resources"
   roots := #[`LeanRunGate.HelperResources]
   needs := #[`@verso_run/LeanRunHelperResources:virResourcePack]
+
+target virPrograms (_pkg) : Array (Lean.Name × Lean.Name) := do
+  return Job.pure #[(`LeanRunGateResources, `LeanRunGate.Chapter),
+    (`LeanRunHelperResources, `LeanRunGate.Helper)]
 
 lean_exe «lean-run-gate» where
   root := `GateMain

@@ -1,0 +1,442 @@
+{
+  "checks": [
+    {
+      "test": "native publisher runs with only a project marker and embedded assets",
+      "result": "pass"
+    },
+    {
+      "test": "compiler signatures survive both publication layouts and native-only generation",
+      "result": "pass"
+    },
+    {
+      "test": "repeated bundle registration deduplicates resources and keeps declaration bindings",
+      "result": "pass"
+    },
+    {
+      "test": "missing program registration reports declaration and source provenance",
+      "result": "pass"
+    },
+    {
+      "test": "typed HTML adapter serializes escaped text and reuses repeated entry placements",
+      "result": "pass"
+    },
+    {
+      "test": "author MissingEntry",
+      "result": "pass"
+    },
+    {
+      "test": "author UnknownEntry",
+      "result": "pass"
+    },
+    {
+      "test": "author Unmarked",
+      "result": "pass"
+    },
+    {
+      "test": "author Unsupported",
+      "result": "pass"
+    },
+    {
+      "test": "author Discarded",
+      "result": "pass"
+    },
+    {
+      "test": "author ErrorExpected",
+      "result": "pass"
+    },
+    {
+      "test": "author Unavailable",
+      "result": "pass"
+    },
+    {
+      "test": "author Private",
+      "result": "pass"
+    },
+    {
+      "test": "author InvalidOutput",
+      "result": "pass"
+    },
+    {
+      "test": "author NatHtml",
+      "result": "pass"
+    },
+    {
+      "test": "author HtmlText",
+      "result": "pass"
+    },
+    {
+      "test": "author PrivateHtml",
+      "result": "pass"
+    },
+    {
+      "test": "author HtmlCollision",
+      "result": "pass"
+    },
+    {
+      "test": "author NonExecutableHtml",
+      "result": "pass"
+    },
+    {
+      "test": "author IlluminateHashing",
+      "result": "pass"
+    },
+    {
+      "test": "author IlluminateCompile",
+      "result": "pass"
+    },
+    {
+      "test": "author IlluminateAsin",
+      "result": "pass"
+    },
+    {
+      "test": "author Arity",
+      "result": "pass"
+    },
+    {
+      "test": "author NoArguments",
+      "result": "pass"
+    },
+    {
+      "test": "author MixedShape",
+      "result": "pass"
+    },
+    {
+      "test": "author Effectful",
+      "result": "pass"
+    },
+    {
+      "test": "author Implicit",
+      "result": "pass"
+    },
+    {
+      "test": "author Polymorphic",
+      "result": "pass"
+    },
+    {
+      "test": "author NonExecutable",
+      "result": "pass"
+    },
+    {
+      "test": "author Dependent",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorMissing",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorMismatch",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorEmpty",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorEntryOutside",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorUnknownEntry",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorUnimported",
+      "result": "pass"
+    },
+    {
+      "test": "author AnchorExternalProject",
+      "result": "pass"
+    },
+    {
+      "test": "unavailable executable dependency fails with declaration provenance",
+      "result": "pass"
+    },
+    {
+      "test": "no runtime on page load",
+      "result": "pass"
+    },
+    {
+      "test": "Nat BigInt results retain exact display and reject negative, lossy, and oversized values",
+      "result": "pass"
+    },
+    {
+      "test": "anchored imported scalar preserves native highlighting and exact worker execution",
+      "result": "pass"
+    },
+    {
+      "test": "native/browser String oracle: empty, edited, Unicode, HTML text",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator preset runs the displayed program with a complete trace",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator native/browser arithmetic, dup, swap and exact large integers",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator reports parse errors, stack underflow and unfinished programs",
+      "result": "pass"
+    },
+    {
+      "test": "stack calculator bounds instructions, stack depth and arithmetic growth",
+      "result": "pass"
+    },
+    {
+      "test": "HTML greeting matches native markup and renders inline styles with escaped reader input",
+      "result": "pass"
+    },
+    {
+      "test": "HTML preview is isolated and cleared on input changes before a fresh invocation",
+      "result": "pass"
+    },
+    {
+      "test": "Illuminate SVG drawing commands execute in Wasm with native markup, labels, links and changing geometry",
+      "result": "pass"
+    },
+    {
+      "test": "Illuminate validates bounded node counts and clears/recreates its preview after edits",
+      "result": "pass"
+    },
+    {
+      "test": "HTML resource failure stays plain text and explicit retry restores the preview",
+      "result": "pass"
+    },
+    {
+      "test": "reject args before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject result before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject arity before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject effect before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "reject missing published signature before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "wrong root manifest rejects the requested full declaration before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "native/browser exact Nat oracle: zero, edited, large integers",
+      "result": "pass"
+    },
+    {
+      "test": "independent repeated placements",
+      "result": "pass"
+    },
+    {
+      "test": "invalid natural inputs rejected before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "changed input clears prior result",
+      "result": "pass"
+    },
+    {
+      "test": "real long-running Wasm interrupted and fresh runtime rerun",
+      "result": "pass"
+    },
+    {
+      "test": "pending creation stop and stale completion suppression",
+      "result": "pass"
+    },
+    {
+      "test": "resource failure is useful and never automatically replayed",
+      "result": "pass"
+    },
+    {
+      "test": "cached-page lifecycle handler discards runtime and permits fresh invocation",
+      "result": "pass"
+    },
+    {
+      "test": "copied output executes from root and nested page/prefix",
+      "result": "pass"
+    },
+    {
+      "test": "Illuminate executes from copied root and nested HTTP deployments",
+      "result": "pass"
+    },
+    {
+      "test": "anchored definition links and execution work at root and nested Manual paths",
+      "result": "pass"
+    },
+    {
+      "test": "JavaScript-disabled highlighting and TeX source fallback",
+      "result": "pass"
+    },
+    {
+      "test": "unsupported replacement fails before publishing over the last accepted site",
+      "result": "pass"
+    },
+    {
+      "test": "duplicate-anchor rejects the rebuild and preserves the last accepted publication",
+      "result": "pass"
+    },
+    {
+      "test": "unclosed-anchor rejects the rebuild and preserves the last accepted publication",
+      "result": "pass"
+    },
+    {
+      "test": "stale-anchor-body rejects the rebuild and preserves the last accepted publication",
+      "result": "pass"
+    },
+    {
+      "test": "implementation invalidation greet",
+      "result": "pass",
+      "program": "lean-run/resources/82ce68787055fbae40d6734504e515d55983f09a6846857556f2ae3b43495062/bundle.json"
+    },
+    {
+      "test": "implementation invalidation double",
+      "result": "pass",
+      "program": "lean-run/resources/410bb37a99ee5a57e575f264c4aa6347273e0d9fe7044b9e886ab093929ca29b/bundle.json"
+    },
+    {
+      "test": "wrong stock producer registration rejects publication and preserves the accepted site",
+      "result": "pass"
+    },
+    {
+      "test": "forSite rejects distinct valid same-module bundles with LOGICAL_ID_CONFLICT before writing",
+      "result": "pass"
+    },
+    {
+      "test": "library-key carrier survives custom source/build roots with identical browser publication",
+      "result": "pass"
+    },
+    {
+      "test": "restored program identity matches original",
+      "result": "pass"
+    }
+  ],
+  "publication": {
+    "programs": {
+      "LeanRunGate.Chapter": {
+        "LeanRunGate.Helper.twice": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json"
+        },
+        "LeanRunGate.Stack.run": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.diagram.leanRunHtml": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.double": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.htmlGreeting.leanRunHtml": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.spin": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  }
+}

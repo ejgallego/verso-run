@@ -14,9 +14,9 @@ rather than treating successful loading as proof that an example works.
   closures, compiler signatures, and rejection before invocation.
 - Embedded native-only generation, root and nested copied sites, both HTML
   layouts, no-JavaScript source, and TeX output.
-- Source/helper invalidation, restored identity, missing/duplicate/ambiguous
-  registration, and relocated carrier source/build roots.
-- Rejected replacements and wrong recipe contracts after a successful build,
+- Source/helper invalidation, restored identity, missing/duplicate stock
+  registration and logical-ID conflicts, and relocated carrier source/build roots.
+- Rejected replacements and wrong producer registrations after a successful build,
   including preservation of the last accepted publication.
 - Imported scalar anchors, semantic entry membership, checked source bodies,
   native definition links, and duplicate/unclosed/stale-anchor rebuild rejection.
@@ -29,6 +29,7 @@ test isolation. CI also cold-builds the independently pinned
 
 | Record | Scope |
 | --- | --- |
+| [Public-pair results](../evidence/public-pair-results.json) | 79-check v3 resource, full-name, BigInt, native/browser/mutation campaign |
 | [Anchor results](../evidence/anchors-results.json) | 77-check shared-core and anchored Manual native/browser/mutation campaign |
 | [Diagnostics results](../evidence/diagnostics-results.json) | Earlier 65-check native/browser/mutation campaign |
 | [Validation log](../evidence/validation.txt) | Dated campaigns, exact identities, commands and limitations |
@@ -63,4 +64,4 @@ actual browser back-cache restoration remains unqualified.
 
 General Illuminate diagram compilation is also unqualified. Only the documented
 drawing-command/SVG path is supported by this demo. See [hosting](hosting.md) for
-the pending GitHub Pages MIME/runtime integration gate.
+the actual hosted runtime qualification.

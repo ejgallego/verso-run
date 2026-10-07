@@ -22,7 +22,7 @@ lake test -- --mutations --output _out/acceptance
 
 The suite builds the native oracle and generator, checks author diagnostics,
 compares real worker calls to native Lean, and exercises both HTML layouts and
-TeX. Mutation checks temporarily edit the chapter, helper, recipe, and Lake
+TeX. Mutation checks temporarily edit the chapter, helper, and Lake
 layout, then restore them in `finally`. Avoid concurrent builds or edits to
 those files. Check the working tree after an interrupted test run.
 
@@ -56,7 +56,7 @@ uv run --with playwright python tests/worker-gate.py
 | `support/` | Lean block elaboration, HTML rendering, and publication |
 | `web/` | Input validation, browser UI, worker ownership, and invocation |
 | `gates/` | The demo chapter, functions, and helper module |
-| `resources/`, `vir-resources/` | Embedded demo bundle and its recipe |
+| `resources/` | Embedded program carriers; `lakefile.lean` owns module registration |
 | `examples/manual-starter/` | Copyable independent author project |
 | `tests/` | Native/browser acceptance and negative author fixtures |
 | `docs/`, `evidence/` | Guides, qualification records, and screenshots |

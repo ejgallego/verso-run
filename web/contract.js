@@ -15,8 +15,7 @@ export function validateInput(shape, value) {
 }
 export function formatResult(shape, result) {
   if (shape === "string" && typeof result !== "string") throw new Error("Lean returned an invalid String");
-  if (shape === "nat" && !((typeof result === "string" && /^[0-9]+$/.test(result)) ||
-      (typeof result === "number" && Number.isSafeInteger(result) && result >= 0))) {
+  if (shape === "nat" && !(typeof result === "bigint" && result >= 0n)) {
     throw new Error("Lean returned an invalid exact Nat");
   }
   const text = String(result);

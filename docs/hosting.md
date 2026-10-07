@@ -19,14 +19,13 @@ The generated paths are relative, and worker execution at nested prefixes is
 covered by acceptance checks. No generated site files are committed to Git.
 
 
-## Current hosting limitation
+## Runtime MIME compatibility and acceptance
 
-The site is deployed, but Run currently fails on GitHub Pages: its server sends
-`application/javascript`, and the frozen VIR loader requires `text/javascript`.
-The local Python server works. A VIR fix and matching runtime have been qualified
-by their owner locally; downstream adoption awaits exact source publication and
-an explicitly selected public runtime release. Do not substitute unpublished
-packs or alter generated manifests. See [the roadmap](../ROADMAP.md).
+The old frozen loader rejected GitHub Pages' `application/javascript` response
+for assets declared `text/javascript`. The selected public runtime `e415…` accepts
+that equivalent JavaScript spelling while preserving file/manifest integrity and
+Wasm MIME checks. Local acceptance and actual hosted deployment are separate
+qualification steps; current evidence is in [validation](validation.md).
 
 ## Share a complete copy
 
@@ -40,4 +39,5 @@ This produces `_out/verso-run-demo.zip`. Recipients can unpack it and run
 `python3 -m http.server 8795 --directory verso-run-demo`, then open `/Greeting/`.
 They need no Lean installation. Serve the whole site over HTTP, including all
 `lean-run/` resources. Root and nested copied deployments are covered by tests.
-Hosts must serve JavaScript as `text/javascript` for the current frozen runtime.
+Serve JavaScript as `text/javascript` or `application/javascript`, and Wasm as
+`application/wasm`, with the complete published inventory.

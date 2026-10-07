@@ -192,3 +192,38 @@ Normal demo generation refreshed both HTML layouts and TeX after restoration.
 The ZIP passed CRC and publication checks; the generated publication equals the
 accepted plan. Local HTTP demo verified at http://127.0.0.1:8795/Anchored-source/.
 Local documentation links and git diff --check passed.
+
+
+2026-10-07 — selected public pair consumer migration
+
+Preserved the shared-core/checked-anchor slice in consumer commit 332b3c9.
+Adopted public VIR bda79d5c4ab7d061c971fcd8917f536393ec03ee, retaining
+Lean 4.34.0, Verso 3f6366aa, and Illuminate a1a61c96. No producer source edits,
+native precompilation, alternative d901 embedding API, or new genre adapter.
+
+Runtime e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd
+Public pack SHA256 3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7
+Size 1,120,065 bytes; acquired by ordinary Lake from the public release lock,
+without copied producer pack bytes. Resource descriptor 2 / compatibility 3.
+
+Stock virPrograms registration selects Chapter and Helper by owning library/module
+Names. Removed handwritten recipes, callable role aliases and interface IDs.
+Experiment.producerModule comes from Lean declaration ownership; document
+placement identity remains separate. The worker expects and calls the full Lean
+declaration and passes the independently elaborated {args,result,effect} object.
+Nonnegative Nat BigInt results are formatted as bounded exact decimal text.
+
+Clean batch lake build passed (728 jobs).
+lake test -- --mutations --output _out/public-pair-acceptance: 79 checks passed.
+Evidence: evidence/public-pair-results.json; full logs: _out/public-pair-acceptance/.
+Validated actual forSite LOGICAL_ID_CONFLICT on distinct individually valid
+same-root bundles before output writes, wrong stock producer registration,
+missing root declaration and independent signature mismatch before invocation.
+Preserved diagnostics, anchors, native-only generation, exact numeric/Unicode
+oracles, HTML/SVG isolation, worker Stop/stale/retry, carrier relocation, rejected
+rebuild preservation, and restored identities. Cold starter and actual Pages
+acceptance are separate subsequent gates; no final-head producer CI claim.
+Standalone managed-worker gate passed on the selected pair: full-name calls,
+raw Nat typeof bigint, exact decimal JSON transport, dispose, and fresh creation.
+Evidence: evidence/public-pair-worker.json. Normal multi/single HTML and TeX
+regenerated into a fresh inventory and switched into the local demo output.

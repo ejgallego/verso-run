@@ -3,17 +3,20 @@
 The project has a copyable Manual starter and a GitHub Pages deployment workflow.
 Keep exact dependencies and the current execution boundary.
 
-## Public runtime integration gate
+## Selected public runtime integration
 
-The hosted demo currently fails during Run because the frozen loader rejects
-GitHub Pages' JavaScript MIME type. VIR's owner has qualified a MIME fix and a
-matching successor pack locally. Adoption waits for verified source publication,
-explicit public runtime release selection, and a complete source/runtime handoff.
-Do not repin or substitute local producer packs before that gate is open.
+The selected pair is public VIR PR #217 commit `bda79d5c` and runtime `e415…`
+(pack SHA256 `3910c29e…`). Source acquisition and exact public bytes are verified.
+The consumer migration uses typed owner/module registration, full Lean declaration
+names, independent `{args, result, effect}` expectations, and exact BigInt Nat
+results. Publication and runtime admission retain their separate phases.
 
-The successor also changes registration, export lookup, and numeric transport.
-Its later integration needs independent author-starter acquisition and hosted
-worker qualification, alongside the existing native/browser acceptance checks.
+Complete native/browser/mutation acceptance, publish the migrated extension,
+repin the independent Git starter, and qualify its cold acquisition and actual
+Pages execution against the native oracle. Producer availability alone does not
+establish hosted acceptance. The VIR Module owner retains final-head CI and any
+upstream merge decision; neither native precompilation nor alternative embedding
+APIs are selected by this migration.
 
 ## Unsupported-program diagnostics
 
@@ -28,8 +31,8 @@ failures. Readers currently edit scalar inputs, not Lean source; source editing
 belongs to the future editor work. Retain plain-text runtime errors, preview
 cleanup, explicit retry, and real Stop.
 
-Further dependency-closure diagnostics and new runtime/schema behavior should
-be reviewed with the VIR owner during successor integration. See
+Further dependency-closure diagnostics and future runtime/schema behavior should
+be reviewed with the VIR owner. See
 [troubleshooting](docs/troubleshooting.md) and [validation](docs/validation.md).
 
 ## Verso anchors and multiple genres

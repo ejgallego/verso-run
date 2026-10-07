@@ -22,6 +22,8 @@ structure Experiment where
   signature : String
   sourceLine : Nat
   sourceColumn : Nat
+  /-- Actual owning module of the callable, separate from its document placement. -/
+  producerModule : String := ""
   deriving ToJson, FromJson
 
 end VersoLeanRun

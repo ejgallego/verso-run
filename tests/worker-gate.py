@@ -12,15 +12,16 @@ onmessage = async ({data}) => {
     const {createProgram} = await import(data.module);
     program = await createProgram({runtimeManifestUrl: new URL(data.runtime), programManifestUrl: new URL(data.program),
       expectedExports: {
-        greet: {declaration: "LeanRunGate.greet", interfaceId: "verso-string-string-v1", signature: {args: [{type: "String", interfaceTag: 3}], result: {type: "String", interfaceTag: 3}, effect: "pure"}},
-        double: {declaration: "LeanRunGate.double", interfaceId: "verso-nat-nat-v1", signature: {args: [{type: "Nat", interfaceTag: 0}], result: {type: "Nat", interfaceTag: 0}, effect: "pure"}}
+        "LeanRunGate.greet": {args: [{type: "String", interfaceTag: 3}], result: {type: "String", interfaceTag: 3}, effect: "pure"},
+        "LeanRunGate.double": {args: [{type: "Nat", interfaceTag: 0}], result: {type: "Nat", interfaceTag: 0}, effect: "pure"}
       }});
-    const first = [program.call("greet", "Unicode 🌍"), program.call("double", "9007199254740993")];
+    const natural = program.call("LeanRunGate.double", "9007199254740993");
+    const first = [program.call("LeanRunGate.greet", "Unicode 🌍"), String(natural)];
     program.dispose();
     program = await createProgram({runtimeManifestUrl: new URL(data.runtime), programManifestUrl: new URL(data.program)});
-    const second = program.call("greet", "again");
+    const second = program.call("LeanRunGate.greet", "again");
     program.dispose(); program = null;
-    postMessage({ok: true, first, second, worker: typeof document === "undefined"});
+    postMessage({ok: true, first, second, natType: typeof natural, worker: typeof document === "undefined"});
   } catch (error) { program?.dispose(); postMessage({ok: false, error: String(error), cause: String(error.cause), stack: error.stack}); }
 };''')
 handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(site))
@@ -41,6 +42,7 @@ with sync_playwright() as p:
     (site/'worker-gate-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
     assert result.get('ok'), result
     assert result['worker']
+    assert result['natType'] == 'bigint'
     assert result['first'] == ['Hello, Unicode 🌍', '18014398509481986'], result
     assert result['second'] == 'Hello, again'
     browser.close()

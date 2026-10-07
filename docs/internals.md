@@ -16,14 +16,26 @@ Blog and Slides work; only Manual is currently supported.
 
 ## Resource ownership and site integration
 
-Follow VIR's public resource workflow, as demonstrated by the
-[lakefile](../lakefile.lean), [resource
-recipe](../vir-resources/LeanRunGateResources.json), and [carrier
-module](../resources/LeanRunGate/Resources.lean):
+Follow VIR's stock resource workflow, demonstrated by the
+[lakefile](../lakefile.lean) and [carrier](../resources/LeanRunGate/Resources.lean):
 
-1. Register the module chapter as a program library. Its marked declarations are the executable roots; the ordinary compiled-module producer acquires their dependency closure.
-2. Register a separate carrier library with a `:virResourcePack` prerequisite and a recipe naming the chapter module and selected roles/declarations. Use `verso-string-string-v1` or `verso-nat-nat-v1` as the corresponding recipe interface ID.
-3. Embed the prepared bundle by its owning library name. The chapter imports extension support, never its carrier:
+1. Register the chapter or helper as a program library. Its public marked
+   declarations supply root entrypoints; imports supply their compiled dependency
+   closure. A declaration in an imported module needs its own registered program
+   bundle when called directly.
+2. Register a disjoint resource carrier library with a `:virResourcePack`
+   prerequisite, and name the owner/module pair in the package's typed target:
+
+   ```lean
+   target virPrograms (_pkg) : Array (Lean.Name × Lean.Name) := do
+     return Job.pure #[(`MyResources, `MyChapter)]
+   ```
+
+   The demo also registers `LeanRunHelperResources` / `LeanRunGate.Helper` for
+   its anchored entry. There are no JSON recipes, callable role aliases, or
+   handwritten interface IDs. Keep program and carrier libraries disjoint.
+3. Embed the prepared bundle by its owning library name. The chapter imports
+   extension support, never its carrier:
 
    ```lean
    module
@@ -33,54 +45,48 @@ module](../resources/LeanRunGate/Resources.lean):
      include_vir_library MyResources
    ```
 
-   `MyResources` is the literal Lake library name from step 2. Custom source/build
-directories require no generated-path changes; the library's prerequisite prepares the
-pack before elaboration.
-
-4. In the native generator, import the chapter, carrier, and `VersoLeanRun.Publish`, then register the embedded bundles:
+   The literal Lake library key and prerequisite survive custom source/build
+   directories; no generated-path changes are needed.
+4. Import the chapter, carrier, and `VersoLeanRun.Publish` in the native generator:
 
    ```lean
    def main := manualMain (%doc MyChapter)
      (extraSteps := [VersoLeanRun.publish #[MySite.program]])
    ```
 
-   The publisher uses VIR's locked runtime by default. A resource set with several
-chapters uses the same call with several bundles. No runtime import or module-to-bundle
-mapping is needed. An application supplying its own compatible runtime can use the named
-`runtime` argument.
+   Pass every required producer bundle. The publisher uses VIR's locked runtime
+   by default; a compatible explicit runtime may use the named `runtime` argument.
 
-The resulting graph is extension support → chapter/helper → compiled program preparation →
-carrier → native generator. Resource preparation is a normal Lake dependency. Neither
-per-block packaging nor a second frontend pass is used. The publisher binds each form's
-actual declaration to an export role in the supplied bundles and checks the interface ID,
-with module/line/column provenance, before writing execution assets. Missing exports or
-multiple matching recipe roles produce errors; repeated references to an identical bundle
-are deduplicated. Keep each runnable declaration in one supplied recipe role. VIR's
-`ResourceSet.forSite` owns bundle validation, deduplication, complete file inventory,
-manifest envelopes, and loader paths. Verso writes that inventory through its normal
-output step and adds the form bindings and worker UI files.
+The graph remains support → chapter/helper → program preparation → carrier →
+native generator. No per-block packaging or second execution compiler is added.
+Verso's standard external-code path prepares cached highlighting separately.
 
-The native executable embeds UI support files as well as program/runtime bytes. It runs
-outside the checkout without reading producer files; the existing Verso generator still
-requires a `lean-toolchain` project marker in its working directory or a parent. VIR still
-requires the library registration and JSON recipe from steps 1–2; this integration adds no
-alternative recipe format or Lake DSL. The demo retains `compiler.postponeCompile false`
-pending discussion with the compiler maintainer.
+`Experiment.program` identifies the document placement group and diagnostic
+position. `producerModule`, resolved from Lean's declaration ownership after any
+HTML adaptation, identifies the executable producer. Local HTML adapters belong
+to the document module; imported anchored entries belong to their producer.
+The publisher matches this module to the generated bundle's `logicalId` and
+preserves the original index-to-manifest mapping. Identical bundles deduplicate.
+Distinct bundles with one logical ID fail `ResourceSet.forSite` validation with
+`LOGICAL_ID_CONFLICT`, before per-form binding or output writes.
 
-During document elaboration, VIR's `analyzeExportInterface` classifies the selected
-declaration. Its canonical `InterfaceType.toJson` encoder supplies the argument and result
-descriptors, including ABI tags; VIR also supplies the effect label. The compiled document
-retains this serialized signature. The native publisher combines it with the recipe's
-declaration and interface ID in `publication.json`, and the worker passes that
-`expectedExport` directly to VIR's existing `expectedExports` checker. The JavaScript
-adapter owns input and display policy; it no longer reconstructs ABI descriptors from the
-form's shape.
+Publication validates resources, module availability, and independent expectation
+construction. VIR's `createProgram` validates actual root declarations and their
+signatures before runtime instantiation. `forSite` does not check callable types;
+there is no embedded-interface parser or reopening of producer files here.
 
-The expectation comes from the trusted document build, independently of the program
-fetched at runtime. A missing published expectation fails before worker creation, and VIR
-rejects argument, result, arity, and effect disagreements before invocation. An interface
-ID alone does not establish the type or semantics; native/browser oracle checks supply the
-demonstrated semantic evidence.
+VIR's `analyzeExportInterface` supplies each independently elaborated signature,
+with canonical type descriptors and effect. The publisher places that exact
+`{args, result, effect}` object in `expectedExport`; the worker uses the full
+Lean declaration as both expectation key and call name. A missing expectation
+fails before worker creation. Missing declarations or argument/result/arity/effect
+mismatches fail in VIR's program-validation phase before invocation. Native/browser
+oracle comparisons establish the demonstrated semantic agreement.
+
+The native executable embeds UI files and complete program/runtime bytes and runs
+outside the checkout. Verso still requires a `lean-toolchain` marker in its working
+directory or a parent. Retain `compiler.postponeCompile false`; native precompilation
+and alternative embedding APIs remain deferred.
 
 ## Interaction and limits
 
@@ -92,8 +98,9 @@ results. Duplicate submissions are disabled while loading/running; page navigati
 disposes each owner. Resource and runtime errors are displayed as text, and failure never
 automatically replays the previous call.
 
-Natural inputs use exact decimal text throughout VIR's documented boundary; no conversion
-to JavaScript `Number` occurs. Reject negatives, whitespace, decimals, exponent notation,
+Natural inputs use validated decimal text. VIR returns nonnegative JavaScript
+`BigInt` values; the worker formats exact decimal display text before posting the
+result. No conversion to JavaScript `Number` occurs. Reject negatives, whitespace, decimals, exponent notation,
 and non-digits before invoking. Limits are 4,096 UTF-16 code units for a String input, 256
 digits for a Nat input, and 65,536 UTF-16 code units for displayed output. These are
 input/output bounds, not a Wasm heap budget. Stop provides actual interruption; execution
@@ -114,16 +121,18 @@ highlighted source without interactive controls.
 | --- | --- |
 | Lean | 4.34.0 (`293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`) |
 | Verso | `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` |
-| VIR | `1ed079ca2ab8306ae877ed4920f7d55d392365f8` (a PR #217 snapshot) |
+| VIR | `bda79d5c4ab7d061c971fcd8917f536393ec03ee` (a PR #217 snapshot) |
 | Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Runtime | `832ab095ad79df0f10f538bcf71272731bb74b90df44f965dac2f086c222897d` |
+| Runtime | `e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd` |
 
 The minimal Verso fork is based on release `cad4b633` and exposes the existing
 `toHighlightedLeanBlock` helper; it contains no demo code. The runtime uses VIR
-compatibility version 1. Lake acquires and verifies VIR's locked runtime, so
+compatibility version 3 (resource descriptor version 2). Lake acquires and verifies VIR's locked runtime, so
 authors do not need a separate SDK installation or Wasm build.
 
 
-These pins remain frozen while VIR prepares a public successor. Adoption includes
-new resource registration, export lookup, and numeric transport; it is a separate
-integration task. See [the roadmap](../ROADMAP.md).
+The selected public pair is VIR PR #217 commit `bda79d5c` and runtime `e415…`,
+pack SHA256 `3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7`.
+Lean, Verso, and Illuminate retain their previous exact pins. Producer CI status
+belongs to the VIR Module owner; consumer acceptance is recorded separately in
+[validation](validation.md).
