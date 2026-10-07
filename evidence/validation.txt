@@ -1,3 +1,38 @@
+Unsupported-program diagnostics and documentation validated 2026-10-07.
+
+Lean Run diagnostics preserve VIR classifier reasons and distinguish VIR interface
+rejection from the form's scalar/pure/arity limits. Entry/type/source and next-step
+coverage includes eight new fixtures: effects, arity, zero arguments, mixed scalar
+shape, polymorphism, implicit parameters, dependent results and noncomputable
+scalar entries. Unsupported interfaces are diagnosed before missing markers.
+Publisher errors explain missing registrations and expected/found recipe IDs.
+Worker failures retain the phase/cause chain with a declaration and reader remedy.
+
+All 65 native/browser/mutation checks pass at _out/diagnostics-acceptance.
+The new mutation cases reject unsupported source and wrong recipe contracts after
+a successful build; no rejected publication is emitted, and the last accepted
+plan remains intact. Existing real Stop, independent workers, exact Nat, HTML/SVG,
+copy/deployment, contract, no-JS/TeX, invalidation and restoration checks still pass.
+Publication equals the retained original demo plan exactly; dependency/runtime
+pins are unchanged. No v3 repin or supplied local producer pack is adopted.
+Normal demo generation and ZIP CRC/publication checks pass after restoration.
+
+Lean Beam probes/sync were used for development. The wrapper was stopped, then
+lake clean and lake build supplied actual batch validation (709 jobs). The final
+suite used the batch-built imports; no server checkpoint supplies final evidence.
+No fresh wider-browser or starter pin qualification is claimed in this slice.
+CI retains its independent cold published-dependency starter gate.
+
+README now leads with demo/starter/quickstart and a reviewed existing screenshot.
+Detailed authoring, hosting, internals, validation and history moved into docs/;
+CONTRIBUTING.md maps the repository and test workflow. Troubleshooting explains
+unsupported programs and the unresolved hosted MIME/pair gate. Local Markdown
+file links and git diff --check pass. No source paths or public imports renamed.
+
+Retained results: evidence/diagnostics-results.json.
+Logs: /tmp/verso-run-diagnostics-{build,test,demo}.log; individual command evidence in
+_out/diagnostics-acceptance. Earlier campaigns below remain historical.
+
 Author starter and Pages workflow validated 2026-10-07.
 
 Root lake build passes (709 jobs) and all 55 native/browser/mutation checks
