@@ -1,0 +1,293 @@
+{
+  "url": "https://ejgallego.github.io/verso-run/",
+  "checks": [
+    "hosted publication matches validated local program and runtime",
+    "Greeting/: edited input executes through the hosted worker and matches native Lean",
+    "Exact-natural-numbers/: edited input executes through the hosted worker and matches native Lean",
+    "HTML-greeting/: edited input executes through the hosted worker and matches native Lean",
+    "Illuminate-diagrams/: edited input executes through the hosted worker and matches native Lean",
+    "no uncaught browser errors"
+  ],
+  "publication": {
+    "programs": {
+      "LeanRunGate.Chapter": {
+        "LeanRunGate.Helper.twice": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json"
+        },
+        "LeanRunGate.Stack.run": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.diagram.leanRunHtml": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.double": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.htmlGreeting.leanRunHtml": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        },
+        "LeanRunGate.spin": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  },
+  "runtimeResponses": [
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "application/javascript; charset=utf-8",
+      "status": 200
+    },
+    {
+      "url": "https://ejgallego.github.io/verso-run/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    }
+  ]
+}

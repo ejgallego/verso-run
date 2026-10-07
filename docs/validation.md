@@ -23,12 +23,17 @@ rather than treating successful loading as proof that an example works.
 
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
-[author starter](../examples/manual-starter/README.md) and runs its 11 checks.
+[author starter](../examples/manual-starter/README.md) without Lake artifact-cache
+reuse and runs its 11 checks. The starter acquires public extension `177b6c1` and
+the selected runtime through its complete Git manifest, without local seeds.
 
 ## Evidence to consult
 
 | Record | Scope |
 | --- | --- |
+| [Public-pair starter](../evidence/public-pair-starter.json) | 11-check cold public Git acquisition/build and native/browser starter campaign |
+| [Public-pair Pages](../evidence/public-pair-pages.json) | Actual hosted/native agreement, publication equality, and runtime MIME responses |
+| [Public-pair worker](../evidence/public-pair-worker.json) | Full-name calls, raw BigInt type, dispose and fresh creation |
 | [Public-pair results](../evidence/public-pair-results.json) | 79-check v3 resource, full-name, BigInt, native/browser/mutation campaign |
 | [Anchor results](../evidence/anchors-results.json) | 77-check shared-core and anchored Manual native/browser/mutation campaign |
 | [Diagnostics results](../evidence/diagnostics-results.json) | Earlier 65-check native/browser/mutation campaign |

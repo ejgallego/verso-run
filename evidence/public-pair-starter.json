@@ -1,0 +1,90 @@
+{
+  "checks": [
+    {
+      "test": "cold no-cache starter acquires the exact public extension and runtime with Git dependencies and no seeds/symlinks",
+      "result": "pass"
+    },
+    {
+      "test": "text and typed HTML exports retain compiler contracts in both layouts",
+      "result": "pass"
+    },
+    {
+      "test": "TeX retains both examples' source",
+      "result": "pass"
+    },
+    {
+      "test": "root: edited Unicode greeting runs in the Wasm worker",
+      "result": "pass"
+    },
+    {
+      "test": "root: typed HTML escapes edited input in an isolated preview",
+      "result": "pass"
+    },
+    {
+      "test": "root: input edits clear the preview and allow a fresh call",
+      "result": "pass"
+    },
+    {
+      "test": "verso-run/starter: edited Unicode greeting runs in the Wasm worker",
+      "result": "pass"
+    },
+    {
+      "test": "verso-run/starter: typed HTML escapes edited input in an isolated preview",
+      "result": "pass"
+    },
+    {
+      "test": "verso-run/starter: input edits clear the preview and allow a fresh call",
+      "result": "pass"
+    },
+    {
+      "test": "browser reports no uncaught page errors",
+      "result": "pass"
+    },
+    {
+      "test": "no-JavaScript output retains source and disabled Run controls",
+      "result": "pass"
+    }
+  ],
+  "publication": {
+    "programs": {
+      "Starter.Chapter": {
+        "Starter.card.leanRunHtml": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/66327c8bd87298d3e861fcb8b900b631d1ecf4e60f2bb61754a0638ad71c776b/bundle.json"
+        },
+        "Starter.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/66327c8bd87298d3e861fcb8b900b631d1ecf4e60f2bb61754a0638ad71c776b/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  },
+  "project": "/tmp/verso-run-starter-6ajwickv",
+  "dependencyRevision": "177b6c1b62783cbe279437c20b86063def28c06b"
+}

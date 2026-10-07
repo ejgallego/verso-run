@@ -11,12 +11,16 @@ The consumer migration uses typed owner/module registration, full Lean declarati
 names, independent `{args, result, effect}` expectations, and exact BigInt Nat
 results. Publication and runtime admission retain their separate phases.
 
-Complete native/browser/mutation acceptance, publish the migrated extension,
-repin the independent Git starter, and qualify its cold acquisition and actual
-Pages execution against the native oracle. Producer availability alone does not
-establish hosted acceptance. The VIR Module owner retains final-head CI and any
-upstream merge decision; neither native precompilation nor alternative embedding
-APIs are selected by this migration.
+Consumer acceptance passed: 79 native/browser/mutation checks, 11 cold Git-only
+starter checks without Lake artifact-cache reuse, and actual Pages/native
+agreement for Greeting, exact Nat, escaped HTML, and Illuminate SVG. Runtime
+JavaScript was served as `application/javascript` on Pages. Evidence is linked
+from [validation](docs/validation.md).
+
+The VIR Module owner retains final-head producer CI and any upstream merge
+decision; neither native precompilation nor alternative embedding APIs are
+selected by this migration. Future producer updates still require matched public
+source/runtime qualification.
 
 ## Unsupported-program diagnostics
 

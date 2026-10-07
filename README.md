@@ -13,10 +13,6 @@ Readers need no Lean installation. **Stop** interrupts a running example.
 [Start your own manual](examples/manual-starter/README.md) ·
 [Authoring guide](docs/authoring.md)
 
-> **Demo update:** the public MIME-compatible runtime is selected and local
-> acceptance is in progress. Hosted qualification follows deployment.
-> Use the local demo during this update. [Hosting details](docs/hosting.md).
-
 ![Lean computes a chain of four nodes and renders it with Illuminate](evidence/illuminate-desktop-4.png)
 
 ## Try it locally

@@ -227,3 +227,20 @@ Standalone managed-worker gate passed on the selected pair: full-name calls,
 raw Nat typeof bigint, exact decimal JSON transport, dispose, and fresh creation.
 Evidence: evidence/public-pair-worker.json. Normal multi/single HTML and TeX
 regenerated into a fresh inventory and switched into the local demo output.
+Cold independent author starter passed all 11 checks with public extension
+177b6c1b62783cbe279437c20b86063def28c06b and a complete transitive Git manifest.
+A fresh copied project began without .lake; lake --no-cache build passed (720 jobs).
+Checked actual extension Git HEAD, exact VIR bda revision, acquired runtime pack
+SHA3910c29e, no package symlinks/seeds, root/nested Unicode and escaped HTML,
+preview reset, no-JavaScript source and TeX. Evidence: public-pair-starter.json;
+full logs: _out/public-pair-starter/.
+Actual GitHub Pages acceptance passed on deployed consumer 177b6c1, CI run
+37691093863 SUCCESS including acceptance and Pages deployment. Hosted publication
+equals the regenerated local plan. Greeting/Unicode, exact Nat, escaped typed
+HTML, and six-node Illuminate SVG match native Lean with no uncaught page errors.
+Runtime JS MIME observed application/javascript; Wasm application/wasm.
+Evidence: evidence/public-pair-pages.json; existing handoff smoke retained as
+tests/pages-smoke.py with portable checkout root and response logging.
+
+Final starter/documentation follow-up changes no demo program or worker code.
+No claim about Module-owned exact bda producer CI or VIR merge is made.

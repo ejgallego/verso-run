@@ -35,21 +35,30 @@ def command(args, log):
         raise RuntimeError(f"{args} failed: see {output / f'{log}.log'}")
 
 
-command(["lake", "build"], "build")
+assert not (project / ".lake").exists()
+command(["lake", "--no-cache", "build"], "build")
 manifest = json.loads((project / "lake-manifest.json").read_text())
 assert all(package["type"] == "git" for package in manifest["packages"])
 extension = next(package for package in manifest["packages"] if package["name"] == "verso_run")
 assert extension["url"] == "https://github.com/ejgallego/verso-run"
-assert extension["rev"] == "55ebf56b49616462a81195efe1cbc1d1480dc088"
+expected = json.loads((ROOT / "examples/manual-starter/lake-manifest.json").read_text())
+expected_revision = next(p["rev"] for p in expected["packages"] if p["name"] == "verso_run")
+assert extension["rev"] == expected_revision
+assert subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project/".lake/packages/verso_run", text=True).strip() == expected_revision
+vir = next(p for p in manifest["packages"] if p["name"] == "lean_vir")
+assert vir["rev"] == "bda79d5c4ab7d061c971fcd8917f536393ec03ee"
+import hashlib
+runtime_pack = project / ".lake/packages/lean_vir/.vir-generated/VirResourceRuntime.virres"
+assert hashlib.sha256(runtime_pack.read_bytes()).hexdigest() == "3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7"
 assert not any(path.is_symlink() for path in (project / ".lake/packages").iterdir())
-record("independent starter builds with Git dependencies and no package symlinks")
+record("cold no-cache starter acquires the exact public extension and runtime with Git dependencies and no seeds/symlinks")
 command(["lake", "exe", "starter-manual", "--with-html-single", "--with-tex", "--depth", "2"],
         "generate")
 site = project / "_out"
 plan = json.loads((site / "html-multi/lean-run/publication.json").read_text())
 bindings = plan["programs"]["Starter.Chapter"]
 assert set(bindings) == {"Starter.greet", "Starter.card.leanRunHtml"}
-assert all(binding["expectedExport"]["signature"]["effect"] == "pure"
+assert all(binding["expectedExport"]["effect"] == "pure"
            for binding in bindings.values())
 assert json.loads((site / "html-single/lean-run/publication.json").read_text()) == plan
 record("text and typed HTML exports retain compiler contracts in both layouts")

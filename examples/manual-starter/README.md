@@ -35,20 +35,19 @@ compatible when updating the dependency.
 - `chapters/Starter/Chapter.lean`: the document and runnable declarations.
   Scalar entries carry `@[vir_export]`. Typed HTML entries get an automatic
   scalar adapter named `<entry>.leanRunHtml`.
-- `vir-resources/StarterResources.json`: the program module and its exported
-  declarations. A typed HTML entry selects the generated adapter here.
 - `resources/Starter/Resources.lean`: embeds the prepared program by its Lake
   library name, `StarterResources`.
 - `Main.lean`: registers the embedded bundle with `VersoLeanRun.publish`.
 - `lakefile.lean`: keeps chapter compilation ahead of resource preparation,
-  embedding, and the native generator. Keep the resource library name and
-  recipe filename in agreement. If renaming the package, also update its
+  embedding, and the native generator. Its typed `virPrograms` target selects
+  `StarterResources` / `Starter.Chapter`; the generated root interface exposes
+  public marked declarations and HTML adapters. If renaming the package, update its
   `@verso_run_starter/StarterResources:virResourcePack` prerequisite.
 - `lake-manifest.json`: locks the extension and its transitive Git dependencies
   to the revisions used to validate this starter.
 
-Add a new runnable function to the chapter and its corresponding export to the
-recipe. Supported forms are pure, monomorphic `String → String`, `Nat → Nat`,
+Add a new runnable function to the chapter; the root interface is generated
+from its marked exports, without JSON recipes or role aliases. Supported forms are pure, monomorphic `String → String`, `Nat → Nat`,
 and `String → Verso.Output.Html`. The displayed source is compiled during the
 document build; readers change input data. Unsupported types and dependency
 closures fail during authoring or resource preparation.
@@ -58,7 +57,7 @@ support; the native generator imports the chapter and its separate resource
 carrier. These dependencies must remain acyclic.
 
 The parent repository's `tests/starter.py` copies this directory to an isolated
-project, builds from Git, and checks the real worker in Chromium at both root
+project, builds without Lake artifact-cache reuse from the exact public Git revision, and checks the real worker in Chromium at both root
 and nested URLs, including escaped HTML, no-JavaScript source, and TeX output.
 
 The starter is provided under the Apache-2.0 license in [LICENSE](LICENSE).
