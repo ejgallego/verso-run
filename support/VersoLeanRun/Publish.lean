@@ -54,7 +54,7 @@ def publish (programs : Array Bundle) (runtime : Bundle := Vir.Resources.Runtime
             programs[j]!.contentId == programs[i]!.contentId && previous.role == entry.role) then
           candidates := candidates.push (i, entry)
     let (i, entry) ← match candidates with
-      | #[] => throw <| IO.userError s!"{provenance}: no published recipe export for {experiment.declaration}"
+      | #[] => throw <| IO.userError s!"{provenance}: no published recipe export for {experiment.declaration}. Add the declaration to your resource recipe and register its bundle with VersoLeanRun.publish."
       | #[candidate] => pure candidate
       | _ => throw <| IO.userError s!"{provenance}: ambiguous published recipe export for {experiment.declaration}; publish one bundle and role for this declaration"
     let expected ← match experiment.shape with
@@ -62,7 +62,7 @@ def publish (programs : Array Bundle) (runtime : Bundle := Vir.Resources.Runtime
       | "nat" => pure "verso-nat-nat-v1"
       | other => throw <| IO.userError s!"{provenance}: unsupported Lean Run shape {other}"
     unless entry.interfaceId == expected do
-      throw <| IO.userError s!"{provenance}: resource recipe contract for {experiment.declaration} must be {expected}"
+      throw <| IO.userError s!"{provenance}: resource recipe contract for {experiment.declaration} must be {expected}; found {entry.interfaceId}. Update this declaration's interfaceId in the resource recipe."
     let signature ← IO.ofExcept <| (Lean.Json.parse experiment.signature).mapError fun error =>
       s!"{provenance}: invalid compiled VIR signature: {error}"
     let binding := Lean.Json.mkObj [

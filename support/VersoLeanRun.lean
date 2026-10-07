@@ -105,6 +105,22 @@ private meta def htmlAdapter (entry : Ident) (name : Name) : DocElabM Name := wi
       attr.add adapter (← `(attr| vir_export)) .global
   return adapter
 
+private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
+    (signature : Vir.Interface.ClassifiedSignature) : DocElabM String := do
+  let reason : MessageData :=
+    if signature.effect != .pure then
+      m!"This form cannot run effectful functions (effect: {signature.effect.label}). \
+        Move I/O to the document build and export a pure function."
+    else if signature.args.size != 1 then
+      m!"This form needs one explicit argument; found {signature.args.size}. \
+        Export a wrapper taking one String or Nat input."
+    else
+      m!"This form supports exactly String → String and Nat → Nat. \
+        Serialize structured inputs and results as text, or return typed HTML."
+  throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
+    This interface is supported by VIR, but not by this Run form.\n\
+    {reason}\nUse a pure String → String, Nat → Nat, or String → Html function."
+
 /-- Elaborate ordinary retained commands, then resolve and classify the selected entry. -/
 @[code_block]
 meta def leanRun : CodeBlockExpanderOf Config
@@ -112,8 +128,12 @@ meta def leanRun : CodeBlockExpanderOf Config
     elabCommands { «show» := true, keep := true, name := none, error := false, fresh := false } str fun shouldShow hls str => do
       let name ← liftM <| Scopes.runWithOpenDecls <| Lean.Elab.realizeGlobalConstNoOverloadWithInfo config.entry
       if isPrivateName name then
-        throwErrorAt config.entry "Lean Run entry '{name}' is private"
+        throwErrorAt config.entry "Lean Run entry '{name}' is private. \
+          Export a public wrapper or remove 'private'."
       let info ← getConstInfo name
+      if isNoncomputable (← getEnv) name then
+        throwErrorAt config.entry "Lean Run entry '{name}' is non-executable.\n\
+          Type: {info.type}\nUse an executable public definition instead of a noncomputable value."
       let entryType ← Lean.Meta.whnf info.type
       let isHtml := match entryType with
         | .forallE _ domain result .default =>
@@ -127,15 +147,20 @@ meta def leanRun : CodeBlockExpanderOf Config
         throwErrorAt config.entry "Lean Run String → Html entries require HTML output"
       let name ← if isHtml then htmlAdapter config.entry name else pure name
       let env ← getEnv
-      unless (vir_export.getState env).contains name do
-        throwErrorAt config.entry "Lean Run entry '{name}' must carry @[vir_export]"
       let info ← getConstInfo name
-      let .ok callSignature ← Vir.Interface.analyzeExportInterface info.type
-        | throwErrorAt config.entry "Lean Run entry '{name}' has an unsupported VIR interface"
+      let callSignature ← match ← Vir.Interface.analyzeExportInterface info.type with
+        | .ok sig => pure sig
+        | .error error => throwErrorAt config.entry
+            "Lean Run entry '{name}' has an unsupported VIR interface.\n\
+              Type: {info.type}\nVIR: {error.toMessageData}"
       let shape ← match callSignature.args, callSignature.result, callSignature.effect with
         | #[{ type := .string, .. }], .string, .pure => pure "string"
         | #[{ type := .nat, .. }], .nat, .pure => pure "nat"
-        | _, _, _ => throwErrorAt config.entry "Lean Run supports exactly String → String and Nat → Nat (one explicit argument, pure and monomorphic); entry '{name}' does not match"
+        | _, _, _ => unsupportedForm config.entry name info.type callSignature
+      unless (vir_export.getState env).contains name do
+        throwErrorAt config.entry "Lean Run entry '{name}' must carry @[vir_export].\n\
+          Type: {info.type}\nAdd the attribute to its public definition. If it is already \
+          present, fix the earlier VIR compilation or dependency error first."
       if output == "html" && shape != "string" then
         throwErrorAt config.entry "Lean Run HTML output requires a String result"
       let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0

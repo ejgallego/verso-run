@@ -1,5 +1,5 @@
 """Real native/browser acceptance; run from the repository root with uv/Playwright."""
-import argparse, copy, functools, http.server, json, shutil, subprocess, tempfile, threading, time
+import argparse, copy, functools, http.server, json, re, shutil, subprocess, tempfile, threading, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -63,13 +63,20 @@ record('repeated bundle registration deduplicates resources and keeps declaratio
 missing = command(['lake', 'exe', 'lean-run-publication-check', 'missing', '--output',
     str(OUTPUT/'missing-registration')], 'missing-registration', expected=1)
 assert 'LeanRunGate.Chapter:' in missing and 'no published recipe export for LeanRunGate.greet' in missing
+assert 'resource recipe' in missing and 'VersoLeanRun.publish' in missing
+assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').exists()
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
     output = command(['lake','env','lean',f'tests/negative/{name}.lean'], 'negative-'+name, expected=1)
-    assert expected.lower() in output.lower(), output
+    details = dict(contains=[expected]) if isinstance(expected, str) else expected
+    assert all(text.lower() in output.lower() for text in details['contains']), output
     assert 'tests/negative/' in output, output
+    if 'line' in details:
+        assert re.search(rf'tests/negative/{name}\.lean:{details["line"]}:\d+: error:', output), output
+    if 'notContains' in details:
+        assert all(text.lower() not in output.lower() for text in details['notContains']), output
     record('author '+name)
 
 dependency_error = command(['lake','build','+UnavailableDependency:vir'], 'unavailable-dependency', expected=1)
@@ -338,6 +345,9 @@ with sync_playwright() as p:
     greeting.locator('[type=submit]').click()
     page.wait_for_function('(e) => e.dataset.state === "failed"', arg=greeting.element_handle())
     assert '404' in greeting.locator('.lean-run-output').text_content()
+    assert 'Could not run LeanRunGate.greet' in greeting.locator('.lean-run-output').text_content()
+    assert 'contact the document author' in greeting.locator('.lean-run-output').text_content()
+    assert 'resource-fetch' in greeting.locator('.lean-run-output').text_content()
     count = len(workers)
     page.unroute('**/program.irpkg')
     page.wait_for_timeout(150)
@@ -400,6 +410,18 @@ with sync_playwright() as p:
         originals={p:p.read_text() for p in [chapter, helper, lakefile, recipe]}
         identity=plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest']
         try:
+            # A rejected replacement must not launch the generator or replace the
+            # last accepted publication. Keep the prior valid site available.
+            published_before=(site/'html-multi/lean-run/publication.json').read_bytes()
+            chapter.write_text(originals[chapter].replace('"Hello, " ++ name',
+                'name ++ toString (Float.atan 0)'))
+            rejected=command(['lake','exe','lean-run-demo','--output',str(site),
+                '--with-html-single'],'unsupported-rebuild',expected=1)
+            assert 'LeanRunGate.greet' in rejected and 'Float.atan' in rejected, rejected
+            assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
+            chapter.write_text(originals[chapter])
+            record('unsupported replacement fails before publishing over the last accepted site')
+
             for source, before, after, role, value in [
                 (chapter,'"Hello, "','"Welcome, "','greet','edited source'),
                 (helper,'n + n','n + n + 1','double','9007199254740993')]:
@@ -416,6 +438,22 @@ with sync_playwright() as p:
                 assert call(form_for('LeanRunGate.'+role),value) == oracle(role,value)
                 record('implementation invalidation '+role, program=changed_plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest'])
                 source.write_text(originals[source])
+
+            wrong=json.loads(originals[recipe])
+            wrong['exports'][0]['interfaceId']='verso-nat-nat-v1'
+            recipe.write_text(json.dumps(wrong,indent=2)+'\n')
+            command(['lake','build'],'wrong-recipe-build')
+            # Existing publication remains intact; a new destination gets no plan.
+            for destination in [site, OUTPUT/'wrong-contract']:
+                failed=command(['lake','exe','lean-run-demo','--output',str(destination)],
+                    'wrong-recipe-'+destination.name,expected=1)
+                assert 'LeanRunGate.Chapter:' in failed and 'LeanRunGate.greet' in failed
+                assert 'must be verso-string-string-v1; found verso-nat-nat-v1' in failed
+                assert 'Update this declaration' in failed
+            assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
+            assert not (OUTPUT/'wrong-contract/html-multi/lean-run/publication.json').exists()
+            recipe.write_text(originals[recipe])
+            record('wrong recipe contract gives an actionable error without a successful publication')
 
             # The same real compiled program may legitimately have multiple recipe
             # roles. Automatic declaration binding must report that ambiguity.

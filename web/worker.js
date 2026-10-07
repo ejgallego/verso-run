@@ -3,13 +3,17 @@ import { validateInput, formatResult } from "./contract.js";
 let program = null;
 let description = null;
 let creating = null;
-function diagnostic(error) {
+function diagnostic(error, declaration) {
   const parts = [];
   for (let current = error, i = 0; current && i < 5; current = current.cause, i++) {
     parts.push(String(current.message ?? current).slice(0, 1000));
   }
   if (error && Object.hasOwn(error, "cleanupError")) parts.push("Cleanup: " + String(error.cleanupError));
-  return parts.join(": ");
+  const reason = parts.join(": ");
+  const help = error?.phase
+    ? "This example's execution resources could not be loaded or verified. Try Run again; if it still fails, contact the document author."
+    : "Try Run again; if it still fails, contact the document author.";
+  return `Could not run ${declaration}. ${help}\nDetails: ${reason}`;
 }
 onmessage = async ({ data }) => {
   const { requestId } = data;
@@ -38,6 +42,6 @@ onmessage = async ({ data }) => {
     creating = null;
     try { program?.dispose(); } catch (cleanup) { error.cleanupError = cleanup; }
     program = null;
-    postMessage({ requestId, state: "failed", error: diagnostic(error) });
+    postMessage({ requestId, state: "failed", error: diagnostic(error, data.description?.declaration ?? "this example") });
   }
 };

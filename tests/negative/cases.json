@@ -1,8 +1,24 @@
 {
   "MissingEntry": "Named argument 'entry'",
   "UnknownEntry": "Unknown constant",
-  "Unmarked": "must carry @[vir_export]",
-  "Unsupported": "supports exactly",
+  "Unmarked": {
+    "contains": [
+      "Lean Run entry 'unmarkedValue'",
+      "Type: Nat → Nat",
+      "must carry @[vir_export]",
+      "fix the earlier VIR"
+    ],
+    "line": 7
+  },
+  "Unsupported": {
+    "contains": [
+      "Lean Run entry 'flag'",
+      "Bool → Bool",
+      "supported by VIR, but not by this Run form",
+      "Serialize structured"
+    ],
+    "line": 7
+  },
   "Discarded": "keep",
   "ErrorExpected": "error",
   "Unavailable": "missing IR",
@@ -15,5 +31,95 @@
   "NonExecutableHtml": "non-executable",
   "IlluminateHashing": "Float.toBits",
   "IlluminateCompile": "Float.atan",
-  "IlluminateAsin": "Float.asin"
+  "IlluminateAsin": "Float.asin",
+  "Arity": {
+    "contains": [
+      "Lean Run entry 'combine'",
+      "String → String → String",
+      "supported by VIR",
+      "found 2",
+      "wrapper taking one"
+    ],
+    "line": 7
+  },
+  "NoArguments": {
+    "contains": [
+      "Lean Run entry 'answer'",
+      "type String",
+      "found 0",
+      "wrapper taking one"
+    ],
+    "line": 7
+  },
+  "MixedShape": {
+    "contains": [
+      "Lean Run entry 'textLength'",
+      "String → Nat",
+      "supports exactly",
+      "Serialize structured"
+    ],
+    "line": 7
+  },
+  "Effectful": {
+    "contains": [
+      "Lean Run entry 'echoIo'",
+      "String → IO String",
+      "supported by VIR",
+      "effect: io",
+      "Move I/O"
+    ],
+    "line": 7
+  },
+  "Implicit": {
+    "contains": [
+      "Lean Run entry 'implicitExtra'",
+      "unsupported VIR interface",
+      "Type:",
+      "implicit or instance arguments",
+      "extra",
+      "wrapper"
+    ],
+    "notContains": [
+      "must carry"
+    ],
+    "line": 7
+  },
+  "Polymorphic": {
+    "contains": [
+      "Lean Run entry 'polymorphic'",
+      "unsupported VIR interface",
+      "Type:",
+      "type parameter",
+      "erased",
+      "concrete wrapper"
+    ],
+    "notContains": [
+      "must carry"
+    ],
+    "line": 7
+  },
+  "NonExecutable": {
+    "contains": [
+      "Lean Run entry 'chosen'",
+      "non-executable",
+      "Type: Nat → Nat",
+      "executable public definition"
+    ],
+    "line": 7
+  },
+  "Dependent": {
+    "contains": [
+      "Lean Run entry 'bounded'",
+      "unsupported VIR interface",
+      "Type:",
+      "unsupported result type",
+      "Fin",
+      "isLt",
+      "erased or void runtime layout"
+    ],
+    "notContains": [
+      "must carry"
+    ],
+    "line": 7
+  }
 }
