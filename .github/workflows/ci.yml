@@ -30,7 +30,8 @@ jobs:
         run: uv run --with playwright python tests/starter.py --output _out/starter-acceptance
       - name: Package demo
         run: |
-          lake exe lean-run-demo --with-html-single --with-tex --depth 2
+          python3 scripts/build-demo-site.py
+          uv run --with playwright python tests/pages-smoke.py --site _out/html-multi --output _out/demo-site-results.json
           python3 scripts/package-demo.py
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()

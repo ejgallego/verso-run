@@ -6,7 +6,7 @@ root = Path(__file__).resolve().parent.parent
 site = root / "_out/html-multi"
 archive = root / "_out/verso-run-demo.zip"
 if not (site / "lean-run/publication.json").is_file():
-    raise SystemExit("Generate the demo with lake exe lean-run-demo first.")
+    raise SystemExit("Generate the demo with python3 scripts/build-demo-site.py first.")
 with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as z:
     for path in sorted(site.rglob("*")):
         if path.is_file():

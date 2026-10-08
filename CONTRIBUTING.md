@@ -21,8 +21,8 @@ lake test -- --mutations --output _out/acceptance
 ```
 
 The suite builds the native oracle and generator, checks author diagnostics,
-compares real worker calls to native Lean, and exercises both HTML layouts and
-TeX. Mutation checks temporarily edit the chapter, helper, and Lake
+compares real worker calls to native Lean, and exercises Manual's two HTML layouts
+and TeX, plus Blog Page/Post. Mutation checks temporarily edit the chapter, helper, and Lake
 layout, then restore them in `finally`. Avoid concurrent builds or edits to
 those files. Check the working tree after an interrupted test run.
 
@@ -61,15 +61,18 @@ uv run --with playwright python tests/worker-gate.py
 | `tests/` | Native/browser acceptance and negative author fixtures |
 | `docs/`, `evidence/` | Guides, qualification records, and screenshots |
 
-`DemoMain.lean` builds the site; `OracleMain.lean` supplies the native reference
-results. `PublicationMain.lean` checks resource registration with real bundles.
+`DemoMain.lean` builds the Manual; `BlogMain.lean` builds the Blog site.
+`scripts/build-demo-site.py` combines them with a landing page.
+`OracleMain.lean` and `BlogOracleMain.lean` supply native reference results.
+`PublicationMain.lean` checks resource registration with real bundles.
 Generated Lake, Beam, VIR, browser, and site outputs stay out of Git.
 
 Within `support/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
 `Collect`, and `Publication` hold the common machinery. `Manual` and `Publish`
 adapt it to Manual elaboration, native source blocks, and generator output.
-`VersoLeanRun` remains the compatibility facade. See the
-[genre review](docs/multi-genre.md) for the planned Blog and Slides adapters.
+`VersoLeanRun` remains the compatibility facade. `Blog` and `Blog.Publish`
+adapt the same core to Page/Post. See the [genre review](docs/multi-genre.md)
+for these boundaries and the planned Slides adapter.
 
 ## Changing the code
 

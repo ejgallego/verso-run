@@ -17,9 +17,23 @@ lean_lib LeanRunHelperResources where
   roots := #[`LeanRunGate.HelperResources]
   needs := #[`@verso_run/LeanRunHelperResources:virResourcePack]
 
+lean_lib LeanRunBlogExamples where
+  srcDir := "gates"
+  roots := #[`LeanRunBlog.Examples]
+
+lean_lib LeanRunBlogDocuments where
+  srcDir := "gates"
+  roots := #[`LeanRunBlog.Home, `LeanRunBlog.Page, `LeanRunBlog.Index, `LeanRunBlog.Post]
+
+lean_lib LeanRunBlogResources where
+  srcDir := "resources"
+  roots := #[`LeanRunBlog.Resources]
+  needs := #[`@verso_run/LeanRunBlogResources:virResourcePack]
+
 target virPrograms (_pkg) : Array (Lean.Name × Lean.Name) := do
   return Job.pure #[(`LeanRunGateResources, `LeanRunGate.Chapter),
-    (`LeanRunHelperResources, `LeanRunGate.Helper)]
+    (`LeanRunHelperResources, `LeanRunGate.Helper),
+    (`LeanRunBlogResources, `LeanRunBlog.Examples)]
 
 lean_exe «lean-run-gate» where
   root := `GateMain
@@ -44,9 +58,23 @@ lean_exe «lean-run-demo» where
 lean_exe «lean-run-oracle» where
   root := `OracleMain
 
+@[default_target]
+lean_exe «lean-run-blog-demo» where
+  root := `BlogMain
+  needs := #[leanRunWeb]
+
+@[default_target]
+lean_exe «lean-run-blog-oracle» where
+  root := `BlogOracleMain
+
 lean_lib VersoLeanRunPublish where
   srcDir := "support"
   roots := #[`VersoLeanRun.Publish]
+  needs := #[leanRunWeb]
+
+lean_lib VersoLeanRunBlog where
+  srcDir := "support"
+  roots := #[`VersoLeanRun.Blog]
   needs := #[leanRunWeb]
 
 @[test_driver]

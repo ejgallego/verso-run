@@ -1,0 +1,142 @@
+{
+  "checks": [
+    {
+      "test": "typed Page/Post AST collection publishes independent canonical signatures",
+      "result": "pass"
+    },
+    {
+      "test": "Blog native generator runs outside the checkout with embedded assets",
+      "result": "pass"
+    },
+    {
+      "test": "missing metadata/registration fails before overwriting accepted publication",
+      "result": "pass"
+    },
+    {
+      "test": "malformed metadata/registration fails before overwriting accepted publication",
+      "result": "pass"
+    },
+    {
+      "test": "root: Page retains native highlighting, lazy loading, and exact Nat execution",
+      "result": "pass"
+    },
+    {
+      "test": "root: Post Unicode and repeated placements have independent worker state",
+      "result": "pass"
+    },
+    {
+      "test": "root: producer-owned HTML adapter escapes text and clears its preview",
+      "result": "pass"
+    },
+    {
+      "test": "root: real synchronous worker Stop and fresh rerun",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: Page retains native highlighting, lazy loading, and exact Nat execution",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: Post Unicode and repeated placements have independent worker state",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: producer-owned HTML adapter escapes text and clears its preview",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: real synchronous worker Stop and fresh rerun",
+      "result": "pass"
+    },
+    {
+      "test": "Blog resource failure reports text and recovers only on explicit retry",
+      "result": "pass"
+    },
+    {
+      "test": "Blog controls and collapsed source fit a narrow viewport",
+      "result": "pass"
+    },
+    {
+      "test": "Page and Post retain native source and disabled controls without JavaScript",
+      "result": "pass"
+    },
+    {
+      "test": "no uncaught Blog browser errors",
+      "result": "pass"
+    }
+  ],
+  "publication": {
+    "programs": {
+      "LeanRunBlog.Page": {
+        "LeanRunGate.Helper.twice": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json"
+        }
+      },
+      "LeanRunBlog.Post": {
+        "LeanRunBlog.Examples.card": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+        },
+        "LeanRunBlog.Examples.count": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+        },
+        "LeanRunBlog.Examples.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  }
+}

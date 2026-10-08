@@ -1,7 +1,7 @@
 # Source anchors and multiple genres
 
-Review dated 2026-10-07. This is an implementation proposal based on source
-inspection, not qualification of new genres. Manual remains the supported genre.
+Source review dated 2026-10-07; Blog implementation added 2026-10-08.
+Manual and Blog Page/Post are implemented. Slides remains a proposal.
 The [dependency pins](internals.md#pinned-dependencies) and public
 `VersoLeanRun` / `VersoLeanRun.Publish` imports remain unchanged.
 
@@ -9,8 +9,8 @@ The first Manual implementation now extracts the common modules and adds
 `leanRunAnchor`. It uses the standard expander, requires an imported same-project
 scalar entry defined in the selected region, and retains native source children.
 See [authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
-Its 77-check qualification is retained in [validation](validation.md). Blog and
-Slides remain proposals.
+Its original 77-check qualification is retained in [validation](validation.md).
+The Blog adapter reuses that common source path; see [Blog authoring](blog.md).
 
 ## What Verso already shares
 
@@ -45,7 +45,7 @@ could simplify this later, but no additional Verso patch is required for this sl
 and unclosed markers and retains highlighting and proof-state metadata. An
 anchor can contain several declarations. Its name does not identify a callable.
 
-## Proposed common and genre-specific parts
+## Common and genre-specific parts
 
 | Responsibility | Shared implementation | Genre adapter |
 | --- | --- | --- |
@@ -56,7 +56,7 @@ anchor can contain several declarations. Its name does not identify a callable.
 | Browser execution | Input validation, dedicated worker, expected-export checks, Stop, stale-result suppression, HTML isolation | Asset URL supplied by the genre; navigation/visibility lifecycle hooks |
 | Static rendering | Source-first fallback policy | Native links, proof states, code styling, and supported output formats |
 
-The core should depend on Verso's shared document types and VIR, without importing
+The core depends on Verso's shared document types and VIR, without importing
 `VersoManual`. Keep the existing module names as compatibility facades over a
 Manual adapter. Separate the callable model/classifier, console renderer, and
 publication planner rather than creating one large genre class.
@@ -113,13 +113,15 @@ the source into a raw HTML blob before traversal would bypass these facilities.
 The inline `leanRun` authoring mode remains a Manual feature; external anchored
 examples provide the shared route across genres.
 
-**Blog, Page and Post:** one adapter can use the existing highlighted-code block
+**Blog, Page and Post:** one adapter uses the existing highlighted-code block
 and component system. Component metadata uses a different encoding from Manual's
 extension JSON, so decoding is adapter-specific. Components provide text JS/CSS
-assets; binary VIR resources still need a site-generator publication hook or
-wrapper. Nested post paths need explicit asset-root handling. The current
-[`bootstrap.js`](../web/bootstrap.js) assumes `lean-run/renderer.js` is relative
-to `document.baseURI`, which is a Manual layout convention. Also, pinned Blog
+assets; `VersoLeanRun.Blog.blogMain` collects the typed site, validates the shared
+publication plan, calls stock Blog generation, and writes binary resources.
+Both genres emit a `<base>` tag. Blog forms carry explicit renderer paths derived
+from their traversal location; [`bootstrap.js`](../web/bootstrap.js) resolves
+these against the page URL. Manual keeps its base-relative default. Root and
+nested copied Blog sites exercise this distinction. Also, pinned Blog
 does not implement Manual's `defSite` policy: preserve Blog's existing code/link
 behavior rather than promising identical definition targets.
 
@@ -144,8 +146,9 @@ the normal asset plan, including collisions. It is useful design evidence, not
 a selected dependency or a qualified verso-run adapter. Coordinate with that
 publisher so a site containing both extensions has one compatible runtime plan.
 
-Only Manual's TeX fallback is currently established. Blog and Slides should retain
-their own supported static output; this proposal does not add TeX backends to them.
+Only Manual's TeX fallback is established. Blog retains native source without
+JavaScript; this adapter does not add a Blog TeX backend. Slides should retain
+its own supported static output.
 
 ## Implementation order and acceptance
 
@@ -171,8 +174,8 @@ ownership checks before claiming anchored HTML support.
 
 For each implemented slice run `lake build`, then `lake test -- --mutations`
 sequentially, plus executable/browser examples for newly supported genres.
-New genre checks remain pending; the shared extraction and anchored Manual
-implementation are described in the [validation record](validation.md).
+The shared extraction, anchored Manual implementation, and Blog Page/Post
+checks are described in the [validation record](validation.md).
 The separate public VIR source/runtime adoption gate remains in force.
 
 [external]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso/Verso/Code/External.lean

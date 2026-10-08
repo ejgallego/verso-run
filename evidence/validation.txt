@@ -244,3 +244,33 @@ tests/pages-smoke.py with portable checkout root and response logging.
 
 Final starter/documentation follow-up changes no demo program or worker code.
 No claim about Module-owned exact bda producer CI or VIR merge is made.
+
+2026-10-08 — Blog Page/Post adapter and combined landing
+
+No dependency/runtime pins changed. Manual facades and source/TeX fallback kept.
+One Blog component retains native highlighted children for both Page and Post;
+typed Site collection validates the shared plan before stock Blog generation.
+Nested forms carry explicit renderer paths resolved against location.href,
+independently of Blog's builtinHeader base tag. Manual keeps its default.
+Anchored HTML uses a producer-owned String serialization wrapper; no automatic
+external typed-HTML adapter is claimed. Slides remains planned.
+
+Clean lake build passed (800 jobs); subsequent saved-source builds passed.
+lake test -- --mutations --output _out/blog-acceptance: 80 checks passed,
+including 16 Blog checks. Native-only generation outside checkout, malformed
+metadata and missing bundles before publication, root/nested Page/Post calls,
+exact Nat/Unicode/native agreement, repeated workers, escaped isolated HTML,
+preview cleanup, actual synchronous Stop/rerun, 404/explicit retry, native
+highlighting and no-JavaScript source, and mobile width passed.
+Evidence: blog-regression.json and blog-results.json; logs: _out/blog-acceptance/.
+Blog producer CID: f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff.
+Existing Manual and Helper CIDs restored unchanged; runtime remains e415e41a….
+
+python3 scripts/build-demo-site.py and package-demo.py passed. Combined site
+keeps Manual chapter/resource URLs, adds Blog under blog/, and uses the Blog
+home as the landing with a corresponding base URL. CI-style local HTTP smoke
+passed 11 checks: both inventories equal local plans, landing links and two
+viewports, four Manual and four Blog calls match native, no page errors.
+Evidence: blog-local-site.json. Desktop/mobile landing and post captures retained.
+actionlint and git diff --check passed. Actual updated Pages deployment is a
+separate post-publication check; historical public-pair-pages.json is unchanged.

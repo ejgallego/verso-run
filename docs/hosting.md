@@ -15,6 +15,7 @@ link. Enable the Actions publishing source and rerun the workflow when ready.
 
 The project URL is <https://ejgallego.github.io/verso-run/>.
 Try `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/` beneath it.
+The landing page also links to `/blog/page/` and a runnable dated Blog post.
 The generated paths are relative, and worker execution at nested prefixes is
 covered by acceptance checks. No generated site files are committed to Git.
 
@@ -36,14 +37,15 @@ check deliberately rejects a different hosted program/runtime publication.
 
 ## Share a complete copy
 
-After generating the demo, run:
+Generate the combined landing, Manual, and Blog site, then package it:
 
 ```sh
+python3 scripts/build-demo-site.py
 python3 scripts/package-demo.py
 ```
 
 This produces `_out/verso-run-demo.zip`. Recipients can unpack it and run
-`python3 -m http.server 8795 --directory verso-run-demo`, then open `/Greeting/`.
+`python3 -m http.server 8795 --directory verso-run-demo`, then open `/`.
 They need no Lean installation. Serve the whole site over HTTP, including all
 `lean-run/` resources. Root and nested copied deployments are covered by tests.
 Serve JavaScript as `text/javascript` or `application/javascript`, and Wasm as

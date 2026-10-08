@@ -11,7 +11,8 @@ Readers need no Lean installation. **Stop** interrupts a running example.
 
 [Demo](https://ejgallego.github.io/verso-run/) ·
 [Start your own manual](examples/manual-starter/README.md) ·
-[Authoring guide](docs/authoring.md)
+[Manual authoring](docs/authoring.md) ·
+[Blog authoring](docs/blog.md)
 
 ![Lean computes a chain of four nodes and renders it with Illuminate](evidence/illuminate-desktop-4.png)
 
@@ -24,11 +25,12 @@ Lean 4.34.0 and fetches its compatible dependencies and runtime automatically.
 git clone https://github.com/ejgallego/verso-run.git
 cd verso-run
 lake build
-lake exe lean-run-demo --with-html-single --with-tex --depth 2
+python3 scripts/build-demo-site.py
 python3 -m http.server 8795 --bind 127.0.0.1 --directory _out/html-multi
 ```
 
-Open [the greeting](http://127.0.0.1:8795/Greeting/), change its input, and choose Run.
+Open [the landing page](http://127.0.0.1:8795/), choose Manual or Blog,
+change an input, and choose Run.
 There are a few more examples to explore:
 
 | Example | Try |
@@ -38,8 +40,11 @@ There are a few more examples to explore:
 | [Illuminate diagrams](http://127.0.0.1:8795/Illuminate-diagrams/) | `1`, `4`, and `8` nodes |
 | [Exact natural numbers](http://127.0.0.1:8795/Exact-natural-numbers/) | `9007199254740993` |
 | [Try Stop](http://127.0.0.1:8795/Try-Stop/) | Start a large calculation, then interrupt it |
+| [Blog page](http://127.0.0.1:8795/blog/page/) | Exact natural numbers from an imported source anchor |
+| [Blog post](http://127.0.0.1:8795/blog/notes/2026-10-8-running-lean-in-a-post/) | Greetings, an HTML card, and Stop |
 
-HTML output lives in `_out/html-multi` and `_out/html-single`; TeX is in `_out/tex`.
+The combined site lives in `_out/html-multi`, with Blog under `blog/`.
+Manual also generates `_out/html-single` and `_out/tex`.
 To share a copy, see [hosting and packaging](docs/hosting.md).
 
 ## Add an example to your document
@@ -73,16 +78,19 @@ argument. VIR also checks their compiled dependencies. A supported function type
 can still reach an operation absent from the runtime; the build will reject it.
 See [troubleshooting](docs/troubleshooting.md) for examples and next steps.
 
-This experimental release supports **Verso Manual**. Slides and blog support are
-planned in [the roadmap](ROADMAP.md). Examples can use inline definitions or
+This experimental release supports **Verso Manual** and **Blog Page/Post**.
+Slides is the next genre in [the roadmap](ROADMAP.md). Manual examples can use inline definitions or
 [checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module).
+Blog uses those checked anchors, with producer-owned scalar wrappers for HTML;
+see [Blog authoring](docs/blog.md).
 Readers edit function inputs; source editing
 belongs to the future editor work. Ordinary highlighted Lean blocks keep working,
-and source remains readable without JavaScript and in TeX.
+and source remains readable without JavaScript. Manual also retains its TeX output.
 
 ## Find your way around
 
 - [Authoring](docs/authoring.md): runnable blocks and typed HTML.
+- [Blog authoring](docs/blog.md): runnable pages, posts, and site publication.
 - [Troubleshooting](docs/troubleshooting.md): unsupported programs and build/runtime errors.
 - [Internals](docs/internals.md): resource ownership, execution, limits, and exact pins.
 - [Contributing](CONTRIBUTING.md): build, test, and repository layout.

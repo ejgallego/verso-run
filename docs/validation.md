@@ -20,6 +20,8 @@ rather than treating successful loading as proof that an example works.
   including preservation of the last accepted publication.
 - Imported scalar anchors, semantic entry membership, checked source bodies,
   native definition links, and duplicate/unclosed/stale-anchor rebuild rejection.
+- Blog Page/Post typed collection, native-only publication, malformed metadata,
+  nested asset URLs, producer-owned HTML, no-JavaScript source, and the combined landing.
 
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
@@ -31,6 +33,9 @@ the selected runtime through its complete Git manifest, without local seeds.
 
 | Record | Scope |
 | --- | --- |
+| [Blog results](../evidence/blog-results.json) | 16 native/browser Page/Post checks at root and nested prefixes |
+| [Blog regression](../evidence/blog-regression.json) | 80-check Manual/Blog native/browser/mutation campaign |
+| [Combined local site](../evidence/blog-local-site.json) | Landing links, viewport checks, and eight Manual/Blog native worker comparisons |
 | [Public-pair starter](../evidence/public-pair-starter.json) | 11-check cold public Git acquisition/build and native/browser starter campaign |
 | [Public-pair Pages](../evidence/public-pair-pages.json) | Actual hosted/native agreement, publication equality, and runtime MIME responses |
 | [Public-pair worker](../evidence/public-pair-worker.json) | Full-name calls, raw BigInt type, dispose and fresh creation |
@@ -61,6 +66,9 @@ JavaScript-disabled pages. Representative captures:
 - [Calculator](../evidence/calculator-desktop.png) and
   [expanded source](../evidence/calculator-desktop-source.png).
 - [Typed HTML](../evidence/html-desktop.png).
+- [Blog post on desktop](../evidence/blog-desktop.png) and
+  [mobile](../evidence/blog-mobile.png); [landing page](../evidence/landing-desktop.png)
+  and its [mobile layout](../evidence/landing-mobile.png).
 
 Browser execution is qualified here in Chromium. Firefox, Safari, physical
 mobile devices, and assistive-technology audits remain outside this evidence.

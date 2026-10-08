@@ -28,7 +28,7 @@ The diagnostics slice preserves VIR classifier reasons, distinguishes VIR
 rejection from form restrictions, and gives declaration/type context and next
 steps. Its fixtures cover effects, arity, polymorphism, implicit parameters,
 dependent results, and non-executable entries. Mutation checks exercise rejected
-rebuilds and bad recipe contracts after successful publication.
+rebuilds and bad producer/compiler contracts after successful publication.
 
 Distinguish author-program rejection from invalid reader inputs and worker
 failures. Readers currently edit scalar inputs, not Lean source; source editing
@@ -51,11 +51,14 @@ are extracted behind the existing Manual API. `leanRunAnchor` reuses checked
 Verso anchors with an explicit imported scalar entry and a producer-owned bundle.
 The demo includes ordinary and runnable displays of the same source region.
 
-Next add a Blog adapter covering Page and Post. Select a compatible Slides
-revision before implementing its source, asset, and Reveal lifecycle adapter.
+The Blog adapter now covers Page and Post with native highlighted source,
+typed site collection, shared resource publication, and explicit renderer URLs
+for nested posts. The landing page links to both genres and marks Slides as planned.
+Select a compatible Slides revision before implementing its source, asset,
+and Reveal lifecycle adapter.
 Preserve each genre's native highlighted blocks, links, styling, and static
 fallback. Qualify an independent example in each genre before claiming support
-beyond Manual. Keep the public VIR integration gate separate.
+beyond Manual and Blog. Keep the public VIR integration gate separate.
 
 ## Later Verso upstreaming slice
 

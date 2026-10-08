@@ -1,5 +1,5 @@
 """Real native/browser acceptance; run from the repository root with uv/Playwright."""
-import argparse, copy, functools, http.server, json, re, shutil, subprocess, tempfile, threading, time
+import argparse, copy, functools, http.server, json, re, shutil, subprocess, sys, tempfile, threading, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -568,5 +568,7 @@ with sync_playwright() as p:
         record('restored program identity matches original')
     browser.close()
 server.shutdown()
+command([sys.executable, 'tests/blog.py', '--output', str(OUTPUT/'blog')], 'blog-adapter')
+record('Blog Page/Post native generation and actual worker qualification')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)

@@ -11,7 +11,8 @@ open Lean Verso.Output Verso.Output.Html
 namespace VersoLeanRun
 
 /-- Shared console markup around source already rendered by its native genre. -/
-def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : String) : Html := Id.run do
+def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : String)
+    (rendererUrl : Option String := none) : Html := Id.run do
   let source := Html.fromArray source
   let label := if experiment.shape == "nat" then "Natural number" else "Text"
   let initial := experiment.initialInput
@@ -22,7 +23,7 @@ def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : 
   let preview := if experiment.output == "html" then
     {{ <iframe class="lean-run-preview" title="HTML result" sandbox="" referrerpolicy="no-referrer" hidden="hidden"/> }}
     else .empty
-  return {{ <section class="lean-run" data-experiment={{(toJson experiment).compress}} data-instance={{instanceId}}>
+  let console := {{ <section class="lean-run" data-experiment={{(toJson experiment).compress}} data-instance={{instanceId}}>
     {{sourcePanel}}
     <div class="lean-run-console">
       <form>
@@ -36,5 +37,9 @@ def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : 
       <noscript> "Enable JavaScript to run this compiled Lean example." </noscript>
     </div>
   </section> }}
+  return match rendererUrl, console with
+    | some url, .tag tagName attrs contents =>
+      .tag tagName (attrs.push ("data-lean-run-renderer", url)) contents
+    | _, _ => console
 
 end VersoLeanRun
