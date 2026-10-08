@@ -22,6 +22,9 @@ rather than treating successful loading as proof that an example works.
   native definition links, and duplicate/unclosed/stale-anchor rebuild rejection.
 - Blog Page/Post typed collection, native-only publication, malformed metadata,
   nested asset URLs, producer-owned HTML, no-JavaScript source, and the combined landing.
+- Slides typed collection, one formatter/Run runtime inventory, asset collisions
+  before output, native fragments, visibility cancellation, keyboard submission,
+  pending-load guards, and readable static source.
 
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
@@ -33,6 +36,9 @@ the selected runtime through its complete Git manifest, without local seeds.
 
 | Record | Scope |
 | --- | --- |
+| [Slides results](../evidence/slides-results.json) | 20 native/Reveal/browser checks, including mobile scrolling and restored controls |
+| [Slides regression](../evidence/slides-regression.json) | 81-check Manual/Blog/Slides native/browser/mutation campaign |
+| [Three-genre site](../evidence/three-genre-local-site.json) | Landing links, viewports, inventories, and 12 native worker comparisons |
 | [Blog results](../evidence/blog-results.json) | 16 native/browser Page/Post checks at root and nested prefixes |
 | [Blog regression](../evidence/blog-regression.json) | 80-check Manual/Blog native/browser/mutation campaign |
 | [Combined local site](../evidence/blog-local-site.json) | Landing links, viewport checks, and eight Manual/Blog native worker comparisons |
@@ -69,6 +75,10 @@ JavaScript-disabled pages. Representative captures:
 - [Blog post on desktop](../evidence/blog-desktop.png) and
   [mobile](../evidence/blog-mobile.png); [landing page](../evidence/landing-desktop.png)
   and its [mobile layout](../evidence/landing-mobile.png).
+- [Slides on desktop](../evidence/slides-desktop.png) and
+  [mobile](../evidence/slides-mobile.png).
+- [Three-genre landing](../evidence/three-genre-landing-desktop.png) and
+  its [mobile layout](../evidence/three-genre-landing-mobile.png).
 
 Browser execution is qualified here in Chromium. Firefox, Safari, physical
 mobile devices, and assistive-technology audits remain outside this evidence.

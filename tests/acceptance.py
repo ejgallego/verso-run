@@ -570,5 +570,7 @@ with sync_playwright() as p:
 server.shutdown()
 command([sys.executable, 'tests/blog.py', '--output', str(OUTPUT/'blog')], 'blog-adapter')
 record('Blog Page/Post native generation and actual worker qualification')
+command([sys.executable, 'tests/slides.py', '--output', str(OUTPUT/'slides')], 'slides-adapter')
+record('Slides native publication, fragment lifecycle, and actual worker qualification')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)

@@ -1,4 +1,4 @@
-"""Generate both qualified genres and a format landing page, preserving Manual URLs."""
+"""Generate the three genres and their landing page, preserving Manual URLs."""
 from pathlib import Path
 import re
 import subprocess
@@ -8,6 +8,8 @@ subprocess.run(["lake", "exe", "lean-run-demo", "--with-html-single", "--with-te
                cwd=root, check=True)
 site = root / "_out/html-multi"
 subprocess.run(["lake", "exe", "lean-run-blog-demo", "--output", str(site / "blog")],
+               cwd=root, check=True)
+subprocess.run(["lake", "exe", "lean-run-slides-demo", "--output", str(site / "slides")],
                cwd=root, check=True)
 # The root landing uses the Blog home's own relative asset/link convention.
 # Existing Manual chapters and their root execution inventory keep their URLs.

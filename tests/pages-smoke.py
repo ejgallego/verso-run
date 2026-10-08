@@ -33,15 +33,15 @@ if args.site:
     atexit.register(server.shutdown)
     base = f'http://127.0.0.1:{server.server_port}/'
 plans = {}
-for genre, path in [('Manual', ''), ('Blog', 'blog/')]:
+for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
     with urlopen(base + path + 'lean-run/publication.json') as response:
         plans[genre] = json.load(response)
     assert plans[genre] == json.loads((root / '_out/html-multi' / path / 'lean-run/publication.json').read_text())
 plan = plans['Manual']
-checks = ['Manual and Blog publications match validated local programs and runtime']
+checks = ['Manual, Blog, and Slides publications match validated local programs and runtime']
 
 def oracle(role, value, genre):
-    executable = 'lean-run-blog-oracle' if genre == 'Blog' else 'lean-run-oracle'
+    executable = 'lean-run-blog-oracle' if genre in ['Blog', 'Slides'] else 'lean-run-oracle'
     return json.loads(subprocess.check_output(
         [str(root / '.lake/build/bin' / executable), role, value], text=True))
 
@@ -53,7 +53,8 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('response', lambda response: runtime_responses.append({
         'url': response.url, 'contentType': response.headers.get('content-type', ''),
-        'status': response.status}) if plan['runtimeModule'].rsplit('/', 1)[0] in response.url else None)
+        'status': response.status}) if any(
+            p['runtimeModule'].rsplit('/', 1)[0] in response.url for p in plans.values()) else None)
     response = page.goto(base)
     assert response.status == 200
     for label, path in [
@@ -61,16 +62,16 @@ with sync_playwright() as p:
         ('see its source anchors', 'Anchored-source/'),
         ('Try a runnable page', 'blog/page/'),
         ('read the runnable post', 'blog/notes/2026-10-8-running-lean-in-a-post/'),
+        ('Try the runnable slides', 'slides/'),
     ]:
         link = page.get_by_role('link', name=label, exact=True)
         assert link.evaluate('(e) => e.href') == base + path
     assert page.get_by_role('heading', name='Slides', exact=True).count() == 1
-    assert 'Slide support is planned' in page.locator('body').inner_text()
     for width in [1280, 390]:
         page.set_viewport_size({'width': width, 'height': 900})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.screenshot(path=str(root / f'_out/landing-{width}.png'), full_page=True)
-    checks.append('landing links resolve to Manual and Blog; Slides is marked planned; both viewports fit')
+    checks.append('landing links resolve to all three genres; both viewports fit')
     for path, declaration, role, value, genre in [
         ('Greeting/', 'LeanRunGate.greet', 'greet', '世界 🌍', 'Manual'),
         ('Exact-natural-numbers/', 'LeanRunGate.double', 'double', '9007199254740993', 'Manual'),
@@ -80,10 +81,32 @@ with sync_playwright() as p:
         ('blog/notes/2026-10-8-running-lean-in-a-post/', 'LeanRunBlog.Examples.greet', 'greet', '世界 🌍', 'Blog'),
         ('blog/notes/2026-10-8-running-lean-in-a-post/', 'LeanRunBlog.Examples.card', 'card', '<b>& Ada', 'Blog'),
         ('blog/notes/2026-10-8-running-lean-in-a-post/', 'LeanRunBlog.Examples.count', 'count', '11', 'Blog'),
+        ('slides/', 'LeanRunGate.Helper.twice', 'twice', '9007199254740993', 'Slides'),
+        ('slides/', 'LeanRunBlog.Examples.greet', 'greet', '世界 🌍', 'Slides'),
+        ('slides/', 'LeanRunBlog.Examples.card', 'card', '<b>& Ada', 'Slides'),
+        ('slides/', 'LeanRunBlog.Examples.count', 'count', '11', 'Slides'),
     ]:
+        print(f'CHECK {genre} {path} {role}', flush=True)
         response = page.goto(base + path)
         assert response.status == 200, (path, response.status)
         page.wait_for_selector('.lean-run[data-enhanced]')
+        if genre == 'Slides':
+            page.wait_for_function('globalThis.Reveal?.isReady() && globalThis.versoVirState === "ready"')
+            page.evaluate('document.fonts.ready')
+            page.wait_for_function('!Reveal.getViewportElement().classList.contains("loading-scroll-mode")')
+            index = {'twice': 0, 'greet': 1, 'count': 2, 'card': 3}[role]
+            page.evaluate('(n) => Reveal.slide(n, 0)', index)
+            if page.evaluate('Reveal.isScrollView()'):
+                # Scroll-mode slide() can stop at the preceding snap boundary.
+                # Advance with the public navigation API, as a reader would.
+                for _ in range(6):
+                    page.wait_for_timeout(100)
+                    current = page.evaluate('Reveal.getIndices().h')
+                    if current == index: break
+                    page.evaluate('Reveal.next()' if current < index else 'Reveal.prev()')
+            page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+            if role == 'greet':
+                page.evaluate('Reveal.nextFragment()')
         form = page.locator('.lean-run[data-experiment*="' + declaration + '"]').first
         form.locator('input').fill(value)
         form.locator('[type=submit]').click()
@@ -107,6 +130,7 @@ with sync_playwright() as p:
     checks.append('no uncaught browser errors')
     browser.close()
 
-result = {'url': base, 'checks': checks, 'publication': plan, 'blogPublication': plans['Blog'], 'runtimeResponses': runtime_responses}
+result = {'url': base, 'checks': checks, 'publication': plan, 'blogPublication': plans['Blog'],
+          'slidesPublication': plans['Slides'], 'runtimeResponses': runtime_responses}
 (root / args.output).write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n')
 print(json.dumps({'url': base, 'checks': checks}, indent=2, ensure_ascii=False))

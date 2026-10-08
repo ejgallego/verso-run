@@ -20,6 +20,6 @@ The Blog genre covers ordinary pages and dated posts, with the same Run controls
 
 # Slides
 
-Slide support is planned. The next adapter will preserve Reveal fragments and
-stop work when a slide is hidden. An executable slide example will appear here
-once that integration is qualified.
+A presentation with native code highlighting and Reveal fragments. Run a function
+during a talk, then move on: hidden slides and fragments stop their workers.
+[Try the runnable slides](../slides/).

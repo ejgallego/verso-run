@@ -274,3 +274,49 @@ viewports, four Manual and four Blog calls match native, no page errors.
 Evidence: blog-local-site.json. Desktop/mobile landing and post captures retained.
 actionlint and git diff --check passed. Actual updated Pages deployment is a
 separate post-publication check; historical public-pair-pages.json is unchanged.
+
+2026-10-08 — Slides adapter and three-genre landing
+
+Added immutable public Slides review snapshot 235aac80e627c11e4f094ced7e4e564ed5ecfe93.
+Its Verso cad4b633 is the parent of our existing 3f6366aa hook. Existing Lean,
+Verso, VIR, Illuminate and runtime pins unchanged; no d390/native-precompile adoption.
+Native Slides fragmentization and typed source children retained under a marked
+wrap. Shared controls are extracted without changing renderConsole's signature.
+preparePublication's original signature/default is preserved; the new explicit
+preparePublicationWithPrefix helper lets Slides use lib/vir with formatter plus
+Run bundles in one runtime inventory. All binaries compose through stock asset
+collision checks, including original built-in theme CSS/fonts and custom themes.
+
+Clean batch lake build passed 857 jobs; final saved-source lake build also passed 857.
+lake test -- --mutations --output _out/slides-compat-acceptance: 81 checks passed,
+including 16 Blog and 20 Slides checks. Earlier campaigns were rerun after actual
+CSS, lifecycle, and API compatibility changes; final logs are retained there.
+Slides includes native-only generation outside checkout, typed full-name bindings,
+one runtime/four manifests, missing bundles/malformed metadata/collisions before
+fresh or accepted output writes, root/nested exact Nat and Unicode native agreement,
+HTML escaping/isolation/cleanup, actual synchronous Stop/slide navigation, fragment
+show/hide and fresh invocation, hidden-submit guard, keyboard ownership, 404/retry,
+pending-load cancellation and stale-result suppression. Mobile controls meet 44px
+and results span the console. Actual mobile scrolling stops a running worker;
+leaving scroll view disposes detached hosts and reattaches restored controls.
+Without JavaScript, native source is visibly readable at 390px with disabled controls.
+Evidence: slides-regression.json and slides-results.json; desktop/mobile captures.
+
+Stock Reveal's mobile scroll-mode slide(h) requires an explicit vertical index;
+slide(h,0) can also land at the preceding snap boundary. The browser harness uses
+public next/prev navigation when needed; actual wheel scrolling is separately
+qualified. No private Reveal implementation or upstream source was patched.
+Stock Slides formatter initialization is retained; only Run workers are lazy.
+Qualified Chromium only; no physical mobile or broad Reveal lifecycle audit claim.
+
+Combined native generation and demo ZIP passed. The three-genre HTTP smoke checks
+15 conditions: inventories match local plans, landing links/desktop/mobile widths,
+12 edited-input Manual/Blog/Slides calls match native Lean, and no page errors.
+Evidence: three-genre-local-site.json; three-genre landing captures. Existing Manual
+URLs and single/TeX output retained; Blog and Slides add no TeX backend.
+Formatter program CID ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a;
+Helper 3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1,
+Blog examples f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff,
+Manual 839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f unchanged.
+Runtime remains e415e41a… / pack SHA 3910c29e…; actual updated Pages qualification
+is a separate post-deployment check. No upstream Slides landing decision is claimed.

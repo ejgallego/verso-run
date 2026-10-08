@@ -72,5 +72,5 @@ it does not acquire Manual's `defSite` policy.
 `lake exe lean-run-blog-demo` produces `_out/blog`, with an overview, a runnable
 Page, and a dated Post. `python3 scripts/build-demo-site.py` generates the combined
 site under `_out/html-multi`: the overview becomes the landing page, Blog lives
-under `blog/`, and existing Manual chapter URLs remain available. Slides has a
-planned section until its own adapter is implemented and qualified.
+under `blog/`, Slides lives under `slides/`, and existing Manual chapter URLs
+remain available. The landing links to runnable examples in all three genres.

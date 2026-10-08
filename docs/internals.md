@@ -11,8 +11,10 @@ prepares the complete validated file inventory without writing it.
 `Manual` supplies inline scope handling and a Run wrapper with native highlighted
 source children. `Publish` decodes Manual wrappers and writes the common plan into
 the selected HTML layout. Public imports remain `VersoLeanRun` and
-`VersoLeanRun.Publish`. The [genre review](multi-genre.md) describes the remaining
-Blog and Slides work; only Manual is currently supported.
+`VersoLeanRun.Publish`. Blog adapters collect typed Page/Post sites. Slides adapters
+retain native source wrappers and compose Run resources with the stock formatter
+asset plan. Both reuse the same model, source loader, console, and worker.
+The [genre review](multi-genre.md) describes those boundaries.
 
 ## Resource ownership and site integration
 
@@ -123,6 +125,7 @@ highlighted source without interactive controls.
 | Verso | `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` |
 | VIR | `bda79d5c4ab7d061c971fcd8917f536393ec03ee` (a PR #217 snapshot) |
 | Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
+| Slides | `235aac80e627c11e4f094ced7e4e564ed5ecfe93` (public review snapshot) |
 | Runtime | `e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd` |
 
 The minimal Verso fork is based on release `cad4b633` and exposes the existing

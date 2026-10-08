@@ -16,6 +16,7 @@ link. Enable the Actions publishing source and rerun the workflow when ready.
 The project URL is <https://ejgallego.github.io/verso-run/>.
 Try `/Stack-calculator/`, `/HTML-greeting/`, or `/Illuminate-diagrams/` beneath it.
 The landing page also links to `/blog/page/` and a runnable dated Blog post.
+The `/slides/` deck uses the same runtime with native Reveal assets.
 The generated paths are relative, and worker execution at nested prefixes is
 covered by acceptance checks. No generated site files are committed to Git.
 
@@ -37,7 +38,7 @@ check deliberately rejects a different hosted program/runtime publication.
 
 ## Share a complete copy
 
-Generate the combined landing, Manual, and Blog site, then package it:
+Generate the combined landing, Manual, Blog, and Slides site, then package it:
 
 ```sh
 python3 scripts/build-demo-site.py

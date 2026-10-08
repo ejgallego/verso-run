@@ -1,6 +1,6 @@
 # verso-run contributor notes
 
-This is an experimental Verso Manual extension for calling compiled Lean
+This is an experimental Verso Manual/Blog/Slides extension for calling compiled Lean
 functions through VIR in a dedicated browser worker. Keep the existing
 VersoLeanRun module API and the separation between elaboration, invocation,
 resource publication, and rendering.

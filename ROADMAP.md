@@ -51,21 +51,34 @@ are extracted behind the existing Manual API. `leanRunAnchor` reuses checked
 Verso anchors with an explicit imported scalar entry and a producer-owned bundle.
 The demo includes ordinary and runnable displays of the same source region.
 
-The Blog adapter now covers Page and Post with native highlighted source,
-typed site collection, shared resource publication, and explicit renderer URLs
-for nested posts. The landing page links to both genres and marks Slides as planned.
-Select a compatible Slides revision before implementing its source, asset,
-and Reveal lifecycle adapter.
-Preserve each genre's native highlighted blocks, links, styling, and static
-fallback. Qualify an independent example in each genre before claiming support
-beyond Manual and Blog. Keep the public VIR integration gate separate.
+Blog covers Page and Post with native highlighted source, typed site collection,
+shared resource publication, and explicit renderer URLs for nested posts.
+Slides uses the compatible public `235aac80` snapshot, native fragmentized
+source, a shared formatter/Run runtime inventory, and the stock asset planner.
+Slide/fragment hiding cancels workers and pending loads; input keys stay with
+the form. Native source remains readable without JavaScript.
+The landing links to executable examples in all three genres.
+
+Preserve each genre's native links, styling, source, and lifecycle. Future Slides
+updates require deliberate dependency selection and qualification. The owner
+retains upstream landing decisions for its review snapshot.
+
+## Native build improvements
+
+VIR [PR #223](https://github.com/ejgallego/lean-vir/pull/223) separates native
+compiler libraries from JavaScript-only externs. It is a draft stacked on #217;
+this repository has not adopted its `d390c004` head. Once a compatible source is
+selected, qualify native precompilation in a separate slice and measure cold/warm
+builds and author iteration. Keep browser runtime matching and ordinary consumer
+acquisition intact; do not combine this with compiler scheduling changes.
 
 ## Later Verso upstreaming slice
 
 Group Verso core work for later review: the public highlighting hook and any
 shared hooks required by the anchors/genre work. Discuss compiler scheduling
 with the compiler maintainer before changing `compiler.postponeCompile false`.
-Native precompilation remains deferred pending the separate VIR fix.
+Native precompilation remains deferred until the separate VIR fix is adopted
+and qualified here.
 
 ## Deferred qualification
 

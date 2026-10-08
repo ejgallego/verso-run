@@ -64,5 +64,10 @@ export function enhance(element) {
     host.invoke(input.value).catch(() => {}); // Host owns all state/error reporting.
   });
   stop.addEventListener("click", () => host.stop());
+  element.addEventListener("lean-run-stop", () => host.stop());
+  element.addEventListener("lean-run-dispose", () => {
+    host.dispose();
+    owners.delete(host);
+  });
   input.addEventListener("input", () => host.stop("idle"));
 }

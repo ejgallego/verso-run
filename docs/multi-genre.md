@@ -1,7 +1,7 @@
 # Source anchors and multiple genres
 
-Source review dated 2026-10-07; Blog implementation added 2026-10-08.
-Manual and Blog Page/Post are implemented. Slides remains a proposal.
+Source review dated 2026-10-07; Blog and Slides implemented 2026-10-08.
+Manual, Blog Page/Post, and Slides reuse the common execution boundary.
 The [dependency pins](internals.md#pinned-dependencies) and public
 `VersoLeanRun` / `VersoLeanRun.Publish` imports remain unchanged.
 
@@ -125,30 +125,39 @@ nested copied Blog sites exercise this distinction. Also, pinned Blog
 does not implement Manual's `defSite` policy: preserve Blog's existing code/link
 behavior rather than promising identical definition targets.
 
-**Slides:** the inspected [verso-slides source][slides-basic] has native
-highlighted code and Reveal fragments but no production `ExternalCode Slides`
-instance. Its block extension is a closed enum. Existing `.wrap` and `.ofHtml`
-constructors offer a possible initial adapter: a marked wrapper with strictly
-decoded experiment metadata, native source children, and common console HTML.
-Retain the typed AST for collection; do not discover exports by scraping rendered
-HTML. A dedicated Run constructor or open extension hook can be discussed later
-if the minimal wrapper proves inadequate.
+**Slides:** the selected [public review snapshot][slides-assets] has native
+highlighted code and Reveal fragments. The adapter adds `ExternalCode Slides`
+using that fragmentization, without side panels or stretch for Run blocks. Its
+closed block enum remains unchanged: a marked `.wrap` contains native source
+children and shared console controls via `.ofHtml`. Collection strictly decodes
+metadata from the typed AST before any generation. `+collapsed` is enhanced in
+the browser; the no-JavaScript layout retains readable source.
 
-A Slides `ExternalCode` instance should reuse its existing code fragmentization,
-panel, and stretch behavior. Reveal slide changes and hidden fragments also need
-to terminate affected workers; page unload alone is insufficient. Check keyboard
-submission against Reveal's shortcuts.
+The common publication planner has a prefix-configurable entry point, while the
+original `preparePublication` API retains its function type and default. Slides uses
+`lib/vir/` and includes the native formatter in the same resource set as the Run
+producers. All binary files enter the stock asset collision plan through theme
+assets. Built-in CSS and fonts retain their original paths; custom themes and
+other settings are preserved. There is one compatible runtime inventory, with
+no copied private asset planner or HTML resource discovery.
 
-The Slides main checkout inspected here is `268257a4` on Lean 4.35.0-rc4, outside
-our frozen Lean 4.34.0 build. A separate owner-managed 4.34 worktree at
-`7bee77a0` demonstrates [VIR binary inventory integration][slides-assets] through
-the normal asset plan, including collisions. It is useful design evidence, not
-a selected dependency or a qualified verso-run adapter. Coordinate with that
-publisher so a site containing both extensions has one compatible runtime plan.
+Reveal slide changes and fragment hide events terminate affected Run workers,
+cancel pending loading, clear previews, and reject stale results. Showing the
+form again allows a fresh call. Hidden forms cannot submit, and input key events
+do not navigate Reveal. Source fragments remain native.
+Scroll navigation also cancels work. Restoring Reveal's saved HTML when leaving
+scroll view disposes detached workers and reattaches the restored forms.
+
+The historical main checkout `268257a4` on Lean 4.35.0-rc4 was unsuitable for our
+frozen toolchain. Selected `235aac80` instead uses Lean 4.34.0 and our exact VIR
+`bda79d5c` / runtime `e415…`. Its required Verso `cad4b633` is the parent of our
+existing `3f6366aa` highlighting-hook revision. Existing pins remain unchanged;
+only the new Slides dependency is added. This is an experimental review snapshot,
+not an assertion that the owner-managed Slides patch has landed upstream.
 
 Only Manual's TeX fallback is established. Blog retains native source without
 JavaScript; this adapter does not add a Blog TeX backend. Slides should retain
-its own supported static output.
+its own supported static output; Slides now has a readable HTML fallback.
 
 ## Implementation order and acceptance
 
@@ -161,8 +170,8 @@ its own supported static output.
    and highlighting prerequisites; avoid a second per-form compiler pipeline.
 3. Add one Blog adapter for Page and Post using the same anchored example.
    Qualify binary publication and nested-page asset URLs.
-4. Add Slides after selecting a compatible revision with its maintainers.
-   Qualify native fragments, asset-plan composition, and visibility-based Stop.
+4. Add Slides on the selected compatible revision. Qualify native fragments,
+   asset-plan composition, keyboard input, static fallback, and visibility-based Stop.
 
 Acceptance should cover missing/duplicate/unclosed anchors, stale block bodies,
 explicit entry resolution and unsupported interfaces, missing producer bundles, conflicting logical IDs, and missing root declarations, repeated placements of one callable, root and nested hosting,
@@ -175,7 +184,7 @@ ownership checks before claiming anchored HTML support.
 For each implemented slice run `lake build`, then `lake test -- --mutations`
 sequentially, plus executable/browser examples for newly supported genres.
 The shared extraction, anchored Manual implementation, and Blog Page/Post
-checks are described in the [validation record](validation.md).
+and Slides checks are described in the [validation record](validation.md).
 The separate public VIR source/runtime adoption gate remains in force.
 
 [external]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso/Verso/Code/External.lean
@@ -183,4 +192,4 @@ The separate public VIR source/runtime adoption gate remains in force.
 [blog]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso-blog/VersoBlog.lean
 [subverso]: https://github.com/leanprover/subverso/blob/9b90b7f938d6169246325df002351014f49945ef/src/SubVerso/Highlighting/Anchors/Basic.lean
 [slides-basic]: https://github.com/ejgallego/verso-slides/blob/268257a4fbdac12c77be726213b51c3ce3a1d41e/VersoSlides/Basic.lean
-[slides-assets]: https://github.com/ejgallego/verso-slides/blob/7bee77a03c60b6423ed67a3a682fa85d1eb077c0/VersoSlides/Render.lean
+[slides-assets]: https://github.com/ejgallego/verso-slides/blob/235aac80e627c11e4f094ced7e4e564ed5ecfe93/VersoSlides/Render.lean

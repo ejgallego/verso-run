@@ -18,10 +18,11 @@ structure Publication where
   plan : Lean.Json
 
 /-- Resolve declarations and validate contracts before performing any output writes. -/
-def preparePublication (rendered : Array Experiment) (programs : Array Bundle)
+def preparePublicationWithPrefix (resourcePrefix : String)
+    (rendered : Array Experiment) (programs : Array Bundle)
     (runtime : Bundle := Vir.Resources.Runtime.bundle) : Except String Publication := do
   let resources : ResourceSet := { runtime, programs }
-  let site ← (resources.forSite "lean-run/resources").mapError reprStr
+  let site ← (resources.forSite resourcePrefix).mapError reprStr
   let mut bindings : Array (String × (String × Lean.Json)) := #[]
   for experiment in rendered do
     let provenance := s!"{experiment.program}:{experiment.sourceLine}:{experiment.sourceColumn}"
@@ -50,6 +51,11 @@ def preparePublication (rendered : Array Experiment) (programs : Array Bundle)
       ("contract.js", include_str "../../web/contract.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }
   return { files, plan }
+
+/-- Preserve the original publication API and default inventory root. -/
+def preparePublication (rendered : Array Experiment) (programs : Array Bundle)
+    (runtime : Bundle := Vir.Resources.Runtime.bundle) : Except String Publication :=
+  preparePublicationWithPrefix "lean-run/resources" rendered programs runtime
 
 /-- Write an already validated publication to the generator-selected site root. -/
 def writePublication (output : System.FilePath) (publication : Publication) : IO Unit := do
