@@ -39,7 +39,7 @@ checks. The implementation first checks semantic definition membership through
 `withAnchored`, then calls the standard `anchor` expander for body checking and
 source construction. The second lookup uses Verso's populated cache. No copy of
 the internal comparison or suggestion code is needed. A checked callback helper
-could simplify this later, but no additional Verso patch is required for this slice.
+could simplify this later, but no additional Verso patch is required for this adapter.
 
 [SubVerso's anchor implementation][subverso] also rejects duplicate, unmatched,
 and unclosed markers and retains highlighting and proof-state metadata. An
@@ -151,49 +151,42 @@ do not navigate Reveal. Source fragments remain native.
 Scroll navigation also cancels work. Restoring Reveal's saved HTML when leaving
 scroll view disposes detached workers and reattaches the restored forms.
 
-The historical main checkout `268257a4` on Lean 4.35.0-rc4 was unsuitable for our
-frozen toolchain. Selected `daa96fee` uses Lean 4.34.0 and the compatible resource APIs.
-The root resolves shared VIR to exact `957854b9` / runtime `6cddc4b8…`, overriding
-the dependency's historical producer pin. Its required Verso `cad4b633` is the parent of our
-existing `3f6366aa` highlighting-hook revision. Lean, Verso and Illuminate pins remain unchanged; only the selected VIR and
-required compatible Slides revisions change. This is an experimental review snapshot,
-not an assertion that the owner-managed Slides patch has landed upstream.
+The selected Slides revision uses module-owned VIR assets on Lean 4.35.0-rc4.
+The root package locks VIR and Verso explicitly, overriding Slides' dependency
+selections. Verso retains the Manual highlighting hook and adds the upstream
+base-85 proof and deprecation-check adjustments required by Lean 4.35.
+Illuminate retains its original revision. See the [dependency table](internals.md#pinned-dependencies)
+for the exact source/runtime pair. The Slides pin is a review snapshot; upstream
+integration remains separate from this consumer's qualification.
 
 Only Manual's TeX fallback is established. Blog retains native source without
 JavaScript; this adapter does not add a Blog TeX backend. Slides should retain
 its own supported static output; Slides now has a readable HTML fallback.
 
-## Implementation order and acceptance
+## Acceptance invariants
 
-1. Extract the shared model, classifier, console, and publication planner behind
-   the existing Manual facades. Preserve all current behavior and acceptance
-   checks before adding another genre.
-2. Add a checked anchored Manual example, with an explicit entry, imported
-   producer, and unchanged resource graph: support → producer → preparation →
-   carrier → generator. Qualify the source-loader's nested Lake/cache behavior
-   and highlighting prerequisites; avoid a second per-form compiler pipeline.
-3. Add one Blog adapter for Page and Post using the same anchored example.
-   Qualify binary publication and nested-page asset URLs.
-4. Add Slides on the selected compatible revision. Qualify native fragments,
-   asset-plan composition, keyboard input, static fallback, and visibility-based Stop.
+The shared extraction, anchored Manual integration, Blog Page/Post adapter, and
+Slides integration are implemented. Their development sequence is recorded in
+[history](history.md); future changes must preserve the shared resource graph and
+native source rendering.
 
-Acceptance should cover missing/duplicate/unclosed anchors, stale block bodies,
-explicit entry resolution and unsupported interfaces, missing producer bundles, conflicting logical IDs, and missing root declarations, repeated placements of one callable, root and nested hosting,
-independent workers, actual Stop, and static source without JavaScript. Specify
-and test how an explicitly chosen entry relates to the displayed region; an
-anchor's name or token spelling is insufficient evidence of that relationship.
-Retain rejected-build/no-fresh-publication mutation checks. Add HTML adapter
-ownership checks before claiming anchored HTML support.
+Acceptance covers missing/duplicate/unclosed anchors, stale block bodies,
+explicit entry resolution and unsupported interfaces, missing producer bundles,
+conflicting logical IDs, and missing root declarations. Repeated placements keep
+independent workers. Root/nested hosting, actual Stop, native fragments, and
+JavaScript-disabled source remain required behaviors. An entry must belong to
+the selected anchor's semantic declaration set; an anchor name or token spelling
+alone does not establish that relationship.
 
-For each implemented slice run `lake build`, then `lake test -- --mutations`
-sequentially, plus executable/browser examples for newly supported genres.
-The shared extraction, anchored Manual implementation, and Blog Page/Post
-and Slides checks are described in the [validation record](validation.md).
-The separate public VIR source/runtime adoption gate remains in force.
+Retain rejected-build/no-fresh-publication mutation checks and document-owned
+HTML-adapter checks when changing the callable boundary. Run `lake build`, then
+`lake test -- --mutations` sequentially. See [validation](validation.md) for the
+current campaign and limitations. Dependency updates still require a matched
+source/runtime pair and consumer qualification.
 
-[external]: https://github.com/ejgallego/verso/blob/8de896e6241a48f25794e5b6bbacdee89ad375d7/src/verso/Verso/Code/External.lean
-[manual]: https://github.com/ejgallego/verso/blob/8de896e6241a48f25794e5b6bbacdee89ad375d7/src/verso-manual/VersoManual/ExternalLean.lean
-[blog]: https://github.com/ejgallego/verso/blob/8de896e6241a48f25794e5b6bbacdee89ad375d7/src/verso-blog/VersoBlog.lean
+[external]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso/Verso/Code/External.lean
+[manual]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso-manual/VersoManual/ExternalLean.lean
+[blog]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso-blog/VersoBlog.lean
 [subverso]: https://github.com/leanprover/subverso/blob/9b90b7f938d6169246325df002351014f49945ef/src/SubVerso/Highlighting/Anchors/Basic.lean
-[slides-basic]: https://github.com/ejgallego/verso-slides/blob/268257a4fbdac12c77be726213b51c3ce3a1d41e/VersoSlides/Basic.lean
+[slides-basic]: https://github.com/ejgallego/verso-slides/blob/daa96fee635f289e2be95982418483bfb4351402/VersoSlides/Basic.lean
 [slides-assets]: https://github.com/ejgallego/verso-slides/blob/daa96fee635f289e2be95982418483bfb4351402/VersoSlides/Render.lean

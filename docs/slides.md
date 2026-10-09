@@ -88,7 +88,7 @@ and the new controls are attached to fresh hosts.
 Inputs own Enter, arrows, and Space while focused, so typing and submitting do
 not navigate Reveal. `+collapsed` uses a source disclosure after enhancement.
 Without JavaScript, the deck becomes a readable static document with visible
-source and disabled controls. This slice adds no Slides TeX backend.
+source and disabled controls. Slides has no TeX backend here.
 
 The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
@@ -99,12 +99,12 @@ VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
 ## Compatibility and demo
 
-The selected Slides snapshot is
-[`daa96fee`](https://github.com/ejgallego/verso-slides/commit/daa96fee635f289e2be95982418483bfb4351402),
-on Lean 4.35.0-rc4 and root-resolved VIR `957854b9` / runtime `6cddc4b8…`. It is a public review snapshot,
-not a claim that its upstream landing is complete. Our existing Verso pin is
-its required `cad4b633` plus the small Manual highlighting hook, and remains unchanged. The root Lake manifest overrides Slides' nested VIR
-pin with the selected PR #229 source.
+The selected [Slides snapshot](https://github.com/ejgallego/verso-slides/commit/daa96fee635f289e2be95982418483bfb4351402)
+uses module-owned assets on Lean 4.35.0-rc4. The root Lake manifest locks its
+shared VIR and Verso dependencies. The Verso fork supplies the Manual highlighting
+hook and two upstream compiler-compatibility adjustments; Illuminate is unchanged.
+See the [exact dependency and runtime pins](internals.md#pinned-dependencies).
+This consumer qualification does not establish upstream integration of the Slides snapshot.
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined
 `python3 scripts/build-demo-site.py` puts the deck under `_out/html-multi/slides`

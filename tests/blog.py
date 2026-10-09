@@ -47,6 +47,33 @@ for mode, reason in [('missing', 'no published program bundle'), ('malformed', '
     assert not (output/('rejected-'+mode)/'lean-run/publication.json').exists()
     record(mode+' metadata/registration fails before overwriting accepted publication')
 
+# Root qualifies collection/planning; nested also exercises native draft generation.
+for placement in ['root', 'nested']:
+    hidden = output/('draft-hidden-'+placement)
+    command(['lake', 'exe', 'lean-run-blog-draft-check', placement, 'hide', str(hidden)],
+            'draft-hidden-'+placement)
+    hidden_plan = json.loads((hidden/'lean-run/publication.json').read_text())
+    assert hidden_plan['programs'] == {}
+    post_path = Path('2026-10-8-running-lean-in-a-post/index.html')
+    if placement == 'nested': post_path = Path('notes')/post_path
+    assert not (hidden/post_path).exists()
+    record(placement+': hidden draft needs no program bundle and emits no execution bindings')
+    shown = output/('draft-shown-'+placement)
+    command(['lake', 'exe', 'lean-run-blog-draft-check', placement, 'show', str(shown)],
+            'draft-shown-'+placement)
+    shown_plan = json.loads((shown/'lean-run/publication.json').read_text())
+    assert set(shown_plan['programs']) == {'LeanRunBlog.Post'}
+    assert shown_plan['programs']['LeanRunBlog.Post'] == plan['programs']['LeanRunBlog.Post']
+    if placement == 'nested': assert (shown/post_path).is_file()
+    record(placement+': explicit drafts publish canonical callable bindings')
+    for destination in [shown, output/('draft-missing-'+placement)]:
+        error = command(['lake', 'exe', 'lean-run-blog-draft-check', placement, 'missing', str(destination)],
+                        'draft-missing-'+placement+'-'+destination.name, expected=1)
+        assert 'no published program bundle' in error and 'LeanRunBlog.Post' in error
+    assert json.loads((shown/'lean-run/publication.json').read_text()) == shown_plan
+    assert not (output/('draft-missing-'+placement)).exists()
+    record(placement+': visible draft without a bundle fails before overwriting or creating output')
+
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *_): pass
     def handle(self):

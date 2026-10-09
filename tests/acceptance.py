@@ -75,7 +75,7 @@ assert '+Module:virResourcePack' in missing and ':virResourcePack' in missing an
 assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').exists()
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
-command(['lake', 'env', 'lean', 'tests/negative/Unmarked.lean'], 'entry-registration')
+command(['lake', 'env', 'lean', 'tests/EntryRegistration.lean'], 'entry-registration')
 record('entry registers unannotated scalar functions and typed Html without an output option')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
@@ -643,7 +643,7 @@ with sync_playwright() as p:
     browser.close()
 server.shutdown()
 command([sys.executable, 'tests/blog.py', '--output', str(OUTPUT/'blog')], 'blog-adapter')
-record('Blog Page/Post native generation and actual worker qualification')
+record('Blog Page/Post generation, draft policy, and actual worker qualification')
 command([sys.executable, 'tests/slides.py', '--output', str(OUTPUT/'slides')], 'slides-adapter')
 record('Slides native publication, fragment lifecycle, and actual worker qualification')
 command([sys.executable, 'tests/typed-forms.py', '--output', str(OUTPUT/'typed')], 'typed-forms')

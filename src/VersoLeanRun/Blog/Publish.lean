@@ -22,31 +22,36 @@ private def decodeExperiment (block : BlockExt) : Except String (Option Experime
     return some (← Lean.fromJson? experiment)
   | _ => return none
 
-private partial def dirExperiments (dir : Dir) : Except String (Array Experiment) := do
+/-- Use the same draft predicate as VersoBlog.Generate.writeBlog. Hidden posts
+must not require callable bundles or contribute execution bindings. -/
+private def blogExperiments (text : Part Page) (posts : Array BlogPost)
+    (showDrafts : Bool) : Except String (Array Experiment) := do
+  let mut found ← experiments decodeExperiment text
+  for post in posts do
+    if post.contents.metadata.map (·.draft) == some true && !showDrafts then continue
+    found := found ++ (← experiments decodeExperiment post.contents)
+  return found
+
+private partial def dirExperiments (dir : Dir) (showDrafts : Bool) : Except String (Array Experiment) := do
   match dir with
   | .page _ _ text children =>
     let mut found ← experiments decodeExperiment text
-    for child in children do found := found ++ (← dirExperiments child)
+    for child in children do found := found ++ (← dirExperiments child showDrafts)
     return found
-  | .blog _ _ text posts =>
-    let mut found ← experiments decodeExperiment text
-    for post in posts do found := found ++ (← experiments decodeExperiment post.contents)
-    return found
+  | .blog _ _ text posts => blogExperiments text posts showDrafts
   | .static .. => return #[]
 
-/-- Collect from typed Page/Post trees, never rendered HTML. -/
-def siteExperiments (site : Site) : Except String (Array Experiment) := do
+/-- Collect from typed Page/Post trees with the generator's draft policy,
+never rendered HTML. Drafts are excluded unless explicitly requested. -/
+def siteExperiments (site : Site) (showDrafts : Bool := false) : Except String (Array Experiment) := do
   match site with
   | .page _ text children =>
     let mut found ← experiments decodeExperiment text
     for child in children do
       if child.name == "lean-run" then throw "Blog directory 'lean-run' is reserved for execution resources"
-      found := found ++ (← dirExperiments child)
+      found := found ++ (← dirExperiments child showDrafts)
     return found
-  | .blog _ text posts =>
-    let mut found ← experiments decodeExperiment text
-    for post in posts do found := found ++ (← experiments decodeExperiment post.contents)
-    return found
+  | .blog _ text posts => blogExperiments text posts showDrafts
 
 /-- Stock Blog generation plus the shared validated binary inventory. Destination
 and draft policy are explicit, so publication and generation cannot select different roots. -/
@@ -55,7 +60,7 @@ def blogMain (theme : Theme) (site : Site) (programs : Array Vir.Resources.Bundl
     (runtime : Vir.Resources.Bundle := Vir.Resources.Runtime.bundle)
     (components : Components := by exact %registered_components)
     (linkTargets : Verso.Code.LinkTargets TraverseContext := {}) : IO UInt32 := do
-  let found ← IO.ofExcept <| siteExperiments site
+  let found ← IO.ofExcept <| siteExperiments site showDrafts
   let publication ← IO.ofExcept <| preparePublication found programs runtime
   let options := ["--output", destination.toString] ++ (if showDrafts then ["--drafts"] else [])
   let result ← Verso.Genre.Blog.blogMain theme site linkTargets options (components := components)

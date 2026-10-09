@@ -26,6 +26,8 @@ rather than treating successful loading as proof that an example works.
   scalar/Html authoring, native source and source-located rejection diagnostics.
 - Blog Page/Post typed collection, native-only publication, malformed metadata,
   nested asset URLs, automatic typed HTML, no-JavaScript source, and the combined landing.
+- Blog draft policy for root collection/planning and nested native generation:
+  hidden drafts require no bundle; shown drafts require registration before writes.
 - Slides typed collection, one formatter/Run runtime inventory, asset collisions
   before output, native fragments, visibility cancellation, keyboard submission,
   pending-load guards, and readable static source.
@@ -51,11 +53,13 @@ a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
 
-The layout and VIR PR #229 migration passed `lake build`, the 89-check mutation
-suite (including the Blog, Slides, typed-form, and inline campaigns), the
-11-check Git-only cold starter, and the 31-check combined-site gate on
-2026-10-09. Demo packaging also passed. These are local checks; hosted validation
-belongs to the deployed revision.
+The pre-merge layout follow-up passed `lake build` and the 86-check mutation
+suite on 2026-10-09, including 22 Blog checks for draft policy and real workers.
+Three duplicate removed-`output` parser cases were consolidated; entry registration,
+HTML adaptation, collision diagnostics, and genre lifecycle coverage remain.
+The initial migration also passed the 11-check Git-only cold starter, the
+31-check combined-site gate, and demo packaging. The starter's pinned dependency
+is unchanged by this follow-up. Hosted validation belongs to the deployed revision.
 
 
 Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.

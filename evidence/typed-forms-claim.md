@@ -1,5 +1,11 @@
 # Typed Run forms — consumer claim
 
+This is a historical qualification record. Its source pins and coordination
+identifiers describe that earlier campaign, not the current contributor workflow.
+See [internals](../docs/internals.md) for current pins and
+[validation](../docs/validation.md) for current qualification.
+
+
 Authority: `VIR-PR223-ALL-FINDINGS-SELECTED-20261008-001`, confirmed by the
 maintainer's direct instruction on 2026-10-08.
 

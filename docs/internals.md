@@ -149,7 +149,7 @@ compatibility version 3 (resource descriptor version 2). Lake acquires and verif
 authors do not need a separate SDK installation or Wasm build.
 
 
-The VIR pin is the exact source head of open PR #229. Its Lean toolchain
+The VIR pin is the exact source head selected from PR #229. Its Lean toolchain
 and runtime lock must be qualified together. Verso adds the upstream base-85 digit proof and deprecation-check adjustment needed by Lean 4.35, while
 Slides uses its module-owned-assets review snapshot. Illuminate retains its pin; consumer acceptance is recorded separately in
 [validation](validation.md).
