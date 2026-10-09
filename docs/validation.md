@@ -35,7 +35,7 @@ rather than treating successful loading as proof that an example works.
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
-reuse and runs its 11 checks. The starter acquires public extension `a830999` and
+reuse and runs its 11 checks. The starter acquires public extension `c5017a9` and
 the selected runtime through its complete Git manifest, without local seeds.
 
 The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `daa96fee`,
@@ -57,7 +57,8 @@ The ResourceSet API follow-up passed the build and 88-check mutation suite,
 including 23 Blog and 21 Slides checks. Native inventory checks cover explicit
 runtime preservation, exact runtime identity conflicts, corrupt repeated runtimes,
 and rejection before writes. Legacy/new Blog and Slides generators emit identical
-site files; Manual emits identical execution assets.
+site files; Manual emits identical execution assets. The updated ResourceSet
+starter also passed its Git-only no-cache build and all 11 worker checks.
 
 
 The pre-merge layout follow-up passed `lake build` and the 86-check mutation
@@ -65,8 +66,8 @@ suite on 2026-10-09, including 22 Blog checks for draft policy and real workers.
 Three duplicate removed-`output` parser cases were consolidated; entry registration,
 HTML adaptation, collision diagnostics, and genre lifecycle coverage remain.
 The initial migration also passed the 11-check Git-only cold starter, the
-31-check combined-site gate, and demo packaging. The starter's pinned dependency
-is unchanged by this follow-up. Hosted validation belongs to the deployed revision.
+31-check combined-site gate, and demo packaging. The initial starter used published extension `a830999`; the ResourceSet
+follow-up selects and cold-qualifies its new extension pin explicitly. Hosted validation belongs to the deployed revision.
 
 
 Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.

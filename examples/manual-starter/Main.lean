@@ -5,4 +5,4 @@ import VersoLeanRun.Publish
 open Verso Genre Manual
 
 def main := manualMain (%doc Starter.Chapter)
-  (extraSteps := [VersoLeanRun.publish #[Starter.resources]])
+  (extraSteps := [VersoLeanRun.publishResources Starter.resources])
