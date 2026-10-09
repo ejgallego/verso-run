@@ -30,6 +30,8 @@ def renderControls (experiment : Experiment) : Html := Id.run do
     else {{ <input type="text" value={{initial}} placeholder={{placeholder}} maxlength="4096" autocomplete="off"/> }}
   let preview := if experiment.form.isHtml then
     {{ <iframe class="lean-run-preview" title="HTML result" sandbox="" referrerpolicy="no-referrer" hidden="hidden"/> }}
+    else if experiment.form.isSequence then
+      {{ <div class="lean-run-sequence" hidden="hidden"/> }}
     else .empty
   return {{ <div class="lean-run-console">
       <form>

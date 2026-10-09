@@ -1,4 +1,5 @@
 import { ExperimentHost } from "./host.js";
+import { SequencePlayer } from "./sequence.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Set();
 addEventListener("pagehide", event => {
@@ -34,6 +35,15 @@ export function enhance(element) {
     preview.hidden = true;
     preview.removeAttribute("srcdoc");
   };
+  const sequenceElement = element.querySelector(".lean-run-sequence");
+  const sequence = sequenceElement ? new SequencePlayer(sequenceElement, error => {
+    busy = false;
+    run.disabled = false;
+    stop.disabled = true;
+    element.dataset.state = "failed";
+    status.textContent = "Failed";
+    output.textContent = `Could not display the sequence. Try Run again. ${error.message}`;
+  }) : null;
   let busy = false;
   const host = new ExperimentHost(description, (state, value = "") => {
     element.dataset.state = state;
@@ -43,10 +53,26 @@ export function enhance(element) {
     status.textContent = state === "idle" ? "Ready" : state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
     clearPreview();
+    sequence?.clear();
     if (state === "success" && preview) {
       output.textContent = "";
       preview.srcdoc = htmlDocument(value);
       preview.hidden = false;
+    } else if (state === "success" && sequence) {
+      output.textContent = "";
+      busy = true;
+      run.disabled = true;
+      stop.disabled = false;
+      element.dataset.state = "loading view";
+      status.textContent = "Loading view";
+      void sequence.show(value).then(shown => {
+        if (!shown) return;
+        busy = false;
+        run.disabled = false;
+        stop.disabled = true;
+        element.dataset.state = "success";
+        status.textContent = "Success";
+      });
     }
   });
   owners.add(host);

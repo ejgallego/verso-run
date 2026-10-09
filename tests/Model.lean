@@ -8,7 +8,8 @@ open Lean VersoLeanRun
 -- Enumerate the admitted forms once for native round-trips and the browser wire check.
 private def wireForms : Array FormKind :=
   #[FormKind.string .line .text, .string .multiline .text, .nat, .bool, .uint64,
-    .string .line .html, .string .multiline .html]
+    .string .line .html, .string .multiline .html,
+    .string .line .sequence, .string .multiline .sequence]
 
 -- This is the metadata boundary shared by all three native genre collectors.
 #eval show IO Unit from do
@@ -48,6 +49,8 @@ run_cmd Lean.Elab.Command.liftTermElabM do
       (`ContractFixtures.text, .string .multiline .text),
       (`LeanRunGate.htmlGreeting.leanRunHtml, .string .line .html),
       (`LeanRunGate.htmlGreeting.leanRunHtml, .string .multiline .html),
+      (`ContractFixtures.text, .string .line .sequence),
+      (`ContractFixtures.text, .string .multiline .sequence),
       (`ContractFixtures.natural, .nat), (`ContractFixtures.boolean, .bool),
       (`ContractFixtures.unsigned, .uint64)] do
     let info ← Lean.getConstInfo name

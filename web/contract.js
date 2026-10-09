@@ -1,6 +1,6 @@
 // Closed form names match the build-validated Lean FormKind.
 export function scalarKind(form) {
-  if (["string", "multilineString", "html", "multilineHtml"].includes(form)) return "string";
+  if (["string", "multilineString", "html", "multilineHtml", "sequence", "multilineSequence"].includes(form)) return "string";
   if (["nat", "bool", "uint64"].includes(form)) return form;
   throw new Error("Unsupported Lean Run form");
 }
