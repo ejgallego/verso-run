@@ -43,9 +43,9 @@ with serve_directory(site) as base:
                 const source = document.querySelector('.lean-run[data-experiment*=stackView]');
                 const renderer = new URL(source.dataset.leanRunRenderer ||
                     '../lean-run/renderer.js', location.href);
-                const {SequencePlayer} = await import(new URL('./sequence.js', renderer).href);
-                const show = SequencePlayer.prototype.show;
-                SequencePlayer.prototype.show = function(data) {
+                const {ViewHost} = await import(new URL('./presenter.js', renderer).href);
+                const show = ViewHost.prototype.show;
+                ViewHost.prototype.show = function(data) {
                     const result = show.call(this, data);
                     result.then(value => importProbe.settled.push(value),
                                 error => importProbe.settled.push(String(error)));

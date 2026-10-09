@@ -1,5 +1,5 @@
 // One worker owns one VIR program. Terminating this worker cancels synchronous calls.
-import { decodeInput, formatResult, scalarKind } from "./contract.js";
+import { decodeInput, formatPublishedResult, scalarKind } from "./contract.js";
 let program = null;
 let description = null;
 let creating = null;
@@ -37,7 +37,7 @@ onmessage = async ({ data }) => {
     }
     postMessage({ requestId, state: "running" });
     const result = program.call(description.callable, argument);
-    postMessage({ requestId, state: "success", result: formatResult(scalarKind(description.form), result) });
+    postMessage({ requestId, state: "success", result: formatPublishedResult(description.form, result) });
   } catch (error) {
     creating = null;
     try { program?.dispose(); } catch (cleanup) { error.cleanupError = cleanup; }

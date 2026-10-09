@@ -50,13 +50,16 @@ assert plan == json.loads((site/'html-single/lean-run/publication.json').read_te
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 assert inventory(site/'html-multi/lean-run') == inventory(OUTPUT/'native-only/html-multi/lean-run')
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting', 'String'), ('diagram', 'String'), ('double', 'Nat'), ('Helper.twice', 'Nat'), ('spin', 'Nat')]:
+for declaration, input_type, result_type in [('greet', 'String', 'String'),
+        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'String'),
+        ('diagram', 'Nat', 'String'), ('double', 'Nat', 'Nat'),
+        ('Helper.twice', 'Nat', 'Nat'), ('spin', 'Nat', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert set(contract) == {'args', 'result', 'effect'}
     assert contract['effect'] == 'pure'
     assert len(contract['args']) == 1
-    assert contract['args'][0]['type'] == type_name
-    assert contract['result']['type'] == type_name
+    assert contract['args'][0]['type'] == input_type
+    assert contract['result']['type'] == result_type
 chapter_manifest = json.loads((site/'html-multi'/published['LeanRunGate.greet']['manifest']).read_text())
 helper_manifest = json.loads((site/'html-multi'/published['LeanRunGate.Helper.twice']['manifest']).read_text())
 assert chapter_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
@@ -321,12 +324,17 @@ with serve_directory(server_root) as base:
             diagram_widths.append(bounds[2])
         assert diagram_widths[0] < diagram_widths[1] < diagram_widths[2]
         record('Illuminate SVG drawing commands execute in Wasm with native markup, labels, links and changing geometry')
-        for value in ['', '0', '9', '-1', '1.5', 'nodes', '100000000000000000000']:
+        for value in ['0', '9', '100000000000000000000']:
             assert call(diagram_form, value) == ''
             assert oracle('diagram', value) in diagram_form.locator('iframe').get_attribute('srcdoc')
             frame = diagram_form.frame_locator('iframe')
             assert 'from 1 to 8' in frame.locator('[role=alert]').inner_text()
             assert frame.locator('svg').count() == 0
+        for value in ['', '-1', '1.5', 'nodes']:
+            diagram_form.locator('input').fill(value)
+            diagram_form.locator('[type=submit]').click()
+            assert diagram_form.get_attribute('data-state') == 'invalid input'
+            assert diagram_form.locator('iframe').is_hidden()
         assert call(diagram_form, '3') == ''
         assert diagram_form.frame_locator('iframe').locator('svg text').count() == 3
         diagram_form.locator('input').fill('5')
@@ -666,5 +674,8 @@ command([sys.executable, 'tests/inline-genres.py', '--output', str(OUTPUT/'inlin
 record('inline Page/Post/Slides authoring, retained scopes, native source and actual workers')
 command([sys.executable, 'tests/sequence.py', '--output', str(OUTPUT/'sequence')], 'sequence')
 record('typed sequences and Lean/VIR DOM presentation across all genres, cleanup and acquisition cancellation')
+command(['node', 'tests/rendered-wire.mjs'], 'rendered-wire')
+command([sys.executable, 'tests/rendered.py', '--output', str(OUTPUT/'rendered')], 'rendered')
+record('typed rendered inputs, exact structured payloads, shared DOM policy and cross-genre native agreement')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)

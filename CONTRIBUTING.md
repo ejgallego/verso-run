@@ -109,7 +109,7 @@ tree changes. CI runs both before deploying the demo.
 | Path | Purpose |
 | --- | --- |
 | `src/` | Lean block elaboration, HTML rendering, and publication |
-| `web/` | Input validation, browser UI, worker ownership, and invocation |
+| `web/` | Input validation, UI state, worker ownership, and asynchronous invocation |
 | `demo/chapters/` | Manual, Blog, and Slides documents and their Lean functions |
 | `demo/generators/` | Native generators for the three demo genres |
 | `demo/resources/` | Embedded program carriers; `lakefile.lean` owns module registration |
@@ -132,6 +132,12 @@ adapt it to Manual elaboration, native source blocks, and generator output.
 `VersoLeanRun` remains the compatibility facade. `Blog` and `Blog.Publish`
 adapt the same core to Page/Post. `Slides` and `Slides.Publish` retain native code
 and compose with the stock Slides asset plan. See the [genre review](docs/multi-genre.md).
+
+`Sequence` holds pure author states and typed frame transport; `Preview` owns the
+shared sandbox document policy. `VersoLeanRunPresenter` implements browser DOM
+presentation through VIR. Its separate resource carrier keeps browser-only
+definitions out of native generator compilation. `web/presenter.js` owns loading,
+cancellation and disposal for both Html and sequence views.
 
 ## Changing the code
 

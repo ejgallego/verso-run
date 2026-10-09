@@ -58,6 +58,22 @@ a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
 
+The typed-rendering follow-up passed `lake build` and all 92 top-level
+mutation/browser checks, including 22 Blog, 20 Slides, 28 sequence and 14
+rendered-view checks. All 15 admitted forms round-trip through native metadata,
+match independent VIR classification and agree with the browser's input/result
+codecs. The new rendering gate checks Bool → Html and UInt64 → SequenceView in
+Manual, Blog Page/Post and Slides, including exact values above 2^53, UInt64
+wraparound and invalid-input cleanup. Nat → Html uses the existing qualified
+Illuminate drawing-command/SVG path.
+
+Sequence results now cross the worker boundary as typed VIR data. Node checks
+cover structured cloning, malformed payload rejection and the combined UTF-16
+output budget. Html and sequence frames share the compiled Lean preview policy.
+The real held-module regression still covers deadline, Stop, retry with the same
+pending URL and observed late rejection. Slides initialization checks no longer
+assume the first form is visible after Reveal restores the selected slide.
+
 The sequence integration on the String-presentation foundation passed
 `lake build` and all 90 top-level mutation/browser checks, including 22 Blog,
 20 Slides, and 27 sequence checks. All nine form expectations match independent

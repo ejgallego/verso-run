@@ -1,6 +1,7 @@
 module
 public import VersoLeanRun.Blog
 import LeanRunSequence.Examples
+import LeanRunRendered.Examples
 import LeanRunBlog.Examples
 
 open Verso Genre Blog VersoLeanRun.Blog
@@ -82,4 +83,21 @@ Run a program, then choose a step to inspect its before and after stacks.
 ```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +") +collapsed
 public def stackView (program : String) : VersoLeanRun.SequenceView :=
   (evaluate program).view renderSnapshot
+```
+
+# Typed rendering
+
+The input type selects its control; the result type selects its view.
+
+```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true") +collapsed
+public def badge (enabled : Bool) : Html :=
+  {{ <p><strong>{{if enabled then "Enabled" else "Disabled"}}</strong></p> }}
+```
+
+```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615") +collapsed
+public def wordSteps (seed : UInt64) : SequenceView :=
+  let sequence : Sequence UInt64 := {
+    initial := seed
+    steps := #[{ label := "Increment", state := seed + 1 }] }
+  sequence.view fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
 ```

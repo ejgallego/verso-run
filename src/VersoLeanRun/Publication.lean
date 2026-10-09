@@ -8,10 +8,21 @@ public import VersoLeanRun.Model
 public import Lean.Data.Json.Parser
 public import Vir.Resources
 public import Vir.Compiler.Interface.Encode
+public import VersoLeanRun.Sequence
+public meta import Vir.Compiler.Interface.Classify.Signature
+public meta import Vir.Compiler.Interface.Encode
+public meta import Lean.Elab.Term
 public import VersoLeanRunPresenterResources
 public section
 open Vir.Resources
 namespace VersoLeanRun
+
+open Lean Elab Term in
+elab "sequenceCallableExpected%" input:ident : term => do
+  let type := mkForall `input .default (mkConst input.getId) (mkConst ``SequenceWire.Payload)
+  let .ok signature ← Vir.Interface.analyzeExportInterface type
+    | throwError "Cannot classify the typed sequence transport"
+  return mkStrLit signature.toExpectedSignatureJson
 
 /-- Complete validated inventory, ready for a genre's output or asset planner. -/
 structure Publication where
@@ -32,16 +43,22 @@ def combineResources (resources additional : ResourceSet) : Except String Resour
     throw s!"RUNTIME_CONTENT_ID_CONFLICT: cannot combine resource sets with runtimes {resources.runtime.contentId} and {additional.runtime.contentId}"
   return { resources with programs := resources.programs ++ additional.programs }
 
-/-- The classifier admits one pure, homogeneous scalar callable. Encode its
-retained type with VIR's canonical encoder, independently of the program bundle. -/
+/-- Encode the admitted input/result pair through VIR, independently of the
+program bundle. Structured results use the compiled payload layout. -/
 def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
+  if form.isSequence then
+    return ← Lean.Json.parse <| match form.scalar with
+      | .string => (sequenceCallableExpected% String)
+      | .nat => (sequenceCallableExpected% Nat)
+      | .bool => (sequenceCallableExpected% Bool)
+      | .uint64 => (sequenceCallableExpected% UInt64)
   let type : Vir.Interface.InterfaceType := match form.scalar with
     | .string => .string
     | .nat => .nat
     | .bool => .bool
     | .uint64 => .uint64
   let signature : Vir.Interface.ClassifiedSignature := {
-    args := #[{ name := "input", type }], result := type, effect := .pure }
+    args := #[{ name := "input", type }], result := if form.isHtml then .string else type, effect := .pure }
   Lean.Json.parse signature.toExpectedSignatureJson
 
 /-- Plan the supplied inventory without acquiring or replacing its runtime.
@@ -49,7 +66,8 @@ Resolve declarations and validate contracts before performing any output writes.
 def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     (resourcePrefix : String := "lean-run/resources") : Except String Publication := do
   let sequence := rendered.any (·.form.isSequence)
-  let resources ← if sequence then
+  let html := rendered.any (·.form.isHtml)
+  let resources ← if sequence || html then
     combineResources resources VersoLeanRunPresenterResources.resources else pure resources
   let programs := resources.programs
   let site ← (resources.forSite resourcePrefix).mapError reprStr
@@ -75,20 +93,28 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     ("runtimeModule", .str site.runtimeModule),
     ("runtimeManifest", .str site.runtimeManifest),
     ("programs", Lean.Json.mkObj programsJson.toList)]
-  if sequence then
+  if sequence || html then
     let some presenterIndex := programs.findIdx? (·.descriptor.logicalId == "VersoLeanRunPresenter")
-      | throw "No published sequence presenter program"
-    let expected ← VersoLeanRunPresenterResources.expectedMount
-    fields := fields ++ [("presenters", Lean.Json.mkObj [("sequence", Lean.Json.mkObj [
-      ("manifest", .str site.programManifests[presenterIndex]!),
-      ("declaration", .str "VersoLeanRun.Presenter.mount"),
-      ("expectedExport", expected)])])]
+      | throw "No published Lean view presenter program"
+    let manifest := site.programManifests[presenterIndex]!
+    let mut presenters : List (String × Lean.Json) := []
+    if sequence then
+      let expected ← VersoLeanRunPresenterResources.expectedMount
+      presenters := presenters ++ [("sequence", Lean.Json.mkObj [
+        ("manifest", .str manifest), ("declaration", .str "VersoLeanRun.Presenter.mount"),
+        ("expectedExport", expected)])]
+    if html then
+      let expected ← VersoLeanRunPresenterResources.expectedHtml
+      presenters := presenters ++ [("html", Lean.Json.mkObj [
+        ("manifest", .str manifest), ("declaration", .str "VersoLeanRun.Presenter.mountHtml"),
+        ("expectedExport", expected)])]
+    fields := fields ++ [("presenters", Lean.Json.mkObj presenters)]
   let plan := Lean.Json.mkObj fields
   let mut files := site.files.push { path := "lean-run/publication.json", bytes := plan.compress.toUTF8 }
   for (name, contents) in [("renderer.js", include_str "../../web/renderer.js"),
       ("host.js", include_str "../../web/host.js"), ("worker.js", include_str "../../web/worker.js"),
       ("contract.js", include_str "../../web/contract.js"),
-      ("sequence.js", include_str "../../web/sequence.js")] do
+      ("presenter.js", include_str "../../web/presenter.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }
   return { files, plan }
 

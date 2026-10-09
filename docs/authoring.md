@@ -61,8 +61,8 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | Function type | Result display |
 | --- | --- |
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
-| `String → Verso.Output.Html` | An isolated HTML preview |
-| `String → VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
+| `String`, `Nat`, `Bool`, or `UInt64` → `Verso.Output.Html` | An isolated HTML preview |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
 
 A String containing markup is still plain text. There is no `output` block
 argument. Return `Html` when the result is intended to be rendered as HTML:
@@ -81,7 +81,7 @@ CSS and data images; scripts and external embedded resources are disabled.
 Input edits, Stop, pending calls and failures clear the preview. Errors stay
 plain text; the frame scrolls larger results.
 
-The extension generates a scalar serializer for VIR. Authors select the original
+The extension generates a typed transport adapter for VIR. Authors select the original
 Html function. Repeated placements reuse the serializer; a conflicting declaration
 at its generated name causes an author error.
 
@@ -178,8 +178,10 @@ Both views use one parser, execution loop, and set of limits. The stepper can in
 a completed program with several stack values; the calculator additionally asks for
 exactly one final result.
 
-The worker computes states and renders their Html. A separate Lean/VIR DOM
-presenter owns selection and event callbacks. Selecting a frame uses the computed
+The worker computes states and renders their Html. Sequence frames cross the worker
+boundary as typed VIR data, without a JSON envelope. Labels, markup and errors have
+a combined 65,536 UTF-16 code unit budget. A separate Lean/VIR DOM
+presenter owns Html documents, selection and event callbacks. Selecting a frame uses the computed
 presentation and does not rerun the evaluator. Each placement owns both runtimes;
 input edits, Stop and genre navigation cancel acquisition and dispose the view.
 State Html uses the same script-disabled sandbox as an ordinary Html result.

@@ -94,7 +94,7 @@ source and disabled controls. Slides has no TeX backend here.
 The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
 as a textarea. Enter edits without moving Reveal; Ctrl+Enter or ⌘+Enter runs.
-Return `String → Verso.Output.Html` for an automatic document-owned serializer
+Return `Html` from a String, Nat, Bool or UInt64 input for an automatic document-owned serializer
 and isolated preview. String results remain text; no `output` argument or producer
 VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
@@ -115,3 +115,6 @@ This consumer qualification does not establish upstream integration of the Slide
 and links all three genres from the landing page. The deck reuses the existing
 ordinary Helper, Blog and typed source functions for exact numbers, Unicode
 greetings, real Stop and HTML. Its document-owned bundle exports selected wrappers.
+
+Rendered inputs can also return `SequenceView`. The same typed payloads and shared
+Lean/VIR presenter serve every genre; see [authoring](authoring.md#present-a-sequence-of-states).

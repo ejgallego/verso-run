@@ -37,7 +37,7 @@ with ExitStack() as servers:
     shared_hashes = {}
     for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
         shared_hashes[genre] = {}
-        for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js', 'sequence.js']:
+        for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js', 'presenter.js']:
             with urlopen(base + path + 'lean-run/' + name) as response:
                 contents = response.read()
             assert contents == (root / '_out/html-multi' / path / 'lean-run' / name).read_bytes(), (genre, name)

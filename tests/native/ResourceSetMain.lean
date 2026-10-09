@@ -37,7 +37,7 @@ private def identities (programs : Array Vir.Resources.Bundle) : Array (String �
 
 def main : IO Unit := do
   let allExperiments ← IO.ofExcept rendered
-  let experiments := allExperiments.filter (fun experiment => !experiment.form.isSequence)
+  let experiments := allExperiments.filter (fun experiment => !experiment.form.isSequence && !experiment.form.isHtml)
   let resources := LeanRunGate.resources
   let direct ← IO.ofExcept <| VersoLeanRun.preparePublication experiments resources
   let site ← IO.ofExcept <| resources.forSite "lean-run/resources" |>.mapError reprStr

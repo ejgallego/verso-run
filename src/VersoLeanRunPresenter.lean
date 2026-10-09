@@ -5,6 +5,7 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import VersoLeanRun.Sequence
+public import VersoLeanRun.Preview
 public import Vir.Browser
 public meta import Vir.Attributes
 public section
@@ -21,6 +22,11 @@ private def text (element : Js Element) (value : String) : DomM Unit := do
 
 private def attr (element : Js Element) (name value : String) : DomM Unit := do
   Element.setAttribute element (← JsValue.ofString name) (← JsValue.ofString value)
+
+/-- Html and sequence frames share one compiled sandbox-document policy. -/
+@[vir_export]
+def mountHtml (frame : Js Element) (markup : String) : DomM Unit :=
+  attr frame "srcdoc" (Preview.document markup)
 
 private def child (root : Js Element) (selector : String) : DomM (Js Element) := do
   let found ← Element.querySelector root (← JsValue.ofString selector)
@@ -47,8 +53,8 @@ private def controls (frames : Array SequenceWire.Frame) : Html := Id.run do
 /-- The bounded presenter runs in the browser; computation stays in the worker.
 The returned callback removes listeners before the host disposes its runtime. -/
 @[vir_export]
-def mount (root : Js Element) (data : String) : DomM (Js.Function0 Unit) := do
-  let payload ← match SequenceWire.decode data with
+def mount (root : Js Element) (data : SequenceWire.Payload) : DomM (Js.Function0 Unit) := do
+  let payload ← match SequenceWire.validate data with
     | .ok payload => pure payload
     | .error message => failure message
   Element.setInnerHTML root (← JsValue.ofString (controls payload.frames).asString)
@@ -69,7 +75,7 @@ def mount (root : Js Element) (data : String) : DomM (Js.Function0 Unit) := do
     let frame := payload.frames[index]!
     text position s!"Step {index + 1} of {payload.frames.size}: {frame.label}"
     text error (frame.error.getD "")
-    attr preview "srcdoc" (SequenceWire.frameDocument frame.html)
+    attr preview "srcdoc" (Preview.document frame.html)
     attr previous "aria-disabled" (if index == 0 then "true" else "false")
     attr next "aria-disabled" (if index + 1 == payload.frames.size then "true" else "false")
     if let some input ← HTMLInputElement.fromElement range then

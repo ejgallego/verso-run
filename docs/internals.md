@@ -99,16 +99,19 @@ construction. VIR's `createProgram` validates actual root declarations and their
 signatures before runtime instantiation. `forSite` does not check callable types;
 there is no embedded-interface parser or reopening of producer files here.
 
-VIR's `analyzeExportInterface` independently classifies the callable. Only pure,
-homogeneous, single-argument String/Nat/Bool/UInt64 signatures are admitted.
-`Experiment.form : FormKind` retains that scalar type and its allowed presentation.
-Its String constructor carries a `StringInputMode` and `StringPresentation`;
-Nat, Bool, and UInt64 have no presentation parameters. This lets additional String
-views extend the presentation type without weakening scalar invariants. The wire tags are
-`string`, `multilineString`, `nat`, `bool`, `uint64`, `html`, `multilineHtml`,
-`sequence`, or `multilineSequence`.
-HTML forms invoke a compiled String serializer. Unsupported combinations have no
-constructor, and unknown form tags fail native metadata decoding.
+VIR's `analyzeExportInterface` independently classifies the callable. Plain-text
+calls retain pure, homogeneous String/Nat/Bool/UInt64 signatures. Any of these
+inputs may instead return `Html` or `SequenceView`. `Experiment.form : FormKind`
+contains an `InputKind` and `PresentationKind`; multiline mode exists only inside
+`InputKind.string`. Unknown tags and unsupported object encodings fail metadata
+decoding. The fifteen wire names are checked against the shared browser codec.
+
+Html adapters retain the actual input type and return markup Strings. Sequence
+adapters return `SequenceWire.Payload` with arrays, labels, markup and optional
+errors. VIR's native structure codec converts these values; worker messages use
+structured clone, including exact BigInt fields. Publication constructs primitive
+contracts through VIR's canonical encoder and derives structured contracts from
+the actual compiled payload type. Both are independent of downloaded executables.
 
 Shape, display mode, and multiline controls are derived from this form. A second
 signature or JSON encoded inside a String is no longer carried in every experiment.
@@ -181,21 +184,21 @@ Slides uses its module-owned-assets review snapshot. Illuminate retains its pin;
 
 `Sequence α` and `SequenceStep α` hold the author's model; `.view` uses an
 `α → Html` function and produces a concrete `SequenceView`. Entry elaboration
-creates a document-owned String serializer and independently classifies its
-actual scalar signature. Publication adds a separate presenter program and its
-compiler-derived DOM call expectation only when a sequence is present. The
+creates a document-owned typed payload adapter and independently classifies its
+actual export signature. Publication adds the separate presenter program and its
+compiler-derived DOM contracts whenever Html or sequence views are present. The
 presenter carrier retains its complete `ResourceSet`; `combineResources` checks
 its runtime identity against the supplied set before publication. Its manifest
 is resolved by module identity rather than inventory position.
 
 The native generator embeds the presenter resource pack without statically
 importing its browser-only definitions. The carrier loads the prepared module's
-compiled environment to classify the actual `mount` declaration type; it does
+compiled environment to classify the actual `mount` and `mountHtml` declaration types; it does
 not infer a contract from the executable manifest or elaborate another source
 frontend. This keeps JS externs out of native C compilation.
 
 `VersoLeanRunPresenter` uses VIR's existing DOM/event/RuntimeRef APIs. It owns
-selection, scrubbing, frame display and the exact listener identities. Its cleanup
+Html preview documents, selection, scrubbing, frame display and exact listener identities. Its cleanup
 callback removes listeners before the JavaScript lifetime bridge disposes the
 runtime. The bridge handles asynchronous acquisition, generation checks, Stop
 and failure/retry. Computation stays in the dedicated worker; the presenter runs
@@ -211,10 +214,10 @@ also run in compiled Lean, in the separate browser presenter. JavaScript owns
 asynchronous loading, worker messages and cancellation; it does not evaluate the
 model or interpret the sequence's meaning.
 
-The current String/JSON adapter is an internal transport choice. It is separate
-from the author's result type and from the renderer. A structured VIR payload
-could replace it after qualification of compiler contracts, worker transfer,
-exact values and output budgets. DOM references and callbacks remain owned by
+Sequence transport is typed data, with no JSON encoding or parsing in the execution
+path. Html markup remains a String at the sandboxed document boundary. Both previews
+use `Preview.document` in compiled Lean, so their CSP and document style have one
+implementation. The browser bridge owns loading and disposal, not document markup. DOM references and callbacks remain owned by
 the browser presenter and must not cross the worker boundary.
 
 Lake already supports this split through the presenter library's module resource

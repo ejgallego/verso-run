@@ -1,5 +1,5 @@
 import { ExperimentHost } from "./host.js";
-import { SequencePlayer } from "./sequence.js";
+import { ViewHost } from "./presenter.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Set();
 addEventListener("pagehide", event => {
@@ -11,12 +11,6 @@ addEventListener("pagehide", event => {
   if (!event.persisted) owners.clear();
 });
 let instance = 0;
-function htmlDocument(markup) {
-  return '<!doctype html><html><head><meta charset="utf-8">' +
-    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">' +
-    '<style>body{margin:0;font:16px system-ui,sans-serif;color:#1e2936;overflow-wrap:anywhere}</style>' +
-    '</head><body>' + markup + '</body></html>';
-}
 export function enhance(element) {
   if (element.dataset.enhanced) return;
   element.dataset.enhanced = "true";
@@ -30,11 +24,6 @@ export function enhance(element) {
   const status = element.querySelector(".lean-run-status");
   const output = element.querySelector(".lean-run-output");
   const preview = element.querySelector(".lean-run-preview");
-  const clearPreview = () => {
-    if (!preview) return;
-    preview.hidden = true;
-    preview.removeAttribute("srcdoc");
-  };
   const sequenceElement = element.querySelector(".lean-run-sequence");
   let busy = false;
   const setState = (state, value = "") => {
@@ -47,23 +36,17 @@ export function enhance(element) {
       state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
   };
-  const sequence = sequenceElement ? new SequencePlayer(sequenceElement, error => {
-    setState("failed", `Could not display the sequence. Try Run again. ${error.message}`);
+  const pane = sequenceElement || preview;
+  const view = pane ? new ViewHost(pane, sequenceElement ? "sequence" : "html", error => {
+    setState("failed", `Could not display the view. Try Run again. ${error.message}`);
   }) : null;
-  const clearResult = () => {
-    clearPreview();
-    sequence?.clear();
-  };
+  const clearResult = () => view?.clear();
   const host = new ExperimentHost(description, (state, value = "") => {
     clearResult();
-    setState(state, value);
-    if (state === "success" && preview) {
-      output.textContent = "";
-      preview.srcdoc = htmlDocument(value);
-      preview.hidden = false;
-    } else if (state === "success" && sequence) {
+    setState(state, state === "success" && view ? "" : value);
+    if (state === "success" && view) {
       setState("loading view");
-      void sequence.show(value).then(shown => {
+      void view.show(value).then(shown => {
         if (!shown) return;
         setState("success");
       });

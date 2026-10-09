@@ -13,9 +13,11 @@ function waitForModule(imported, signal) {
     signal.removeEventListener("abort", abort));
 }
 
-export class SequencePlayer {
-  constructor(element, onError) {
+export class ViewHost {
+  constructor(element, kind, onError) {
+    if (!["html", "sequence"].includes(kind)) throw new Error("Unsupported Lean view");
     this.element = element;
+    this.kind = kind;
     this.onError = onError;
     this.generation = 0;
     this.program = null;
@@ -33,9 +35,10 @@ export class SequencePlayer {
     try { cleanup?.(); } catch (error) { failure = error; }
     try { program?.dispose(); } catch (error) { failure ??= error; }
     this.element.replaceChildren();
+    if (this.kind === "html") this.element.removeAttribute("srcdoc");
     this.element.hidden = true;
     // Cleanup must never prevent the host from settling Stop or disposal.
-    if (failure) console.error("Sequence cleanup failed", failure);
+    if (failure) console.error("View cleanup failed", failure);
   }
   async show(data) {
     this.clear();
@@ -43,13 +46,13 @@ export class SequencePlayer {
     const controller = this.controller = new AbortController();
     let program;
     const deadline = setTimeout(() => controller.abort(
-      new Error("Sequence view loading timed out. Try Run again.")), 15000);
+      new Error("View loading timed out. Try Run again.")), 15000);
     try {
       const response = await fetch(new URL("./publication.json", import.meta.url), { signal: controller.signal });
-      if (!response.ok) throw new Error(`Sequence publication: HTTP ${response.status}`);
+      if (!response.ok) throw new Error(`View publication: HTTP ${response.status}`);
       const plan = await response.json();
-      const presenter = plan.presenters?.sequence;
-      if (!presenter?.expectedExport) throw new Error("No published sequence presenter contract");
+      const presenter = plan.presenters?.[this.kind];
+      if (!presenter?.expectedExport) throw new Error(`No published ${this.kind} presenter contract`);
       const url = path => new URL(path, new URL("../", import.meta.url));
       const { createProgram } = await waitForModule(
         import(url(plan.runtimeModule).href), controller.signal);
@@ -61,8 +64,10 @@ export class SequencePlayer {
       if (generation !== this.generation) { program.dispose(); return false; }
       this.program = program;
       const cleanup = program.call(presenter.declaration, this.element, data);
-      if (typeof cleanup !== "function") throw new Error("Sequence presenter did not return its cleanup callback");
-      this.cleanup = cleanup;
+      if (this.kind === "sequence") {
+        if (typeof cleanup !== "function") throw new Error("Sequence presenter did not return its cleanup callback");
+        this.cleanup = cleanup;
+      } else if (cleanup !== undefined) throw new Error("HTML presenter returned an invalid Unit");
       this.element.hidden = false;
       this.controller = null;
       return true;

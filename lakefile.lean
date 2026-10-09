@@ -74,6 +74,10 @@ lean_lib LeanRunSequenceExamples where
   srcDir := "demo/chapters"
   roots := #[`LeanRunSequence.Examples]
 
+lean_lib LeanRunRenderedExamples where
+  srcDir := "demo/chapters"
+  roots := #[`LeanRunRendered.Examples]
+
 -- Prepare module-owned packs before embedding them in disjoint carrier libraries.
 -- Keep the graph acyclic: document → module resource facet → carrier → generator.
 

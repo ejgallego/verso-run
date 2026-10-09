@@ -9,15 +9,14 @@ set_option compiler.postponeCompile false
 def rejected (value : Except String α) : Bool :=
   match value with | .ok _ => false | .error _ => true
 
-#guard rejected (SequenceWire.decode "{\"version\":1,\"frames\":[]}")
-#guard rejected (SequenceWire.decode "{\"version\":2,\"frames\":[]}")
+#guard rejected (SequenceWire.validate { version := 1, frames := #[] })
+#guard rejected (SequenceWire.validate { version := 2, frames := #[] })
 
-def payloadWithFrames (count : Nat) : String :=
-  (Lean.toJson (SequenceWire.Payload.mk 1
-    (Array.replicate count (SequenceWire.Frame.mk "Frame" "<p>State</p>" none)))).compress
+def payloadWithFrames (count : Nat) : SequenceWire.Payload :=
+  { version := 1, frames := Array.replicate count (SequenceWire.Frame.mk "Frame" "<p>State</p>" none) }
 
-#guard !rejected (SequenceWire.decode (payloadWithFrames 128))
-#guard rejected (SequenceWire.decode (payloadWithFrames 129))
+#guard !rejected (SequenceWire.validate (payloadWithFrames 128))
+#guard rejected (SequenceWire.validate (payloadWithFrames 129))
 
 -- Known operational states, independently of the native/browser agreement oracle.
 #guard ((LeanRunGate.Stack.evaluate "6 7 * 2 +").steps.map (·.after)) ==
@@ -44,7 +43,7 @@ public def greetingSteps (name : String) : SequenceView :=
 ```
 
 ```leanRun (entry := greetingSteps)
-#check (greetingSteps.leanRunSequence : String → String)
-#guard !(rejected (SequenceWire.decode
+#check (greetingSteps.leanRunSequence : String → SequenceWire.Payload)
+#guard !(rejected (SequenceWire.validate
   (greetingSteps.leanRunSequence "<b>& 世界")))
 ```

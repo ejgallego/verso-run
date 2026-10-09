@@ -33,13 +33,15 @@ for genre, path in [('manual',site/'manual/html-multi'),('blog',site/'blog'),('s
     presenter = plan['presenters']['sequence']
     assert presenter['expectedExport']['effect'] == 'dom'
     assert presenter['expectedExport']['args'][0]['name'] == 'Lean.Vir.Browser.Element'
-    assert presenter['expectedExport']['args'][1] == {'type':'String','interfaceTag':3}
+    payload_type = presenter['expectedExport']['args'][1]
+    assert payload_type['kind'] == 'structure'
+    assert payload_type['name'] == 'VersoLeanRun.SequenceWire.Payload'
     for owner, bindings in plan['programs'].items():
         if 'LeanRunSequence.Examples.stackView' in bindings:
             assert bindings['LeanRunSequence.Examples.stackView']['expectedExport'] == {
                 'args':[{'type':'String','interfaceTag':3}],
-                'result':{'type':'String','interfaceTag':3},'effect':'pure'}
-record('all genres independently classify pure sequence adapters and the separate DOM presenter')
+                'result':payload_type,'effect':'pure'}
+record('all genres independently classify typed payload producers and the separate DOM presenter')
 
 served = output/'served'
 for prefix in ['root','nested/prefix']:

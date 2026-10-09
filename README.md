@@ -77,8 +77,8 @@ The authoring guide explains [imports, block options, HTML, and registration](do
 | `Nat → Nat` | An exact decimal natural number | An exact decimal natural number |
 | `Bool → Bool` | A true/false selector | Plain `true` or `false` |
 | `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
-| `String → Verso.Output.Html` | Text | An isolated HTML preview |
-| `String → SequenceView` | Text | A sequence with previous/next and scrubbing |
+| `String/Nat/Bool/UInt64 → Verso.Output.Html` | The corresponding control above | An isolated HTML preview |
+| `String/Nat/Bool/UInt64 → SequenceView` | The corresponding control above | A sequence with previous/next and scrubbing |
 
 Functions must be public, executable, pure, and monomorphic, with one explicit
 argument. Selecting `entry` registers the callable; no VIR attribute is needed.
