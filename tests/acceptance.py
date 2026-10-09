@@ -66,6 +66,8 @@ assert helper_manifest == chapter_manifest
 record('entry-selected local/imported callables share a document-owned resource and independent signatures')
 command(['lake', 'exe', 'lean-run-resource-set-check'], 'resource-set-adapter')
 record('ResourceSet planner preserves inventories and explicit runtimes and rejects conflicting or corrupt runtimes')
+command(['lake', 'exe', 'lean-run-publication-check', 'bindings'], 'publication-bindings')
+record('publication bindings deduplicate placements and reject conflicting signatures, manifests and callables')
 duplicates = OUTPUT/'duplicate-registration'
 command(['lake', 'exe', 'lean-run-publication-check', 'duplicate', '--output', str(duplicates)],
     'duplicate-registration')

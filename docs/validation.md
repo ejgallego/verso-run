@@ -6,7 +6,11 @@ rather than treating successful loading as proof that an example works.
 
 ## What the suite checks
 
-- Closed form metadata round-trips and rejection of unsupported combinations.
+- Closed form metadata round-trips and rejection of unsupported combinations;
+  native wire tags checked against browser codecs and the generated HTML serializer.
+- Idempotent, document-scoped publication bindings with deterministic output;
+  conflicting signatures, manifests, and callables reject in either order with
+  both source locations, before publication writes.
 - Entry-selected exports without author annotations, type-derived result display,
   unannotated imported producers and document-owned scalar/HTML wrappers.
 - Text, Unicode, exact natural numbers, calculator traces and bounds, typed
@@ -53,6 +57,14 @@ source/dependency/runtime identities; a hosted run requires the deployed revisio
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
+
+Publication binding validation passed `lake build` and all 91 top-level
+mutation/browser checks, including 22 Blog and 20 Slides checks. Native cases
+cover identical registrations, differing placement options, independent document
+and entry namespaces, stable publication bytes under reordering, empty documents,
+and signature/manifest/callable conflicts in both orders with both source locations.
+The native-to-browser wire check covers all seven form tags, and HTML expectation
+classification uses the actual generated serializer.
 
 The String-presentation refinement passed `lake build` and all 89 top-level
 mutation/browser checks. Its normalized expectations match independent VIR
