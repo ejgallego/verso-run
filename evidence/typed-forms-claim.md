@@ -1,5 +1,11 @@
 # Typed Run forms — consumer claim
 
+This is a historical qualification record. Its source pins and coordination
+identifiers describe that earlier campaign, not the current contributor workflow.
+See [internals](../docs/internals.md) for current pins and
+[validation](../docs/validation.md) for current qualification.
+
+
 Authority: `VIR-PR223-ALL-FINDINGS-SELECTED-20261008-001`, confirmed by the
 maintainer's direct instruction on 2026-10-08.
 
@@ -92,7 +98,7 @@ All three genre publication plans exactly match the bda/e415 typed checkpoint;
 all published resource members were checked against their SHA256 identities.
 The isolated gate reused cached dependency builds; no clean consumer build or
 hosted acceptance is claimed. Exact identities and checks are retained in
-[`codec-successor.json`](codec-successor.json).
+the historical `codec-successor.json` (retained in Git at `23f449e`).
 
 The bounded read-only review found no implementation blocker. Its stale Boolean
 rejection example in `docs/troubleshooting.md` is corrected in the preserved main

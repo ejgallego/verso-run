@@ -49,8 +49,9 @@ membership remain authoritative. Anchored proof states can be hidden with
 
 ## Publish a deck
 
-Prepare the deck through its carrier library's bare Module `needs` and fixed
-`:virResourcePack` prerequisite, then embed with no-argument `include_vir_program`,
+Prepare the deck through its asset library's
+`+Module:virResourcePack` prerequisite, then embed with
+`include_vir_assets (modules := #[Module])`,
 as in [Blog publication](blog.md#publish-a-site). Import
 `VersoLeanRun.Slides.Publish` in the native generator:
 
@@ -87,7 +88,7 @@ and the new controls are attached to fresh hosts.
 Inputs own Enter, arrows, and Space while focused, so typing and submitting do
 not navigate Reveal. `+collapsed` uses a source disclosure after enhancement.
 Without JavaScript, the deck becomes a readable static document with visible
-source and disabled controls. This slice adds no Slides TeX backend.
+source and disabled controls. Slides has no TeX backend here.
 
 The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
@@ -98,12 +99,12 @@ VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
 ## Compatibility and demo
 
-The selected Slides snapshot is
-[`35b5d14b`](https://github.com/ejgallego/verso-slides/commit/35b5d14bc97d71981d01957f8a6fc6ea7470a6e4),
-on Lean 4.34.0 and root-resolved VIR `fb5af647` / runtime `e415…`. It is a public review snapshot,
-not a claim that its upstream landing is complete. Our existing Verso pin is
-its required `cad4b633` plus the small Manual highlighting hook, and remains unchanged. The root Lake manifest overrides Slides' nested VIR
-pin with the selected public `fb5af647` source.
+The selected [Slides snapshot](https://github.com/ejgallego/verso-slides/commit/daa96fee635f289e2be95982418483bfb4351402)
+uses module-owned assets on Lean 4.35.0-rc4. The root Lake manifest locks its
+shared VIR and Verso dependencies. The Verso fork supplies the Manual highlighting
+hook and two upstream compiler-compatibility adjustments; Illuminate is unchanged.
+See the [exact dependency and runtime pins](internals.md#pinned-dependencies).
+This consumer qualification does not establish upstream integration of the Slides snapshot.
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined
 `python3 scripts/build-demo-site.py` puts the deck under `_out/html-multi/slides`

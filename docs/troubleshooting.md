@@ -66,9 +66,9 @@ not the rejected replacement. CI deploys only after all checks pass.
 
 ## A program bundle or callable is missing
 
-Add the document's bare Module key (for example, `` `+MyChapter ``) to the resource
-library's `needs`, keep its fixed `:virResourcePack` prerequisite, and embed with
-no-argument `include_vir_program`. Supply that bundle to `VersoLeanRun.publish`. Publication reports the declaration,
+Add the document's module resource facet (for example,
+`` `+MyChapter:virResourcePack ``) to the asset library's `needs`, and embed with
+`include_vir_assets (modules := #[Module])`. Select the program bundle from the returned `ResourceSet` and supply it to `VersoLeanRun.publish`. Publication reports the declaration,
 callable-owning module, and document position when no matching bundle is available.
 Identical bundles deduplicate; distinct bundles with the same module logical ID
 produce `LOGICAL_ID_CONFLICT` before writing execution resources.

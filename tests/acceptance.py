@@ -71,11 +71,11 @@ record('repeated bundle registration deduplicates resources and keeps declaratio
 missing = command(['lake', 'exe', 'lean-run-publication-check', 'missing', '--output',
     str(OUTPUT/'missing-registration')], 'missing-registration', expected=1)
 assert 'LeanRunGate.Chapter:' in missing and 'no published program bundle for LeanRunGate.greet' in missing
-assert 'bare program Module' in missing and ':virResourcePack' in missing and 'include_vir_program' in missing and 'VersoLeanRun.publish' in missing
+assert '+Module:virResourcePack' in missing and ':virResourcePack' in missing and 'include_vir_assets' in missing and 'VersoLeanRun.publish' in missing
 assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').exists()
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
-command(['lake', 'env', 'lean', 'tests/negative/Unmarked.lean'], 'entry-registration')
+command(['lake', 'env', 'lean', 'tests/EntryRegistration.lean'], 'entry-registration')
 record('entry registers unannotated scalar functions and typed Html without an output option')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
@@ -525,12 +525,13 @@ with sync_playwright() as p:
     assert not errors, errors
 
     if args.mutations:
-        chapter=ROOT/'gates/LeanRunGate/Chapter.lean'
-        helper=ROOT/'gates/LeanRunGate/Helper.lean'
+        chapter=ROOT/'demo/chapters/LeanRunGate/Chapter.lean'
+        helper=ROOT/'demo/chapters/LeanRunGate/Helper.lean'
         lakefile=ROOT/'lakefile.lean'
-        resources=ROOT/'resources'
+        resources=ROOT/'demo/resources'
         moved=ROOT/'_registration-layout/resources'
-        originals={p:p.read_text() for p in [chapter, helper, lakefile]}
+        carrier=resources/"LeanRunGate/Resources.lean"
+        originals={p:p.read_text() for p in [chapter, helper, lakefile, carrier]}
         identity=plan['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest']
         try:
             # A rejected replacement must not launch the generator or replace the
@@ -583,18 +584,20 @@ with sync_playwright() as p:
             # Redirect the stock resource library program Module to a real but different module.
             # The carrier still builds; publication must reject the missing Chapter bundle.
             wrong = originals[lakefile].replace(
-                '`+LeanRunGate.Chapter, `@verso_run/LeanRunGateResources:virResourcePack',
-                '`+LeanRunBlog.Page, `@verso_run/LeanRunGateResources:virResourcePack')
+                '`+LeanRunGate.Chapter:virResourcePack',
+                '`+LeanRunBlog.Page:virResourcePack')
             lakefile.write_text(wrong)
+            carrier.write_text(originals[carrier].replace("#[LeanRunGate.Chapter]", "#[LeanRunBlog.Page]"))
             command(['lake','build'],'wrong-root-build')
             for destination in [site, OUTPUT/'wrong-root']:
                 failed=command(['lake','exe','lean-run-demo','--output',str(destination)],
                     'wrong-root-'+destination.name,expected=1)
                 assert 'LeanRunGate.Chapter:' in failed and 'LeanRunGate.greet' in failed
-                assert 'no published program bundle' in failed and 'bare program Module' in failed and ':virResourcePack' in failed and 'include_vir_program' in failed
+                assert 'no published program bundle' in failed and '+Module:virResourcePack' in failed and ':virResourcePack' in failed and 'include_vir_assets' in failed
             assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
             assert not (OUTPUT/'wrong-root/html-multi/lean-run/publication.json').exists()
             lakefile.write_text(originals[lakefile])
+            carrier.write_text(originals[carrier])
             command(['lake','build'],'restore-root-build')
             record('wrong stock producer registration rejects publication and preserves the accepted site')
 
@@ -606,7 +609,7 @@ with sync_playwright() as p:
             assert not (OUTPUT/'conflicting-bundles/html-multi/lean-run/publication.json').exists()
             record('forSite rejects distinct valid same-module bundles with LOGICAL_ID_CONFLICT before writing')
 
-            # Change source and build roots without changing the no-argument carrier include.
+            # Change source and build roots without changing the explicit module include.
             # No prepared pack is moved to the new root: its prerequisite repairs it.
             moved.parent.mkdir(exist_ok=True)
             assert not moved.exists()
@@ -616,19 +619,19 @@ with sync_playwright() as p:
                 staged.rename(Path(tempfile.mkdtemp(prefix='old-prepared-', dir=moved.parent))/'packs')
             layout=originals[lakefile].replace('package verso_run\n',
                 'package verso_run where\n  buildDir := ".lake/registration-build"\n')
-            layout=layout.replace('srcDir := "resources"', 'srcDir := "_registration-layout/resources"')
+            layout=layout.replace('srcDir := "demo/resources"', 'srcDir := "_registration-layout/resources"')
             lakefile.write_text(layout)
             command(['lake','build'],'custom-carrier-layout-build')
             changed=OUTPUT/'custom-carrier-layout'
             generate(changed)
             changed_plan=json.loads((changed/'html-single/lean-run/publication.json').read_text())
             assert changed_plan == plan
-            assert (moved/'.vir-generated/LeanRunGateResources.virres').is_file()
+            assert (ROOT/'.lake/registration-build/lib/lean/vir-assets/LeanRunGate/Chapter.virres').is_file()
             shutil.copytree(changed/'html-single',server_root/'custom-carrier-layout',dirs_exist_ok=True)
             page.goto(base+'custom-carrier-layout/')
             page.wait_for_selector('.lean-run[data-enhanced]')
-            assert call(form_for('LeanRunGate.greet'),'library key') == oracle('greet','library key')
-            record('library-key carrier survives custom source/build roots with identical browser publication')
+            assert call(form_for('LeanRunGate.greet'),'module assets') == oracle('greet','module assets')
+            record('module-owned assets survive custom source/build roots with identical browser publication')
         finally:
             if moved.exists(): moved.rename(resources)
             for source, text in originals.items(): source.write_text(text)
@@ -640,7 +643,7 @@ with sync_playwright() as p:
     browser.close()
 server.shutdown()
 command([sys.executable, 'tests/blog.py', '--output', str(OUTPUT/'blog')], 'blog-adapter')
-record('Blog Page/Post native generation and actual worker qualification')
+record('Blog Page/Post generation, draft policy, and actual worker qualification')
 command([sys.executable, 'tests/slides.py', '--output', str(OUTPUT/'slides')], 'slides-adapter')
 record('Slides native publication, fragment lifecycle, and actual worker qualification')
 command([sys.executable, 'tests/typed-forms.py', '--output', str(OUTPUT/'typed')], 'typed-forms')

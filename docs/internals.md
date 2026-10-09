@@ -24,20 +24,20 @@ The [genre review](multi-genre.md) describes those boundaries.
 ## Resource ownership and site integration
 
 Follow VIR's stock resource workflow, demonstrated by the
-[lakefile](../lakefile.lean) and [carrier](../resources/LeanRunGate/Resources.lean):
+[lakefile](../lakefile.lean) and [carrier](../demo/resources/LeanRunGate/Resources.lean):
 
 1. Register the document as a program library. `entry` validates and registers
    local scalar entries; imported functions and typed HTML get document-owned
    callable adapters. Imports supply their compiled dependency closure. Ordinary
    producer modules need no VIR annotations or separate root resource bundles.
-2. Register a disjoint resource carrier library with the bare program Module
-   in `needs` and the fixed `:virResourcePack` prerequisite:
+2. Register a disjoint resource carrier library with the explicit module resource facet
+   in `needs`:
 
    ```lean
    lean_lib MyResources where
      srcDir := "resources"
      roots := #[`MySite.Resources]
-     needs := #[`+MyChapter, `@my_package/MyResources:virResourcePack]
+     needs := #[`+MyChapter:virResourcePack]
    ```
 
    The demo registers the Manual chapter, Blog Page/Post and Slides deck as
@@ -48,14 +48,16 @@ Follow VIR's stock resource workflow, demonstrated by the
 
    ```lean
    module
-   public import Vir.Resources.Embed
+   public import Vir.Resources.Assets
 
    public def MySite.program : Vir.Resources.Bundle :=
-     include_vir_program
+     (include_vir_assets (modules := #[MyChapter])).programs[0]!
    ```
 
-   The no-argument include resolves the carrier library; its prerequisite survives custom source/build
-   directories; no generated-path changes are needed.
+   The include names the program module and returns a `ResourceSet` containing
+   the locked runtime and prepared programs. This example selects its single
+   program bundle to preserve the existing `VersoLeanRun.publish` API.
+   Module resource facets support custom source/build directories.
 4. Import the chapter, carrier, and `VersoLeanRun.Publish` in the native generator:
 
    ```lean
@@ -134,12 +136,12 @@ highlighted source without interactive controls.
 
 | Component | Pinned revision |
 | --- | --- |
-| Lean | 4.34.0 (`293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`) |
-| Verso | `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` |
-| VIR | `fb5af64788e419affa4a496b144f7f96bed48322` (landed public source) |
+| Lean | 4.35.0-rc4 (required by VIR PR #229) |
+| Verso | `aff0fc92d7b9e56a3b309d409b7ef69629af3770` |
+| VIR | `957854b9df1202d4fadbd00ac5fa34e5adf278cc` (PR #229 head) |
 | Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Slides | `35b5d14bc97d71981d01957f8a6fc6ea7470a6e4` (public review snapshot) |
-| Runtime | `e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd` |
+| Slides | `daa96fee635f289e2be95982418483bfb4351402` (public review snapshot) |
+| Runtime | `6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20` |
 
 The minimal Verso fork is based on release `cad4b633` and exposes the existing
 `toHighlightedLeanBlock` helper; it contains no demo code. The runtime uses VIR
@@ -147,8 +149,7 @@ compatibility version 3 (resource descriptor version 2). Lake acquires and verif
 authors do not need a separate SDK installation or Wasm build.
 
 
-The selected public pair is landed VIR commit `fb5af647` and runtime `e415…`,
-pack SHA256 `3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7`.
-Lean, Verso, and Illuminate retain their previous exact pins. Producer CI status
-belongs to the VIR Module owner; consumer acceptance is recorded separately in
+The VIR pin is the exact source head selected from PR #229. Its Lean toolchain
+and runtime lock must be qualified together. Verso adds the upstream base-85 digit proof and deprecation-check adjustment needed by Lean 4.35, while
+Slides uses its module-owned-assets review snapshot. Illuminate retains its pin; consumer acceptance is recorded separately in
 [validation](validation.md).

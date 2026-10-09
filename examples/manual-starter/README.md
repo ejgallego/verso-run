@@ -26,7 +26,7 @@ Single-page HTML is in `_out/html-single`; TeX is in `_out/tex`.
 Serve the complete HTML directory over HTTP, including `lean-run/` and all
 generated assets. Copying it under a nested URL prefix also works.
 
-This starter pins public extension `cb016c4`, which uses the current `entry` API:
+This starter pins public extension `a830999`, which uses the current `entry` API:
 no export attribute is required, and the result type selects text or HTML display.
 See [the authoring guide](../../docs/authoring.md).
 
@@ -39,14 +39,13 @@ compatible when updating the dependency.
 - `chapters/Starter/Chapter.lean`: the document and runnable declarations.
   `entry` registers scalar callables. Typed HTML entries get an automatic
   scalar adapter named `<entry>.leanRunHtml`.
-- `resources/Starter/Resources.lean`: embeds the prepared program with no-argument
-  `include_vir_program` in the `StarterResources` library.
+- `resources/Starter/Resources.lean`: embeds the prepared program from
+  `include_vir_assets (modules := #[Starter.Chapter])` in the `StarterResources` library.
 - `Main.lean`: registers the embedded bundle with `VersoLeanRun.publish`.
 - `lakefile.lean`: keeps chapter compilation ahead of resource preparation,
   embedding, and the native generator. Its resource library `needs` contains the
-  bare Module key `` `+Starter.Chapter `` and the fixed resource-pack prerequisite;
-  the generated root interface exposes entries selected by the chapter. If renaming the package, update its
-  `@verso_run_starter/StarterResources:virResourcePack` prerequisite.
+  module resource facet `` `+Starter.Chapter:virResourcePack ``;
+  the generated root interface exposes entries selected by the chapter. The module facet is independent of the carrier library or package name.
 - `lake-manifest.json`: locks the extension and its transitive Git dependencies
   to the revisions used to validate this starter.
 

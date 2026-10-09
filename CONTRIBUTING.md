@@ -4,6 +4,68 @@ Start with the [README](README.md) to run the demo and the
 [author starter](examples/manual-starter/README.md) to build a document of your own.
 Repository-specific constraints are in [AGENTS.md](AGENTS.md).
 
+## Worktrees and pull requests
+
+Use one task branch and one worktree under `.worktree/` for new code work. From the
+main checkout, start a task with a descriptive name in place of `example`:
+
+```sh
+git fetch origin
+git worktree add -b feat/example .worktree/example origin/main
+cd .worktree/example
+```
+
+Keep each worktree's build and generated outputs independent. Existing working
+changes and older `.worktrees/` checkouts can remain where they are until their
+tasks are complete. Do not reset the main checkout or move another task's work.
+
+Keep a PR focused on one change. Before submission, inspect the diff and working
+tree, run the validation below sequentially for code changes, and use conventional
+commit subjects. Documentation-only changes need a diff and link review.
+
+Push the task branch and open a PR against `main`:
+
+```sh
+git push -u origin feat/example
+gh pr create --base main --head feat/example --title "feat: describe the change" \
+  --body-file /tmp/verso-run-example-pr.md
+```
+
+Write the description file first: explain the resulting behavior, relevant
+validation and remaining limits. Include screenshots or reproduction instructions
+for visible changes. Use `--draft` if implementation or validation is incomplete.
+Report the PR URL and address review on the same branch.
+
+Merge after the maintainer requests or approves it and CI passes on the current
+head. Record the reviewed head from `gh pr view NUMBER --json headRefOid`, check
+`gh pr checks NUMBER`, and merge that exact revision:
+
+```sh
+gh pr merge NUMBER --squash --match-head-commit REVIEWED_HEAD_SHA
+```
+
+Squash is the default. If the head changes, check the new diff and CI before
+merging. Do not bypass checks. Merging to `main` triggers the demo's Pages workflow;
+report the merge and deployment status separately.
+
+After GitHub confirms the PR is merged, retain any evidence referenced by the PR
+outside disposable worktree outputs. From the main checkout, inspect and remove
+only that task's clean worktree:
+
+```sh
+git -C .worktree/example status --short
+git worktree remove .worktree/example
+git push origin --delete feat/example
+git branch -d feat/example
+```
+
+Skip remote deletion if GitHub already deleted the branch. A squash merge may
+make `git branch -d` refuse because the original commits are not ancestors of
+`main`. Only after confirming that the PR for this exact branch/head is merged
+and all work is preserved, use `git branch -D feat/example`. Never force-remove a
+dirty worktree or clean unrelated directories. Fetch the new `main`; fast-forward
+the main checkout only when its working tree is clean.
+
 ## Build and test
 
 Install [elan](https://github.com/leanprover/elan), [uv](https://docs.astral.sh/uv/),
@@ -53,21 +115,25 @@ uv run --with playwright python tests/worker-gate.py
 
 | Path | Purpose |
 | --- | --- |
-| `support/` | Lean block elaboration, HTML rendering, and publication |
+| `src/` | Lean block elaboration, HTML rendering, and publication |
 | `web/` | Input validation, browser UI, worker ownership, and invocation |
-| `gates/` | The demo chapter, functions, and helper module |
-| `resources/` | Embedded program carriers; `lakefile.lean` owns module registration |
+| `demo/chapters/` | Manual, Blog, and Slides documents and their Lean functions |
+| `demo/generators/` | Native generators for the three demo genres |
+| `demo/resources/` | Embedded program carriers; `lakefile.lean` owns module registration |
 | `examples/manual-starter/` | Copyable independent author project |
 | `tests/` | Native/browser acceptance and negative author fixtures |
-| `docs/`, `evidence/` | Guides, qualification records, and screenshots |
+| `docs/`, `evidence/` | Guides, documentation artwork, and written qualification limits |
 
-`DemoMain.lean` builds the Manual; `BlogMain.lean` builds the Blog site.
-`SlidesMain.lean` builds the deck. `scripts/build-demo-site.py` combines them with a landing page.
-`OracleMain.lean` and `BlogOracleMain.lean` supply native reference results.
-`PublicationMain.lean` checks resource registration with real bundles.
+`demo/generators/DemoMain.lean` builds the Manual; `demo/generators/BlogMain.lean` builds the Blog site.
+`demo/generators/SlidesMain.lean` builds the deck. `scripts/build-demo-site.py` combines them with a landing page.
+`tests/native/OracleMain.lean` and `tests/native/BlogOracleMain.lean` supply native reference results.
+`tests/native/PublicationMain.lean` checks resource registration with real bundles.
 Generated Lake, Beam, VIR, browser, and site outputs stay out of Git.
+Generated qualification reports and prototype captures belong in `_out/` or CI
+artifacts; their earlier versions remain in Git history at `23f449e`. Keep only
+illustrations used by documentation in `docs/images/`.
 
-Within `support/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
+Within `src/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
 `Collect`, and `Publication` hold the common machinery. `Manual` and `Publish`
 adapt it to Manual elaboration, native source blocks, and generator output.
 `VersoLeanRun` remains the compatibility facade. `Blog` and `Blog.Publish`

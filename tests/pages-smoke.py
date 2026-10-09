@@ -41,7 +41,7 @@ if args.revision:
     assert build_identity['dirty'] is False, build_identity
 local_manifest = json.loads((root / 'lake-manifest.json').read_text())
 assert build_identity['dependencies'] == {p['name']: p['rev'] for p in local_manifest['packages']}
-assert build_identity['runtime'] == 'e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd'
+assert build_identity['runtime'] == '6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20'
 plans = {}
 for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
     with urlopen(base + path + 'lean-run/publication.json') as response:

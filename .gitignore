@@ -6,3 +6,6 @@ __pycache__/
 _registration-layout/
 .worktrees/
 .agents/
+.worktree/
+.playwright/
+.cache/

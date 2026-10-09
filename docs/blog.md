@@ -47,9 +47,20 @@ text inference. See [anchor authoring](authoring.md#run-an-anchored-example-from
 
 ## Publish a site
 
-Put each Page/Post document's bare Module key in its carrier library's `needs`,
-retain the fixed `:virResourcePack` prerequisite, and embed with no-argument
-`include_vir_program`. See [resource wiring](internals.md#resource-ownership-and-site-integration). Import
+Use a Page root with blogs in child directories, as the demo does. In the pinned
+Verso revision, native generation of a `Site.blog` root fails because its blog
+traversal registration is missing. Root collection and publication planning are
+tested directly; nested blogs are qualified through native generation.
+
+
+`blogMain` excludes draft posts by default. Its publication collector follows
+the same policy as native Blog generation, so hidden drafts need no program
+bundle and add no callable bindings. Pass `(showDrafts := true)` to generate
+drafts and register their bundles along with the visible documents' bundles.
+
+
+For each Page/Post document, declare `+Module:virResourcePack` in `needs`, and embed with
+`include_vir_assets (modules := #[Module])`. See [resource wiring](internals.md#resource-ownership-and-site-integration). Import
 `VersoLeanRun.Blog.Publish` in the native site generator and call:
 
 ```lean
@@ -69,7 +80,7 @@ text-asset machinery. Every form carries a renderer URL relative to its own
 page, resolved against the page URL independently of any theme's `<base>` tag.
 Deep posts and copied nested sites resolve assets correctly.
 Source remains readable without JavaScript; controls start
-disabled until enhancement. Blog has no TeX backend in this slice.
+disabled until enhancement. Blog has no TeX backend.
 
 ## HTML and interaction
 
@@ -80,7 +91,7 @@ breaks; Ctrl+Enter or ⌘+Enter runs the example.
 Return `String → Verso.Output.Html` for an HTML preview. `entry` creates a
 document-owned scalar serializer automatically; a String result always displays
 plain text. There is no `output` argument and no producer VIR annotation.
-The [demo producer](../gates/LeanRunBlog/Examples.lean) shows this arrangement.
+The [demo producer](../demo/chapters/LeanRunBlog/Examples.lean) shows this arrangement.
 
 Input, `+collapsed`, exact Nat transport, isolated HTML previews, independent
 worker ownership, actual Stop, stale-result guards, and explicit retry use the

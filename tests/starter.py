@@ -51,10 +51,10 @@ for package in manifest["packages"]:
     assert subprocess.check_output(["git", "rev-parse", "HEAD"],
         cwd=project/".lake/packages"/package["name"].strip("«»"), text=True).strip() == package["rev"]
 vir = next(p for p in manifest["packages"] if p["name"] == "lean_vir")
-assert vir["rev"] == "fb5af64788e419affa4a496b144f7f96bed48322"
+assert vir["rev"] == "957854b9df1202d4fadbd00ac5fa34e5adf278cc"
 import hashlib
 runtime_pack = project / ".lake/packages/lean_vir/.vir-generated/VirResourceRuntime.virres"
-assert hashlib.sha256(runtime_pack.read_bytes()).hexdigest() == "3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7"
+assert hashlib.sha256(runtime_pack.read_bytes()).hexdigest() == "8fbf3dd2cc065c714ba17b7093edbcd1e285e7fc6353b7b7594c5031781dccf3"
 assert not any(path.is_symlink() for path in (project / ".lake/packages").iterdir())
 record("cold no-cache starter acquires the exact public extension and runtime with Git dependencies and no seeds/symlinks")
 command(["lake", "exe", "starter-manual", "--with-html-single", "--with-tex", "--depth", "2"],
