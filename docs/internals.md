@@ -207,8 +207,12 @@ Slides uses its module-owned-assets review snapshot. Illuminate retains its pin;
 ## Sequence presentation boundary
 
 `Sequence α` and `SequenceStep α` hold the author's model; `.view` uses an
-`α → Html` function and produces a concrete `SequenceView`. Entry elaboration
-creates a document-owned typed payload adapter and independently classifies its
+`α → Html` function and produces a concrete `SequenceView`. Both sequences and
+views require an initial record, making their nonempty invariant structural.
+`Sequence.iterate` traces a pure `α → α` automaton for an explicit transition count;
+`SequenceView.error` reports an input failure without inventing a model state.
+Entry elaboration reduces the result type to recognize aliases before choosing
+a document-owned typed payload adapter and independently classifies its
 actual export signature. Publication adds the separate presenter program and its
 compiler-derived DOM contracts whenever Html or sequence views are present. The
 presenter carrier retains its complete `ResourceSet`; `combineResources` checks

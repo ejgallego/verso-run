@@ -113,16 +113,14 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
     throwErrorAt config.entry "Lean Run entry '{name}' is non-executable.\n\
       Type: {info.type}\nUse an executable public definition instead of a noncomputable value."
   let entryType ← Lean.Meta.whnf info.type
-  let isHtml := match entryType with
-    | .forallE _ _ result .default =>
-      info.levelParams.isEmpty &&
-        result.isConstOf ``Verso.Output.Html
-    | _ => false
-  let isSequence := match entryType with
-    | .forallE _ _ result .default =>
-      info.levelParams.isEmpty && result.isConstOf ``SequenceView
-    | _ => false
-  let mode : AdapterKind := if isHtml then .html else if isSequence then .sequence else .scalar
+  let mode : AdapterKind ← match entryType with
+    | .forallE binder domain result .default =>
+      if !info.levelParams.isEmpty then pure .scalar else
+        Lean.Meta.withLocalDecl binder .default domain fun argument => do
+          let result ← Lean.Meta.whnf (result.instantiate1 argument)
+          return if result.isConstOf ``Verso.Output.Html then .html
+            else if result.isConstOf ``SequenceView then .sequence else .scalar
+    | _ => pure .scalar
   -- Classify the source interface independently before registering scalar exports.
   -- Html uses markup; SequenceView uses a typed payload with a compiler-derived ABI.
   let sourceName := name

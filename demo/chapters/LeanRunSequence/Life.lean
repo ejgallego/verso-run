@@ -58,18 +58,11 @@ structure State where
   generation : Nat := 0
   board : Board := {}
 
-def simulate (seed : String) : Sequence State := Id.run do
-  match parse seed with
-  | .error message =>
-    return { initial := {}, initialLabel := "Seed", initialError := some message }
-  | .ok initial =>
-    let mut board := initial
-    let mut result : Sequence State := { initial := { board }, initialLabel := "0" }
-    for i in [1:generations + 1] do
-      board := board.step
-      result := { result with steps := result.steps.push {
-        label := toString i, state := { generation := i, board } } }
-    return result
+def State.step (state : State) : State :=
+  { generation := state.generation + 1, board := state.board.step }
+
+def simulate (initial : Board) : Sequence State :=
+  Sequence.iterate State.step { board := initial } generations
 
 private def livePath (board : Board) : String := Id.run do
   let mut path := ""
@@ -98,7 +91,9 @@ def renderState (state : State) : Html :=
 
 -- ANCHOR: lifeView
 public def lifeView (seed : String) : VersoLeanRun.SequenceView :=
-  (simulate seed).view renderState
+  match parse seed with
+  | .error message => SequenceView.error message
+  | .ok board => (simulate board).view renderState
 -- ANCHOR_END: lifeView
 
 end LeanRunSequence.Life

@@ -18,6 +18,23 @@ def payloadWithFrames (count : Nat) : SequenceWire.Payload :=
 #guard !rejected (SequenceWire.validate (payloadWithFrames 128))
 #guard rejected (SequenceWire.validate (payloadWithFrames 129))
 
+-- The initial state is present even for zero transitions. Rendering never calls
+-- the transition, and custom labels describe the same iteration indices.
+def successors := Sequence.iterate (· + 2) (3 : Nat) 3 (fun i => s!"State {i}")
+#guard successors.initial.state == 3
+#guard successors.initial.label == "State 0"
+#guard successors.steps.map (·.state) == #[5, 7, 9]
+#guard successors.steps.map (·.label) == #["State 1", "State 2", "State 3"]
+#guard (Sequence.iterate Bool.not true 0).steps.isEmpty
+#guard (Sequence.iterate Bool.not true 0).initial.state
+#guard (Sequence.iterate Bool.not true 3).steps.map (·.state) == #[false, true, false]
+#guard (Sequence.iterate Bool.not true 0 |>.view fun _ => .empty).toPayload.frames.size == 1
+#guard (SequenceView.error "No initial model").toPayload.frames.size == 1
+#guard (SequenceView.error "No initial model").initial.html.asString == ""
+#guard (SequenceView.error "No initial model").initial.error == some "No initial model"
+
+public abbrev TraceView := SequenceView
+
 -- Known operational states, independently of the native/browser agreement oracle.
 #guard ((LeanRunGate.Stack.evaluate "6 7 * 2 +").steps.map (·.after)) ==
   #[[6], [7, 6], [42], [2, 42], [44]]
@@ -35,9 +52,9 @@ def payloadWithFrames (count : Nat) : SequenceWire.Payload :=
 #doc (Manual) "A generic sequence view" =>
 
 ```leanRun (entry := greetingSteps) (input := "Ada")
-public def greetingSteps (name : String) : SequenceView :=
+public def greetingSteps (name : String) : TraceView :=
   let sequence : Sequence String := {
-    initial := name
+    initial := { label := "Start", state := name }
     steps := #[{ label := "Greeting", state := "Hello, " ++ name }] }
   sequence.view (Verso.Output.Html.text true)
 ```

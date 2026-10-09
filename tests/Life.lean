@@ -25,11 +25,11 @@ def corners := board "#......#\n........\n........\n........\n........\n........
 #guard corners.step.population == 0
 
 #guard board "#\r\n#\r\n" == board "#\n#"
-#guard (simulate "bad").steps.isEmpty && (simulate "bad").initialError.isSome
-#guard (simulate "#########").initialError.isSome
-#guard (simulate "#\n..").initialError.isSome
-#guard (simulate "").initialError.isSome
-#guard (simulate ".#.\n..#\n###").steps.size == 12
+#guard (lifeView "bad").steps.isEmpty && (lifeView "bad").initial.error.isSome
+#guard (lifeView "#########").initial.error.isSome
+#guard (lifeView "#\n..").initial.error.isSome
+#guard (lifeView "").initial.error.isSome
+#guard (simulate (board ".#.\n..#\n###")).steps.size == 12
 -- UTF-8 byte length bounds UTF-16 code units, without a removed JSON envelope.
 #guard (lifeView "########\n########\n########\n########\n########\n########\n########\n########").toPayload.frames.foldl
   (fun size frame => size + frame.label.utf8ByteSize + frame.html.utf8ByteSize +

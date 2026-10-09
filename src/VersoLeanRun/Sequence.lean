@@ -19,10 +19,19 @@ structure SequenceStep (α : Type) where
 
 /-- A finite computation or explanation. Its state and meaning stay in Lean. -/
 structure Sequence (α : Type) where
-  initial : α
+  initial : SequenceStep α
   steps : Array (SequenceStep α) := #[]
-  initialLabel : String := "Start"
-  initialError : Option String := none
+
+/-- Record the initial state and exactly `count` applications of an automaton.
+The transition is pure; labels refer to the iteration index, starting at zero. -/
+def Sequence.iterate (step : α → α) (initial : α) (count : Nat)
+    (label : Nat → String := toString) : Sequence α := Id.run do
+  let mut state := initial
+  let mut steps := #[]
+  for i in [:count] do
+    state := step state
+    steps := steps.push { label := label (i + 1), state }
+  return { initial := { label := label 0, state := initial }, steps }
 
 /-- A state rendered with Verso's existing HTML API. -/
 structure SequenceFrame where
@@ -32,13 +41,18 @@ structure SequenceFrame where
 
 /-- A concrete presentation selected by the function's result type. -/
 structure SequenceView where
-  frames : Array SequenceFrame
+  initial : SequenceFrame
+  steps : Array SequenceFrame := #[]
+
+/-- Report a failure before a model state exists. -/
+def SequenceView.error (message : String) (label : String := "Input") : SequenceView :=
+  { initial := { label, html := .empty, error := some message } }
 
 /-- Render each state without changing the sequence's execution semantics. -/
 def Sequence.view (sequence : Sequence α) (render : α → Html) : SequenceView :=
-  let initial := SequenceFrame.mk sequence.initialLabel (render sequence.initial) sequence.initialError
-  { frames := #[initial] ++ sequence.steps.map fun step =>
-      SequenceFrame.mk step.label (render step.state) step.error }
+  let frame := fun (step : SequenceStep α) =>
+    SequenceFrame.mk step.label (render step.state) step.error
+  { initial := frame sequence.initial, steps := sequence.steps.map frame }
 
 namespace SequenceWire
 
@@ -67,7 +81,8 @@ end SequenceWire
 
 /-- Generated adapters return typed data; VIR owns its boundary conversion. -/
 def SequenceView.toPayload (view : SequenceView) : SequenceWire.Payload :=
-  { version := 1, frames := view.frames.map fun frame =>
-    { label := frame.label, html := frame.html.asString, error := frame.error } }
+  let frame := fun (frame : SequenceFrame) =>
+    ({ label := frame.label, html := frame.html.asString, error := frame.error } : SequenceWire.Frame)
+  { version := 1, frames := #[frame view.initial] ++ view.steps.map frame }
 
 end VersoLeanRun

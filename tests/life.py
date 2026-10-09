@@ -58,7 +58,10 @@ with serve_directory(served) as base:
                 assert frame['html'] in form().locator('iframe').get_attribute('srcdoc')
                 assert form().locator('iframe').get_attribute('sandbox')==''
                 assert form().locator('.lean-run-sequence-error').text_content()==(frame['error'] or '')
-                assert form().frame_locator('iframe').locator('svg').get_attribute('aria-label').startswith('Game of Life generation')
+                if frame['error']:
+                    assert form().frame_locator('iframe').locator('svg').count() == 0
+                else:
+                    assert form().frame_locator('iframe').locator('svg').get_attribute('aria-label').startswith('Game of Life generation')
             return expected
         for prefix in ['root','nested/prefix']:
             for genre,path in [('manual','Game-of-Life/'),('blog','page/'),

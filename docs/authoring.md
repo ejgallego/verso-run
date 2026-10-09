@@ -163,20 +163,47 @@ Verso's existing `Html` type:
 ```lean
 public def Demo.greetingSteps (name : String) : VersoLeanRun.SequenceView :=
   let sequence : VersoLeanRun.Sequence String := {
-    initial := name
+    initial := { label := "Start", state := name }
     steps := #[{ label := "Greeting", state := "Hello, " ++ name }] }
   sequence.view (Verso.Output.Html.text true)
 ```
 
 Select it with `leanRun (entry := Demo.greetingSteps)`. No JSON, export marker or
 output argument is needed. `SequenceStep.error` can report a failure at a state;
-`Sequence.initialError` handles an invalid initial input. Models and views are
-ordinary Lean code and can live in imported modules with checked source anchors.
+the initial state uses the same `SequenceStep` record as later states. Models and
+views are ordinary Lean code and can live in imported modules with checked source anchors.
 The [stack example](../demo/chapters/LeanRunSequence/Examples.lean) renders both sides
 of each step from the calculator's [shared evaluator](../demo/chapters/LeanRunGate/Stack.lean).
 Both views use one parser, execution loop, and set of limits. The stepper can inspect
 a completed program with several stack values; the calculator additionally asks for
 exactly one final result.
+
+For an automaton `step : α → α`, use `Sequence.iterate step initial count`.
+It records the initial state followed by exactly `count` transitions. Zero
+transitions still give one state. The optional fourth argument labels iteration
+indices, starting at zero:
+
+```lean
+def counter (seed : Nat) : SequenceView :=
+  (Sequence.iterate (· + 1) seed 5 (fun i => s!"Iteration {i}")).view
+    (fun n => Verso.Output.Html.text true (toString n))
+```
+
+Both `Sequence` and `SequenceView` require an initial state/frame and have an
+optional array of later steps. A view cannot be empty. Report a failure before a
+model state exists with `SequenceView.error`, rather than constructing a dummy
+state:
+
+```lean
+public def lifeView (seed : String) : SequenceView :=
+  match parse seed with
+  | .error message => SequenceView.error message
+  | .ok board => (simulate board).view renderState
+```
+
+Result-type abbreviations for `Html` and `SequenceView` work like the underlying
+types. The presentation limits still apply to the resulting view; iteration does
+not truncate a trace to fit them.
 
 The worker computes states and renders their Html. Sequence frames cross the worker
 boundary as typed VIR data, without a JSON envelope. Labels, markup and errors have

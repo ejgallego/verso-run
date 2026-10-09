@@ -12,7 +12,7 @@ public def badge (enabled : Bool) : Html :=
 -- ANCHOR: wordSteps
 public def wordSteps (seed : UInt64) : SequenceView :=
   let sequence : Sequence UInt64 := {
-    initial := seed
+    initial := { label := "Start", state := seed }
     steps := #[{ label := "Increment", state := seed + 1 }] }
   sequence.view fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
 -- ANCHOR_END: wordSteps

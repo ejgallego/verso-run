@@ -90,7 +90,7 @@ public def badge (enabled : Bool) : Html :=
 ```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615") +collapsed
 public def wordSteps (seed : UInt64) : SequenceView :=
   let sequence : Sequence UInt64 := {
-    initial := seed
+    initial := { label := "Start", state := seed }
     steps := #[{ label := "Increment", state := seed + 1 }] }
   sequence.view fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
 ```
@@ -104,5 +104,7 @@ Try `###` on one line for a blinker, or `##` on each of two lines for a still li
 
 ```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := ".#.\n..#\n###") +multiline +collapsed
 public def lifeView (seed : String) : VersoLeanRun.SequenceView :=
-  (simulate seed).view renderState
+  match parse seed with
+  | .error message => SequenceView.error message
+  | .ok board => (simulate board).view renderState
 ```

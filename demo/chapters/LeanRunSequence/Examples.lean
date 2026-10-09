@@ -11,8 +11,8 @@ abbrev Snapshot := LeanRunGate.Stack.TraceStep
 
 def evaluate (program : String) : Sequence Snapshot :=
   let trace := LeanRunGate.Stack.evaluate program
-  { initial := { label := "Start", before := [], after := [] }
-    initialError := trace.initialError
+  let start : Snapshot := { label := "Start", before := [], after := [] }
+  { initial := { label := "Start", state := start, error := trace.initialError }
     steps := trace.steps.map fun step => { label := step.label, state := step, error := step.error } }
 
 private def stackCells (values : List Nat) : Html :=
