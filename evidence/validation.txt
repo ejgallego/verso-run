@@ -449,3 +449,9 @@ typed Html alongside existing source anchors. Active native resources remain
 Manual chapter, Page/Post, deck, formatter and runtime. All published member
 SHA256 identities verified; exact records in inline-genres-results.json.
 Local combined demo and full ZIP regenerated with current inline examples.
+
+2026-10-09 — landed VIR public adoption and publication-loading cancellation
+Core source cb016c437bc566f77c01d86e2e77ba012ecfb0e4; initial adoption90414e5; preserved base11b5 plus all187 live inputs archived before writes. Exact VIRfb5af64788e419affa4a496b144f7f96bed48322, Slides35b5d14bc97d71981d01957f8a6fc6ea7470a6e4, unchanged e415/runtime SHA3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7. Actual shared Lake Git heads checked; Lean/Verso/Illuminate pins unchanged.
+Commands: lake build; lake test -- --mutations --output _out/public-adoption/cancellation-acceptance. Build866, acceptance89 (typed29, inline26, Blog16, Slides20); focused lifecycle7. Initial full run logged a Playwright cleanup callback for the deliberately held aborted route; current route cleanup was fixed and requalified by the isolated real-browser regression (2 checks). Exact pre-fix host fails the prompt-settlement regression.
+Combined local site31 checks includes exact served host/worker/codec/renderer bytes, typed controls and inline examples. Six unique packs, all267 emitted resource hashes and all3 publication plans match the actual preserved baseline; host bytes intentionally change. Isolated9421 remains clean and historical.
+Cold no-cache unseeded Git starter against90414e5 passed11; current starter pins repaired public cb016c437bc566f77c01d86e2e77ba012ecfb0e4. Final exact main CI/cold starter and hosted revision are separate gates, not inferred from this local record. No producer/Slides source edits, new runtime, alias4, PR226, native precompilation, warm-runtime changes, or stepper implementation.

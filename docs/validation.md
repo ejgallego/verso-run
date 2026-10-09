@@ -33,13 +33,26 @@ rather than treating successful loading as proof that an example works.
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
-reuse and runs its 11 checks. The starter acquires public extension `177b6c1` and
+reuse and runs its 11 checks. The starter acquires public extension `cb016c4` and
 the selected runtime through its complete Git manifest, without local seeds.
+
+The selected dependencies are public VIR `fb5af647` and compatible Slides `35b5d14b`,
+with unchanged runtime `e415…`. The compiler-owned expectation codec and bare Module
+resource prerequisites preserve all six unique packs and 267 emitted member hashes.
+Publication loading cancellation is qualified before any response, with fresh-fetch
+retry and concurrent placements. The browser test also checks actual public promise
+settlement; runtime-Wasm cancellation remains a separate test.
+
+The combined-site gate covers typed and inline examples and compares all four shared
+JavaScript files in every genre. `verso-run-build.json` records the generator's exact
+source/dependency/runtime identities; a hosted run requires the deployed revision and
+a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Evidence to consult
 
 | Record | Scope |
 | --- | --- |
+| [Landed public adoption](../evidence/public-adoption.json) | Local `cb016c4` checkpoint: 89 checks, 7 focused lifecycle checks, 31 combined-site checks, identical executable assets; final cold Git/hosted gates belong to the exact main CI/deployment |
 | [Inline genres](../evidence/inline-genres-results.json) | 86 checks, including 26 inline and 29 typed; Page/Post/Slides definitions, retained scopes, native source and actual workers |
 | [Entry-selected interface](../evidence/entry-interface-results.json) | 85 checks, including 29 typed; annotation-free entries, type-derived output, and document-owned scalar/Html adapters |
 | [Typed form claim](../evidence/typed-forms-claim.md) | Source/base ownership and exact type-only schema agreement; bda/e415 retained |

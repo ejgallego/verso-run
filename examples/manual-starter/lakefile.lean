@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-require verso_run from git "https://github.com/ejgallego/verso-run" @ "90414e5f03867d5bddcc87a670a1b3b2ef0017c4"
+require verso_run from git "https://github.com/ejgallego/verso-run" @ "cb016c437bc566f77c01d86e2e77ba012ecfb0e4"
 
 package verso_run_starter
 

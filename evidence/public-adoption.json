@@ -1,0 +1,1720 @@
+{
+  "base": "11b5c5cdb18a526d0f0a290e651461c74587205c",
+  "preservedBaselineFiles": 187,
+  "preservedBaselineArchiveSha256": "d8494efd9c9ab90f9236e7161ecceb3ea9eac95fd746e9b5bd84679f51a7d144",
+  "vir": "fb5af64788e419affa4a496b144f7f96bed48322",
+  "slides": "35b5d14bc97d71981d01957f8a6fc6ea7470a6e4",
+  "runtime": "e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd",
+  "runtimePackSha256": "3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7",
+  "buildJobs": 866,
+  "acceptanceChecks": 89,
+  "subCampaigns": {
+    "blog": 16,
+    "slides": 20,
+    "typed": 29,
+    "inline": 26
+  },
+  "localSiteChecks": 31,
+  "publicationPlansUnchanged": true,
+  "uniquePacksUnchanged": 6,
+  "emittedMemberHashesUnchanged": 267,
+  "inactiveCarriersPreserved": [
+    "resources/LeanRunGate/HelperResources.lean",
+    "resources/LeanRunTyped/Resources.lean"
+  ],
+  "nativePrecompilation": false,
+  "historicalIsolated": {
+    "head": "9421ffa1b7a412eb1a8436d90ae5d4693ba4562a",
+    "status": "",
+    "executedHead": "e4ea185112f95b815043aea0746f3ce20d2ff31e",
+    "source": "696cc49328906185d6d0284835da7b7d89a97dc5",
+    "runtime": "e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd",
+    "evidence": {
+      "_out/codec-completion.json": "a4b625a9969e2d35194b9bc8f8ddd8b24fe6410778b5dc61873da67d22e70e55",
+      "evidence/codec-successor.json": "82d5d457876fcf601f0522fe7e7af26c9113cab46838e931766cdebf077c869f"
+    }
+  },
+  "identityComparison": {
+    "publicationPlansUnchanged": {
+      "manual": {
+        "programs": {
+          "LeanRunGate.Chapter": {
+            "LeanRunGate.Helper.twice": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunGate.Stack.run": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunGate.diagram": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunGate.double": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunGate.greet": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunGate.htmlGreeting": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunGate.spin": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunTyped.Examples.flip": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 2,
+                    "type": "Bool"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 2,
+                  "type": "Bool"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunTyped.Examples.increment": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 7,
+                    "type": "UInt64"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 7,
+                  "type": "UInt64"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            },
+            "LeanRunTyped.Examples.lines": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+            }
+          }
+        },
+        "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+        "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+      },
+      "blog": {
+        "programs": {
+          "LeanRunBlog.Page": {
+            "LeanRunBlog.Page.Inline.card": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+            },
+            "LeanRunBlog.Page.Inline.greet": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+            },
+            "LeanRunGate.Helper.twice": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+            },
+            "LeanRunTyped.Examples.flip": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 2,
+                    "type": "Bool"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 2,
+                  "type": "Bool"
+                }
+              },
+              "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+            },
+            "LeanRunTyped.Examples.increment": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 7,
+                    "type": "UInt64"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 7,
+                  "type": "UInt64"
+                }
+              },
+              "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+            },
+            "LeanRunTyped.Examples.lines": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+            }
+          },
+          "LeanRunBlog.Post": {
+            "LeanRunBlog.Examples.card": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+            },
+            "LeanRunBlog.Examples.count": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+            },
+            "LeanRunBlog.Examples.greet": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+            },
+            "LeanRunBlog.Post.Inline.card": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+            },
+            "LeanRunBlog.Post.Inline.greet": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+            }
+          }
+        },
+        "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+        "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+      },
+      "slides": {
+        "programs": {
+          "LeanRunSlides.Deck": {
+            "LeanRunBlog.Examples.card": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunBlog.Examples.count": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunBlog.Examples.greet": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunGate.Helper.twice": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 0,
+                    "type": "Nat"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunSlides.Deck.Inline.card": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunSlides.Deck.Inline.greet": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunTyped.Examples.flip": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 2,
+                    "type": "Bool"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 2,
+                  "type": "Bool"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunTyped.Examples.increment": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 7,
+                    "type": "UInt64"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 7,
+                  "type": "UInt64"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            },
+            "LeanRunTyped.Examples.lines": {
+              "expectedExport": {
+                "args": [
+                  {
+                    "interfaceTag": 3,
+                    "type": "String"
+                  }
+                ],
+                "effect": "pure",
+                "result": {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              },
+              "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+            }
+          }
+        },
+        "runtimeManifest": "lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+        "runtimeModule": "lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+      }
+    },
+    "allSiteMemberHashesUnchanged": {
+      "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/program.irpkg": "ac5d689a015a53a5ba0fdd376c24fb101839a2d081f689e57836680745e4e925",
+      "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/program.irpkg-set.json": "f97d2a9b1491c6695ab884a026ee6f594d778d121929ea43f3ee1a8537fb4352",
+      "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json": "d36b4dfd063db65fe8ee6eae74ab8bef37db23512e4fff6deeafc6e7b4a78e57",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/program.irpkg": "b62c2571f1be2db8831930d9ba87c63cecbddee89ddba3fdb18affa0ac2df738",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/program.irpkg-set.json": "164ae1884bc23bcc276de22fac4320d8f37f8aabeb4689b0c5a0f1aaff092609",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json": "c95c7c281eec80ff7a7ca54f47022a28d313b8987dbedc177e384f50b758da9f",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/program.irpkg": "b956891175a118282fa2195a22100ac3f8509a4c0aaea86a8ea8da198e854bd5",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/program.irpkg-set.json": "e40a32038f644dcc5c7b666aa937b62cdea4fc68b7e8707f6caa149d9e156434",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json": "ca3c4655ddea543c3bd16699cf407e40baf6ce0b3485111dd0b677a65a6a432a",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE": "ec9f9f0edffd4204177a59e36ae91454029334b410f2b87f4477bad349da23c2",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES": "00cce2ac071f63d470a287438a7c6bbc4334706be244384e9af4fc9ead11cdce",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE": "8b28515ffffc5c0fe2807d8ae3735b00b324d9b7ce807dd63ff6ac8922fbce7e",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE": "6f306db6390c163410b41f6517867b756207212736b31e50b2639710ccd706d8",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm": "a80e04dbbda9b9d40b98acfb95cde83ec1d75ccc60714aed7e6e8ebd2ef04d0d",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js": "ec9a019db8fc83986aee9c98bd518abc04117a2bbabc480ffec66e4239d34a15",
+      "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json": "fe1421e25a171bd34b2a7b4a468205d7dc934c86d296f4d5764ab4d852c8d6c1",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/program.irpkg": "f80c03320aa3e7b9b4b333e159656e0af2309d70dd6503e40a22147c566d75fc",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/program.irpkg-set.json": "b7b3563ce1bc83f09153a646c8208ef4e4323fd7daa9e81e09a35342187613a6",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json": "619a28f3678f30cd39ab07d7febc428c38eb7e2e12e6237db1aff5a2a507dddb",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/10.irpkg": "e94b152bbfa367a83ff7743f0bf61c30d2d1e25c62103a48bd9b20fb150d4899",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/20.irpkg": "14a09d6741e5e7cffb9e84769d67d2473cb07deb0105f5040835bac723aacc5e",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/6.irpkg": "30a19fe6264e742ceea69e35a6dea77579f9a74155307740bacb3a2760f8ae1d",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/9.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/25.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/8.irpkg": "3fe0dafa7cd3aa5f686a9ff4a44ad52aa1e8ef935ee273a75467984833b2baf5",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/24.irpkg": "461f5c78fc18a7bbe7357070df2e44aea02fd82fd04f325998e034a722089fa7",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/12.irpkg": "fd7c0ff7e16f3afbe08737782c5d0b0b95f51cba4872316ea6215942c5e27e00",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/26.irpkg": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/1.irpkg": "fe01d97abdf58053be592e41c29295f0f5428ba7859865d9a0de84cebf706580",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/32.irpkg": "d21651698fa77a24a91e5283010cd65044bd02333612e77a97b037249bf1b550",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/15.irpkg": "2e212fc09f2012849e27709e1b2a596c5183c20d81aedb25ce4002fae6a3fce1",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/18.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/11.irpkg": "731228e39f1ecabc05d0100c850bff769382586432aacb02ecc83ede19429177",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/14.irpkg": "a708854a4b6abfbcfbb7501d851111caf93f97d62a8f8435ca89cc298ff17155",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/4.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/19.irpkg": "2ad65ee06468bc01f66cea5cab023671f2cd6fc03089d17b80d3044bd0ffa122",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/27.irpkg": "5b0824abf83db86bbeddf3a0a8f15060fdab344295b7a21d245bdf280ffb1b5e",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/23.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/16.irpkg": "fe0b0f15d1df104aca500b2f32be326dd27df6ea73148d51cc3f458296c93643",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/28.irpkg": "9553d5b9cad17a3bf7422d9d9e8ae9dcb3eb4b503109914b4afcf86fbc2eb7ed",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/5.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/13.irpkg": "fdc72f017d617c9d2fbb1b7122b45bdf59143bbf3825db0d60325931b3db8238",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/31.irpkg": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/2.irpkg": "73ae43dbf1d032a8540a06708a09a9514fd09d4fd2e450d2449c5c2f48b1476e",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/0.irpkg": "373a9228e35ca18e8e793ea9c0379b1765019e1260332d2d809ced56c16ee6ae",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/3.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/29.irpkg": "d5d13f9a2965287600c684a8cb57698d5fae86a1c504e20ed276e22cf12e361d",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/30.irpkg": "4d389aad0db0d63b8b7e9db0860cac12f6b3d4249e346f7fda5c6f8fbc63d3cd",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/22.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/21.irpkg": "f5cada4007e3477e906843cbbaa3c362013700fe31c2583343e0c9bbfea272c9",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/7.irpkg": "93cbbdc09c676254f158eb5f3b4e645785494380613e66cc6e73066dd6af0450",
+      "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/parts/17.irpkg": "485c4c7d42d22d0b7d5223f78df07b8e34cd27945f44f87e163b414d76cd413f",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/10.irpkg": "731228e39f1ecabc05d0100c850bff769382586432aacb02ecc83ede19429177",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/20.irpkg": "f5cada4007e3477e906843cbbaa3c362013700fe31c2583343e0c9bbfea272c9",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/6.irpkg": "30a19fe6264e742ceea69e35a6dea77579f9a74155307740bacb3a2760f8ae1d",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/9.irpkg": "93285858ac4a0b9449c43ec7622eea310dbecef2514035919a681bdeddea55a5",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/25.irpkg": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/8.irpkg": "3fe0dafa7cd3aa5f686a9ff4a44ad52aa1e8ef935ee273a75467984833b2baf5",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/24.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/12.irpkg": "fdc72f017d617c9d2fbb1b7122b45bdf59143bbf3825db0d60325931b3db8238",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/26.irpkg": "5b0824abf83db86bbeddf3a0a8f15060fdab344295b7a21d245bdf280ffb1b5e",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/1.irpkg": "fe01d97abdf58053be592e41c29295f0f5428ba7859865d9a0de84cebf706580",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/15.irpkg": "fe0b0f15d1df104aca500b2f32be326dd27df6ea73148d51cc3f458296c93643",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/18.irpkg": "2ad65ee06468bc01f66cea5cab023671f2cd6fc03089d17b80d3044bd0ffa122",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/11.irpkg": "fd7c0ff7e16f3afbe08737782c5d0b0b95f51cba4872316ea6215942c5e27e00",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/14.irpkg": "2e212fc09f2012849e27709e1b2a596c5183c20d81aedb25ce4002fae6a3fce1",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/4.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/19.irpkg": "14a09d6741e5e7cffb9e84769d67d2473cb07deb0105f5040835bac723aacc5e",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/27.irpkg": "9553d5b9cad17a3bf7422d9d9e8ae9dcb3eb4b503109914b4afcf86fbc2eb7ed",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/23.irpkg": "461f5c78fc18a7bbe7357070df2e44aea02fd82fd04f325998e034a722089fa7",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/16.irpkg": "485c4c7d42d22d0b7d5223f78df07b8e34cd27945f44f87e163b414d76cd413f",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/28.irpkg": "d5d13f9a2965287600c684a8cb57698d5fae86a1c504e20ed276e22cf12e361d",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/5.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/13.irpkg": "a708854a4b6abfbcfbb7501d851111caf93f97d62a8f8435ca89cc298ff17155",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/2.irpkg": "5a44e66f8cd21287a346d363fcfa45b53daeb032a9f0125371bc5b0aa3a512ee",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/0.irpkg": "4ed79fd029dcdfc9eb625d186f34d7f30cf9805a7d0a11bc6bb45b648901c74b",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/3.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/29.irpkg": "4d389aad0db0d63b8b7e9db0860cac12f6b3d4249e346f7fda5c6f8fbc63d3cd",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/30.irpkg": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/22.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/21.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/7.irpkg": "93cbbdc09c676254f158eb5f3b4e645785494380613e66cc6e73066dd6af0450",
+      "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/parts/17.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/1.irpkg": "32cd67c1ed656cc2ff28c605282df03a8747c07e7c9cd4bd0764b82b8c0c6e0e",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/4.irpkg": "d4f6cc2f23df286a6b1f8ebd139a6919d90b0bce51fec28eafedaea235d21024",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/5.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/0.irpkg": "87bbbf84bc034590f8ee2348b90a171556dd9492db8973e90d6b32706d2d1ed4",
+      "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/3.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "slides/lib/vir/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/program.irpkg": "ac5d689a015a53a5ba0fdd376c24fb101839a2d081f689e57836680745e4e925",
+      "slides/lib/vir/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/program.irpkg-set.json": "f97d2a9b1491c6695ab884a026ee6f594d778d121929ea43f3ee1a8537fb4352",
+      "slides/lib/vir/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json": "d36b4dfd063db65fe8ee6eae74ab8bef37db23512e4fff6deeafc6e7b4a78e57",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/program.irpkg": "2a659dcda6a67180ae97554b4bae4d3e3203568167e3612efcfe79a1097e1078",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/program.irpkg-set.json": "e5831d6d823874149b82bae2c61522e65ce26d010beeb16afc69c3c241a75dbf",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/bundle.json": "31e0f1d0a8b4850055a40d1334a984dfc321f21abc07fca8d98a0e10eb48d236",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/program.irpkg": "af7a4820062ce8ee5b882828d24e21baa44f0f0f0709d34a827bc235cb23baa5",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/program.irpkg-set.json": "90f5f84d3b175b73f284826a1a21557504c08464b8f40cea127d30acd844aed5",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json": "9aa38730531bd68cf7e36565db4d3fc9f4e26a252444d2a849ad4f3d5daa3c0f",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/program.irpkg": "3f374e211489cacf43daa688304720b45e75ddaa23b5def64bc27aa4e668aafc",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/program.irpkg-set.json": "619750e1fe24bd14dbf383b9256def10a477564d1a7f0e563cddc4ef90583548",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json": "903050cd27f6d7a39d9d5e6eb59c8de32b7758017f43cbcf5ea1219fd62629fd",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE": "ec9f9f0edffd4204177a59e36ae91454029334b410f2b87f4477bad349da23c2",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES": "00cce2ac071f63d470a287438a7c6bbc4334706be244384e9af4fc9ead11cdce",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE": "8b28515ffffc5c0fe2807d8ae3735b00b324d9b7ce807dd63ff6ac8922fbce7e",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE": "6f306db6390c163410b41f6517867b756207212736b31e50b2639710ccd706d8",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm": "a80e04dbbda9b9d40b98acfb95cde83ec1d75ccc60714aed7e6e8ebd2ef04d0d",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js": "ec9a019db8fc83986aee9c98bd518abc04117a2bbabc480ffec66e4239d34a15",
+      "slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json": "fe1421e25a171bd34b2a7b4a468205d7dc934c86d296f4d5764ab4d852c8d6c1",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/program.irpkg": "12e2a59bd39191342b4f3772feee2e660127d6be3bccbceca46b890294cb7a8d",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/program.irpkg-set.json": "94b580b03f7b268ab23aba0e360aba4cdbaf9e88c4117e83f8e701a01cdb2396",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/bundle.json": "dd23c3013df78e95fb1aa9e5a894da3ea8a8fbd8ff656cefafb192df9d4ff57a",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/program.irpkg": "f80c03320aa3e7b9b4b333e159656e0af2309d70dd6503e40a22147c566d75fc",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/program.irpkg-set.json": "b7b3563ce1bc83f09153a646c8208ef4e4323fd7daa9e81e09a35342187613a6",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json": "619a28f3678f30cd39ab07d7febc428c38eb7e2e12e6237db1aff5a2a507dddb",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/parts/1.irpkg": "359f8fc1c73ad5951db2f2ca7840ef7ac6b82442914b7bfaf0b77c6c2b12ffeb",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/parts/4.irpkg": "c188d5e9c5cd46cad47950c7f929c55d6f1d85b64870afe56e2b615693401e13",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/parts/5.irpkg": "3a8cc6ffb0b1fad2e757e507ae4dc2deec71e2850155aaf7c5505a0b65dc9cfe",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/parts/2.irpkg": "07eb3ea68d1df4d730c71c0583e2ec5be195fa0cffab315522af653193c45e28",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/parts/0.irpkg": "b2ccf89ee4778f1880f3f30a796cb7c1956fccff0f06c47b674c06297ac013c2",
+      "slides/lib/vir/ba68416b65643b594d5a21cbdcf893bc41b80d0df8f2d4e5e1c60fb24145862a/parts/3.irpkg": "5c2d76ebca92de975ca6ed39e7c240d3a7b8c79a41c714ebf6659fa60eb42826",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/10.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/6.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/9.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/8.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/11.irpkg": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/4.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/5.irpkg": "19edc7749dcdcf29a3fc650349e5976e9327f167aafa55c0bbe1e8b2db6378a3",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "slides/lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/7.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/10.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/6.irpkg": "93285858ac4a0b9449c43ec7622eea310dbecef2514035919a681bdeddea55a5",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/9.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/8.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/12.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/15.irpkg": "7c9fcc3d89a47da05f482c4cd81f7183b7115481cd964da87fb593b139e247ef",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/11.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/14.irpkg": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/4.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/16.irpkg": "7c663fbe43d7e442c6a528b5b09e0e3df449151ac31ce7763a34d0e02d6dfd7a",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/5.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/13.irpkg": "885e4173f0f4460e2d3a3fed6ea964f26c2ced42c80d49b8b9060ac021bf1c88",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "slides/lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/parts/7.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/10.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/6.irpkg": "e94b152bbfa367a83ff7743f0bf61c30d2d1e25c62103a48bd9b20fb150d4899",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/9.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/8.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/12.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/15.irpkg": "7c9fcc3d89a47da05f482c4cd81f7183b7115481cd964da87fb593b139e247ef",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/11.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/14.irpkg": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/4.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/16.irpkg": "7c663fbe43d7e442c6a528b5b09e0e3df449151ac31ce7763a34d0e02d6dfd7a",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/5.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/13.irpkg": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "slides/lib/vir/507c7fbf17a9aa9b2d4973461110712839fc8dbd71e43452e3d4161c19b8a948/parts/7.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/1.irpkg": "32cd67c1ed656cc2ff28c605282df03a8747c07e7c9cd4bd0764b82b8c0c6e0e",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/4.irpkg": "d4f6cc2f23df286a6b1f8ebd139a6919d90b0bce51fec28eafedaea235d21024",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/5.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/0.irpkg": "87bbbf84bc034590f8ee2348b90a171556dd9492db8973e90d6b32706d2d1ed4",
+      "slides/lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/3.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "blog/lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/program.irpkg": "ac5d689a015a53a5ba0fdd376c24fb101839a2d081f689e57836680745e4e925",
+      "blog/lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/program.irpkg-set.json": "f97d2a9b1491c6695ab884a026ee6f594d778d121929ea43f3ee1a8537fb4352",
+      "blog/lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json": "d36b4dfd063db65fe8ee6eae74ab8bef37db23512e4fff6deeafc6e7b4a78e57",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/program.irpkg": "794444c1caf75f51a1703f7f8eb2c447930db6b4a8f485075c9292ccdcd8b0d4",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/program.irpkg-set.json": "14012e1bbeea5270967056b7fb245938f45238689c191becb528cd688ada4a63",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json": "88bb2597f2a83aeb4d8f58bcb5f300657af639a538f9ce339a5e0d75133dcdbd",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/program.irpkg": "af7a4820062ce8ee5b882828d24e21baa44f0f0f0709d34a827bc235cb23baa5",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/program.irpkg-set.json": "90f5f84d3b175b73f284826a1a21557504c08464b8f40cea127d30acd844aed5",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json": "9aa38730531bd68cf7e36565db4d3fc9f4e26a252444d2a849ad4f3d5daa3c0f",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/program.irpkg": "515b31908e1ef73f446c086861124529f86aa948bfe1cb39803ee1aa1870c755",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/program.irpkg-set.json": "dda12228967d69b1878d809a27a4c755a55260509d171be74042e0ed7d59e302",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/bundle.json": "a00d7266f6407d17145a178c918b4db10ece82db7331a610a2b65d82f4cd2047",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE": "ec9f9f0edffd4204177a59e36ae91454029334b410f2b87f4477bad349da23c2",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES": "00cce2ac071f63d470a287438a7c6bbc4334706be244384e9af4fc9ead11cdce",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE": "8b28515ffffc5c0fe2807d8ae3735b00b324d9b7ce807dd63ff6ac8922fbce7e",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE": "6f306db6390c163410b41f6517867b756207212736b31e50b2639710ccd706d8",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm": "a80e04dbbda9b9d40b98acfb95cde83ec1d75ccc60714aed7e6e8ebd2ef04d0d",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js": "ec9a019db8fc83986aee9c98bd518abc04117a2bbabc480ffec66e4239d34a15",
+      "blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json": "fe1421e25a171bd34b2a7b4a468205d7dc934c86d296f4d5764ab4d852c8d6c1",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/program.irpkg": "e90aada856251831cfb69e047f84821fd6aa3ff7a078287331780ccbb6f3559c",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/program.irpkg-set.json": "fb49a24b76f2ea284c4414ac310315dab7a351138132df3e29c98f5638ffc3ed",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/bundle.json": "d83b4986f5e70ef85603bce6d037ef1e873553cb427ff3279caf848fbb0ac57b",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/program.irpkg": "bb1b411cdb21c5274871ee1543f463d7e73fb600f303bb0525dc143694206f32",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/program.irpkg-set.json": "02335201a29770a95f52cc4214a32758e9c8a94c01aa9776774233da7bfd4a80",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json": "c5de79bbecff3c8ea2067c36b474b626fe1214ca3ddc6371ebd92972014d4e85",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/program.irpkg": "f80c03320aa3e7b9b4b333e159656e0af2309d70dd6503e40a22147c566d75fc",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/program.irpkg-set.json": "b7b3563ce1bc83f09153a646c8208ef4e4323fd7daa9e81e09a35342187613a6",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json": "619a28f3678f30cd39ab07d7febc428c38eb7e2e12e6237db1aff5a2a507dddb",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/10.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/6.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/9.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/8.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/12.irpkg": "9455f0beb5b78da2c2795c232d8716bdda8e515fcbb67a1d643abbd06366d47a",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/11.irpkg": "885e4173f0f4460e2d3a3fed6ea964f26c2ced42c80d49b8b9060ac021bf1c88",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/4.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/5.irpkg": "19edc7749dcdcf29a3fc650349e5976e9327f167aafa55c0bbe1e8b2db6378a3",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "blog/lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/parts/7.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/10.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/6.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/9.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/8.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/11.irpkg": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/4.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/5.irpkg": "19edc7749dcdcf29a3fc650349e5976e9327f167aafa55c0bbe1e8b2db6378a3",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "blog/lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/parts/7.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/10.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/6.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/9.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/8.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/12.irpkg": "9455f0beb5b78da2c2795c232d8716bdda8e515fcbb67a1d643abbd06366d47a",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/11.irpkg": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/4.irpkg": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/5.irpkg": "19edc7749dcdcf29a3fc650349e5976e9327f167aafa55c0bbe1e8b2db6378a3",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "blog/lean-run/resources/737e5bf117dab2bface6080222c1b4b1caa810e32f6130cf2d959f57d2e7d206/parts/7.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/6.irpkg": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/1.irpkg": "32cd67c1ed656cc2ff28c605282df03a8747c07e7c9cd4bd0764b82b8c0c6e0e",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/4.irpkg": "d4f6cc2f23df286a6b1f8ebd139a6919d90b0bce51fec28eafedaea235d21024",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/5.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/0.irpkg": "87bbbf84bc034590f8ee2348b90a171556dd9492db8973e90d6b32706d2d1ed4",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/3.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "blog/lean-run/resources/9200e6184958791d88f3e4f3e0fdbd562dc58174429e588e46d310ba47f8e511/parts/7.irpkg": "358b5d2331fc38e73ab513f93ad65fd83d91184bc9ce52593feca770c7a87086",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/10.irpkg": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/6.irpkg": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/9.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/8.irpkg": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/12.irpkg": "a0dcfb09cc195c18d42243150ff68620faece7ce57aa6d568865131a474cd004",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/1.irpkg": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/11.irpkg": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/14.irpkg": "358b5d2331fc38e73ab513f93ad65fd83d91184bc9ce52593feca770c7a87086",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/4.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/5.irpkg": "93285858ac4a0b9449c43ec7622eea310dbecef2514035919a681bdeddea55a5",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/13.irpkg": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/0.irpkg": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/3.irpkg": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e",
+      "blog/lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/parts/7.irpkg": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/1.irpkg": "32cd67c1ed656cc2ff28c605282df03a8747c07e7c9cd4bd0764b82b8c0c6e0e",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/4.irpkg": "d4f6cc2f23df286a6b1f8ebd139a6919d90b0bce51fec28eafedaea235d21024",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/5.irpkg": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/2.irpkg": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/0.irpkg": "87bbbf84bc034590f8ee2348b90a171556dd9492db8973e90d6b32706d2d1ed4",
+      "blog/lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/parts/3.irpkg": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3"
+    },
+    "packComparison": "pack-comparison.json",
+    "runtimePackSha256": "3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7"
+  },
+  "packComparison": [
+    {
+      "path": "resources/.vir-generated/LeanRunBlogPostResources.virres",
+      "sha256": "313f539724cc0fa422bc30e799b2e571d4ef5b397e6503308e773a8076705201",
+      "bytes": 158173,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "program.irpkg-set.json",
+            "role": "programSet"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 1412,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/0.irpkg",
+            "sha256": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa"
+          },
+          {
+            "byteLength": 3174,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/1.irpkg",
+            "sha256": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4"
+          },
+          {
+            "byteLength": 72880,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/10.irpkg",
+            "sha256": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a"
+          },
+          {
+            "byteLength": 41799,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/11.irpkg",
+            "sha256": "885e4173f0f4460e2d3a3fed6ea964f26c2ced42c80d49b8b9060ac021bf1c88"
+          },
+          {
+            "byteLength": 5293,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/12.irpkg",
+            "sha256": "9455f0beb5b78da2c2795c232d8716bdda8e515fcbb67a1d643abbd06366d47a"
+          },
+          {
+            "byteLength": 7212,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/2.irpkg",
+            "sha256": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576"
+          },
+          {
+            "byteLength": 1647,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/3.irpkg",
+            "sha256": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e"
+          },
+          {
+            "byteLength": 2123,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/4.irpkg",
+            "sha256": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f"
+          },
+          {
+            "byteLength": 903,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/5.irpkg",
+            "sha256": "19edc7749dcdcf29a3fc650349e5976e9327f167aafa55c0bbe1e8b2db6378a3"
+          },
+          {
+            "byteLength": 1317,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/6.irpkg",
+            "sha256": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f"
+          },
+          {
+            "byteLength": 3842,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/7.irpkg",
+            "sha256": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886"
+          },
+          {
+            "byteLength": 889,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/8.irpkg",
+            "sha256": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1"
+          },
+          {
+            "byteLength": 3511,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/9.irpkg",
+            "sha256": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068"
+          },
+          {
+            "byteLength": 6948,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "program.irpkg",
+            "sha256": "794444c1caf75f51a1703f7f8eb2c447930db6b4a8f485075c9292ccdcd8b0d4"
+          },
+          {
+            "byteLength": 2445,
+            "mediaType": "application/json",
+            "path": "program.irpkg-set.json",
+            "sha256": "14012e1bbeea5270967056b7fb245938f45238689c191becb528cd688ada4a63"
+          }
+        ],
+        "kind": "program",
+        "logicalId": "LeanRunBlog.Post",
+        "schemaVersion": 2
+      }
+    },
+    {
+      "path": "resources/.vir-generated/LeanRunBlogResources.virres",
+      "sha256": "958ab8644c134d038da580d7faa448da16174baa92992dbdcde582b40a054bd8",
+      "bytes": 159406,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "program.irpkg-set.json",
+            "role": "programSet"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 1412,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/0.irpkg",
+            "sha256": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa"
+          },
+          {
+            "byteLength": 3174,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/1.irpkg",
+            "sha256": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4"
+          },
+          {
+            "byteLength": 3511,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/10.irpkg",
+            "sha256": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068"
+          },
+          {
+            "byteLength": 72880,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/11.irpkg",
+            "sha256": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a"
+          },
+          {
+            "byteLength": 38958,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/12.irpkg",
+            "sha256": "a0dcfb09cc195c18d42243150ff68620faece7ce57aa6d568865131a474cd004"
+          },
+          {
+            "byteLength": 613,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/13.irpkg",
+            "sha256": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4"
+          },
+          {
+            "byteLength": 2693,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/14.irpkg",
+            "sha256": "358b5d2331fc38e73ab513f93ad65fd83d91184bc9ce52593feca770c7a87086"
+          },
+          {
+            "byteLength": 7212,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/2.irpkg",
+            "sha256": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576"
+          },
+          {
+            "byteLength": 1647,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/3.irpkg",
+            "sha256": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e"
+          },
+          {
+            "byteLength": 2472,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/4.irpkg",
+            "sha256": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3"
+          },
+          {
+            "byteLength": 1755,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/5.irpkg",
+            "sha256": "93285858ac4a0b9449c43ec7622eea310dbecef2514035919a681bdeddea55a5"
+          },
+          {
+            "byteLength": 1317,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/6.irpkg",
+            "sha256": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f"
+          },
+          {
+            "byteLength": 3842,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/7.irpkg",
+            "sha256": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886"
+          },
+          {
+            "byteLength": 889,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/8.irpkg",
+            "sha256": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1"
+          },
+          {
+            "byteLength": 2080,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/9.irpkg",
+            "sha256": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568"
+          },
+          {
+            "byteLength": 9044,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "program.irpkg",
+            "sha256": "bb1b411cdb21c5274871ee1543f463d7e73fb600f303bb0525dc143694206f32"
+          },
+          {
+            "byteLength": 2789,
+            "mediaType": "application/json",
+            "path": "program.irpkg-set.json",
+            "sha256": "02335201a29770a95f52cc4214a32758e9c8a94c01aa9776774233da7bfd4a80"
+          }
+        ],
+        "kind": "program",
+        "logicalId": "LeanRunBlog.Page",
+        "schemaVersion": 2
+      }
+    },
+    {
+      "path": "resources/.vir-generated/LeanRunSlidesResources.virres",
+      "sha256": "9f156f08200bc6effedbcfbe1942de1ef7873bad2473b27bb2412e7aa0d5b25a",
+      "bytes": 173387,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "program.irpkg-set.json",
+            "role": "programSet"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 1412,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/0.irpkg",
+            "sha256": "f3b169bcea266805664c7f48e50fe332f54137c1a5d8a0dcd34f7fde65a550fa"
+          },
+          {
+            "byteLength": 3174,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/1.irpkg",
+            "sha256": "6b0bc8cf8e42e734a707791b5fd1eba8e78d47da9ab3e948699aa8b76dd430d4"
+          },
+          {
+            "byteLength": 2080,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/10.irpkg",
+            "sha256": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568"
+          },
+          {
+            "byteLength": 3511,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/11.irpkg",
+            "sha256": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068"
+          },
+          {
+            "byteLength": 72880,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/12.irpkg",
+            "sha256": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a"
+          },
+          {
+            "byteLength": 41799,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/13.irpkg",
+            "sha256": "885e4173f0f4460e2d3a3fed6ea964f26c2ced42c80d49b8b9060ac021bf1c88"
+          },
+          {
+            "byteLength": 613,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/14.irpkg",
+            "sha256": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4"
+          },
+          {
+            "byteLength": 5293,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/15.irpkg",
+            "sha256": "7c9fcc3d89a47da05f482c4cd81f7183b7115481cd964da87fb593b139e247ef"
+          },
+          {
+            "byteLength": 2693,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/16.irpkg",
+            "sha256": "7c663fbe43d7e442c6a528b5b09e0e3df449151ac31ce7763a34d0e02d6dfd7a"
+          },
+          {
+            "byteLength": 7212,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/2.irpkg",
+            "sha256": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576"
+          },
+          {
+            "byteLength": 1647,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/3.irpkg",
+            "sha256": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e"
+          },
+          {
+            "byteLength": 2123,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/4.irpkg",
+            "sha256": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f"
+          },
+          {
+            "byteLength": 2472,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/5.irpkg",
+            "sha256": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3"
+          },
+          {
+            "byteLength": 1755,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/6.irpkg",
+            "sha256": "93285858ac4a0b9449c43ec7622eea310dbecef2514035919a681bdeddea55a5"
+          },
+          {
+            "byteLength": 1317,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/7.irpkg",
+            "sha256": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f"
+          },
+          {
+            "byteLength": 3842,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/8.irpkg",
+            "sha256": "03655c3556624866681b08ef3a4d359b0e2c52e5132415a4f761f3c56fbbf886"
+          },
+          {
+            "byteLength": 889,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/9.irpkg",
+            "sha256": "80b3f7911855612094f582865ebf384e348cebb7877b18377d3e61afeb8547b1"
+          },
+          {
+            "byteLength": 12077,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "program.irpkg",
+            "sha256": "3f374e211489cacf43daa688304720b45e75ddaa23b5def64bc27aa4e668aafc"
+          },
+          {
+            "byteLength": 3137,
+            "mediaType": "application/json",
+            "path": "program.irpkg-set.json",
+            "sha256": "619750e1fe24bd14dbf383b9256def10a477564d1a7f0e563cddc4ef90583548"
+          }
+        ],
+        "kind": "program",
+        "logicalId": "LeanRunSlides.Deck",
+        "schemaVersion": 2
+      }
+    },
+    {
+      "path": "resources/.vir-generated/LeanRunGateResources.virres",
+      "sha256": "18f8014c76ce9b0880684a56d75b2726350bc69245921fd18e50931fc491a104",
+      "bytes": 499496,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "program.irpkg-set.json",
+            "role": "programSet"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 1981,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/0.irpkg",
+            "sha256": "373a9228e35ca18e8e793ea9c0379b1765019e1260332d2d809ced56c16ee6ae"
+          },
+          {
+            "byteLength": 2098,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/1.irpkg",
+            "sha256": "fe01d97abdf58053be592e41c29295f0f5428ba7859865d9a0de84cebf706580"
+          },
+          {
+            "byteLength": 1755,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/10.irpkg",
+            "sha256": "e94b152bbfa367a83ff7743f0bf61c30d2d1e25c62103a48bd9b20fb150d4899"
+          },
+          {
+            "byteLength": 8131,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/11.irpkg",
+            "sha256": "731228e39f1ecabc05d0100c850bff769382586432aacb02ecc83ede19429177"
+          },
+          {
+            "byteLength": 8118,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/12.irpkg",
+            "sha256": "fd7c0ff7e16f3afbe08737782c5d0b0b95f51cba4872316ea6215942c5e27e00"
+          },
+          {
+            "byteLength": 12954,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/13.irpkg",
+            "sha256": "fdc72f017d617c9d2fbb1b7122b45bdf59143bbf3825db0d60325931b3db8238"
+          },
+          {
+            "byteLength": 3630,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/14.irpkg",
+            "sha256": "a708854a4b6abfbcfbb7501d851111caf93f97d62a8f8435ca89cc298ff17155"
+          },
+          {
+            "byteLength": 4266,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/15.irpkg",
+            "sha256": "2e212fc09f2012849e27709e1b2a596c5183c20d81aedb25ce4002fae6a3fce1"
+          },
+          {
+            "byteLength": 1176,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/16.irpkg",
+            "sha256": "fe0b0f15d1df104aca500b2f32be326dd27df6ea73148d51cc3f458296c93643"
+          },
+          {
+            "byteLength": 12926,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/17.irpkg",
+            "sha256": "485c4c7d42d22d0b7d5223f78df07b8e34cd27945f44f87e163b414d76cd413f"
+          },
+          {
+            "byteLength": 1317,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/18.irpkg",
+            "sha256": "67545847e1d4ad834e12bcb1667a2311548a138b4433dd6c57a30be33a34578f"
+          },
+          {
+            "byteLength": 3842,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/19.irpkg",
+            "sha256": "2ad65ee06468bc01f66cea5cab023671f2cd6fc03089d17b80d3044bd0ffa122"
+          },
+          {
+            "byteLength": 3350,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/2.irpkg",
+            "sha256": "73ae43dbf1d032a8540a06708a09a9514fd09d4fd2e450d2449c5c2f48b1476e"
+          },
+          {
+            "byteLength": 1230,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/20.irpkg",
+            "sha256": "14a09d6741e5e7cffb9e84769d67d2473cb07deb0105f5040835bac723aacc5e"
+          },
+          {
+            "byteLength": 592,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/21.irpkg",
+            "sha256": "f5cada4007e3477e906843cbbaa3c362013700fe31c2583343e0c9bbfea272c9"
+          },
+          {
+            "byteLength": 2080,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/22.irpkg",
+            "sha256": "f32b41fd5903e179ce4e625124cd1b365e4067809df1f1a8f3e2f5edecefd568"
+          },
+          {
+            "byteLength": 3511,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/23.irpkg",
+            "sha256": "a90e1c978427249ef6ff513951f2a639c9abd2eac058d9e427899710d7241068"
+          },
+          {
+            "byteLength": 5392,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/24.irpkg",
+            "sha256": "461f5c78fc18a7bbe7357070df2e44aea02fd82fd04f325998e034a722089fa7"
+          },
+          {
+            "byteLength": 72880,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/25.irpkg",
+            "sha256": "4ffe852889b9ac3849fc01d9c2442619e36a0c90214526c95ff31b8f1866004a"
+          },
+          {
+            "byteLength": 41799,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/26.irpkg",
+            "sha256": "8063293f0381a341b20393235cb464db20e1a7d779fbe4ebf6d63a4765f9df87"
+          },
+          {
+            "byteLength": 35873,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/27.irpkg",
+            "sha256": "5b0824abf83db86bbeddf3a0a8f15060fdab344295b7a21d245bdf280ffb1b5e"
+          },
+          {
+            "byteLength": 1125,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/28.irpkg",
+            "sha256": "9553d5b9cad17a3bf7422d9d9e8ae9dcb3eb4b503109914b4afcf86fbc2eb7ed"
+          },
+          {
+            "byteLength": 2054,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/29.irpkg",
+            "sha256": "d5d13f9a2965287600c684a8cb57698d5fae86a1c504e20ed276e22cf12e361d"
+          },
+          {
+            "byteLength": 7212,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/3.irpkg",
+            "sha256": "49e0a9cd9288c7857dea3db2e080226090d8e7a9b54c4ec35234df29cf272576"
+          },
+          {
+            "byteLength": 937,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/30.irpkg",
+            "sha256": "4d389aad0db0d63b8b7e9db0860cac12f6b3d4249e346f7fda5c6f8fbc63d3cd"
+          },
+          {
+            "byteLength": 613,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/31.irpkg",
+            "sha256": "dd13002726bf200f16f4f50cf18ab2fb92789ca3a3b7c94f905fa137e9eb32c4"
+          },
+          {
+            "byteLength": 2693,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/32.irpkg",
+            "sha256": "d21651698fa77a24a91e5283010cd65044bd02333612e77a97b037249bf1b550"
+          },
+          {
+            "byteLength": 1647,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/4.irpkg",
+            "sha256": "d01bda51dd22d6b48a40f8b78d6ace73f51298400f9e52c666fb5a2ce28d511e"
+          },
+          {
+            "byteLength": 2123,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/5.irpkg",
+            "sha256": "4472f716d3a05f27cf2415b8ba58e50d2a1dfa2a1708765b99fa0c7f628b3d2f"
+          },
+          {
+            "byteLength": 2556,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/6.irpkg",
+            "sha256": "30a19fe6264e742ceea69e35a6dea77579f9a74155307740bacb3a2760f8ae1d"
+          },
+          {
+            "byteLength": 1035,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/7.irpkg",
+            "sha256": "93cbbdc09c676254f158eb5f3b4e645785494380613e66cc6e73066dd6af0450"
+          },
+          {
+            "byteLength": 1293,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/8.irpkg",
+            "sha256": "3fe0dafa7cd3aa5f686a9ff4a44ad52aa1e8ef935ee273a75467984833b2baf5"
+          },
+          {
+            "byteLength": 2472,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/9.irpkg",
+            "sha256": "174e34c8c292d88336ec4a56d2d88075f85f90b6f2fca03009691cb77b32fea3"
+          },
+          {
+            "byteLength": 232574,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "program.irpkg",
+            "sha256": "b62c2571f1be2db8831930d9ba87c63cecbddee89ddba3fdb18affa0ac2df738"
+          },
+          {
+            "byteLength": 6076,
+            "mediaType": "application/json",
+            "path": "program.irpkg-set.json",
+            "sha256": "164ae1884bc23bcc276de22fac4320d8f37f8aabeb4689b0c5a0f1aaff092609"
+          }
+        ],
+        "kind": "program",
+        "logicalId": "LeanRunGate.Chapter",
+        "schemaVersion": 2
+      }
+    },
+    {
+      "path": ".lake/packages/lean_vir/.vir-generated/VirResourceRuntime.virres",
+      "sha256": "3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7",
+      "bytes": 1120065,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "runtime.js",
+            "role": "runtimeModule"
+          },
+          {
+            "path": "runtime.wasm",
+            "role": "wasm"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 10318,
+            "mediaType": "text/plain",
+            "path": "LICENSE",
+            "sha256": "6f306db6390c163410b41f6517867b756207212736b31e50b2639710ccd706d8"
+          },
+          {
+            "byteLength": 725,
+            "mediaType": "text/plain",
+            "path": "NOTICE",
+            "sha256": "ec9f9f0edffd4204177a59e36ae91454029334b410f2b87f4477bad349da23c2"
+          },
+          {
+            "byteLength": 9160,
+            "mediaType": "text/plain",
+            "path": "lean-LICENSE",
+            "sha256": "8b28515ffffc5c0fe2807d8ae3735b00b324d9b7ce807dd63ff6ac8922fbce7e"
+          },
+          {
+            "byteLength": 81854,
+            "mediaType": "text/plain",
+            "path": "lean-LICENSES",
+            "sha256": "00cce2ac071f63d470a287438a7c6bbc4334706be244384e9af4fc9ead11cdce"
+          },
+          {
+            "byteLength": 244400,
+            "mediaType": "text/javascript",
+            "path": "runtime.js",
+            "sha256": "ec9a019db8fc83986aee9c98bd518abc04117a2bbabc480ffec66e4239d34a15"
+          },
+          {
+            "byteLength": 772467,
+            "mediaType": "application/wasm",
+            "path": "runtime.wasm",
+            "sha256": "a80e04dbbda9b9d40b98acfb95cde83ec1d75ccc60714aed7e6e8ebd2ef04d0d"
+          }
+        ],
+        "kind": "runtime",
+        "logicalId": "lean-vir/runtime",
+        "schemaVersion": 2
+      }
+    },
+    {
+      "path": ".lake/packages/verso-slides/.vir-generated/VersoSlidesVendored.virres",
+      "sha256": "2516a1e9560673b45a63a61a1b6d7a8b33843e39c4331c5760ff5afc84b28150",
+      "bytes": 77764,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "program.irpkg-set.json",
+            "role": "programSet"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 670,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/0.irpkg",
+            "sha256": "b2ccf89ee4778f1880f3f30a796cb7c1956fccff0f06c47b674c06297ac013c2"
+          },
+          {
+            "byteLength": 1976,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/1.irpkg",
+            "sha256": "359f8fc1c73ad5951db2f2ca7840ef7ac6b82442914b7bfaf0b77c6c2b12ffeb"
+          },
+          {
+            "byteLength": 900,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/2.irpkg",
+            "sha256": "07eb3ea68d1df4d730c71c0583e2ec5be195fa0cffab315522af653193c45e28"
+          },
+          {
+            "byteLength": 5934,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/3.irpkg",
+            "sha256": "5c2d76ebca92de975ca6ed39e7c240d3a7b8c79a41c714ebf6659fa60eb42826"
+          },
+          {
+            "byteLength": 11228,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/4.irpkg",
+            "sha256": "c188d5e9c5cd46cad47950c7f929c55d6f1d85b64870afe56e2b615693401e13"
+          },
+          {
+            "byteLength": 48707,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/5.irpkg",
+            "sha256": "3a8cc6ffb0b1fad2e757e507ae4dc2deec71e2850155aaf7c5505a0b65dc9cfe"
+          },
+          {
+            "byteLength": 5512,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "program.irpkg",
+            "sha256": "2a659dcda6a67180ae97554b4bae4d3e3203568167e3612efcfe79a1097e1078"
+          },
+          {
+            "byteLength": 1239,
+            "mediaType": "application/json",
+            "path": "program.irpkg-set.json",
+            "sha256": "e5831d6d823874149b82bae2c61522e65ce26d010beeb16afc69c3c241a75dbf"
+          }
+        ],
+        "kind": "program",
+        "logicalId": "VersoSlides.VirPrettyM",
+        "schemaVersion": 2
+      }
+    },
+    {
+      "path": ".lake/packages/verso-slides/.lake/build/vir/resources/programs/VersoSlidesVendored.virres",
+      "sha256": "2516a1e9560673b45a63a61a1b6d7a8b33843e39c4331c5760ff5afc84b28150",
+      "bytes": 77764,
+      "unchangedFromLiveBaseline": true,
+      "descriptor": {
+        "compatibility": {
+          "leanRevision": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "virVersion": 3
+        },
+        "fileEntries": [
+          {
+            "path": "program.irpkg-set.json",
+            "role": "programSet"
+          }
+        ],
+        "files": [
+          {
+            "byteLength": 670,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/0.irpkg",
+            "sha256": "b2ccf89ee4778f1880f3f30a796cb7c1956fccff0f06c47b674c06297ac013c2"
+          },
+          {
+            "byteLength": 1976,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/1.irpkg",
+            "sha256": "359f8fc1c73ad5951db2f2ca7840ef7ac6b82442914b7bfaf0b77c6c2b12ffeb"
+          },
+          {
+            "byteLength": 900,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/2.irpkg",
+            "sha256": "07eb3ea68d1df4d730c71c0583e2ec5be195fa0cffab315522af653193c45e28"
+          },
+          {
+            "byteLength": 5934,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/3.irpkg",
+            "sha256": "5c2d76ebca92de975ca6ed39e7c240d3a7b8c79a41c714ebf6659fa60eb42826"
+          },
+          {
+            "byteLength": 11228,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/4.irpkg",
+            "sha256": "c188d5e9c5cd46cad47950c7f929c55d6f1d85b64870afe56e2b615693401e13"
+          },
+          {
+            "byteLength": 48707,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "parts/5.irpkg",
+            "sha256": "3a8cc6ffb0b1fad2e757e507ae4dc2deec71e2850155aaf7c5505a0b65dc9cfe"
+          },
+          {
+            "byteLength": 5512,
+            "mediaType": "application/vnd.lean-vir.ir-package",
+            "path": "program.irpkg",
+            "sha256": "2a659dcda6a67180ae97554b4bae4d3e3203568167e3612efcfe79a1097e1078"
+          },
+          {
+            "byteLength": 1239,
+            "mediaType": "application/json",
+            "path": "program.irpkg-set.json",
+            "sha256": "e5831d6d823874149b82bae2c61522e65ce26d010beeb16afc69c3c241a75dbf"
+          }
+        ],
+        "kind": "program",
+        "logicalId": "VersoSlides.VirPrettyM",
+        "schemaVersion": 2
+      }
+    }
+  ],
+  "initialCoreSource": "90414e5f03867d5bddcc87a670a1b3b2ef0017c4",
+  "coreSource": "cb016c437bc566f77c01d86e2e77ba012ecfb0e4",
+  "focusedLifecycleChecks": 7,
+  "cancellation": {
+    "hostSha256": "caceaa00636655def52190f992f7f22b05b15010199e47109be542c5265e96e2",
+    "oldSourceRegressionFails": true,
+    "heldPublicationBrowserChecks": 2,
+    "currentRouteCleanupVerified": true,
+    "failureRetryDeadlineSeconds": 15,
+    "warmRuntimePolicyChanged": false
+  },
+  "coldStarterBeforeCancellation": {
+    "source": "90414e5f03867d5bddcc87a670a1b3b2ef0017c4",
+    "checks": 11,
+    "allGitRevisionsVerified": true,
+    "artifactCache": false,
+    "seedsOrSymlinks": false
+  },
+  "currentStarterDependency": "cb016c437bc566f77c01d86e2e77ba012ecfb0e4",
+  "publicationBoundary": "Local current-source acceptance; exact final main CI, cold Git starter and hosted deployment are recorded separately.",
+  "sharedHostHashes": {
+    "Manual": {
+      "host.js": "caceaa00636655def52190f992f7f22b05b15010199e47109be542c5265e96e2",
+      "worker.js": "ff5e84b4e01f8096bb640f4ad1101528a340feea0de371a824ee6c5d13a58a11",
+      "contract.js": "219a6feae0d94d9aa8406447f86885cc95287daf40dd9b856499e5c21e01a0ec",
+      "renderer.js": "318a32256dcd4caa9d417dc3a8120eeffbe06bfca0d81d6d9c83589d08878143"
+    },
+    "Blog": {
+      "host.js": "caceaa00636655def52190f992f7f22b05b15010199e47109be542c5265e96e2",
+      "worker.js": "ff5e84b4e01f8096bb640f4ad1101528a340feea0de371a824ee6c5d13a58a11",
+      "contract.js": "219a6feae0d94d9aa8406447f86885cc95287daf40dd9b856499e5c21e01a0ec",
+      "renderer.js": "318a32256dcd4caa9d417dc3a8120eeffbe06bfca0d81d6d9c83589d08878143"
+    },
+    "Slides": {
+      "host.js": "caceaa00636655def52190f992f7f22b05b15010199e47109be542c5265e96e2",
+      "worker.js": "ff5e84b4e01f8096bb640f4ad1101528a340feea0de371a824ee6c5d13a58a11",
+      "contract.js": "219a6feae0d94d9aa8406447f86885cc95287daf40dd9b856499e5c21e01a0ec",
+      "renderer.js": "318a32256dcd4caa9d417dc3a8120eeffbe06bfca0d81d6d9c83589d08878143"
+    }
+  },
+  "initialAdoptionDelta": [
+    "resources/LeanRunBlog/PostResources.lean",
+    "resources/LeanRunSlides/Resources.lean",
+    ".gitignore",
+    "ROADMAP.md",
+    "docs/blog.md",
+    "docs/internals.md",
+    "docs/multi-genre.md",
+    "docs/slides.md",
+    "docs/troubleshooting.md",
+    "lake-manifest.json",
+    "lakefile.lean",
+    "resources/LeanRunBlog/Resources.lean",
+    "resources/LeanRunGate/Resources.lean",
+    "scripts/build-demo-site.py",
+    "support/VersoLeanRun/Callable.lean",
+    "support/VersoLeanRun/Publication.lean",
+    "tests/acceptance.py",
+    "tests/pages-smoke.py"
+  ],
+  "changedFromPreservedBaseline": [
+    "resources/LeanRunBlog/PostResources.lean",
+    "resources/LeanRunSlides/Resources.lean",
+    ".gitignore",
+    "ROADMAP.md",
+    "docs/blog.md",
+    "docs/internals.md",
+    "docs/multi-genre.md",
+    "docs/slides.md",
+    "docs/troubleshooting.md",
+    "examples/manual-starter/README.md",
+    "examples/manual-starter/chapters/Starter/Chapter.lean",
+    "examples/manual-starter/lake-manifest.json",
+    "examples/manual-starter/lakefile.lean",
+    "examples/manual-starter/resources/Starter/Resources.lean",
+    "lake-manifest.json",
+    "lakefile.lean",
+    "resources/LeanRunBlog/Resources.lean",
+    "resources/LeanRunGate/Resources.lean",
+    "scripts/build-demo-site.py",
+    "support/VersoLeanRun/Callable.lean",
+    "support/VersoLeanRun/Publication.lean",
+    "tests/acceptance.py",
+    "tests/pages-smoke.py",
+    "tests/starter.py",
+    "web/host.js"
+  ]
+}
