@@ -115,7 +115,7 @@ with serve_directory(served) as base:
                     slide(7, fragment=True)
                 first, second = form(owner, 'greet'), form(owner, 'greet', 1)
                 data = json.loads(first.get_attribute('data-experiment'))
-                assert data['program'] == data['producerModule'] == owner
+                assert data['program'] == owner
                 assert data['callable'] == data['declaration'] == owner+'.Inline.greet'
                 assert data['form'] == 'string'
                 assert '@[vir_export]' not in first.locator('.lean-run-source').text_content()

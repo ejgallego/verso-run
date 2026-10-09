@@ -1,5 +1,9 @@
 import LeanRunGate.Chapter
 import LeanRunGate.Resources
+import LeanRunBlog.Page
+import LeanRunBlog.Index
+import LeanRunBlog.Post
+import VersoLeanRun.Blog.Publish
 import VersoLeanRun.Publish
 import LeanRunSlides.Deck
 import LeanRunSlides.Resources
@@ -28,6 +32,17 @@ private def alternateRuntime (original : Vir.Resources.Bundle) : Vir.Resources.B
 private def check (condition : Bool) (message : String) : IO Unit :=
   unless condition do throw <| IO.userError message
 
+private def checkProvenance (experiments : Array VersoLeanRun.Experiment) : IO Unit := do
+  check (!experiments.isEmpty) "native collector returned no experiments"
+  for experiment in experiments do
+    check (!experiment.producerModule.isEmpty && experiment.sourceLine > 0)
+      "native collector lost producer/source provenance"
+    let decoded ← IO.ofExcept <|
+      (Lean.fromJson? (Lean.toJson experiment) : Except String VersoLeanRun.Experiment)
+    check ((decoded.producerModule, decoded.sourceLine, decoded.sourceColumn) ==
+      (experiment.producerModule, experiment.sourceLine, experiment.sourceColumn))
+      "native metadata round-trip lost publication provenance"
+
 private def samePublication (a b : VersoLeanRun.Publication) : Bool :=
   a.plan == b.plan && (a.files.qsort (·.path < ·.path)).map (fun f => (f.path, f.bytes)) ==
     (b.files.qsort (·.path < ·.path)).map (fun f => (f.path, f.bytes))
@@ -37,6 +52,12 @@ private def identities (programs : Array Vir.Resources.Bundle) : Array (String �
 
 def main : IO Unit := do
   let experiments ← IO.ofExcept rendered
+  checkProvenance experiments
+  checkProvenance (← IO.ofExcept <| VersoLeanRun.Slides.slideExperiments (%doc LeanRunSlides.Deck))
+  checkProvenance (← IO.ofExcept <| VersoLeanRun.Blog.siteExperiments <|
+    .page `LeanRunBlog.Page (%doc LeanRunBlog.Page)
+      #[.blog "notes" `LeanRunBlog.Index (%doc LeanRunBlog.Index)
+        #[{ id := `LeanRunBlog.Post, contents := %doc LeanRunBlog.Post }]])
   let resources := LeanRunGate.resources
   let direct ← IO.ofExcept <| VersoLeanRun.preparePublication experiments resources
   let site ← IO.ofExcept <| resources.forSite "lean-run/resources" |>.mapError reprStr
@@ -82,4 +103,4 @@ def main : IO Unit := do
     check ((error.toString.splitOn "RUNTIME_CONTENT_ID_CONFLICT").length > 1) error.toString
   check ((← IO.FS.readFile marker) == "accepted output") "runtime rejection modified accepted output"
   check (!(← (destination / "index.html").pathExists)) "runtime rejection created a slide site"
-  IO.println "ResourceSet inventory, ordering, explicit runtime, and rejection-before-write checks passed"
+  IO.println "Native genre provenance, ResourceSet inventory, ordering, explicit runtime, and rejection-before-write checks passed"
