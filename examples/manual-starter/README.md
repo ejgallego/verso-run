@@ -26,7 +26,7 @@ Single-page HTML is in `_out/html-single`; TeX is in `_out/tex`.
 Serve the complete HTML directory over HTTP, including `lean-run/` and all
 generated assets. Copying it under a nested URL prefix also works.
 
-This starter pins public extension `c5017a9`, which uses the current `entry` API:
+This starter pins public extension `fa66aee`, which uses the current `entry` API:
 no export attribute is required, and the result type selects text or HTML display.
 See [the authoring guide](../../docs/authoring.md).
 
@@ -41,7 +41,7 @@ compatible when updating the dependency.
   scalar adapter named `<entry>.leanRunHtml`.
 - `resources/Starter/Resources.lean`: embeds the complete runtime/program `ResourceSet` from
   `include_vir_assets (modules := #[Starter.Chapter])` in the `StarterResources` library.
-- `Main.lean`: passes the embedded set directly to `VersoLeanRun.publishResources`.
+- `Main.lean`: passes the embedded set directly to `VersoLeanRun.publish`.
 - `lakefile.lean`: keeps chapter compilation ahead of resource preparation,
   embedding, and the native generator. Its resource library `needs` contains the
   module resource facet `` `+Starter.Chapter:virResourcePack ``;

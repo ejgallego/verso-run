@@ -35,7 +35,7 @@ rather than treating successful loading as proof that an example works.
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
-reuse and runs its 11 checks. The starter acquires public extension `c5017a9` and
+reuse and runs its 11 checks. The starter acquires public extension `fa66aee` and
 the selected runtime through its complete Git manifest, without local seeds.
 
 The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `6e514cd4`,
@@ -61,7 +61,8 @@ hook passed all 22 configuration cases, including collisions with built-in and
 custom theme assets. Shared harness checks confirm logged failures and listener
 cleanup on exceptional exits. The obsolete standalone worker gate and legacy
 API equivalence checks have been removed; current workers are exercised through
-the actual generated sites.
+the actual generated sites. The starter pins public core `fa66aee`, passed its
+Git-only no-cache build, and passed all 11 browser checks.
 
 The ResourceSet API follow-up passed the build and 88-check mutation suite,
 including 23 Blog and 21 Slides checks. Native inventory checks cover explicit
