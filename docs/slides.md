@@ -1,52 +1,68 @@
 # Runnable slide presentations
 
-Import `VersoLeanRun.Slides` and use the same checked `leanRunAnchor` blocks as
-Manual and Blog. Import the producer module containing the selected anchor and
-its explicitly exported scalar entry:
+Import `VersoLeanRun.Slides` and use the same inline Run block as Manual or Blog:
 
 ````lean
 module
 public import VersoLeanRun.Slides
-import MyExamples
 open Verso VersoSlides VersoLeanRun.Slides
+set_option compiler.postponeCompile false
 
 #doc (VersoSlides.Slides) "Try Lean" =>
 
 # A greeting
 
+```leanRun (entry := Demo.greet) (input := "Ada")
+public def Demo.greet (name : String) : String :=
+  "Hello, " ++ name ++ "!"
+```
+````
+
+Definitions, namespaces and open declarations remain available in later Run
+blocks. A later placement can show `#check Demo.greet` and select the same entry.
+The document owns its selected callables and resource bundle. No VIR annotation
+or source anchor is needed for an inline definition.
+
+The adapter uses Slides' formatting-aware command elaborator, fragmentization
+and native code renderers. Source remains in the typed document tree; Run uses
+its existing marked wrapper with native source children and shared controls.
+It adds no constructor to Slides' closed block enum. Run source boxes have no side
+panel or stretch, leaving room for controls.
+
+## Optional shared source anchors
+
+Import an ordinary producer and use `leanRunAnchor` when the same source should
+be displayed in several documents:
+
+````lean
 ```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
-@[vir_export]
 public def MyExamples.greet (name : String) : String :=
   "Hello, " ++ name ++ "!"
 ```
 ````
 
-`MyExamples` must contain that exact region between `-- ANCHOR: greeting` and
-`-- ANCHOR_END: greeting`. Standard Verso source matching, suggestions, cached
-highlighting, and semantic entry membership remain authoritative.
-See [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
-
-The adapter supplies an `ExternalCode Slides` instance using native Slides
-fragmentization and code renderers. Source remains in the typed document tree;
-Run uses a marked `BlockExt.wrap` with native source children and shared controls.
-It does not add a new constructor to Slides' closed block enum. Proof states can
-be hidden with `-showProofStates`; definition links follow native Slides policy.
-Run source blocks use no side panel and no stretch, leaving room for controls.
+`MyExamples` must contain that region between `-- ANCHOR: greeting` and
+`-- ANCHOR_END: greeting`. Verso's source matching, suggestions and semantic entry
+membership remain authoritative. Anchored proof states can be hidden with
+`-showProofStates`; definition links follow native Slides policy. See
+[anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
 ## Publish a deck
 
-Prepare and embed each producer with `virPrograms` and `include_vir_library`,
+Prepare the deck through its carrier library's bare Module `needs` and fixed
+`:virResourcePack` prerequisite, then embed with no-argument `include_vir_program`,
 as in [Blog publication](blog.md#publish-a-site). Import
 `VersoLeanRun.Slides.Publish` in the native generator:
 
 ```lean
 def main := VersoLeanRun.Slides.slidesMain
   { outputDir := "_slides", theme := "white" }
-  (%doc MyDeck) #[MyExamples.resources]
+  (%doc MyDeck) #[MyDeck.resources]
 ```
 
 The wrapper collects marked metadata from the typed deck, then prepares one
-resource set containing the native Slides formatter and Run producers. Both use
+resource set containing the native Slides formatter and document-selected Run
+callables. Both use
 the stock embedded runtime and the `lib/vir/` inventory. The shared Run host and
 binding plan live under `lean-run/`.
 
@@ -73,20 +89,24 @@ not navigate Reveal. `+collapsed` uses a source disclosure after enhancement.
 Without JavaScript, the deck becomes a readable static document with visible
 source and disabled controls. This slice adds no Slides TeX backend.
 
-The scalar boundary is shared: pure `String → String` and `Nat → Nat` exports.
-HTML uses a producer-owned String serialization wrapper, as in Blog; isolated
-previews preserve escaping. Inline definition elaboration remains Manual-only.
+The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
+`Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
+as a textarea. Enter edits without moving Reveal; Ctrl+Enter or ⌘+Enter runs.
+Return `String → Verso.Output.Html` for an automatic document-owned serializer
+and isolated preview. String results remain text; no `output` argument or producer
+VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
 ## Compatibility and demo
 
 The selected Slides snapshot is
-[`235aac80`](https://github.com/ejgallego/verso-slides/commit/235aac80e627c11e4f094ced7e4e564ed5ecfe93),
-on Lean 4.34.0 and VIR `bda79d5c` / runtime `e415…`. It is a public review snapshot,
+[`35b5d14b`](https://github.com/ejgallego/verso-slides/commit/35b5d14bc97d71981d01957f8a6fc6ea7470a6e4),
+on Lean 4.34.0 and root-resolved VIR `fb5af647` / runtime `e415…`. It is a public review snapshot,
 not a claim that its upstream landing is complete. Our existing Verso pin is
-its required `cad4b633` plus the small Manual highlighting hook, so adding Slides
-does not change any existing dependency pin.
+its required `cad4b633` plus the small Manual highlighting hook, and remains unchanged. The root Lake manifest overrides Slides' nested VIR
+pin with the selected public `fb5af647` source.
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined
 `python3 scripts/build-demo-site.py` puts the deck under `_out/html-multi/slides`
 and links all three genres from the landing page. The deck reuses the existing
-Helper and Blog producers for exact Nat, Unicode greetings, real Stop, and HTML.
+ordinary Helper, Blog and typed source functions for exact numbers, Unicode
+greetings, real Stop and HTML. Its document-owned bundle exports selected wrappers.

@@ -1,0 +1,1168 @@
+{
+  "url": "http://127.0.0.1:42389/",
+  "checks": [
+    "Manual, Blog, and Slides publications match validated local programs and runtime",
+    "landing links resolve to all three genres; both viewports fit",
+    "Greeting/: edited input executes through the hosted worker and matches native Lean",
+    "Exact-natural-numbers/: edited input executes through the hosted worker and matches native Lean",
+    "HTML-greeting/: edited input executes through the hosted worker and matches native Lean",
+    "Illuminate-diagrams/: edited input executes through the hosted worker and matches native Lean",
+    "blog/page/: edited input executes through the hosted worker and matches native Lean",
+    "blog/notes/2026-10-8-running-lean-in-a-post/: edited input executes through the hosted worker and matches native Lean",
+    "blog/notes/2026-10-8-running-lean-in-a-post/: edited input executes through the hosted worker and matches native Lean",
+    "blog/notes/2026-10-8-running-lean-in-a-post/: edited input executes through the hosted worker and matches native Lean",
+    "slides/: edited input executes through the hosted worker and matches native Lean",
+    "slides/: edited input executes through the hosted worker and matches native Lean",
+    "slides/: edited input executes through the hosted worker and matches native Lean",
+    "slides/: edited input executes through the hosted worker and matches native Lean",
+    "no uncaught browser errors"
+  ],
+  "publication": {
+    "programs": {
+      "LeanRunGate.Chapter": {
+        "LeanRunGate.Helper.twice": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunGate.Stack.run": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunGate.diagram": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunGate.double": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunGate.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunGate.htmlGreeting": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunGate.spin": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunTyped.Examples.flip": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 2,
+                "type": "Bool"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 2,
+              "type": "Bool"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunTyped.Examples.increment": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 7,
+                "type": "UInt64"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 7,
+              "type": "UInt64"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        },
+        "LeanRunTyped.Examples.lines": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/a49deaa154c8ee110da01c6aca645ca95f4eb3e39ad626843bab75f0b5d187ee/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  },
+  "blogPublication": {
+    "programs": {
+      "LeanRunBlog.Page": {
+        "LeanRunBlog.Page.Inline.card": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+        },
+        "LeanRunBlog.Page.Inline.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+        },
+        "LeanRunGate.Helper.twice": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+        },
+        "LeanRunTyped.Examples.flip": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 2,
+                "type": "Bool"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 2,
+              "type": "Bool"
+            }
+          },
+          "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+        },
+        "LeanRunTyped.Examples.increment": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 7,
+                "type": "UInt64"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 7,
+              "type": "UInt64"
+            }
+          },
+          "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+        },
+        "LeanRunTyped.Examples.lines": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/f0121ac58d4240cfc60939a31a8f6a319fd916f1de23ea9aaaa95271f15eed31/bundle.json"
+        }
+      },
+      "LeanRunBlog.Post": {
+        "LeanRunBlog.Examples.card": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+        },
+        "LeanRunBlog.Examples.count": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+        },
+        "LeanRunBlog.Examples.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+        },
+        "LeanRunBlog.Post.Inline.card": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+        },
+        "LeanRunBlog.Post.Inline.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lean-run/resources/b15f16921a7edf13e7d8a0a92bbf167122e4f4bdb8a6d526ccff6a3b6f236cbf/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  },
+  "slidesPublication": {
+    "programs": {
+      "LeanRunSlides.Deck": {
+        "LeanRunBlog.Examples.card": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunBlog.Examples.count": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunBlog.Examples.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunGate.Helper.twice": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 0,
+              "type": "Nat"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunSlides.Deck.Inline.card": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunSlides.Deck.Inline.greet": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunTyped.Examples.flip": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 2,
+                "type": "Bool"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 2,
+              "type": "Bool"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunTyped.Examples.increment": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 7,
+                "type": "UInt64"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 7,
+              "type": "UInt64"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        },
+        "LeanRunTyped.Examples.lines": {
+          "expectedExport": {
+            "args": [
+              {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            ],
+            "effect": "pure",
+            "result": {
+              "interfaceTag": 3,
+              "type": "String"
+            }
+          },
+          "manifest": "lib/vir/0baa40e34a32fc1212321c41bc0ccef94c53ef74e88beffcfb62fe5d4a8949aa/bundle.json"
+        }
+      }
+    },
+    "runtimeManifest": "lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+    "runtimeModule": "lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+  },
+  "runtimeResponses": [
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/blog/lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "contentType": "application/json",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/NOTICE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSE",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/lean-LICENSES",
+      "contentType": "application/octet-stream",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js",
+      "contentType": "text/javascript",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:42389/slides/lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.wasm",
+      "contentType": "application/wasm",
+      "status": 200
+    }
+  ]
+}

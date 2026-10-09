@@ -30,7 +30,7 @@ def preparePublicationWithPrefix (resourcePrefix : String)
     -- forSite has already rejected distinct bundles with one logicalId.
     -- Preserve the original index-to-manifest mapping for identical repetitions.
     let some i := programs.findIdx? (fun bundle => bundle.descriptor.logicalId == producer)
-      | throw s!"{provenance}: no published program bundle for {experiment.declaration} (producer module {producer}). Register its owner/module with virPrograms and supply its bundle to VersoLeanRun.publish."
+      | throw s!"{provenance}: no published program bundle for {experiment.declaration} (producer module {producer}). Add the bare program Module to the resource library needs, retain its fixed :virResourcePack prerequisite, embed with include_vir_program, and supply its bundle to VersoLeanRun.publish."
     let signature ← (Lean.Json.parse experiment.signature).mapError fun error =>
       s!"{provenance}: invalid compiled VIR signature: {error}"
     let binding := Lean.Json.mkObj [

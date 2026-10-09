@@ -8,6 +8,8 @@ public import VersoSlides
 public import VersoLeanRun.Render
 public import Verso.Code.External
 public meta import VersoLeanRun.Anchored
+public meta import VersoLeanRun.Inline
+public meta import VersoSlides.InlineLean
 
 public section
 open Lean Verso Doc Elab Output Html Code.External
@@ -49,6 +51,28 @@ def leanRun (experiment : Experiment) (source : Array (Block VersoSlides.Slides)
     ("data-lean-run-renderer", "lean-run/renderer.js")]) #[
       .other (.wrap #[("class", "lean-run-source")]) source,
       .other (.ofHtml (renderControls experiment)) #[]]
+
+private meta def inlineSource (shouldShow : Bool) (hls : Highlighted)
+    (str : StrLit) : DocElabM Term := do
+  if !shouldShow then return ← ``(Verso.Doc.Block.concat #[])
+  let col? := (← getRef).getPos? |>.map (← getFileMap).utf8PosToLspPos |>.map (·.character)
+  let hls := match col? with
+    | none => hls
+    | some col => hls.deIndent col
+  match fragmentize hls.trim with
+  | .ok code =>
+    ``(Verso.Doc.Block.other (VersoSlides.BlockExt.slideCode $(quote (scToExport code)) false false)
+      #[Verso.Doc.Block.code $(quote str.getString)])
+  | .error message => throwErrorAt str message
+
+/-- Inline Run retains Slides' native formatting and fragment data. -/
+@[code_block leanRun]
+meta def leanRunInline : CodeBlockExpanderOf Config
+  | config, str => elabInlineRun config str inlineSource (fun experiment source => do
+      let description ← quoteExperiment experiment
+      ``(VersoLeanRun.Slides.leanRun $description #[$source]))
+    (elaborate := fun str continuation =>
+      VersoSlides.elabCommandsWithFormat retainedRunCommands str continuation)
 
 @[code_block_expander leanRunAnchor]
 meta def leanRunAnchor : CodeBlockExpander

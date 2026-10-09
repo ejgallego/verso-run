@@ -98,11 +98,11 @@ The existing `Experiment.program` remains a document-owner/binding key. The
 public-pair migration adds `producerModule` from Lean's actual declaration
 ownership, which selects the generated module bundle independently of that key.
 
-Typed HTML needs additional care: today's `leanRunHtml` wrapper is compiled in
-the document module. Selecting source from another module does not transfer that
-wrapper's ownership there. The first anchored example should use an already
-exported scalar function. Then qualify HTML with an explicitly owned compiled
-adapter and registered producer bundle, while keeping existing inline HTML working.
+The initial anchored implementation required producer-owned scalar exports.
+The current entry-selected API creates document-owned callable adapters for both
+imported scalars and typed HTML. The original producer remains ordinary Lean;
+its IR is included as a dependency of the document bundle. This qualifies the
+previously deferred anchored Html path without changing VIR's scalar boundary.
 
 ## Adapter findings
 
@@ -110,8 +110,11 @@ adapter and registered producer bundle, while keeping existing inline HTML worki
 child of the Run wrapper. Its traversal registers definitions and its native
 renderers preserve reference links, `defSite`, proof states, and TeX. Rendering
 the source into a raw HTML blob before traversal would bypass these facilities.
-The inline `leanRun` authoring mode remains a Manual feature; external anchored
-examples provide the shared route across genres.
+The inline `leanRun` authoring mode now works across all three genres through a
+shared selection/registration helper with native source renderers. External
+anchors remain an optional source-reuse route. Slides retains its formatting-aware
+command elaborator; Blog Run code is retained in the document environment, while
+ordinary Blog example contexts remain separate.
 
 **Blog, Page and Post:** one adapter uses the existing highlighted-code block
 and component system. Component metadata uses a different encoding from Manual's
@@ -149,10 +152,11 @@ Scroll navigation also cancels work. Restoring Reveal's saved HTML when leaving
 scroll view disposes detached workers and reattaches the restored forms.
 
 The historical main checkout `268257a4` on Lean 4.35.0-rc4 was unsuitable for our
-frozen toolchain. Selected `235aac80` instead uses Lean 4.34.0 and our exact VIR
-`bda79d5c` / runtime `e415…`. Its required Verso `cad4b633` is the parent of our
-existing `3f6366aa` highlighting-hook revision. Existing pins remain unchanged;
-only the new Slides dependency is added. This is an experimental review snapshot,
+frozen toolchain. Selected `35b5d14b` uses Lean 4.34.0 and the compatible resource APIs.
+The root resolves shared VIR to exact `fb5af647` / runtime `e415…`, overriding
+the dependency's historical producer pin. Its required Verso `cad4b633` is the parent of our
+existing `3f6366aa` highlighting-hook revision. Lean, Verso and Illuminate pins remain unchanged; only the selected VIR and
+required compatible Slides revisions change. This is an experimental review snapshot,
 not an assertion that the owner-managed Slides patch has landed upstream.
 
 Only Manual's TeX fallback is established. Blog retains native source without
@@ -192,4 +196,4 @@ The separate public VIR source/runtime adoption gate remains in force.
 [blog]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso-blog/VersoBlog.lean
 [subverso]: https://github.com/leanprover/subverso/blob/9b90b7f938d6169246325df002351014f49945ef/src/SubVerso/Highlighting/Anchors/Basic.lean
 [slides-basic]: https://github.com/ejgallego/verso-slides/blob/268257a4fbdac12c77be726213b51c3ce3a1d41e/VersoSlides/Basic.lean
-[slides-assets]: https://github.com/ejgallego/verso-slides/blob/235aac80e627c11e4f094ced7e4e564ed5ecfe93/VersoSlides/Render.lean
+[slides-assets]: https://github.com/ejgallego/verso-slides/blob/35b5d14bc97d71981d01957f8a6fc6ea7470a6e4/VersoSlides/Render.lean

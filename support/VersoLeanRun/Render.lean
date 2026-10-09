@@ -12,15 +12,28 @@ namespace VersoLeanRun
 
 /-- Shared input, state, output, and preview controls. -/
 def renderControls (experiment : Experiment) : Html := Id.run do
-  let label := if experiment.shape == "nat" then "Natural number" else "Text"
+  let label := match experiment.shape with
+    | "nat" => "Natural number"
+    | "uint64" => "Unsigned 64-bit integer"
+    | "bool" => "Boolean"
+    | _ => "Text"
   let initial := experiment.initialInput
-  let placeholder := if experiment.shape == "nat" then "0" else "Enter text"
+  let placeholder := if experiment.shape == "nat" || experiment.shape == "uint64" then "0" else "Enter text"
+  let control := if experiment.shape == "bool" then
+    let options := if initial == "true" then
+      {{ <option value="false"> "false" </option><option value="true" selected="selected"> "true" </option> }}
+      else {{ <option value="false" selected="selected"> "false" </option><option value="true"> "true" </option> }}
+    {{ <select>{{options}}</select> }}
+    else if experiment.multiline then
+      -- HTML removes the first leading LF in textarea contents. Preserve the preset.
+      {{ <textarea rows="4" maxlength="4096" placeholder={{placeholder}}>{{"\n" ++ initial}}</textarea> }}
+    else {{ <input type="text" value={{initial}} placeholder={{placeholder}} maxlength="4096" autocomplete="off"/> }}
   let preview := if experiment.output == "html" then
     {{ <iframe class="lean-run-preview" title="HTML result" sandbox="" referrerpolicy="no-referrer" hidden="hidden"/> }}
     else .empty
   return {{ <div class="lean-run-console">
       <form>
-        <label> {{label}} <input type="text" value={{initial}} placeholder={{placeholder}} maxlength="4096" autocomplete="off"/> </label>
+        <label> {{label}} {{control}} </label>
         <button type="submit" disabled="disabled"> "Run" </button>
         <button type="button" class="lean-run-stop" disabled="disabled"> "Stop" </button>
       </form>

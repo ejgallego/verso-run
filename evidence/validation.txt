@@ -320,3 +320,132 @@ Blog examples f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff,
 Manual 839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f unchanged.
 Runtime remains e415e41a… / pack SHA 3910c29e…; actual updated Pages qualification
 is a separate post-deployment check. No upstream Slides landing decision is claimed.
+
+2026-10-08 — Selected consumer Bool/UInt64/multiline String forms (local only)
+
+Consumer base 11b5c5c clean; no earlier WIP overwritten. Exact type-only args/result/
+effect contract accepted directly against native bfbd claim/encoder before form
+implementation. Proposal and decision IDs in typed-forms-claim.md. New native
+encoder import remains deferred; existing compatible bda serializer retained.
+Lean/Verso/VIR/Illuminate/Slides pins and runtime e415/pack 3910c29e unchanged.
+No PR223 source, unselected runtime, producer writes, push/merge or cleanup.
+
+lake build PASS 866 jobs; no Beam checkpoints saved and no cleanup run.
+lake test -- --mutations --output _out/typed-acceptance PASS 85 checks, including
+16 Blog, 20 Slides and 29 focused typed checks. New negative cases cover Bool HTML,
+invalid Boolean preset and multiline Nat; the old Bool rejection fixture now
+uses VIR-supported, form-unsupported Int. Fixed eight-form assertions now check
+unique identities and one fallback notice per actual form. Standard mutation
+sources/carrier layout restored; typed source remains local WIP.
+
+Pure one-argument homogeneous Bool/Bool and UInt64/UInt64 join String/String and
+Nat/Nat; +multiline is String presentation only. Shared codec requires actual
+Boolean wire values and bounded UInt64 BigInt, never Number. Shared worker/host
+ownership, Stop/stale/retry, expected-signature admission and genre visibility
+behavior remain. Native/browser agreement at root and nested prefixes in all
+three genres covers false/true, zero, leading zeros, 2^53+1, UInt64 max and wrap,
+invalid decimal/range recovery, multiline empty/leading/trailing blank lines,
+spaces, Unicode and text escaping, Enter editing and Ctrl+Enter submission.
+Wrong Bool/UInt64 result expectations fail program admission before invocation.
+Independent controls, narrow layout, no-JavaScript presets/source, Manual single
+HTML and TeX pass. Shared codec directly checks invalid result types/bounds.
+Evidence: typed-regression.json, typed-forms-results.json and desktop/mobile captures.
+
+Combined native site and ZIP refreshed locally. 15 combined HTTP/native checks
+pass against the current plans and existing twelve examples in all three genres.
+Evidence: typed-combined-site.json. This is not a hosted Pages acceptance claim;
+remote/public source remains the previously qualified 11b5 snapshot.
+
+2026-10-08 — Isolated compiler expected-signature helper acceptance
+
+Authority VIR-PR223-CODEC-LOCAL-CONSUMER-HANDOFF-20261008-001; exact producer
+696cc49328906185d6d0284835da7b7d89a97dc5 selected for this local gate only.
+Successor _out/codec-successor on the preserved 11b5 + typed patch snapshot
+09293919b0cbfecd9a2458fa8f73b881da79f857a26961d35248ff45e8f4ffd0.
+Main working/public pair remains bda/e415; no alias/config/runtime363d or v4.
+
+Callable uses compiler Classify.Signature/Encode imports and the agreed pure
+ClassifiedSignature.toExpectedSignatureJson instead of field-copy JSON assembly.
+Independent classification and expectedExports worker admission remain intact.
+lake build PASS 866 jobs, followed by lake test -- --mutations PASS 85 checks
+including 29 typed checks across Manual/Blog/Slides. All mutation inputs restored;
+only isolated lakefile, manifest and Callable migration inputs differ from the
+original copied source. Cached dependency builds reused; no clean build claim,
+Beam checkpoints, cleanup or hosted publication.
+
+All three typed genre publication plans exactly equal the bda/e415 checkpoint.
+Every published resource member SHA256 verified. Helper, Manual, Blog, formatter,
+typed producer and e415 runtime content identities unchanged. Runtime pack SHA
+3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7 retained.
+Exact source/runtime/program identities and checks: codec-successor.json.
+No working pin change, public consumer push, merge or cleanup.
+
+Bounded review follow-up: corrected troubleshooting's stale Bool rejection prose
+and diagnostic to tested signedIdentity : Int → Int in main WIP and isolated
+successor. Both samples exactly match their retained negative-Unsupported logs.
+Successor follow-up changes only docs/troubleshooting.md; git diff --check PASS.
+No broad rerun: 85/29 acceptance at e4ea185 retained. Current clean source head
+and doc-only comparison recorded separately in codec-successor.json.
+
+2026-10-08 — Entry-selected, type-derived authoring (local main WIP)
+
+Current main consumer base 11b5c5c with preserved typed/genre work. Exact
+Lean/Verso/VIR/Illuminate/Slides pins and e415/3910 runtime unchanged; prior clean
+isolated codec checkpoint 9421ffa remains untouched. No public push, repin,
+deployment, native precompile, compiler scheduling change or workspace cleanup.
+
+Run arguments are entry, optional input, +collapsed and +multiline. entry selects
+and registers local scalar functions through VIR validation. Imported scalars
+and typed Html get document-owned compiled callable wrappers; ordinary producer
+modules need no VIR annotation or separate root bundle. Result type selects text
+or sandboxed Html preview. output options are rejected; String markup stays text.
+Model retains author-selected declaration separately from full runtime callable
+name; worker uses the latter for independent expectedExports admission and call.
+Existing explicit annotations and describeEntry calling convention remain valid.
+
+lake build PASS 866 jobs, then lake test -- --mutations PASS 85 checks including
+16 Blog, 20 Slides and 29 typed checks. Full author/type/dependency negatives,
+source-anchor checks, real Stop/stale/retry, native-only generation, root/nested
+worker agreement, source/carrier mutations, restored identities and rejection
+before overwriting accepted output all pass. Noncomputable input is rejected
+before registration; Unmarked fixture now succeeds. Typed Html author fixture
+also directly rechecked with retained explicit annotations and repeated entries.
+Cached dependencies reused; no Beam checkpoints or clean build claim.
+
+Active resource owners are Manual chapter, Blog Page/Post, and Slides deck;
+formatter/runtime shared. All members of six published resource envelopes were
+SHA256 verified. Exact identities and checks: entry-interface-results.json.
+Local combined demo and complete ZIP refreshed. Independently pinned public
+starter source/dependency retained as an older, qualified annotated example.
+
+2026-10-08 — Inline leanRun across Manual, Blog Page/Post and Slides (local only)
+
+Current main 11b5 + preserved typed/entry-interface WIP; dependency/toolchain pins
+and e415/3910 runtime unchanged. Prior isolated codec 9421 remains clean and
+separate. No public push, site deployment, dependency repin, precompilation,
+compiler scheduling change, Beam checkpoint or workspace cleanup.
+
+New shared Inline helper selects/registers the entry after retained command
+elaboration. Verso's generic command engine currently lives in the Manual
+library; shared helper constructs no Manual AST. Manual keeps native highlighting,
+Blog uses native ExternalCode Page/Post source, Slides uses its formatting-aware
+elaborator/native fragmentized code. Existing AST wrappers, collectors, resource
+planner, worker and codec retained. Anchors remain optional source reuse.
+
+lake build PASS 868 jobs; then lake test -- --mutations PASS 86 checks including
+16 Blog, 20 Slides, 29 typed and 26 focused inline genre checks. The focused
+inline checks compile all four scalar shapes and typed Html in Page/Post/Slides,
+verify source-located unsupported/removed-output rejection, retained namespace
+and definition reuse, independent canonical signatures and exact native/browser
+agreement at root/nested prefixes. Repeated placements independent; inline Html
+escapes in sandbox; hidden inline fragment stops its worker and clears output.
+No-JavaScript inline source/disabled controls at 390px and no browser errors pass.
+A targeted ordinary Blog leanInit/lean context compatibility check also passes.
+Standard source/resource-layout mutations restore their accepted identities.
+Cached dependencies reused; no clean-build claim.
+
+Demo Page, Post and deck now include inline definitions, later #check reuse and
+typed Html alongside existing source anchors. Active native resources remain
+Manual chapter, Page/Post, deck, formatter and runtime. All published member
+SHA256 identities verified; exact records in inline-genres-results.json.
+Local combined demo and full ZIP regenerated with current inline examples.

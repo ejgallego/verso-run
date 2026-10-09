@@ -1,6 +1,5 @@
 import LeanRunSlides.Deck
-import LeanRunBlog.Resources
-import LeanRunGate.HelperResources
+import LeanRunSlides.Resources
 import VersoLeanRun.Slides.Publish
 
 open Verso Doc VersoSlides
@@ -11,8 +10,8 @@ def main (args : List String) : IO UInt32 := do
     | ["--output", path] => pure ("normal", (⟨path⟩ : System.FilePath))
     | ["--check", mode, "--output", path] => pure (mode, (⟨path⟩ : System.FilePath))
     | _ => throw <| IO.userError "usage: lean-run-slides-demo [--output DIRECTORY]"
-  let programs := if mode == "missing" then #[LeanRunGate.helperResources]
-    else #[LeanRunGate.helperResources, LeanRunBlog.resources]
+  let programs := if mode == "missing" then #[]
+    else #[LeanRunSlides.resources]
   let doc ← match mode with
     | "normal" | "missing" | "collision" => pure (%doc LeanRunSlides.Deck)
     | "malformed" =>

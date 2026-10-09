@@ -2,14 +2,19 @@
 
 ## Common machinery and Manual integration
 
-The common modules have no dependency on `VersoManual`: `Model` retains portable
-experiment data, `Callable` classifies entries and builds expected contracts,
+The portable model, callable classifier, anchor loader, console, AST collector
+and publication planner have no dependency on `VersoManual`: `Model` retains portable
+experiment data, `Callable` selects/registers entries and builds expected contracts,
 `Anchored` reuses standard checked source anchors, `Render` builds the console,
 `Collect` walks a genre's AST with its extension decoder, and `Publication`
 prepares the complete validated file inventory without writing it.
 
-`Manual` supplies inline scope handling and a Run wrapper with native highlighted
-source children. `Publish` decodes Manual wrappers and writes the common plan into
+`Inline` shares entry selection and retained command scopes after elaboration.
+It reuses Verso's generic command engine, currently located in the Manual library;
+it constructs no Manual AST. `Manual` supplies its native highlighted source and
+Run wrapper. Blog supplies native Page/Post code blocks; Slides supplies its own
+formatting-aware command engine and native fragmentized source. `Publish` decodes
+Manual wrappers and writes the common plan into
 the selected HTML layout. Public imports remain `VersoLeanRun` and
 `VersoLeanRun.Publish`. Blog adapters collect typed Page/Post sites. Slides adapters
 retain native source wrappers and compose Run resources with the stock formatter
@@ -21,22 +26,24 @@ The [genre review](multi-genre.md) describes those boundaries.
 Follow VIR's stock resource workflow, demonstrated by the
 [lakefile](../lakefile.lean) and [carrier](../resources/LeanRunGate/Resources.lean):
 
-1. Register the chapter or helper as a program library. Its public marked
-   declarations supply root entrypoints; imports supply their compiled dependency
-   closure. A declaration in an imported module needs its own registered program
-   bundle when called directly.
-2. Register a disjoint resource carrier library with a `:virResourcePack`
-   prerequisite, and name the owner/module pair in the package's typed target:
+1. Register the document as a program library. `entry` validates and registers
+   local scalar entries; imported functions and typed HTML get document-owned
+   callable adapters. Imports supply their compiled dependency closure. Ordinary
+   producer modules need no VIR annotations or separate root resource bundles.
+2. Register a disjoint resource carrier library with the bare program Module
+   in `needs` and the fixed `:virResourcePack` prerequisite:
 
    ```lean
-   target virPrograms (_pkg) : Array (Lean.Name × Lean.Name) := do
-     return Job.pure #[(`MyResources, `MyChapter)]
+   lean_lib MyResources where
+     srcDir := "resources"
+     roots := #[`MySite.Resources]
+     needs := #[`+MyChapter, `@my_package/MyResources:virResourcePack]
    ```
 
-   The demo also registers `LeanRunHelperResources` / `LeanRunGate.Helper` for
-   its anchored entry. There are no JSON recipes, callable role aliases, or
-   handwritten interface IDs. Keep program and carrier libraries disjoint.
-3. Embed the prepared bundle by its owning library name. The chapter imports
+   The demo registers the Manual chapter, Blog Page/Post and Slides deck as
+   separate document roots. There are no JSON recipes or handwritten interface
+   IDs. Keep document and carrier libraries disjoint.
+3. Embed the prepared bundle in its carrier library. The chapter imports
    extension support, never its carrier:
 
    ```lean
@@ -44,10 +51,10 @@ Follow VIR's stock resource workflow, demonstrated by the
    public import Vir.Resources.Embed
 
    public def MySite.program : Vir.Resources.Bundle :=
-     include_vir_library MyResources
+     include_vir_program
    ```
 
-   The literal Lake library key and prerequisite survive custom source/build
+   The no-argument include resolves the carrier library; its prerequisite survives custom source/build
    directories; no generated-path changes are needed.
 4. Import the chapter, carrier, and `VersoLeanRun.Publish` in the native generator:
 
@@ -56,17 +63,19 @@ Follow VIR's stock resource workflow, demonstrated by the
      (extraSteps := [VersoLeanRun.publish #[MySite.program]])
    ```
 
-   Pass every required producer bundle. The publisher uses VIR's locked runtime
+   Pass every required document bundle. The publisher uses VIR's locked runtime
    by default; a compatible explicit runtime may use the named `runtime` argument.
 
-The graph remains support → chapter/helper → program preparation → carrier →
+The graph remains support → producer → document → program preparation → carrier →
 native generator. No per-block packaging or second execution compiler is added.
 Verso's standard external-code path prepares cached highlighting separately.
 
 `Experiment.program` identifies the document placement group and diagnostic
-position. `producerModule`, resolved from Lean's declaration ownership after any
-HTML adaptation, identifies the executable producer. Local HTML adapters belong
-to the document module; imported anchored entries belong to their producer.
+position; `declaration` is the author-selected Lean entry. `callable` is the full
+compiled VIR export name (with a fallback to `declaration` for older metadata).
+`producerModule` identifies the callable's owning module. Generated scalar/Html
+adapters for imported entries belong to the document, leaving producer modules
+unchanged. Source anchor names and callable export names remain separate.
 The publisher matches this module to the generated bundle's `logicalId` and
 preserves the original index-to-manifest mapping. Identical bundles deduplicate.
 Distinct bundles with one logical ID fail `ResourceSet.forSite` validation with
@@ -78,9 +87,10 @@ signatures before runtime instantiation. `forSite` does not check callable types
 there is no embedded-interface parser or reopening of producer files here.
 
 VIR's `analyzeExportInterface` supplies each independently elaborated signature,
-with canonical type descriptors and effect. The publisher places that exact
+with canonical type descriptors and effect. `callSignature.toExpectedSignatureJson` supplies the type-only contract.
+The publisher places that exact
 `{args, result, effect}` object in `expectedExport`; the worker uses the full
-Lean declaration as both expectation key and call name. A missing expectation
+Lean `callable` declaration as both expectation key and call name. A missing expectation
 fails before worker creation. Missing declarations or argument/result/arity/effect
 mismatches fail in VIR's program-validation phase before invocation. Native/browser
 oracle comparisons establish the demonstrated semantic agreement.
@@ -123,9 +133,9 @@ highlighted source without interactive controls.
 | --- | --- |
 | Lean | 4.34.0 (`293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`) |
 | Verso | `3f6366aa8045b342b0b68c0373a8ebfce7d5611f` |
-| VIR | `bda79d5c4ab7d061c971fcd8917f536393ec03ee` (a PR #217 snapshot) |
+| VIR | `fb5af64788e419affa4a496b144f7f96bed48322` (landed public source) |
 | Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Slides | `235aac80e627c11e4f094ced7e4e564ed5ecfe93` (public review snapshot) |
+| Slides | `35b5d14bc97d71981d01957f8a6fc6ea7470a6e4` (public review snapshot) |
 | Runtime | `e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd` |
 
 The minimal Verso fork is based on release `cad4b633` and exposes the existing
@@ -134,7 +144,7 @@ compatibility version 3 (resource descriptor version 2). Lake acquires and verif
 authors do not need a separate SDK installation or Wasm build.
 
 
-The selected public pair is VIR PR #217 commit `bda79d5c` and runtime `e415…`,
+The selected public pair is landed VIR commit `fb5af647` and runtime `e415…`,
 pack SHA256 `3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7`.
 Lean, Verso, and Illuminate retain their previous exact pins. Producer CI status
 belongs to the VIR Module owner; consumer acceptance is recorded separately in

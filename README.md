@@ -44,6 +44,8 @@ There are a few more examples to explore:
 | [Blog page](http://127.0.0.1:8795/blog/page/) | Exact natural numbers from an imported source anchor |
 | [Blog post](http://127.0.0.1:8795/blog/notes/2026-10-8-running-lean-in-a-post/) | Greetings, an HTML card, and Stop |
 | [Slides](http://127.0.0.1:8795/slides/) | Run exact numbers and greetings, then navigate away to stop work |
+| [Typed inputs](http://127.0.0.1:8795/Typed-inputs/) | Boolean choices and UInt64 maximum/wraparound |
+| [Multiline text](http://127.0.0.1:8795/Multiline-text/) | Keep blank lines and number each line |
 
 The combined site lives in `_out/html-multi`, with Blog under `blog/` and Slides under `slides/`.
 Manual also generates `_out/html-single` and `_out/tex`.
@@ -55,11 +57,10 @@ The [Manual starter](examples/manual-starter/README.md) is a small independent
 project with everything wired together: a text function, a typed HTML card,
 resource preparation, and a site generator. Copy it and edit its chapter.
 
-A runnable block looks like this:
+The same runnable block syntax works in Manual, Blog Page/Post, and Slides:
 
 ````lean
 ```leanRun (entry := Demo.greet) (input := "Ada")
-@[vir_export]
 public def Demo.greet (name : String) : String :=
   "Hello, " ++ name ++ "!"
 ```
@@ -73,18 +74,25 @@ The authoring guide explains [imports, block options, HTML, and registration](do
 | --- | --- | --- |
 | `String → String` | Text | Plain text |
 | `Nat → Nat` | An exact decimal natural number | An exact decimal natural number |
+| `Bool → Bool` | A true/false selector | Plain `true` or `false` |
+| `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
 | `String → Verso.Output.Html` | Text | An isolated HTML preview |
 
 Functions must be public, executable, pure, and monomorphic, with one explicit
-argument. VIR also checks their compiled dependencies. A supported function type
+argument. Selecting `entry` registers the callable; no VIR attribute is needed.
+VIR also checks their compiled dependencies. A supported function type
 can still reach an operation absent from the runtime; the build will reject it.
 See [troubleshooting](docs/troubleshooting.md) for examples and next steps.
+
+String inputs can use `+multiline`: Enter adds a line break, and Ctrl+Enter or
+⌘+Enter runs the example. All three genres share these controls and codecs.
 
 This experimental release supports **Verso Manual**, **Blog Page/Post**, and **Slides**.
 Manual examples can use inline definitions or
 [checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module).
-Blog and Slides use those checked anchors, with producer-owned scalar wrappers for HTML;
-see [Blog authoring](docs/blog.md) and [Slides authoring](docs/slides.md).
+All three genres support inline definitions and optional checked anchors, including
+automatic typed HTML adaptation; see [Blog authoring](docs/blog.md) and
+[Slides authoring](docs/slides.md).
 Readers edit function inputs; source editing
 belongs to the future editor work. Ordinary highlighted Lean blocks keep working,
 and source remains readable without JavaScript. Manual also retains its TeX output.

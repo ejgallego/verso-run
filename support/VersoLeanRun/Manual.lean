@@ -8,6 +8,7 @@ public import VersoManual
 public import VersoLeanRun.Callable
 public import VersoLeanRun.Render
 public meta import VersoLeanRun.Anchored
+public meta import VersoLeanRun.Inline
 public import VersoManual.ExternalLean
 public meta import VersoManual.InlineLean
 public meta import VersoManual.InlineLean.Scopes
@@ -32,10 +33,7 @@ block_extension Block.leanRun (experiment : Experiment) where
 @[code_block]
 meta def leanRun : CodeBlockExpanderOf Config
   | config, str => do
-    elabCommands { «show» := true, keep := true, name := none, error := false, fresh := false } str fun shouldShow hls str => do
-      let name ← liftM <| Scopes.runWithOpenDecls <| Lean.Elab.realizeGlobalConstNoOverloadWithInfo config.entry
-      let experiment ← describeEntry config name str
-      let source ← toHighlightedLeanBlock shouldShow hls str
+    elabInlineRun config str toHighlightedLeanBlock fun experiment source => do
       let description ← quoteExperiment experiment
       ``(Verso.Doc.Block.other (VersoLeanRun.Block.leanRun $description) #[$source])
 

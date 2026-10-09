@@ -14,6 +14,7 @@ from playwright.sync_api import sync_playwright
 root = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
 parser.add_argument('--url', default='https://ejgallego.github.io/verso-run/')
+parser.add_argument('--revision', help='require the immutable deployed source revision and a clean build')
 parser.add_argument('--site', help='serve a local generated site instead of the hosted URL')
 parser.add_argument('--output', default='_out/pages-smoke.json')
 args = parser.parse_args()
@@ -32,6 +33,14 @@ if args.site:
     atexit.register(server.server_close)
     atexit.register(server.shutdown)
     base = f'http://127.0.0.1:{server.server_port}/'
+with urlopen(base + 'verso-run-build.json') as response:
+    build_identity = json.load(response)
+if args.revision:
+    assert build_identity['source'] == args.revision, build_identity
+    assert build_identity['dirty'] is False, build_identity
+local_manifest = json.loads((root / 'lake-manifest.json').read_text())
+assert build_identity['dependencies'] == {p['name']: p['rev'] for p in local_manifest['packages']}
+assert build_identity['runtime'] == 'e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd'
 plans = {}
 for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
     with urlopen(base + path + 'lean-run/publication.json') as response:
@@ -126,11 +135,69 @@ with sync_playwright() as p:
                 assert '&lt;b&gt;&amp; Ada' in frame.get_attribute('srcdoc')
                 assert form.frame_locator('iframe').locator('b').count() == 0
         checks.append(f'{path}: edited input executes through the hosted worker and matches native Lean')
+    # Qualify the new bounded controls and inline functions on the actual deployment.
+    page.set_viewport_size({'width': 1280, 'height': 1000})
+    for genre, path, owner in [
+        ('Manual', '', 'LeanRunGate.Chapter'),
+        ('Blog', 'blog/page/', 'LeanRunBlog.Page'),
+        ('Slides', 'slides/', 'LeanRunSlides.Deck')]:
+        for role, values in [('flip', ['false', 'true']),
+                             ('increment', ['9007199254740993', '18446744073709551615']),
+                             ('lines', [' a \n世界 🌍\n\n<b>&\n'])]:
+            location = path if genre != 'Manual' else ('Multiline-text/' if role == 'lines' else 'Typed-inputs/')
+            page.goto(base + location)
+            page.wait_for_selector('.lean-run[data-enhanced]')
+            if genre == 'Slides':
+                page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
+                index = {'flip': 4, 'increment': 5, 'lines': 6}[role]
+                page.evaluate('(n) => Reveal.slide(n, 0)', index)
+                page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+            form = page.locator('.lean-run[data-experiment*="LeanRunTyped.Examples.' + role + '"]').first
+            for value in values:
+                field = form.locator('input, select, textarea')
+                if role == 'flip': field.select_option(value)
+                else: field.fill(value)
+                form.locator('[type=submit]').click()
+                page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                                       arg=form.element_handle(), timeout=60000)
+                assert form.get_attribute('data-state') == 'success', form.inner_text()
+                expected = json.loads(subprocess.check_output(
+                    [str(root / '.lake/build/bin/lean-run-typed-oracle'), role, value], text=True))
+                assert form.locator('.lean-run-output').text_content() == expected
+            checks.append(genre + ': hosted ' + role + ' control agrees with native Lean')
+    for path, owner, role in [
+        ('blog/page/', 'LeanRunBlog.Page', 'page'),
+        ('blog/notes/2026-10-8-running-lean-in-a-post/', 'LeanRunBlog.Post', 'post'),
+        ('slides/', 'LeanRunSlides.Deck', 'slide')]:
+        for function in ['greet', 'card']:
+            page.goto(base + path)
+            page.wait_for_selector('.lean-run[data-enhanced]')
+            if role == 'slide':
+                page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
+                index = 7 if function == 'greet' else 9
+                page.evaluate('(n) => Reveal.slide(n, 0)', index)
+                page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                if function == 'greet': page.evaluate('Reveal.nextFragment()')
+            form = page.locator('.lean-run[data-experiment*="' + owner + '.Inline.' + function + '"]').first
+            value = '世界 🌍 <b>&'
+            form.locator('input').fill(value)
+            form.locator('[type=submit]').click()
+            page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                                   arg=form.element_handle(), timeout=60000)
+            assert form.get_attribute('data-state') == 'success', form.inner_text()
+            expected = oracle(role + ('InlineGreet' if function == 'greet' else 'InlineCard'), value, 'Blog')
+            if function == 'greet':
+                assert form.locator('.lean-run-output').text_content() == expected
+            else:
+                assert expected in form.locator('iframe').get_attribute('srcdoc')
+                assert form.locator('iframe').get_attribute('sandbox') == ''
+                assert form.frame_locator('iframe').locator('b').count() == 0
+            checks.append(path + ': hosted inline ' + function + ' agrees with native Lean')
     assert not errors, errors
     checks.append('no uncaught browser errors')
     browser.close()
 
-result = {'url': base, 'checks': checks, 'publication': plan, 'blogPublication': plans['Blog'],
+result = {'build': build_identity, 'url': base, 'checks': checks, 'publication': plan, 'blogPublication': plans['Blog'],
           'slidesPublication': plans['Slides'], 'runtimeResponses': runtime_responses}
 (root / args.output).write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n')
 print(json.dumps({'url': base, 'checks': checks}, indent=2, ensure_ascii=False))

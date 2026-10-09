@@ -62,6 +62,8 @@
 }
 
 .lean-run input,
+.lean-run select,
+.lean-run textarea,
 .lean-run button {
   box-sizing: border-box;
   min-height: 44px;
@@ -72,13 +74,16 @@
   line-height: 1.25;
 }
 
-.lean-run input {
+.lean-run input,
+.lean-run select,
+.lean-run textarea {
   width: 100%;
   min-width: 0;
   padding: .6rem .75rem;
   background: white;
   color: #1e2936;
 }
+.lean-run textarea { resize: vertical; line-height: 1.5; }
 
 .lean-run input::placeholder {
   color: #738191;
@@ -114,6 +119,8 @@
 }
 
 .lean-run input:focus-visible,
+.lean-run select:focus-visible,
+.lean-run textarea:focus-visible,
 .lean-run button:focus-visible {
   outline: 2px solid #4777ff;
   outline-offset: 3px;

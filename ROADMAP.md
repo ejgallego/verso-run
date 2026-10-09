@@ -5,13 +5,13 @@ Keep exact dependencies and the current execution boundary.
 
 ## Selected public runtime integration
 
-The selected pair is public VIR PR #217 commit `bda79d5c` and runtime `e415…`
+The selected pair is landed public VIR commit `fb5af647` and runtime `e415…`
 (pack SHA256 `3910c29e…`). Source acquisition and exact public bytes are verified.
-The consumer migration uses typed owner/module registration, full Lean declaration
+The consumer migration uses bare Module needs and fixed resource prerequisites, full Lean declaration
 names, independent `{args, result, effect}` expectations, and exact BigInt Nat
 results. Publication and runtime admission retain their separate phases.
 
-Consumer acceptance passed: 79 native/browser/mutation checks, 11 cold Git-only
+The historical bda/e415 consumer acceptance passed: 79 native/browser/mutation checks, 11 cold Git-only
 starter checks without Lake artifact-cache reuse, and actual Pages/native
 agreement for Greeting, exact Nat, escaped HTML, and Illuminate SVG. Runtime
 JavaScript was served as `application/javascript` on Pages. Evidence is linked
@@ -48,12 +48,12 @@ instances have separate identities.
 
 The common model, classifier, console, AST collector, and publication planner
 are extracted behind the existing Manual API. `leanRunAnchor` reuses checked
-Verso anchors with an explicit imported scalar entry and a producer-owned bundle.
+Verso anchors with an explicit imported entry and a document-owned callable bundle.
 The demo includes ordinary and runnable displays of the same source region.
 
 Blog covers Page and Post with native highlighted source, typed site collection,
 shared resource publication, and explicit renderer URLs for nested posts.
-Slides uses the compatible public `235aac80` snapshot, native fragmentized
+Slides uses the compatible public `35b5d14b` snapshot, native fragmentized
 source, a shared formatter/Run runtime inventory, and the stock asset planner.
 Slide/fragment hiding cancels workers and pending loads; input keys stay with
 the form. Native source remains readable without JavaScript.
@@ -63,12 +63,60 @@ Preserve each genre's native links, styling, source, and lifecycle. Future Slide
 updates require deliberate dependency selection and qualification. The owner
 retains upstream landing decisions for its review snapshot.
 
+## Concrete typed Run forms
+
+The selected consumer slice adds Bool/UInt64 and multiline String controls to
+Manual, Blog, and Slides with the shared codec and worker lifecycle. Forms remain
+bounded, pure, monomorphic, and homogeneous; multiline is presentation only.
+The independently classified expectation stays an ordered `args` array of canonical
+type descriptors, one `result` descriptor, and the canonical `effect` label.
+Parameter names and UI metadata are outside that expectation.
+
+The native owner supplies the matching pure expected-signature encoder. Agreement
+is retained in [the consumer claim](evidence/typed-forms-claim.md). The selected public adoption uses the compiler-owned
+`callSignature.toExpectedSignatureJson` encoder on source `fb5af647`, with the
+same e415 runtime. The earlier local adoption remains historical evidence: Explicitly selected source `696cc493`
+with the same e415 runtime passed an isolated local helper adoption gate: build
+and all 85 acceptance checks, including 29 typed checks. Its three genre
+publication plans exactly match the bda/e415 checkpoint. See
+[the successor evidence](evidence/codec-successor.json). The earlier isolated gate granted no publication. The later selected public
+adoption covers ordinary consumer publication and fresh hosted/cold starter
+acceptance; alias/config/v4, merge and cleanup remain outside its scope.
+
+## Entry-selected, type-derived authoring
+
+The current local authoring slice removes redundant export annotations and the
+`output` block argument. `entry` selects and validates a scalar export; the Lean
+result type chooses text or an isolated Html preview. Imported scalar and Html
+functions get document-owned callable adapters, so ordinary source producers
+need no VIR annotation or separate root bundle. Register document/carrier pairs.
+
+Keep `input`, `+multiline` and `+collapsed`, and reuse Verso's existing project/
+module defaults for anchors. The shared signature contract, scalar worker codec,
+real Stop and genre-native source remain. Runtime and dependency pins stay fixed.
+The independent starter remains on its qualified older public revision until a
+separately selected dependency/publication update. The earlier isolated codec
+checkpoint remains preserved, independently of this new main-tree API slice.
+
+## Inline authoring in every genre
+
+`leanRun` now defines or reuses a function directly in Manual, Blog Page/Post and
+Slides. Definitions, namespaces and open declarations are retained across Run
+blocks. `entry`, input and the two presentation flags remain the same; typed Html
+is adapted automatically. Anchors are optional when documents share source.
+
+The shared Inline helper selects and validates callables after command elaboration.
+It uses Verso's generic command engine, currently in the Manual library, with native
+Blog code rendering; Slides supplies its formatting-aware elaborator and source.
+Ordinary Blog named example contexts keep their original semantics. Publication,
+codec and worker lifecycle remain shared. No new dependency or runtime is selected.
+
 ## Native build improvements
 
 VIR [PR #223](https://github.com/ejgallego/lean-vir/pull/223) separates native
-compiler libraries from JavaScript-only externs. It is a draft stacked on #217;
-this repository has not adopted its `d390c004` head. Once a compatible source is
-selected, qualify native precompilation in a separate slice and measure cold/warm
+compiler libraries from JavaScript-only externs. Its landed compatible source
+is selected in the public adoption above. Native consumer precompilation remains
+a separate deferred slice: qualify it explicitly and measure cold/warm
 builds and author iteration. Keep browser runtime matching and ordinary consumer
 acquisition intact; do not combine this with compiler scheduling changes.
 
@@ -77,8 +125,8 @@ acquisition intact; do not combine this with compiler scheduling changes.
 Group Verso core work for later review: the public highlighting hook and any
 shared hooks required by the anchors/genre work. Discuss compiler scheduling
 with the compiler maintainer before changing `compiler.postponeCompile false`.
-Native precompilation remains deferred until the separate VIR fix is adopted
-and qualified here.
+Native precompilation remains deferred until its own consumer qualification is
+selected; the landed source adoption does not enable it.
 
 ## Deferred qualification
 

@@ -9,8 +9,8 @@ public meta import VersoLeanRun.Model
 public import Verso.Doc.Elab
 public import Verso.Output.Html
 public meta import Vir.Attributes
-public meta import Vir.Interface.Classify.Signature
-public meta import Vir.GeneratePackage.Interface.Encode
+public meta import Vir.Compiler.Interface.Classify.Signature
+public meta import Vir.Compiler.Interface.Encode
 public meta import Lean.ToExpr
 public section
 open Lean Verso Doc Elab ArgParse
@@ -20,39 +20,47 @@ structure Config where
   entry : Ident
   input : Option String
   collapsed : Bool
-  output : Option String
+  multiline : Bool := false
 
 meta instance : FromArgs Config DocElabM where
   fromArgs := Config.mk <$> .named `entry .ident false <*> .named `input .string true <*>
-    .flag `collapsed false <*> .named `output .string true
+    .flag `collapsed false <*> .flag `multiline false
 
-/-- Adapt the document's typed HTML function at the existing scalar VIR boundary.
-The stable suffix is the full declaration selected in the generated root interface. -/
-private meta def htmlAdapter (entry : Ident) (name : Name) : DocElabM Name := withRef entry do
-  if isNoncomputable (← getEnv) name then
-    throwErrorAt entry "Lean Run HTML entry '{name}' is non-executable"
-  let adapter := name ++ `leanRunHtml
+/-- Registration is selected by the Run entry, after independent type/form checks.
+Keep VIR's attribute validator authoritative for executable IR and dependencies. -/
+private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := do
+  unless (vir_export.getState (← getEnv)).contains name do
+    withExporting do
+      let .ok attr := getAttributeImpl (← getEnv) `vir_export
+        | throwErrorAt entry "Missing VIR export attribute"
+      withRef entry <| attr.add name entry .global
+
+/-- Imported callables and typed HTML have a document-owned scalar boundary.
+The producer need not know that a document will select its function. -/
+private meta def scalarEntry (entry : Ident) (name : Name) (isHtml : Bool) : DocElabM Name := do
+  let env ← getEnv
+  let imported := (env.getModuleIdxFor? name).isSome
+  if !isHtml && !imported then return name
+  let adapter := (if imported then env.mainModule ++ name else name) ++
+    (if isHtml then `leanRunHtml else `leanRun)
+  let info ← getConstInfo name
   let string := mkConst ``String
-  let type ← mkArrow string string
-  let value := mkLambda `input .default string <|
-    mkApp3 (mkConst ``Verso.Output.Html.asString)
-      (mkApp (mkConst name) (.bvar 0)) (mkNatLit 0) (mkConst ``Bool.true)
-  if let some existing := (← getEnv).find? adapter then
+  let type ← if isHtml then mkArrow string string else pure info.type
+  let value := if isHtml then
+    mkLambda `input .default string <|
+      mkApp3 (mkConst ``Verso.Output.Html.asString)
+        (mkApp (mkConst name) (.bvar 0)) (mkNatLit 0) (mkConst ``Bool.true)
+    else mkConst name
+  if let some existing := env.find? adapter then
     unless existing.type == type && existing.value? == some value &&
-        (vir_export.getState (← getEnv)).contains adapter do
-      throwErrorAt entry "Lean Run HTML adapter name '{adapter}' is already in use"
+        (vir_export.getState env).contains adapter do
+      throwErrorAt entry "Lean Run adapter name '{adapter}' is already in use"
   else
     withExporting do
       addAndCompile (.defnDecl {
-        name := adapter
-        levelParams := []
-        type := type
-        value := value
-        hints := .abbrev
-        safety := .safe }) (logCompileErrors := false)
-      let .ok attr := getAttributeImpl (← getEnv) `vir_export
-        | throwError "Missing VIR export attribute"
-      attr.add adapter (← `(attr| vir_export)) .global
+        name := adapter, levelParams := [], type, value,
+        hints := .abbrev,
+        safety := if info.isUnsafe then .unsafe else .safe }) (logCompileErrors := false)
   return adapter
 
 private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
@@ -63,16 +71,16 @@ private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
         Move I/O to the document build and export a pure function."
     else if signature.args.size != 1 then
       m!"This form needs one explicit argument; found {signature.args.size}. \
-        Export a wrapper taking one String or Nat input."
+        Export a wrapper taking one String, Nat, Bool, or UInt64 input."
     else
-      m!"This form supports exactly String → String and Nat → Nat. \
+      m!"This form supports exactly String → String, Nat → Nat, Bool → Bool, and UInt64 → UInt64. \
         Serialize structured inputs and results as text, or return typed HTML."
   throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
     This interface is supported by VIR, but not by this Run form.\n\
-    {reason}\nUse a pure String → String, Nat → Nat, or String → Html function."
+    {reason}\nUse a pure String → String, Nat → Nat, Bool → Bool, UInt64 → UInt64, or String → Html function."
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
-HTML adapters are compiled in the current document module, so external sources opt out. -/
+Selected imported entries and HTML adapters are compiled in the document module. -/
 meta def describeEntry (config : Config) (name : Name) (str : StrLit)
     (allowHtml : Bool := true) : DocElabM Experiment := do
   if isPrivateName name then
@@ -89,15 +97,12 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
         result.isConstOf ``Verso.Output.Html
     | _ => false
   if isHtml && !allowHtml then
-    throwErrorAt config.entry "Lean Run anchored HTML entries need a scalar adapter owned by the producer. \
-      Export a String → String serialization wrapper in the selected anchor."
-  let output := config.output.getD (if isHtml then "html" else "text")
-  unless output == "text" || output == "html" do
-    throwErrorAt config.entry "Lean Run output must be 'text' or 'html'"
-  if isHtml && output != "html" then
-    throwErrorAt config.entry "Lean Run String → Html entries require HTML output"
-  let name ← if isHtml then htmlAdapter config.entry name else pure name
-  let env ← getEnv
+    throwErrorAt config.entry "Lean Run entry '{name}' returns Html, but this context requires a scalar result"
+  let output := if isHtml then "html" else "text"
+  -- Classify the source interface independently before registering scalar exports.
+  -- Html crosses VIR through a generated String serializer.
+  let sourceName := name
+  let name ← if isHtml then scalarEntry config.entry name true else pure name
   let info ← getConstInfo name
   let callSignature ← match ← Vir.Interface.analyzeExportInterface info.type with
     | .ok sig => pure sig
@@ -107,24 +112,28 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
   let shape ← match callSignature.args, callSignature.result, callSignature.effect with
     | #[{ type := .string, .. }], .string, .pure => pure "string"
     | #[{ type := .nat, .. }], .nat, .pure => pure "nat"
+    | #[{ type := .bool, .. }], .bool, .pure => pure "bool"
+    | #[{ type := .uint64, .. }], .uint64, .pure => pure "uint64"
     | _, _, _ => unsupportedForm config.entry name info.type callSignature
-  unless (vir_export.getState env).contains name do
-    throwErrorAt config.entry "Lean Run entry '{name}' must carry @[vir_export].\n\
-      Type: {info.type}\nAdd the attribute to its public definition. If it is already \
-      present, fix the earlier VIR compilation or dependency error first."
-  if output == "html" && shape != "string" then
-    throwErrorAt config.entry "Lean Run HTML output requires a String result"
+  if config.multiline && shape != "string" then
+    throwErrorAt config.entry "Lean Run multiline input requires a String argument"
+  if shape == "bool" then
+    if let some input := config.input then
+      unless input == "true" || input == "false" do
+        throwErrorAt config.entry "Lean Run Boolean preset must be 'true' or 'false'"
+  let name ← if isHtml then pure name else scalarEntry config.entry name false
+  registerEntry config.entry name
+  let env ← getEnv
   let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
-  let signature := Vir.GeneratePackage.jsonObject #[
-    ("args", Vir.GeneratePackage.jsonArray (callSignature.args.map (·.type.toJson))),
-    ("result", callSignature.result.toJson),
-    ("effect", Vir.GeneratePackage.jsonString callSignature.effect.label)]
+  let signature := callSignature.toExpectedSignatureJson
   let experiment : Experiment := {
-    program := env.mainModule.toString, declaration := name.toString, shape, signature,
+    program := env.mainModule.toString, declaration := sourceName.toString, callable := name.toString, shape, signature,
     producerModule := match env.getModuleIdxFor? name with
       | some idx => env.header.moduleNames[idx.toNat]!.toString
       | none => env.mainModule.toString,
-    initialInput := config.input.getD (if shape == "nat" then "0" else ""),
+    initialInput := config.input.getD (if shape == "nat" || shape == "uint64" then "0"
+      else if shape == "bool" then "false" else ""),
+    multiline := config.multiline,
     collapsed := config.collapsed,
     output,
     sourceLine := pos.line, sourceColumn := pos.column }
@@ -139,6 +148,6 @@ meta def quoteExperiment (experiment : Experiment) : DocElabM Term := do
     $(quote experiment.output)
     $(quote experiment.signature)
     $(quote experiment.sourceLine) $(quote experiment.sourceColumn)
-    $(quote experiment.producerModule))
+    $(quote experiment.producerModule) $(quote experiment.multiline) $(quote experiment.callable))
 
 end VersoLeanRun

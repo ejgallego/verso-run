@@ -1,13 +1,13 @@
 # Authoring runnable examples
 
-For a complete working project, start with the
-[Manual starter](../examples/manual-starter/README.md). This guide explains the
-blocks you add to its chapter.
+A Run block selects a function with `entry`. Its Lean type chooses the input
+control and result display. The document build handles VIR registration.
 
 ## A basic block
 
-Import `VersoLeanRun` into a module chapter and disable postponed compilation for
-executable examples:
+The same `leanRun` block works in Manual, Blog Page/Post and Slides. Select the
+genre adapter import, open its namespace, and keep compilation enabled. For a
+Manual chapter:
 
 ````lean
 module
@@ -17,51 +17,54 @@ set_option compiler.postponeCompile false
 
 #doc (Manual) "My runnable chapter" =>
 
-```leanRun (entry := Demo.greet)
-@[vir_export]
+```leanRun (entry := Demo.greet) (input := "Ada")
 public def Demo.greet (name : String) : String :=
   "Hello, " ++ name
 ```
 ````
 
-`entry` is mandatory and resolves through Lean's actual declaration identity and the
-retained example scopes. Scalar declarations must carry `@[vir_export]`. VIR classifies
-their interfaces; this form admits pure, monomorphic `String → String` and `Nat → Nat`,
-each with one explicit argument. A public `String → Verso.Output.Html` function is adapted
-automatically, without an author-side `@[vir_export]` marker. Missing, unmarked, private,
-unsupported, non-executable, and unavailable standard-runtime dependencies have negative
-tests. Other block arguments, including `-keep` and `+error`, are rejected. Ordinary
-`lean` blocks retain their existing behavior.
+The function must be public, executable, pure and monomorphic. No
+`@[vir_export]` attribute is required: `entry` selects and registers the callable
+using VIR's existing validator, including its compiled dependencies. Existing
+explicit attributes continue to work. Helpers are compiled as dependencies;
+they do not become entrypoints merely because they appear in the block.
 
-## Input and source display
+`entry` resolves through Lean's actual declaration identity and the retained
+example scopes. Repeated blocks can select the same function, for example with
+`#check Demo.greet` as displayed code. Each placement has its own worker.
+Ordinary `lean` blocks keep their existing behavior. `-keep`, `+error` and unknown
+Run arguments are rejected.
 
-The optional `(input := "...")` argument supplies the form's initial text, without running
-it on page load. For example, the stack calculator uses `(input := "6 7 * 2 +")`. Readers
-can edit or clear it normally, and ordinary input validation still applies when they run
-it.
+## Arguments and defaults
 
-For a longer example, `+collapsed` puts its source in a native expandable “View Lean
-implementation” panel. It starts closed so the input is easy to reach; readers can open it
-with a mouse or keyboard, including without JavaScript. The source remains fully present
-in HTML and TeX, and all declarations are still elaborated and retained normally.
+| Argument | Meaning | Default |
+| --- | --- | --- |
+| `(entry := My.function)` | Select the function | Required |
+| `(input := "...")` | Initial reader input; does not run on page load | Empty String, `"0"` for Nat/UInt64, `"false"` for Bool |
+| `+multiline` | A textarea for a String argument | Off |
+| `+collapsed` | Initially folded source | Off |
 
-## HTML results
+Bool gets a true/false selector. Boolean presets are the literal strings
+`"true"` or `"false"`. Nat and UInt64 get exact decimal inputs; UInt64 is bounded
+by `18446744073709551615` and arithmetic uses Lean's normal wraparound. Values
+beyond JavaScript's safe integer range remain exact.
 
-Scalar output defaults to plain text. `(output := "html")` requires a String result and
-displays the markup in an isolated, sandboxed frame. Typed HTML entries select this mode
-automatically; explicit `output := "text"` is rejected. This preview supports static HTML,
-inline CSS, and data images; scripts and external embedded resources are disabled. String
-functions interpolating reader input into markup should escape it for the chosen context.
-Typed HTML functions can use Verso’s HTML syntax to escape text and attributes
-automatically; raw HTML nodes remain an explicit author choice. Input edits, Stop, pending
-calls and failures clear the previous preview. Runtime errors remain plain text, and the
-result-size limit still applies. The frame has a fixed height with scrolling for larger
-documents.
+`+multiline` keeps whitespace and blank lines. Enter edits text; Ctrl+Enter or
+⌘+Enter runs the function. Numeric and Boolean entries reject it. String input
+has a 4096 UTF-16 code unit bound; all results have the common output bound.
 
-For a typed HTML entry, the block generates and marks a public `String → String`
-wrapper named `<entry>.leanRunHtml`, calling `Verso.Output.Html.asString`. The
-generated root interface exposes that full declaration; the block's `entry`
-stays the original function:
+`+collapsed` puts source in an expandable “View Lean implementation” panel.
+Source remains present in HTML and Manual TeX, including without JavaScript.
+
+## The result type chooses the display
+
+| Function type | Result display |
+| --- | --- |
+| `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
+| `String → Verso.Output.Html` | An isolated HTML preview |
+
+A String containing markup is still plain text. There is no `output` block
+argument. Return `Html` when the result is intended to be rendered as HTML:
 
 ````lean
 ```leanRun (entry := Demo.card) (input := "Ada")
@@ -71,73 +74,76 @@ public def Demo.card (name : String) : Verso.Output.Html :=
 ```
 ````
 
-The generated wrapper receives the usual `vir_export` validation, including its
-compiled dependency closure. Repeated placements reuse it; conflicting declarations
-at that name produce an author diagnostic. Neither VIR's ABI nor the renderer changes.
+Verso's typed HTML syntax escapes interpolated text and attributes. Raw HTML
+nodes remain an explicit author choice. The preview supports static HTML, inline
+CSS and data images; scripts and external embedded resources are disabled.
+Input edits, Stop, pending calls and failures clear the preview. Errors stay
+plain text; the frame scrolls larger results.
+
+The extension generates a scalar serializer for VIR. Authors select the original
+Html function. Repeated placements reuse the serializer; a conflicting declaration
+at its generated name causes an author error.
 
 ## Run an anchored example from an imported module
 
-The current checkout also provides `leanRunAnchor`. It displays a standard Verso
-source anchor and runs an explicitly selected function without redeclaring it in
-the document. The independently pinned starter demonstrates the inline API. The same extension
-also provides checked anchors.
-
-In a producer module such as `Examples.Arithmetic`, mark the source region:
+`leanRunAnchor` displays a standard Verso source anchor and selects a function
+from an imported module. The producer is ordinary Lean, without VIR annotations:
 
 ```lean
 module
-public meta import Vir.Attributes
-
 -- ANCHOR: twice
-@[vir_export]
 public def Examples.twice (n : Nat) : Nat := n + n
 -- ANCHOR_END: twice
 ```
 
-Import that module into the document, then include the checked source:
+Import the producer into the document. Verso's existing project/module defaults
+can shorten repeated blocks:
 
 ````lean
-```leanRunAnchor twice (project := ".") (module := Examples.Arithmetic) (entry := Examples.twice) (input := "21")
-@[vir_export]
+import Examples.Arithmetic
+set_option verso.exampleProject "."
+set_option verso.exampleModule "Examples.Arithmetic"
+
+```leanRunAnchor twice (entry := Examples.twice) (input := "21")
 public def Examples.twice (n : Nat) : Nat := n + n
 ```
 ````
 
-The function must be defined inside the selected anchor, public, executable, and
-marked for VIR. The block body must match the source region; stale or empty
-bodies receive Verso's usual replacement/fill-in suggestions. Anchor comments
-are omitted from the display. This first version requires the document's own
-project and an imported scalar producer; separate-project execution and automatic
-typed HTML adapter generation are not qualified here. A producer-owned exported
-`String → String` HTML serialization wrapper can use `(output := "html")`.
+Explicit `(project := ".")` and `(module := Examples.Arithmetic)` arguments remain
+available. The entry must be defined in the selected anchor, public and executable.
+The body must match the source region; stale or empty bodies get Verso's normal
+replacement/fill-in suggestions. Anchor comments are omitted from the display.
 
-Register the producer module in `virPrograms` and supply its embedded bundle to
-`VersoLeanRun.publish`. The generated root interface includes its marked entries;
-a chapter bundle does not turn imported dependencies into call entrypoints. The
-anchor name does not replace the full entry declaration. Keep the producer
-separate from the chapter that loads its highlighting and from its resource
-carrier. The [demo chapter](../gates/LeanRunGate/Chapter.lean) shows the arrangement
-with the [helper](../gates/LeanRunGate/Helper.lean).
+The document creates a callable wrapper around the imported function. Its bundle
+owns that wrapper and includes the producer's compiled dependencies. Register and
+publish the **document module's** resource bundle, just as for inline examples;
+the producer needs no separate export marker or root bundle. Imported `String →
+Html` functions use the same automatic serialization and preview as inline ones.
+Only same-project execution is qualified.
 
-`+collapsed`, input, and output options work as for inline forms. Standard
-external-code options such as `-showProofStates` and `-defSite` remain available.
-Open `Verso.Code.External` when using the ordinary `anchor` block by its short name.
-Use `-defSite` for a repeated display when another block already owns the desired
-definition target. Each runnable placement still gets its own worker. An ordinary
-`anchor` block can display the same source without a Run form.
+Input, `+multiline` and `+collapsed` work across Manual, Blog and Slides. Standard
+source options such as `-showProofStates` and `-defSite` remain available. Open
+`Verso.Code.External` for the ordinary `anchor` block. Use `-defSite` on repeated
+Manual displays when another block already owns the desired definition target.
+An ordinary `anchor` can show the same source without a Run form.
 
-## Reuse and document integration
+`leanRun` defines or reuses a function directly in any of the three genres.
+Namespace, open declarations and definitions remain available in later Run blocks.
+`leanRunAnchor` is optional when several documents share an imported source region.
+Each genre retains native source styling and links. See
+[Blog authoring](blog.md) and [Slides authoring](slides.md).
 
-`leanRun` uses ordinary command elaboration and the shared highlighted-block constructor,
-retaining source locations, hovers, and example links. The only core Verso change exposes
-`toHighlightedLeanBlock` for this reuse. This standalone package leaves native
-precompilation disabled pending the separate VIR native-client fix. It uses the normal
-Verso package as a Git dependency.
+## Project wiring and migration
 
-Repeated placements may select the same declaration, for example with `#check Demo.greet`
-as the displayed code. Each rendered placement has a distinct instance ID and its own
-worker/runtime.
+Keep support → producer → document → resource preparation → carrier → generator
+acyclic. The native generator imports the document and its separate resource
+carrier; the document imports support and its source producers, never its carrier.
+See [resource integration](internals.md#resource-ownership-and-site-integration).
+Retain `compiler.postponeCompile false`; native precompilation remains deferred.
 
-
-For the complete project wiring, see [the starter](../examples/manual-starter/README.md)
-and [resource integration](internals.md#resource-ownership-and-site-integration).
+When updating an older example, remove redundant `@[vir_export]` markers and
+`output` options. Change a String HTML serialization wrapper to return typed
+`Html` directly. For anchors, move root resource registration from the imported
+producer to the document module. The independently pinned
+[Manual starter](../examples/manual-starter/README.md) still demonstrates the older
+published revision; its explicit annotations are kept until its dependency update.

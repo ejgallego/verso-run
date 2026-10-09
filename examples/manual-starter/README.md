@@ -26,6 +26,11 @@ Single-page HTML is in `_out/html-single`; TeX is in `_out/tex`.
 Serve the complete HTML directory over HTTP, including `lean-run/` and all
 generated assets. Copying it under a nested URL prefix also works.
 
+This starter is deliberately pinned to the older public extension revision.
+Its explicit export annotations remain necessary there. The current development
+API selects exports with `entry` and infers output from the result type; see
+[the current authoring guide](../../docs/authoring.md).
+
 The toolchain and dependency revision are intentionally pinned. Lake fetches
 the matching Verso, VIR, and locked runtime through `verso-run`. Keep these
 compatible when updating the dependency.

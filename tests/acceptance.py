@@ -42,7 +42,7 @@ plan = json.loads((site/'html-multi/lean-run/publication.json').read_text())
 assert plan == json.loads((site/'html-single/lean-run/publication.json').read_text())
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting.leanRunHtml', 'String'), ('diagram.leanRunHtml', 'String'), ('double', 'Nat'), ('Helper.twice', 'Nat'), ('spin', 'Nat')]:
+for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting', 'String'), ('diagram', 'String'), ('double', 'Nat'), ('Helper.twice', 'Nat'), ('spin', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert set(contract) == {'args', 'result', 'effect'}
     assert contract['effect'] == 'pure'
@@ -52,9 +52,10 @@ for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('h
 chapter_manifest = json.loads((site/'html-multi'/published['LeanRunGate.greet']['manifest']).read_text())
 helper_manifest = json.loads((site/'html-multi'/published['LeanRunGate.Helper.twice']['manifest']).read_text())
 assert chapter_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
-assert helper_manifest['descriptor']['logicalId'] == 'LeanRunGate.Helper'
+assert helper_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
 assert chapter_manifest['descriptor']['schemaVersion'] == helper_manifest['descriptor']['schemaVersion'] == 2
-record('compiler signatures survive both publication layouts and native-only generation')
+assert helper_manifest == chapter_manifest
+record('entry-selected local/imported callables share a document-owned resource and independent signatures')
 duplicates = OUTPUT/'duplicate-registration'
 command(['lake', 'exe', 'lean-run-publication-check', 'duplicate', '--output', str(duplicates)],
     'duplicate-registration')
@@ -68,10 +69,12 @@ record('repeated bundle registration deduplicates resources and keeps declaratio
 missing = command(['lake', 'exe', 'lean-run-publication-check', 'missing', '--output',
     str(OUTPUT/'missing-registration')], 'missing-registration', expected=1)
 assert 'LeanRunGate.Chapter:' in missing and 'no published program bundle for LeanRunGate.greet' in missing
-assert 'virPrograms' in missing and 'VersoLeanRun.publish' in missing
+assert 'bare program Module' in missing and ':virResourcePack' in missing and 'include_vir_program' in missing and 'VersoLeanRun.publish' in missing
 assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').exists()
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
+command(['lake', 'env', 'lean', 'tests/negative/Unmarked.lean'], 'entry-registration')
+record('entry registers unannotated scalar functions and typed Html without an output option')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
     output = command(['lake','env','lean',f'tests/negative/{name}.lean'], 'negative-'+name, expected=1)
@@ -93,11 +96,15 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def handle(self):
         try: super().handle()
         except (BrokenPipeError, ConnectionResetError): pass
+foreign_site = OUTPUT/'foreign-root'
+command(['lake','exe','lean-run-blog-demo','--output',str(foreign_site)], 'foreign-root-generate')
+foreign_plan = json.loads((foreign_site/'lean-run/publication.json').read_text())
 server_root = OUTPUT/'served'
 server_root.mkdir(exist_ok=True)
 shutil.copytree(site/'html-multi', server_root/'root', dirs_exist_ok=True)
 shutil.copytree(site/'html-multi', server_root/'nested'/'prefix'/'manual', dirs_exist_ok=True)
 shutil.copytree(site/'html-single', server_root/'single', dirs_exist_ok=True)
+shutil.copytree(foreign_site, server_root/'single/foreign-root', dirs_exist_ok=True)
 server = http.server.ThreadingHTTPServer(('127.0.0.1',0), functools.partial(QuietHandler, directory=str(server_root)))
 threading.Thread(target=server.serve_forever, daemon=True).start()
 base = f'http://127.0.0.1:{server.server_port}/'
@@ -129,8 +136,8 @@ with sync_playwright() as p:
     other = form_for('LeanRunGate.greet', 1)
     spin = form_for('LeanRunGate.spin')
     calculator = form_for('LeanRunGate.Stack.run')
-    html_form = form_for('LeanRunGate.htmlGreeting.leanRunHtml')
-    diagram_form = form_for('LeanRunGate.diagram.leanRunHtml')
+    html_form = form_for('LeanRunGate.htmlGreeting')
+    diagram_form = form_for('LeanRunGate.diagram')
     assert calculator.locator('details').get_attribute('open') is None
     calculator.locator('summary').press('Enter')
     assert calculator.locator('details').get_attribute('open') is not None
@@ -251,7 +258,7 @@ with sync_playwright() as p:
 
     page.reload()
     page.wait_for_selector('.lean-run[data-enhanced]')
-    html_form = form_for('LeanRunGate.htmlGreeting.leanRunHtml')
+    html_form = form_for('LeanRunGate.htmlGreeting')
     page.route('**/program.irpkg', lambda route: route.fulfill(status=404, body='missing'))
     html_form.locator('[type=submit]').click()
     page.wait_for_function('e => e.dataset.state === "failed"', arg=html_form.element_handle(), timeout=20000)
@@ -303,7 +310,7 @@ with sync_playwright() as p:
         record('reject '+name+' before invocation')
         page.unroute('**/lean-run/publication.json')
     altered = copy.deepcopy(plan)
-    altered['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest'] = published['LeanRunGate.Helper.twice']['manifest']
+    altered['programs']['LeanRunGate.Chapter']['LeanRunGate.greet']['manifest'] = 'foreign-root/' + foreign_plan['programs']['LeanRunBlog.Page']['LeanRunGate.Helper.twice']['manifest']
     page.route('**/lean-run/publication.json', lambda route: route.fulfill(
         content_type='application/json', body=json.dumps(altered)))
     page.goto(base+'single/')
@@ -331,7 +338,8 @@ with sync_playwright() as p:
     record('native/browser exact Nat oracle: zero, edited, large integers')
     assert call(other,'independent') == oracle('greet','independent')
     assert greeting.locator('.lean-run-output').text_content() == oracle('greet','<img src=x onerror=alert(1)>')
-    assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 8
+    instances = page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)')
+    assert len(set(instances)) == len(instances)
     record('independent repeated placements')
     for value in ['-1','1.5','abc','',' 1','1e3','9'*257]:
         numeric.locator('input').fill(value)
@@ -414,7 +422,7 @@ with sync_playwright() as p:
     for path in ['root/Illuminate-diagrams/', 'nested/prefix/manual/Illuminate-diagrams/']:
         page.goto(base+path)
         page.wait_for_selector('.lean-run[data-enhanced]')
-        form = form_for('LeanRunGate.diagram.leanRunHtml')
+        form = form_for('LeanRunGate.diagram')
         assert call(form, '6') == ''
         assert oracle('diagram', '6') in form.locator('iframe').get_attribute('srcdoc')
         assert form.frame_locator('iframe').locator('svg text').count() == 6
@@ -435,12 +443,12 @@ with sync_playwright() as p:
     assert 'public def LeanRunGate.greet' in plain.locator('body').inner_text()
     assert '#check Nat.add' in plain.locator('body').inner_text()
     assert plain.locator('.lean-run [type=submit]').first.is_disabled()
-    assert plain.locator('.lean-run noscript').count() == 8
+    assert plain.locator('.lean-run noscript').count() == plain.locator('.lean-run').count()
     assert all('Enable JavaScript' in text for text in plain.locator('.lean-run noscript').all_text_contents())
     plain_calculator = plain.locator('.lean-run[data-experiment*="LeanRunGate.Stack.run"]')
     plain_calculator.locator('summary').click()
     assert 'public inductive Instruction' in plain_calculator.locator('.lean-run-source').inner_text()
-    plain_diagram = plain.locator('.lean-run[data-experiment*="LeanRunGate.diagram.leanRunHtml"]')
+    plain_diagram = plain.locator('.lean-run[data-experiment*="LeanRunGate.diagram"]')
     plain_diagram.locator('summary').click()
     assert 'public def LeanRunGate.diagram' in plain_diagram.locator('.lean-run-source').inner_text()
     assert 'Svg.render' in plain_diagram.locator('.lean-run-source').inner_text()
@@ -509,18 +517,18 @@ with sync_playwright() as p:
                 source.write_text(originals[source])
                 chapter.write_text(originals[chapter])
 
-            # Redirect the stock owner registration to a real but different module.
+            # Redirect the stock resource library program Module to a real but different module.
             # The carrier still builds; publication must reject the missing Chapter bundle.
             wrong = originals[lakefile].replace(
-                '(`LeanRunGateResources, `LeanRunGate.Chapter)',
-                '(`LeanRunGateResources, `LeanRunGate.Helper)')
+                '`+LeanRunGate.Chapter, `@verso_run/LeanRunGateResources:virResourcePack',
+                '`+LeanRunBlog.Page, `@verso_run/LeanRunGateResources:virResourcePack')
             lakefile.write_text(wrong)
             command(['lake','build'],'wrong-root-build')
             for destination in [site, OUTPUT/'wrong-root']:
                 failed=command(['lake','exe','lean-run-demo','--output',str(destination)],
                     'wrong-root-'+destination.name,expected=1)
                 assert 'LeanRunGate.Chapter:' in failed and 'LeanRunGate.greet' in failed
-                assert 'no published program bundle' in failed and 'virPrograms' in failed
+                assert 'no published program bundle' in failed and 'bare program Module' in failed and ':virResourcePack' in failed and 'include_vir_program' in failed
             assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
             assert not (OUTPUT/'wrong-root/html-multi/lean-run/publication.json').exists()
             lakefile.write_text(originals[lakefile])
@@ -535,7 +543,7 @@ with sync_playwright() as p:
             assert not (OUTPUT/'conflicting-bundles/html-multi/lean-run/publication.json').exists()
             record('forSite rejects distinct valid same-module bundles with LOGICAL_ID_CONFLICT before writing')
 
-            # Change source and build roots without changing the library-key include.
+            # Change source and build roots without changing the no-argument carrier include.
             # No prepared pack is moved to the new root: its prerequisite repairs it.
             moved.parent.mkdir(exist_ok=True)
             assert not moved.exists()
@@ -572,5 +580,9 @@ command([sys.executable, 'tests/blog.py', '--output', str(OUTPUT/'blog')], 'blog
 record('Blog Page/Post native generation and actual worker qualification')
 command([sys.executable, 'tests/slides.py', '--output', str(OUTPUT/'slides')], 'slides-adapter')
 record('Slides native publication, fragment lifecycle, and actual worker qualification')
+command([sys.executable, 'tests/typed-forms.py', '--output', str(OUTPUT/'typed')], 'typed-forms')
+record('Bool/UInt64/multiline native signatures, shared codec, and all genre controls')
+command([sys.executable, 'tests/inline-genres.py', '--output', str(OUTPUT/'inline')], 'inline-genres')
+record('inline Page/Post/Slides authoring, retained scopes, native source and actual workers')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)

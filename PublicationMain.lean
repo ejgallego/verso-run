@@ -1,6 +1,5 @@
 import LeanRunGate.Chapter
 import LeanRunGate.Resources
-import LeanRunGate.HelperResources
 import VersoLeanRun.Publish
 import Vir.Hash
 
@@ -25,10 +24,9 @@ def main (args : List String) : IO UInt32 := do
   let mode :: options := args
     | throw <| IO.userError "usage: lean-run-publication-check duplicate|missing|conflict [MANUAL OPTIONS]"
   let programs ← match mode with
-    | "duplicate" => pure #[LeanRunGate.resources, LeanRunGate.resources,
-        LeanRunGate.helperResources, LeanRunGate.helperResources]
+    | "duplicate" => pure #[LeanRunGate.resources, LeanRunGate.resources]
     | "missing" => pure #[]
-    | "conflict" => pure #[LeanRunGate.resources, conflictingBundle, LeanRunGate.helperResources]
+    | "conflict" => pure #[LeanRunGate.resources, conflictingBundle]
     | _ => throw <| IO.userError s!"unknown publication check {mode}"
   manualMain (%doc LeanRunGate.Chapter) (options := options)
     (extraSteps := [VersoLeanRun.publish programs])

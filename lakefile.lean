@@ -1,9 +1,9 @@
 import Lake
 open Lake DSL
 require verso from git "https://github.com/ejgallego/verso" @ "3f6366aa8045b342b0b68c0373a8ebfce7d5611f"
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "bda79d5c4ab7d061c971fcd8917f536393ec03ee"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "fb5af64788e419affa4a496b144f7f96bed48322"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "a1a61c9678da010e958ed24cdfa6f635b85f172a"
-require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "235aac80e627c11e4f094ced7e4e564ed5ecfe93"
+require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "35b5d14bc97d71981d01957f8a6fc6ea7470a6e4"
 package verso_run
 lean_lib LeanRunGateProgram where
   srcDir := "gates"
@@ -11,12 +11,7 @@ lean_lib LeanRunGateProgram where
 lean_lib LeanRunGateResources where
   srcDir := "resources"
   roots := #[`LeanRunGate.Resources]
-  needs := #[`@verso_run/LeanRunGateResources:virResourcePack]
-
-lean_lib LeanRunHelperResources where
-  srcDir := "resources"
-  roots := #[`LeanRunGate.HelperResources]
-  needs := #[`@verso_run/LeanRunHelperResources:virResourcePack]
+  needs := #[`+LeanRunGate.Chapter, `@verso_run/LeanRunGateResources:virResourcePack]
 
 lean_lib LeanRunBlogExamples where
   srcDir := "gates"
@@ -29,16 +24,25 @@ lean_lib LeanRunBlogDocuments where
 lean_lib LeanRunBlogResources where
   srcDir := "resources"
   roots := #[`LeanRunBlog.Resources]
-  needs := #[`@verso_run/LeanRunBlogResources:virResourcePack]
+  needs := #[`+LeanRunBlog.Page, `@verso_run/LeanRunBlogResources:virResourcePack]
 
 lean_lib LeanRunSlidesDocuments where
   srcDir := "gates"
   roots := #[`LeanRunSlides.Deck]
 
-target virPrograms (_pkg) : Array (Lean.Name × Lean.Name) := do
-  return Job.pure #[(`LeanRunGateResources, `LeanRunGate.Chapter),
-    (`LeanRunHelperResources, `LeanRunGate.Helper),
-    (`LeanRunBlogResources, `LeanRunBlog.Examples)]
+lean_lib LeanRunTypedExamples where
+  srcDir := "gates"
+  roots := #[`LeanRunTyped.Examples]
+
+lean_lib LeanRunBlogPostResources where
+  srcDir := "resources"
+  roots := #[`LeanRunBlog.PostResources]
+  needs := #[`+LeanRunBlog.Post, `@verso_run/LeanRunBlogPostResources:virResourcePack]
+
+lean_lib LeanRunSlidesResources where
+  srcDir := "resources"
+  roots := #[`LeanRunSlides.Resources]
+  needs := #[`+LeanRunSlides.Deck, `@verso_run/LeanRunSlidesResources:virResourcePack]
 
 lean_exe «lean-run-gate» where
   root := `GateMain
@@ -76,6 +80,10 @@ lean_exe «lean-run-blog-oracle» where
 lean_exe «lean-run-slides-demo» where
   root := `SlidesMain
   needs := #[leanRunWeb]
+
+@[default_target]
+lean_exe «lean-run-typed-oracle» where
+  root := `TypedOracleMain
 
 lean_lib VersoLeanRunPublish where
   srcDir := "support"

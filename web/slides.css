@@ -14,7 +14,8 @@
 }
 .reveal .lean-run-console { padding: 18px; }
 .reveal .lean-run label, .reveal .lean-run-status { font-size: 19px; }
-.reveal .lean-run input, .reveal .lean-run button { font-size: 22px; }
+.reveal .lean-run input, .reveal .lean-run select, .reveal .lean-run textarea,
+.reveal .lean-run button { font-size: 22px; }
 .reveal .lean-run .lean-run-output {
   display: block;
   width: auto;
@@ -35,7 +36,8 @@
   .reveal .lean-run-source, .reveal .lean-run-console { padding: 36px; }
   .reveal .lean-run-source .hl.lean.block { font-size: 42px; }
   .reveal .lean-run label, .reveal .lean-run-status { font-size: 38px; }
-  .reveal .lean-run input, .reveal .lean-run button { font-size: 44px; min-height: 144px; }
+  .reveal .lean-run input, .reveal .lean-run select, .reveal .lean-run textarea,
+  .reveal .lean-run button { font-size: 44px; min-height: 144px; }
   .reveal .lean-run .lean-run-output { font-size: 44px; }
   .reveal .lean-run-source summary { font-size: 40px; }
 }

@@ -3,7 +3,7 @@ import LeanRunBlog.Page
 import LeanRunBlog.Index
 import LeanRunBlog.Post
 import LeanRunBlog.Resources
-import LeanRunGate.HelperResources
+import LeanRunBlog.PostResources
 import VersoLeanRun.Blog.Publish
 
 open Verso Genre Blog
@@ -19,8 +19,8 @@ def main (args : List String) : IO UInt32 := do
     | ["--output", path] => pure ("normal", (⟨path⟩ : System.FilePath))
     | ["--check", mode, "--output", path] => pure (mode, (⟨path⟩ : System.FilePath))
     | _ => throw <| IO.userError "usage: lean-run-blog-demo [--output DIRECTORY]"
-  let programs := if mode == "missing" then #[LeanRunGate.helperResources]
-    else #[LeanRunGate.helperResources, LeanRunBlog.resources]
+  let programs := if mode == "missing" then #[]
+    else #[LeanRunBlog.pageResources, LeanRunBlog.postResources]
   let selected ← match mode with
     | "normal" | "missing" => pure site
     | "malformed" =>

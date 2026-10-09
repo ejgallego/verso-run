@@ -7,14 +7,15 @@ error in the build log; later errors may be consequences of it.
 ## The function does not fit a Run form
 
 VIR supports more interfaces than this extension currently presents. For example,
-a `Bool → Bool` function is a valid VIR interface, but a Run form accepts only
-pure, monomorphic `String → String`, `Nat → Nat`, or `String → Html` functions
+an `Int → Int` function is a valid VIR interface, but a Run form accepts only
+pure, monomorphic `String → String`, `Nat → Nat`, `Bool → Bool`,
+`UInt64 → UInt64`, or `String → Html` functions
 with one explicit argument.
 
 The diagnostic names the entry, shows its type, and explains the form restriction:
 
 ```text
-Lean Run entry 'flag' has type Bool → Bool.
+Lean Run entry 'signedIdentity' has type Int → Int.
 This interface is supported by VIR, but not by this Run form.
 ```
 
@@ -37,19 +38,16 @@ export a concrete wrapper instead
 ```
 
 Check the reported argument or result and choose a supported representation.
-Interface rejection is diagnosed before a missing export marker so adding a
-marker is not offered as the cure for an unsupported type.
+Interface rejection is diagnosed before automatic registration, so adding an
+export marker is not offered as the cure for an unsupported type.
 
 ## The definition is not executable or registered
 
 Use an executable public definition instead of a theorem, axiom, private entry,
 or `noncomputable` value. Proofs and noncomputable choices do not supply executable
-IR. Scalar functions need `@[vir_export]`; typed HTML functions are adapted and
-marked automatically.
-
-If an attribute is already present but the entry is not registered, address its
-earlier VIR validation error first. Failed compilation or an unsupported reached
-dependency can prevent the marker from being installed.
+IR. Selecting `entry` registers a scalar callable or generates a typed HTML
+serializer automatically. Read the first compilation or VIR dependency error;
+adding an export annotation is not a remedy for missing executable IR.
 
 ## The type is supported, but a dependency is unavailable
 
@@ -68,15 +66,16 @@ not the rejected replacement. CI deploys only after all checks pass.
 
 ## A program bundle or callable is missing
 
-Register the producer's owner library/module pair in `virPrograms`, and supply
-its embedded bundle to `VersoLeanRun.publish`. Publication reports the declaration,
-producer module, and document position when no matching bundle is available.
+Add the document's bare Module key (for example, `` `+MyChapter ``) to the resource
+library's `needs`, keep its fixed `:virResourcePack` prerequisite, and embed with
+no-argument `include_vir_program`. Supply that bundle to `VersoLeanRun.publish`. Publication reports the declaration,
+callable-owning module, and document position when no matching bundle is available.
 Identical bundles deduplicate; distinct bundles with the same module logical ID
 produce `LOGICAL_ID_CONFLICT` before writing execution resources.
 
-Each root interface exposes its own marked declarations, including generated
-`<entry>.leanRunHtml` adapters. Imported functions need their producer's bundle
-when called directly. At Run, `createProgram` checks the selected full declaration
+Each document root exposes entries selected by its Run blocks, including
+generated wrappers for imported functions and typed HTML. Imported producers
+supply dependencies; the callable wrapper belongs to the document's bundle. At Run, `createProgram` checks the selected full declaration
 and independent signature before invoking Lean. A missing root declaration or
 signature mismatch belongs to program validation, not a native recipe check.
 The [starter](../examples/manual-starter/README.md) shows complete wiring.

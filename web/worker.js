@@ -1,8 +1,9 @@
 // One worker owns one VIR program. Terminating this worker cancels synchronous calls.
-import { validateInput, formatResult } from "./contract.js";
+import { decodeInput, formatResult } from "./contract.js";
 let program = null;
 let description = null;
 let creating = null;
+const callable = description => description.callable || description.declaration;
 function diagnostic(error, declaration) {
   const parts = [];
   for (let current = error, i = 0; current && i < 5; current = current.cause, i++) {
@@ -19,7 +20,7 @@ onmessage = async ({ data }) => {
   const { requestId } = data;
   try {
     if (data.operation !== "invoke" || creating) throw new Error("Invalid or overlapping worker request");
-    validateInput(data.description.shape, data.input);
+    const argument = decodeInput(data.description.shape, data.input);
     if (!program) {
       description = data.description;
       const { createProgram } = await import(data.publication.runtimeModule);
@@ -28,15 +29,15 @@ onmessage = async ({ data }) => {
         runtimeManifestUrl: new URL(data.publication.runtimeManifest),
         programManifestUrl: new URL(data.publication.programManifest),
         signal: creating.signal,
-        expectedExports: { [data.description.declaration]: data.publication.expectedExport },
+        expectedExports: { [callable(data.description)]: data.publication.expectedExport },
       });
       creating = null;
     }
-    if (description.declaration !== data.description.declaration || description.shape !== data.description.shape) {
+    if (description.declaration !== data.description.declaration || description.shape !== data.description.shape || callable(description) !== callable(data.description)) {
       throw new Error("Worker experiment identity changed");
     }
     postMessage({ requestId, state: "running" });
-    const result = program.call(description.declaration, data.input);
+    const result = program.call(callable(description), argument);
     postMessage({ requestId, state: "success", result: formatResult(description.shape, result) });
   } catch (error) {
     creating = null;

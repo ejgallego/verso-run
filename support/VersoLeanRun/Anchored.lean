@@ -22,7 +22,7 @@ meta instance : FromArgs AnchorConfig DocElabM where
 
 /-- Shared anchored authoring path. The adapter wraps native source terms in its
 own Run block. Standard Verso code-body checks and highlighting remain authoritative.
-Only imported, same-project scalar producers are qualified in this first slice. -/
+Imported, same-project entries use a document-owned scalar callable. -/
 meta def elabAnchoredRun
     (wrap : Experiment → Array Term → DocElabM (Array Term))
     (args : Array Arg) (str : StrLit) : DocElabM (Array Term) := do
@@ -37,10 +37,10 @@ meta def elabAnchoredRun
     unless hl.definedNames.contains name do
       throwErrorAt config.run.entry "Lean Run entry '{name}' is not defined in anchor '{config.anchor.getId}' \
         of module '{config.source.module.getId}'. Choose an entry defined in the selected source region."
-    let experiment ← describeEntry config.run name str (allowHtml := false)
+    let experiment ← describeEntry config.run name str
     let sourceArgs := args.filter fun
-      | .named _ name _ => !([`entry, `input, `output].contains name.getId)
-      | .flag _ name _ => name.getId != `collapsed
+      | .named _ name _ => !([`entry, `input].contains name.getId)
+      | .flag _ name _ => !([`collapsed, `multiline].contains name.getId)
       | _ => true
     -- The second lookup uses Verso's populated cache. Delegate body validation,
     -- replacement suggestions, and native ExternalCode construction unchanged.

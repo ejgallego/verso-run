@@ -24,6 +24,10 @@ structure Experiment where
   sourceColumn : Nat
   /-- Actual owning module of the callable, separate from its document placement. -/
   producerModule : String := ""
+  /-- String control presentation; this never changes the callable signature. -/
+  multiline : Bool := false
+  /-- Actual full Lean export name; the declaration remains the author-selected entry. -/
+  callable : String := ""
   deriving ToJson, FromJson
 
 end VersoLeanRun

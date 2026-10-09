@@ -26,5 +26,6 @@ html, body, .reveal {
 .reveal .lean-run-source, .reveal .lean-run-console { padding: 16px; }
 .reveal .lean-run-source .hl.lean.block { font-size: 18px; }
 .reveal .lean-run label, .reveal .lean-run-status { font-size: 18px; }
-.reveal .lean-run input, .reveal .lean-run button { font-size: 20px; min-height: 44px; }
+.reveal .lean-run input, .reveal .lean-run select, .reveal .lean-run textarea,
+.reveal .lean-run button { font-size: 20px; min-height: 44px; }
 .reveal .lean-run-source summary { font-size: 18px; }

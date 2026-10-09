@@ -28,11 +28,11 @@ site = output/'site'
 command(['lake', 'exe', 'lean-run-slides-demo', '--output', str(site)], 'generate')
 plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunSlides.Deck'}
-assert len(plan['programs']['LeanRunSlides.Deck']) == 4
+assert len(plan['programs']['LeanRunSlides.Deck']) == 9
 assert plan['runtimeModule'].startswith('lib/vir/')
 assert len(list(site.rglob('runtime.js'))) == 1
-assert len(list(site.rglob('bundle.json'))) == 4  # runtime, formatter, Helper, Blog examples
-record('typed deck collection composes one runtime with formatter and two Run producers')
+assert len(list(site.rglob('bundle.json'))) == 3  # runtime, formatter, document-selected callables
+record('typed deck collection composes one runtime with formatter and document-selected callables')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-slides-demo'), '--output', str(output/'native-only')],
         'native-only', cwd=output)

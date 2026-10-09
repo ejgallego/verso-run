@@ -29,7 +29,8 @@ command(['lake', 'exe', 'lean-run-blog-demo', '--output', str(site)], 'generate'
 plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunBlog.Page', 'LeanRunBlog.Post'}
 assert set(plan['programs']['LeanRunBlog.Post']) == {
-    'LeanRunBlog.Examples.greet', 'LeanRunBlog.Examples.card', 'LeanRunBlog.Examples.count'}
+    'LeanRunBlog.Examples.greet', 'LeanRunBlog.Examples.card', 'LeanRunBlog.Examples.count',
+    'LeanRunBlog.Post.Inline.greet', 'LeanRunBlog.Post.Inline.card'}
 record('typed Page/Post AST collection publishes independent canonical signatures')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-blog-demo'), '--output', str(output/'native-only')],
@@ -102,7 +103,7 @@ try:
             assert first.locator('.lean-run-output b').count() == 0
             assert call(second, 'independent') == oracle('greet', 'independent')
             assert first.locator('.lean-run-output').text_content() == oracle('greet', '世界 🌍 <b>&')
-            assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 4
+            assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 7
             record(prefix+': Post Unicode and repeated placements have independent worker state')
             card = form('LeanRunBlog.Examples.card')
             assert call(card, '<b>& Ada') == ''
@@ -113,7 +114,7 @@ try:
             card.locator('input').fill('Grace')
             assert frame.is_hidden()
             assert call(card, 'Grace') == ''
-            record(prefix+': producer-owned HTML adapter escapes text and clears its preview')
+            record(prefix+': document-owned typed Html adapter escapes text and clears its preview')
             count = form('LeanRunBlog.Examples.count')
             assert call(count, '10') == oracle('count', '10')
             count.locator('input').fill('1000000000000')

@@ -5,3 +5,4 @@ _out/
 __pycache__/
 _registration-layout/
 .worktrees/
+.agents/

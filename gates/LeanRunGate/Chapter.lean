@@ -1,6 +1,7 @@
 module
 public import VersoLeanRun
 import LeanRunGate.Helper
+import LeanRunTyped.Examples
 public import Illuminate.Render.Svg
 public import Illuminate.Geometry.PathData
 public import Illuminate.Geometry.Matrix
@@ -10,6 +11,7 @@ open Verso Genre Manual InlineLean VersoLeanRun
 open Verso.Code.External
 
 set_option compiler.postponeCompile false
+set_option verso.exampleProject "."
 
 #doc (Manual) "Run compiled Lean" =>
 
@@ -19,7 +21,6 @@ Use Stop to interrupt a calculation.
 # Greeting
 
 ```leanRun (entry := LeanRunGate.greet)
-@[vir_export]
 public def LeanRunGate.greet (name : String) : String :=
   "Hello, " ++ name
 ```
@@ -57,7 +58,6 @@ public def step : Instruction → List Nat → Except String (List Nat)
 public def showStack (stack : List Nat) : String :=
   "[" ++ ", ".intercalate (stack.reverse.map toString) ++ "]"
 
-@[vir_export]
 public def run (program : String) : String := Id.run do
   let words := (program.splitOn " ").filter (!·.isEmpty)
   if words.isEmpty then return "Enter a program, for example: 6 7 * 2 +"
@@ -168,7 +168,6 @@ Open the implementation to see the library calls. Values outside 1–8 produce a
 # Exact natural numbers
 
 ```leanRun (entry := LeanRunGate.double)
-@[vir_export]
 public def LeanRunGate.double (n : Nat) : Nat :=
   LeanRunGate.Helper.twice n
 ```
@@ -185,19 +184,41 @@ This example displays an anchor from the imported helper module. The displayed
 definition and the compiled callable are selected separately, so the same source
 region can be reused in another document without redeclaring the function.
 
-```leanRunAnchor twice (project := ".") (module := LeanRunGate.Helper) (entry := LeanRunGate.Helper.twice) (input := "21")
-@[vir_export]
+```leanRunAnchor twice (module := LeanRunGate.Helper) (entry := LeanRunGate.Helper.twice) (input := "21")
 public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
 ```
 
 An ordinary anchored block can display that same source without a Run form:
 
-```anchor twice (project := ".") (module := LeanRunGate.Helper) -defSite
-@[vir_export]
+```anchor twice (module := LeanRunGate.Helper) -defSite
 public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
 ```
 
 The {name}`LeanRunGate.Helper.twice` reference uses the native source block's definition target.
+
+# Typed inputs
+
+Boolean choices and unsigned integers use the same worker lifecycle as text.
+UInt64 arithmetic wraps after its maximum value, `18446744073709551615`.
+
+```leanRunAnchor flip (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.flip)
+public def LeanRunTyped.Examples.flip (value : Bool) : Bool := !value
+```
+
+```leanRunAnchor increment (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.increment) (input := "9007199254740993")
+public def LeanRunTyped.Examples.increment (value : UInt64) : UInt64 := value + 1
+```
+
+# Multiline text
+
+Enter preserves line breaks. Ctrl+Enter or ⌘+Enter runs the example.
+
+```leanRunAnchor lines (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.lines) (input := "Hello\nLean") +multiline +collapsed
+public def LeanRunTyped.Examples.lines (text : String) : String :=
+  String.intercalate "\n" <|
+    (text.splitOn "\n").zipIdx.map fun (line, index) =>
+      s!"{index + 1}. {line}"
+```
 
 # Ordinary Lean
 
@@ -216,7 +237,6 @@ public def LeanRunGate.spinLoop (n acc : Nat) : Nat :=
   | 0 => acc
   | n + 1 => LeanRunGate.spinLoop n (acc + 1)
 
-@[vir_export]
 public def LeanRunGate.spin (n : Nat) : Nat :=
   LeanRunGate.spinLoop n 0
 ```

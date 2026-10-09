@@ -1,43 +1,60 @@
 # Runnable Blog pages and posts
 
-Import `VersoLeanRun.Blog` in a `Page` or `Post` document and open
-`VersoLeanRun.Blog` alongside `Verso.Genre.Blog`. The adapter uses the same
-checked `leanRunAnchor` authoring path as Manual:
+Import `VersoLeanRun.Blog` in a `Page` or `Post`, and open its namespace alongside
+`Verso.Genre.Blog`. Use the same inline Run block as a Manual chapter:
 
 ````lean
 module
 public import VersoLeanRun.Blog
-import MyExamples
 open Verso Genre Blog VersoLeanRun.Blog
+set_option compiler.postponeCompile false
 
 #doc (Page) "Try the function" =>
 
+```leanRun (entry := Demo.greet) (input := "Ada")
+public def Demo.greet (name : String) : String :=
+  "Hello, " ++ name ++ "!"
+```
+````
+
+The same block works in a `Post` with its normal date/author metadata. Definitions,
+namespaces and open declarations persist across Run blocks in that document.
+A later block can select an existing function and show `#check Demo.greet`.
+Functions belong to the document module; `entry` handles export registration.
+Page and Post share the native Blog code renderer and the same Run component.
+
+Run definitions use the document environment. Blog's ordinary `leanInit`/`lean`
+blocks keep their existing named example contexts; those isolated contexts are
+not imported into the runnable document environment.
+
+## Optional shared source anchors
+
+Use `leanRunAnchor` when an ordinary imported producer is shared among several
+documents. It adds Verso's checked source-region matching to the same Run behavior:
+
+````lean
 ```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
-@[vir_export]
 public def MyExamples.greet (name : String) : String :=
   "Hello, " ++ name ++ "!"
 ```
 ````
 
-The imported producer must contain that region between `-- ANCHOR: greeting`
-and `-- ANCHOR_END: greeting`. Standard Verso body checks, highlighting, proof
-states, and Blog hover assets remain native. Entry selection uses the compiled
-declaration and semantic definition membership, not source text inference.
-See [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
-
-The same block works in a `Post` with its normal date/author metadata. One
-component implements both genres. Inline command elaboration through `leanRun`
-remains specific to Manual in this version.
+Import `MyExamples` into the document. Its source region must be between
+`-- ANCHOR: greeting` and `-- ANCHOR_END: greeting`, and the displayed body must
+match. Standard highlighting, proof states and hover assets remain native.
+Selection uses compiled declarations and semantic anchor membership, never source
+text inference. See [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
 ## Publish a site
 
-Register each producer's resource owner/module pair through the normal
-`virPrograms` target and embed its carrier with `include_vir_library`. Import
+Put each Page/Post document's bare Module key in its carrier library's `needs`,
+retain the fixed `:virResourcePack` prerequisite, and embed with no-argument
+`include_vir_program`. See [resource wiring](internals.md#resource-ownership-and-site-integration). Import
 `VersoLeanRun.Blog.Publish` in the native site generator and call:
 
 ```lean
 def main := VersoLeanRun.Blog.blogMain Theme.default mySite
-  #[MyExamples.resources] (destination := "_site")
+  #[MyPage.resources, MyPost.resources] (destination := "_site")
 ```
 
 The wrapper takes a typed Blog `Site`, a theme, embedded bundles, an explicit
@@ -56,10 +73,13 @@ disabled until enhancement. Blog has no TeX backend in this slice.
 
 ## HTML and interaction
 
-The shared scalar boundary admits pure `String → String` and `Nat → Nat` exports.
-A producer can expose a marked String serialization wrapper around typed HTML,
-then select `(output := "html")`. This keeps wrapper ownership in the producer;
-automatic typed-HTML adapter creation from external source is still deferred.
+The shared scalar boundary admits pure `String → String`, `Nat → Nat`,
+`Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` chooses a textarea
+for String inputs without changing the callable signature. Enter preserves line
+breaks; Ctrl+Enter or ⌘+Enter runs the example.
+Return `String → Verso.Output.Html` for an HTML preview. `entry` creates a
+document-owned scalar serializer automatically; a String result always displays
+plain text. There is no `output` argument and no producer VIR annotation.
 The [demo producer](../gates/LeanRunBlog/Examples.lean) shows this arrangement.
 
 Input, `+collapsed`, exact Nat transport, isolated HTML previews, independent

@@ -6,7 +6,6 @@ set_option compiler.postponeCompile false
 #doc (Manual) "Illuminate dependency gate" =>
 
 ```leanRun (entry := arrowAngle)
-@[vir_export]
 public def arrowAngle (_ : String) : String :=
   toString (Float.asin 0.5)
 ```

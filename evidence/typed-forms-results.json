@@ -1,0 +1,532 @@
+{
+  "checks": [
+    {
+      "test": "shared input/result codec checks exact Bool, UInt64 bounds and untrimmed String",
+      "result": "pass"
+    },
+    {
+      "test": "Manual: independent type-only canonical Bool/UInt64/String signatures",
+      "result": "pass"
+    },
+    {
+      "test": "Blog: independent type-only canonical Bool/UInt64/String signatures",
+      "result": "pass"
+    },
+    {
+      "test": "Slides: independent type-only canonical Bool/UInt64/String signatures",
+      "result": "pass"
+    },
+    {
+      "test": "root/manual: Boolean selector transports actual false/true with native results",
+      "result": "pass"
+    },
+    {
+      "test": "root/manual: UInt64 exact large/max/wrap values and invalid-input recovery",
+      "result": "pass"
+    },
+    {
+      "test": "root/manual: multiline whitespace/Unicode survives; Enter edits and Ctrl+Enter runs",
+      "result": "pass"
+    },
+    {
+      "test": "root/blog: Boolean selector transports actual false/true with native results",
+      "result": "pass"
+    },
+    {
+      "test": "root/blog: UInt64 exact large/max/wrap values and invalid-input recovery",
+      "result": "pass"
+    },
+    {
+      "test": "root/blog: multiline whitespace/Unicode survives; Enter edits and Ctrl+Enter runs",
+      "result": "pass"
+    },
+    {
+      "test": "root/slides: Boolean selector transports actual false/true with native results",
+      "result": "pass"
+    },
+    {
+      "test": "root/slides: UInt64 exact large/max/wrap values and invalid-input recovery",
+      "result": "pass"
+    },
+    {
+      "test": "root/slides: multiline whitespace/Unicode survives; Enter edits and Ctrl+Enter runs",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/manual: Boolean selector transports actual false/true with native results",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/manual: UInt64 exact large/max/wrap values and invalid-input recovery",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/manual: multiline whitespace/Unicode survives; Enter edits and Ctrl+Enter runs",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: Boolean selector transports actual false/true with native results",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: UInt64 exact large/max/wrap values and invalid-input recovery",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/blog: multiline whitespace/Unicode survives; Enter edits and Ctrl+Enter runs",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/slides: Boolean selector transports actual false/true with native results",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/slides: UInt64 exact large/max/wrap values and invalid-input recovery",
+      "result": "pass"
+    },
+    {
+      "test": "nested/prefix/slides: multiline whitespace/Unicode survives; Enter edits and Ctrl+Enter runs",
+      "result": "pass"
+    },
+    {
+      "test": "different typed controls keep independent worker state on one page",
+      "result": "pass"
+    },
+    {
+      "test": "flip: independently wrong result expectation rejects before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "increment: independently wrong result expectation rejects before invocation",
+      "result": "pass"
+    },
+    {
+      "test": "typed selectors, decimal fields and multiline controls fit narrow output",
+      "result": "pass"
+    },
+    {
+      "test": "all genres preserve multiline presets and readable source without JavaScript",
+      "result": "pass"
+    },
+    {
+      "test": "Manual single HTML and TeX retain typed examples",
+      "result": "pass"
+    },
+    {
+      "test": "no uncaught typed-form browser errors",
+      "result": "pass"
+    }
+  ],
+  "publications": {
+    "Manual": {
+      "programs": {
+        "LeanRunGate.Chapter": {
+          "LeanRunGate.Helper.twice": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json"
+          },
+          "LeanRunGate.Stack.run": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+          },
+          "LeanRunGate.diagram.leanRunHtml": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+          },
+          "LeanRunGate.double": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+          },
+          "LeanRunGate.greet": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+          },
+          "LeanRunGate.htmlGreeting.leanRunHtml": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+          },
+          "LeanRunGate.spin": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lean-run/resources/839777e240fc12da051d314c14ff24e0e7746df9f6a838272f3ec9862539ab7f/bundle.json"
+          },
+          "LeanRunTyped.Examples.flip": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 2,
+                  "type": "Bool"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 2,
+                "type": "Bool"
+              }
+            },
+            "manifest": "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          },
+          "LeanRunTyped.Examples.increment": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 7,
+                  "type": "UInt64"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 7,
+                "type": "UInt64"
+              }
+            },
+            "manifest": "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          },
+          "LeanRunTyped.Examples.lines": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          }
+        }
+      },
+      "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+    },
+    "Blog": {
+      "programs": {
+        "LeanRunBlog.Page": {
+          "LeanRunGate.Helper.twice": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lean-run/resources/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json"
+          },
+          "LeanRunTyped.Examples.flip": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 2,
+                  "type": "Bool"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 2,
+                "type": "Bool"
+              }
+            },
+            "manifest": "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          },
+          "LeanRunTyped.Examples.increment": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 7,
+                  "type": "UInt64"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 7,
+                "type": "UInt64"
+              }
+            },
+            "manifest": "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          },
+          "LeanRunTyped.Examples.lines": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          }
+        },
+        "LeanRunBlog.Post": {
+          "LeanRunBlog.Examples.card": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+          },
+          "LeanRunBlog.Examples.count": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+          },
+          "LeanRunBlog.Examples.greet": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lean-run/resources/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+          }
+        }
+      },
+      "runtimeManifest": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "runtimeModule": "lean-run/resources/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+    },
+    "Slides": {
+      "programs": {
+        "LeanRunSlides.Deck": {
+          "LeanRunBlog.Examples.card": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+          },
+          "LeanRunBlog.Examples.count": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+          },
+          "LeanRunBlog.Examples.greet": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lib/vir/f2a845043ec967f1034d5ef7b26495df10aa88672338d32f08e62be7bde5ebff/bundle.json"
+          },
+          "LeanRunGate.Helper.twice": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 0,
+                  "type": "Nat"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 0,
+                "type": "Nat"
+              }
+            },
+            "manifest": "lib/vir/3e7706482b52b2e17d9ef1a404aa41774e6155a6edef41f3886c45a184c10dd1/bundle.json"
+          },
+          "LeanRunTyped.Examples.flip": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 2,
+                  "type": "Bool"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 2,
+                "type": "Bool"
+              }
+            },
+            "manifest": "lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          },
+          "LeanRunTyped.Examples.increment": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 7,
+                  "type": "UInt64"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 7,
+                "type": "UInt64"
+              }
+            },
+            "manifest": "lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          },
+          "LeanRunTyped.Examples.lines": {
+            "expectedExport": {
+              "args": [
+                {
+                  "interfaceTag": 3,
+                  "type": "String"
+                }
+              ],
+              "effect": "pure",
+              "result": {
+                "interfaceTag": 3,
+                "type": "String"
+              }
+            },
+            "manifest": "lib/vir/6ad28f6a98520f6bac3385492bfe0ca9e829cf86ca2cab1a1eaf41bf0eb14317/bundle.json"
+          }
+        }
+      },
+      "runtimeManifest": "lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/bundle.json",
+      "runtimeModule": "lib/vir/e415e41a43eccf298b710056efccf6c3d436d5fceb4e130fb06cb09d12d027dd/runtime.js"
+    }
+  }
+}

@@ -6,6 +6,8 @@ rather than treating successful loading as proof that an example works.
 
 ## What the suite checks
 
+- Entry-selected exports without author annotations, type-derived result display,
+  unannotated imported producers and document-owned scalar/HTML wrappers.
 - Text, Unicode, exact natural numbers, calculator traces and bounds, typed
   HTML escaping and isolation, and Illuminate SVG markup and geometry.
 - Independent forms, repeated placements, real Stop, pending-load cancellation,
@@ -20,8 +22,10 @@ rather than treating successful loading as proof that an example works.
   including preservation of the last accepted publication.
 - Imported scalar anchors, semantic entry membership, checked source bodies,
   native definition links, and duplicate/unclosed/stale-anchor rebuild rejection.
+- Inline Page/Post/Slides definitions, retained namespaces and repeated selection,
+  scalar/Html authoring, native source and source-located rejection diagnostics.
 - Blog Page/Post typed collection, native-only publication, malformed metadata,
-  nested asset URLs, producer-owned HTML, no-JavaScript source, and the combined landing.
+  nested asset URLs, automatic typed HTML, no-JavaScript source, and the combined landing.
 - Slides typed collection, one formatter/Run runtime inventory, asset collisions
   before output, native fragments, visibility cancellation, keyboard submission,
   pending-load guards, and readable static source.
@@ -36,6 +40,12 @@ the selected runtime through its complete Git manifest, without local seeds.
 
 | Record | Scope |
 | --- | --- |
+| [Inline genres](../evidence/inline-genres-results.json) | 86 checks, including 26 inline and 29 typed; Page/Post/Slides definitions, retained scopes, native source and actual workers |
+| [Entry-selected interface](../evidence/entry-interface-results.json) | 85 checks, including 29 typed; annotation-free entries, type-derived output, and document-owned scalar/Html adapters |
+| [Typed form claim](../evidence/typed-forms-claim.md) | Source/base ownership and exact type-only schema agreement; bda/e415 retained |
+| [Typed forms](../evidence/typed-forms-results.json) | 29 codec/native/browser checks across all three genres and root/nested hosting |
+| [Typed regression](../evidence/typed-regression.json) | 85-check native/browser/mutation campaign, local source only |
+| [Typed combined site](../evidence/typed-combined-site.json) | Local combined inventories, links, viewports, and existing native calls |
 | [Slides results](../evidence/slides-results.json) | 20 native/Reveal/browser checks, including mobile scrolling and restored controls |
 | [Slides regression](../evidence/slides-regression.json) | 81-check Manual/Blog/Slides native/browser/mutation campaign |
 | [Three-genre site](../evidence/three-genre-local-site.json) | Landing links, viewports, inventories, and 12 native worker comparisons |
@@ -79,6 +89,8 @@ JavaScript-disabled pages. Representative captures:
   [mobile](../evidence/slides-mobile.png).
 - [Three-genre landing](../evidence/three-genre-landing-desktop.png) and
   its [mobile layout](../evidence/three-genre-landing-mobile.png).
+- [Typed controls on desktop](../evidence/typed-forms-desktop.png) and
+  [mobile](../evidence/typed-forms-mobile.png).
 
 Browser execution is qualified here in Chromium. Firefox, Safari, physical
 mobile devices, and assistive-technology audits remain outside this evidence.

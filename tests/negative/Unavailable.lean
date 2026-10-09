@@ -6,5 +6,5 @@ set_option compiler.postponeCompile false
 
 ```leanRun (entry := value)
 axiom absent : Nat → Nat
-@[vir_export] public noncomputable def value (n : Nat) : Nat := absent n
+public noncomputable def value (n : Nat) : Nat := absent n
 ```

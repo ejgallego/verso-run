@@ -22,7 +22,8 @@ export function enhance(element) {
   element.dataset.instance = `lean-run-${++instance}`;
   const description = JSON.parse(element.dataset.experiment);
   const form = element.querySelector("form");
-  const input = form.querySelector("input");
+  const input = form.querySelector("input, select, textarea");
+  if (input.tagName === "TEXTAREA") input.value = description.initialInput;
   const run = form.querySelector('[type="submit"]');
   const stop = form.querySelector(".lean-run-stop");
   const status = element.querySelector(".lean-run-status");
@@ -70,4 +71,10 @@ export function enhance(element) {
     owners.delete(host);
   });
   input.addEventListener("input", () => host.stop("idle"));
+  if (input.tagName === "TEXTAREA") input.addEventListener("keydown", event => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
 }

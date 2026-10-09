@@ -7,6 +7,7 @@ module
 public import VersoBlog
 public import VersoLeanRun.Render
 public meta import VersoLeanRun.Anchored
+public meta import VersoLeanRun.Inline
 
 public section
 open Lean Verso Doc Elab Genre Blog Output Html
@@ -24,7 +25,23 @@ block_component leanRun (experiment : Experiment) where
     return renderConsole experiment source (toString id)
       (some (relativeRoot ++ "lean-run/renderer.js"))
 
-/-- Checked source anchors are the common authoring route for both Blog genres. -/
+private meta def inlineSource (shouldShow : Bool) (hls : SubVerso.Highlighting.Highlighted)
+    (_str : StrLit) : DocElabM Term := do
+  if !shouldShow then return ← ``(Verso.Doc.Block.concat #[])
+  let col? := (← getRef).getPos? |>.map (← getFileMap).utf8PosToLspPos |>.map (·.character)
+  let hls := match col? with
+    | Option.none => hls
+    | Option.some col => hls.deIndent col
+  ``(Verso.Code.External.ExternalCode.leanBlock $(quote hls) {})
+
+/-- Page and Post use the same inline Run syntax and their native code renderer. -/
+@[code_block leanRun]
+meta def leanRunInline : CodeBlockExpanderOf Config
+  | config, str => elabInlineRun config str inlineSource fun experiment source => do
+    let description ← quoteExperiment experiment
+    ``(VersoLeanRun.Blog.leanRun $description #[$source])
+
+/-- Optional checked-source reuse for either Blog genre. -/
 @[code_block_expander leanRunAnchor]
 meta def leanRunAnchor : CodeBlockExpander
   | args, str => elabAnchoredRun (fun experiment source => do
