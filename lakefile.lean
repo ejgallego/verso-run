@@ -72,7 +72,7 @@ lean_lib LeanRunTypedExamples where
 
 lean_lib LeanRunSequenceExamples where
   srcDir := "demo/chapters"
-  roots := #[`LeanRunSequence.Examples]
+  roots := #[`LeanRunSequence.Examples, `LeanRunSequence.Life]
 
 lean_lib LeanRunRenderedExamples where
   srcDir := "demo/chapters"

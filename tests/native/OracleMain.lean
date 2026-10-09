@@ -1,13 +1,15 @@
 import LeanRunGate.Chapter
 import LeanRunSequence.Examples
 import LeanRunRendered.Examples
+import LeanRunSequence.Life
 import Lean.Data.Json
 
 def main (args : List String) : IO Unit := do
-  let [role, input] := args | throw <| IO.userError "usage: lean-run-oracle greet|stack|sequence|htmlGreeting|diagram|badge|wordSteps|double|spin INPUT"
+  let [role, input] := args | throw <| IO.userError "usage: lean-run-oracle greet|stack|sequence|life|htmlGreeting|diagram|badge|wordSteps|double|spin INPUT"
   let result ← match role with
     | "greet" => pure <| LeanRunGate.greet input
     | "sequence" => pure <| (Lean.toJson (LeanRunSequence.Examples.stackView input).toPayload).compress
+    | "life" => pure <| (Lean.toJson (LeanRunSequence.Life.lifeView input).toPayload).compress
     | "stack" => pure <| LeanRunGate.Stack.run input
     | "htmlGreeting" => pure <| (LeanRunGate.htmlGreeting input).asString
     | "diagram" => do

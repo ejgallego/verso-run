@@ -25,7 +25,7 @@ site = output/'site'
 command(['lake', 'exe', 'lean-run-slides-demo', '--output', str(site)], 'generate')
 plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunSlides.Deck'}
-assert len(plan['programs']['LeanRunSlides.Deck']) == 12
+assert len(plan['programs']['LeanRunSlides.Deck']) == 13
 assert plan['runtimeModule'].startswith('lib/vir/')
 assert len(list(site.rglob('runtime.js'))) == 1
 assert len(list(site.rglob('bundle.json'))) == 4  # runtime, formatter, document callables, DOM presenter

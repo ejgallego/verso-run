@@ -194,3 +194,10 @@ The DOM presenter is a bounded experimental library, not a claim of general VIR
 DOM qualification. Only its exercised bindings are covered here. Illuminate's
 full animation compiler remains unqualified on the current runtime; its existing
 qualified drawing-command/SVG output can be used inside a state Html view.
+
+The [Game of Life example](../demo/chapters/LeanRunSequence/Life.lean) is another
+ordinary `String → SequenceView` function. Its input is a rectangular `#`/`.` seed
+of at most 8 rows and columns, centred on an 8×8 board. The model computes twelve
+generations with dead cells beyond the edge, then its view renders an SVG board.
+It uses the same player and worker lifecycle as the stack stepper. No JavaScript
+implements the simulation or interprets its trace.

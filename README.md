@@ -36,6 +36,7 @@ There are a few more examples to explore:
 
 | Example | Try |
 | --- | --- |
+| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then step through its generations |
 | [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Move through before/after stacks with Lean-authored controls |
 | [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
 | [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |

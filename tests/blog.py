@@ -28,7 +28,7 @@ assert set(plan['programs']) == {'LeanRunBlog.Page', 'LeanRunBlog.Post'}
 assert set(plan['programs']['LeanRunBlog.Post']) == {
     'LeanRunBlog.Examples.greet', 'LeanRunBlog.Examples.card', 'LeanRunBlog.Examples.count',
     'LeanRunBlog.Post.Inline.greet', 'LeanRunBlog.Post.Inline.card', 'LeanRunSequence.Examples.stackView',
-    'LeanRunRendered.Examples.badge', 'LeanRunRendered.Examples.wordSteps'}
+    'LeanRunRendered.Examples.badge', 'LeanRunRendered.Examples.wordSteps', 'LeanRunSequence.Life.lifeView'}
 record('typed Page/Post AST collection publishes independent canonical signatures')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-blog-demo'), '--output', str(output/'native-only')],

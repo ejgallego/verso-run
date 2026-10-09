@@ -12,6 +12,7 @@ for readers.
 
 A book with chapters, definition links, and source that also appears in TeX.
 [Explore the manual](../Greeting/) or [see its source anchors](../Anchored-source/).
+[Explore Game of Life](../Game-of-Life/) with an editable seed and generation controls.
 [Step through a stack program](../Stack-stepper/) with a player written in Lean.
 
 # Blog

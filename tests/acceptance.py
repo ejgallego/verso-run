@@ -677,5 +677,8 @@ record('typed sequences and Lean/VIR DOM presentation across all genres, cleanup
 command(['node', 'tests/rendered-wire.mjs'], 'rendered-wire')
 command([sys.executable, 'tests/rendered.py', '--output', str(OUTPUT/'rendered')], 'rendered')
 record('typed rendered inputs, exact structured payloads, shared DOM policy and cross-genre native agreement')
+command([sys.executable, 'tests/life.py', '--site', str(OUTPUT/'sequence/site'),
+         '--output', str(OUTPUT/'life')], 'life')
+record('Game of Life rules, every native generation, edited seeds and all genre views')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)
