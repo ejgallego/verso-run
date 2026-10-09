@@ -56,15 +56,17 @@ as in [Blog publication](blog.md#publish-a-site). Import
 `VersoLeanRun.Slides.Publish` in the native generator:
 
 ```lean
-def main := VersoLeanRun.Slides.slidesMain
+def main := VersoLeanRun.Slides.slidesMainResources
   { outputDir := "_slides", theme := "white" }
-  (%doc MyDeck) #[MyDeck.resources]
+  (%doc MyDeck) MyDeck.resources
 ```
 
 The wrapper collects marked metadata from the typed deck, then prepares one
 resource set containing the native Slides formatter and document-selected Run
-callables. Both use
-the stock embedded runtime and the `lib/vir/` inventory. The shared Run host and
+callables. The incoming set must use the same runtime content identity as the stock
+formatter; mismatches are rejected before generation rather than silently
+replaced. The complete inventory uses `lib/vir/`. The original `slidesMain`
+Bundle-array API remains available and uses the stock runtime. The shared Run host and
 binding plan live under `lean-run/`.
 
 The complete inventory enters Slides' existing asset planner as binary theme

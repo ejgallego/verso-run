@@ -41,13 +41,13 @@ private def assetTheme (config : VersoSlides.Config) : CustomTheme :=
       highlightTheme := config.highlightTheme }
 
 /-- Compose Run resources with the stock formatter inventory and collision plan.
-The embedded stock runtime remains authoritative for the deck. -/
-def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
-    (programs : Array Vir.Resources.Bundle) : IO UInt32 := do
+The embedded stock runtime remains authoritative; a different supplied runtime is
+rejected before generation rather than silently replaced. -/
+def slidesMainResources (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
+    (resources : Vir.Resources.ResourceSet) : IO UInt32 := do
   let found ← IO.ofExcept <| slideExperiments doc
-  let publication ← IO.ofExcept <| preparePublicationWithPrefix "lib/vir" found
-    (VersoSlides.VirPrettyMResources.resources.programs ++ programs)
-    (runtime := VersoSlides.VirPrettyMResources.resources.runtime)
+  let resources ← IO.ofExcept <| combineResources VersoSlides.VirPrettyMResources.resources resources
+  let publication ← IO.ofExcept <| preparePublicationWithResources found resources "lib/vir"
   let theme := assetTheme config
   let assets := publication.files.map fun file =>
     ({ filename := file.path, contents := file.bytes } : ThemeAsset)
@@ -61,5 +61,11 @@ def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
       {{ <script type="module" src="lean-run/slides.js"/> }},
       {{ <noscript><style>{{Html.text false (include_str "../../../web/slides-static.css")}}</style></noscript> }}] }
   VersoSlides.slidesMain config doc
+
+/-- Compatibility adapter; legacy program-only callers use the stock Slides runtime. -/
+def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
+    (programs : Array Vir.Resources.Bundle) : IO UInt32 :=
+  slidesMainResources config doc {
+    runtime := VersoSlides.VirPrettyMResources.resources.runtime, programs }
 
 end VersoLeanRun.Slides

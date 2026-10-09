@@ -58,6 +58,15 @@ assert helper_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
 assert chapter_manifest['descriptor']['schemaVersion'] == helper_manifest['descriptor']['schemaVersion'] == 2
 assert helper_manifest == chapter_manifest
 record('entry-selected local/imported callables share a document-owned resource and independent signatures')
+command(['lake', 'exe', 'lean-run-resource-set-check'], 'resource-set-adapter')
+record('ResourceSet planner preserves legacy bytes, explicit prefixes/runtimes, and rejects conflicting or corrupt runtimes')
+legacy = OUTPUT/'legacy-publication'
+command(['lake', 'exe', 'lean-run-publication-check', 'legacy', '--output', str(legacy)], 'legacy-publication')
+assert plan == json.loads((legacy/'html-multi/lean-run/publication.json').read_text())
+def inventory(path):
+    return {p.relative_to(path): p.read_bytes() for p in path.rglob('*') if p.is_file()}
+assert inventory(site/'html-multi/lean-run') == inventory(legacy/'html-multi/lean-run')
+record('legacy Manual Bundle publisher and ResourceSet publisher emit identical execution assets')
 duplicates = OUTPUT/'duplicate-registration'
 command(['lake', 'exe', 'lean-run-publication-check', 'duplicate', '--output', str(duplicates)],
     'duplicate-registration')

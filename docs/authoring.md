@@ -145,5 +145,7 @@ When updating an older example, remove redundant `@[vir_export]` markers and
 `output` options. Change a String HTML serialization wrapper to return typed
 `Html` directly. For anchors, move root resource registration from the imported
 producer to the document module. The independently pinned
-[Manual starter](../examples/manual-starter/README.md) still demonstrates the older
-published revision; its explicit annotations are kept until its dependency update.
+[Manual starter](../examples/manual-starter/README.md) demonstrates entry-selected
+registration without annotations. New generators should pass the complete
+`include_vir_assets` result to the ResourceSet publication APIs; the Bundle-array
+APIs remain compatibility adapters. See [resource integration](internals.md#resource-ownership-and-site-integration).

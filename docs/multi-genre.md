@@ -119,7 +119,7 @@ ordinary Blog example contexts remain separate.
 **Blog, Page and Post:** one adapter uses the existing highlighted-code block
 and component system. Component metadata uses a different encoding from Manual's
 extension JSON, so decoding is adapter-specific. Components provide text JS/CSS
-assets; `VersoLeanRun.Blog.blogMain` collects the typed site, validates the shared
+assets; `VersoLeanRun.Blog.blogMainResources` collects the typed site, validates the shared
 publication plan, calls stock Blog generation, and writes binary resources.
 Both genres emit a `<base>` tag. Blog forms carry explicit renderer paths derived
 from their traversal location; [`bootstrap.js`](../web/bootstrap.js) resolves
@@ -136,8 +136,10 @@ children and shared console controls via `.ofHtml`. Collection strictly decodes
 metadata from the typed AST before any generation. `+collapsed` is enhanced in
 the browser; the no-JavaScript layout retains readable source.
 
-The common publication planner has a prefix-configurable entry point, while the
-original `preparePublication` API retains its function type and default. Slides uses
+The common `preparePublicationWithResources` planner accepts the complete resource
+set and an optional prefix. The original Bundle APIs retain their defaults as
+compatibility adapters. Slides combines with its formatter's set, requiring the
+same runtime identity before publication. Slides uses
 `lib/vir/` and includes the native formatter in the same resource set as the Run
 producers. All binary files enter the stock asset collision plan through theme
 assets. Built-in CSS and fonts retain their original paths; custom themes and

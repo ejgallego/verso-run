@@ -54,17 +54,24 @@ def siteExperiments (site : Site) (showDrafts : Bool := false) : Except String (
   | .blog _ text posts => blogExperiments text posts showDrafts
 
 /-- Stock Blog generation plus the shared validated binary inventory. Destination
-and draft policy are explicit, so publication and generation cannot select different roots. -/
-def blogMain (theme : Theme) (site : Site) (programs : Array Vir.Resources.Bundle)
+and draft policy are explicit; the supplied runtime and inventory are preserved. -/
+def blogMainResources (theme : Theme) (site : Site) (resources : Vir.Resources.ResourceSet)
     (destination : System.FilePath := "_site") (showDrafts : Bool := false)
-    (runtime : Vir.Resources.Bundle := Vir.Resources.Runtime.bundle)
     (components : Components := by exact %registered_components)
     (linkTargets : Verso.Code.LinkTargets TraverseContext := {}) : IO UInt32 := do
   let found ← IO.ofExcept <| siteExperiments site showDrafts
-  let publication ← IO.ofExcept <| preparePublication found programs runtime
+  let publication ← IO.ofExcept <| preparePublicationWithResources found resources
   let options := ["--output", destination.toString] ++ (if showDrafts then ["--drafts"] else [])
   let result ← Verso.Genre.Blog.blogMain theme site linkTargets options (components := components)
   if result == 0 then writePublication destination publication
   return result
+
+/-- Compatibility adapter for the original Bundle-based Blog generator. -/
+def blogMain (theme : Theme) (site : Site) (programs : Array Vir.Resources.Bundle)
+    (destination : System.FilePath := "_site") (showDrafts : Bool := false)
+    (runtime : Vir.Resources.Bundle := Vir.Resources.Runtime.bundle)
+    (components : Components := by exact %registered_components)
+    (linkTargets : Verso.Code.LinkTargets TraverseContext := {}) : IO UInt32 :=
+  blogMainResources theme site { runtime, programs } destination showDrafts components linkTargets
 
 end VersoLeanRun.Blog

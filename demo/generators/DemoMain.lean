@@ -7,4 +7,4 @@ open Verso.Output.Html
 
 def main := manualMain (%doc LeanRunGate.Chapter)
   (config := { extraCss := {CSS.mk (include_str "../../web/demo.css")} })
-  (extraSteps := [VersoLeanRun.publish #[LeanRunGate.resources]])
+  (extraSteps := [VersoLeanRun.publishResources LeanRunGate.resources])

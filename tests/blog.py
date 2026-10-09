@@ -37,6 +37,13 @@ command([str(ROOT/'.lake/build/bin/lean-run-blog-demo'), '--output', str(output/
         'native-only', cwd=output)
 assert plan == json.loads((output/'native-only/lean-run/publication.json').read_text())
 record('Blog native generator runs outside the checkout with embedded assets')
+legacy = output/'legacy'
+command(['lake', 'exe', 'lean-run-blog-demo', '--check', 'legacy', '--output', str(legacy)], 'legacy-generate')
+assert plan == json.loads((legacy/'lean-run/publication.json').read_text())
+def inventory(path):
+    return {p.relative_to(path): p.read_bytes() for p in path.rglob('*') if p.is_file()}
+assert inventory(site) == inventory(legacy)
+record('legacy Bundle generator and ResourceSet generator publish identical site files')
 accepted = (site/'lean-run/publication.json').read_bytes()
 for mode, reason in [('missing', 'no published program bundle'), ('malformed', 'Invalid Blog Lean Run metadata')]:
     for destination in [site, output/('rejected-'+mode)]:

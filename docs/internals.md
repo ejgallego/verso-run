@@ -43,30 +43,41 @@ Follow VIR's stock resource workflow, demonstrated by the
    The demo registers the Manual chapter, Blog Page/Post and Slides deck as
    separate document roots. There are no JSON recipes or handwritten interface
    IDs. Keep document and carrier libraries disjoint.
-3. Embed the prepared bundle in its carrier library. The chapter imports
+3. Embed the complete prepared resource set in its carrier library. The chapter imports
    extension support, never its carrier:
 
    ```lean
    module
    public import Vir.Resources.Assets
 
-   public def MySite.program : Vir.Resources.Bundle :=
-     (include_vir_assets (modules := #[MyChapter])).programs[0]!
+   public def MySite.resources : Vir.Resources.ResourceSet :=
+     include_vir_assets (modules := #[MyChapter])
    ```
 
    The include names the program module and returns a `ResourceSet` containing
-   the locked runtime and prepared programs. This example selects its single
-   program bundle to preserve the existing `VersoLeanRun.publish` API.
+   the locked runtime and prepared programs. Pass this value directly; no singleton
+   extraction or reconstruction of runtime ownership is needed.
    Module resource facets support custom source/build directories.
 4. Import the chapter, carrier, and `VersoLeanRun.Publish` in the native generator:
 
    ```lean
    def main := manualMain (%doc MyChapter)
-     (extraSteps := [VersoLeanRun.publish #[MySite.program]])
+     (extraSteps := [VersoLeanRun.publishResources MySite.resources])
    ```
 
-   Pass every required document bundle. The publisher uses VIR's locked runtime
-   by default; a compatible explicit runtime may use the named `runtime` argument.
+   Pass every required document's complete set. `combineResources` appends programs
+   only when both sets use the same runtime content identity, validating inventories
+   before composition. Manual and Blog preserve the supplied runtime. Slides combines
+   with its embedded formatter set and rejects a different supplied runtime before
+   generation. VIR owns program compatibility, deduplication, and conflict checks.
+
+`preparePublicationWithResources` is the common pure planner; its optional
+`resourcePrefix` controls inventory paths. Manual uses `publishResources`, Blog
+uses `blogMainResources`, and Slides uses `slidesMainResources`. The original
+`preparePublication`, `preparePublicationWithPrefix`, `publish`, `blogMain`, and
+`slidesMain` entry points remain Bundle-array compatibility adapters with their
+existing defaults. Explicit legacy Manual/Blog `runtime` arguments still work;
+legacy Slides callers use the stock formatter runtime.
 
 The graph remains support → producer → document → program preparation → carrier →
 native generator. No per-block packaging or second execution compiler is added.

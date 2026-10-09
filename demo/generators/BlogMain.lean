@@ -19,13 +19,17 @@ def main (args : List String) : IO UInt32 := do
     | ["--output", path] => pure ("normal", (⟨path⟩ : System.FilePath))
     | ["--check", mode, "--output", path] => pure (mode, (⟨path⟩ : System.FilePath))
     | _ => throw <| IO.userError "usage: lean-run-blog-demo [--output DIRECTORY]"
-  let programs := if mode == "missing" then #[]
-    else #[LeanRunBlog.pageResources, LeanRunBlog.postResources]
+  let resources ← IO.ofExcept <| VersoLeanRun.combineResources
+    LeanRunBlog.pageResources LeanRunBlog.postResources
+  let resources := if mode == "missing" then { resources with programs := #[] } else resources
   let selected ← match mode with
-    | "normal" | "missing" => pure site
+    | "normal" | "missing" | "legacy" => pure site
     | "malformed" =>
       let bad : Doc.Block Page := .other (.component `VersoLeanRun.Blog.leanRun .null) #[]
       let home := { (%doc LeanRunBlog.Home) with content := #[bad] }
       pure <| Site.page `Malformed home #[]
     | _ => throw <| IO.userError s!"Unknown Blog check {mode}"
-  VersoLeanRun.Blog.blogMain Theme.default selected programs destination
+  if mode == "legacy" then
+    return ← VersoLeanRun.Blog.blogMain Theme.default selected resources.programs destination
+      (runtime := resources.runtime)
+  VersoLeanRun.Blog.blogMainResources Theme.default selected resources destination

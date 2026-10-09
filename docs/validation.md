@@ -53,6 +53,13 @@ a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
 
+The ResourceSet API follow-up passed the build and 88-check mutation suite,
+including 23 Blog and 21 Slides checks. Native inventory checks cover explicit
+runtime preservation, exact runtime identity conflicts, corrupt repeated runtimes,
+and rejection before writes. Legacy/new Blog and Slides generators emit identical
+site files; Manual emits identical execution assets.
+
+
 The pre-merge layout follow-up passed `lake build` and the 86-check mutation
 suite on 2026-10-09, including 22 Blog checks for draft policy and real workers.
 Three duplicate removed-`output` parser cases were consolidated; entry registration,

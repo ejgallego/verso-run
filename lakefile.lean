@@ -132,6 +132,11 @@ lean_exe «lean-run-blog-draft-check» where
   srcDir := "tests/native"
   root := `BlogDraftMain
 
+-- Resource inventory checks execute natively: they hash complete embedded packs.
+lean_exe «lean-run-resource-set-check» where
+  srcDir := "tests/native"
+  root := `ResourceSetMain
+
 -- This fixture elaborates, but packaging must reject its unavailable native provider.
 
 lean_lib LeanRunGateFailures where

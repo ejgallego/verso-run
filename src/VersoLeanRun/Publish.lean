@@ -18,12 +18,17 @@ private def decodeExperiment (container : Manual.Block) : Except String (Option 
     return some (← Lean.fromJson? container.data)
   return none
 
-/-- Manual output adapter; the common planner validates all bindings before writing. -/
-def publish (programs : Array Vir.Resources.Bundle)
-    (runtime : Vir.Resources.Bundle := Vir.Resources.Runtime.bundle) : ExtraStep := fun mode config _ text => do
+/-- Manual output adapter for complete embedded assets. The supplied runtime is
+preserved; the common planner validates all bindings before writing. -/
+def publishResources (resources : Vir.Resources.ResourceSet) : ExtraStep := fun mode config _ text => do
   let rendered ← IO.ofExcept <| experiments decodeExperiment text
-  let publication ← IO.ofExcept <| preparePublication rendered programs runtime
+  let publication ← IO.ofExcept <| preparePublicationWithResources rendered resources
   let output := config.destination / (match mode with | .single => "html-single" | .multi => "html-multi")
   writePublication output publication
+
+/-- Compatibility adapter for authors supplying program bundles and an optional runtime. -/
+def publish (programs : Array Vir.Resources.Bundle)
+    (runtime : Vir.Resources.Bundle := Vir.Resources.Runtime.bundle) : ExtraStep :=
+  publishResources { runtime, programs }
 
 end VersoLeanRun

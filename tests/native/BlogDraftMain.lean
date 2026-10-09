@@ -24,7 +24,7 @@ def main (args : List String) : IO UInt32 := do
     throw <| IO.userError s!"unknown placement {placement}"
   unless ["hide", "show", "missing"].contains mode do
     throw <| IO.userError s!"unknown draft policy {mode}"
-  let programs := if mode == "show" then #[LeanRunBlog.postResources] else #[]
+  let programs := if mode == "show" then LeanRunBlog.postResources.programs else #[]
   let site := draftSite (placement == "nested")
   let showDrafts := mode != "hide"
   if placement == "root" then

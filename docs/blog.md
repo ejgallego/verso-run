@@ -53,7 +53,7 @@ traversal registration is missing. Root collection and publication planning are
 tested directly; nested blogs are qualified through native generation.
 
 
-`blogMain` excludes draft posts by default. Its publication collector follows
+`blogMainResources` excludes draft posts by default. Its publication collector follows
 the same policy as native Blog generation, so hidden drafts need no program
 bundle and add no callable bindings. Pass `(showDrafts := true)` to generate
 drafts and register their bundles along with the visible documents' bundles.
@@ -64,12 +64,15 @@ For each Page/Post document, declare `+Module:virResourcePack` in `needs`, and e
 `VersoLeanRun.Blog.Publish` in the native site generator and call:
 
 ```lean
-def main := VersoLeanRun.Blog.blogMain Theme.default mySite
-  #[MyPage.resources, MyPost.resources] (destination := "_site")
+def main : IO UInt32 := do
+  let resources ← IO.ofExcept <| VersoLeanRun.combineResources MyPage.resources MyPost.resources
+  VersoLeanRun.Blog.blogMainResources Theme.default mySite resources (destination := "_site")
 ```
 
-The wrapper takes a typed Blog `Site`, a theme, embedded bundles, an explicit
-destination, and optional draft policy, runtime, components, and link targets.
+The wrapper takes a typed Blog `Site`, a theme, a complete `ResourceSet`, an explicit
+destination, and optional draft policy, components, and link targets. It preserves
+the set's runtime; composition rejects different runtime identities. The original
+`blogMain` Bundle-array API remains available, including its optional `runtime`.
 It collects Page/Post AST metadata and validates the common resource plan before
 calling stock Blog generation. On successful generation it writes the complete
 binary inventory. It never discovers programs by scraping HTML or reopening
