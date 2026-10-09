@@ -21,7 +21,7 @@ inductive StringInputMode where
 /-- String transport and result presentation are separate. A new String view does
 not change the callable ABI or permit rendered views on numeric/Boolean forms. -/
 inductive StringPresentation where
-  | text | html
+  | text | html | sequence
   deriving BEq, Repr
 
 inductive FormKind where
@@ -35,6 +35,8 @@ instance : ToJson FormKind where
     | .string .multiline .text => "multilineString"
     | .string .line .html => "html"
     | .string .multiline .html => "multilineHtml"
+    | .string .line .sequence => "sequence"
+    | .string .multiline .sequence => "multilineSequence"
     | .nat => "nat"
     | .bool => "bool"
     | .uint64 => "uint64"
@@ -51,6 +53,8 @@ instance : FromJson FormKind where
     | "uint64" => pure .uint64
     | "html" => pure (.string .line .html)
     | "multilineHtml" => pure (.string .multiline .html)
+    | "sequence" => pure (.string .line .sequence)
+    | "multilineSequence" => pure (.string .multiline .sequence)
     | tag => throw s!"Unsupported Lean Run form '{tag}'"
 
 def FormKind.scalar : FormKind → ScalarKind
@@ -65,6 +69,10 @@ def FormKind.multiline : FormKind → Bool
 
 def FormKind.isHtml : FormKind → Bool
   | .string _ .html => true
+  | _ => false
+
+def FormKind.isSequence : FormKind → Bool
+  | .string _ .sequence => true
   | _ => false
 
 /-- Portable call description admitted from the independently classified Lean

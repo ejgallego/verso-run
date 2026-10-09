@@ -1,5 +1,6 @@
 module
 public import VersoLeanRun.Slides
+import LeanRunSequence.Examples
 import LeanRunGate.Helper
 import LeanRunBlog.Examples
 import LeanRunTyped.Examples
@@ -111,4 +112,13 @@ The namespace and definition remain available in later blocks.
 public def card (name : String) : Verso.Output.Html :=
   .text true name
 end LeanRunSlides.Deck.Inline
+```
+
+# Stack stepper
+
+Run a program, then choose a step to inspect its before and after stacks.
+
+```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +") +collapsed
+public def stackView (program : String) : VersoLeanRun.SequenceView :=
+  (evaluate program).view renderSnapshot
 ```

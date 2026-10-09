@@ -9,6 +9,7 @@ public meta import VersoLeanRun.Model
 public import Verso.Doc.Elab
 meta import Verso.Instances.Deriving
 public import Verso.Output.Html
+public import VersoLeanRun.Sequence
 public meta import Vir.Attributes
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Lean.ToExpr
@@ -32,6 +33,11 @@ meta instance : FromArgs Config DocElabM where
   fromArgs := Config.mk <$> .named `entry .ident false <*> .named `input .string true <*>
     .flag `collapsed false <*> .flag `multiline false
 
+/-- Scalar aliases keep their original type; rendered results need serializers. -/
+private inductive AdapterKind where
+  | scalar | html | sequence
+  deriving BEq
+
 /-- Registration is selected by the Run entry, after independent type/form checks.
 Keep VIR's attribute validator authoritative for executable IR and dependencies. -/
 private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := do
@@ -43,16 +49,19 @@ private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := 
 
 /-- Imported callables and typed HTML have a document-owned scalar boundary.
 The producer need not know that a document will select its function. -/
-private meta def scalarEntry (entry : Ident) (name : Name) (isHtml : Bool) : DocElabM Name := do
+private meta def scalarEntry (entry : Ident) (name : Name) (mode : AdapterKind) : DocElabM Name := do
   let env ← getEnv
   let imported := (env.getModuleIdxFor? name).isSome
-  if !isHtml && !imported then return name
+  if mode == .scalar && !imported then return name
   let adapter := (if imported then env.mainModule ++ name else name) ++
-    (if isHtml then `leanRunHtml else `leanRun)
+    (match mode with | .scalar => `leanRun | .html => `leanRunHtml | .sequence => `leanRunSequence)
   let info ← getConstInfo name
   let string := mkConst ``String
-  let type ← if isHtml then mkArrow string string else pure info.type
-  let value := if isHtml then
+  let type ← if mode == .scalar then pure info.type else mkArrow string string
+  let value := if mode == .sequence then
+    mkLambda `input .default string <| mkApp (mkConst ``SequenceView.serialize)
+      (mkApp (mkConst name) (.bvar 0))
+    else if mode == .html then
     mkLambda `input .default string <|
       mkApp3 (mkConst ``Verso.Output.Html.asString)
         (mkApp (mkConst name) (.bvar 0)) (mkNatLit 0) (mkConst ``Bool.true)
@@ -101,10 +110,15 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
       info.levelParams.isEmpty && domain.isConstOf ``String &&
         result.isConstOf ``Verso.Output.Html
     | _ => false
+  let isSequence := match entryType with
+    | .forallE _ domain result .default =>
+      info.levelParams.isEmpty && domain.isConstOf ``String && result.isConstOf ``SequenceView
+    | _ => false
+  let mode : AdapterKind := if isHtml then .html else if isSequence then .sequence else .scalar
   -- Classify the source interface independently before registering scalar exports.
   -- Html crosses VIR through a generated String serializer.
   let sourceName := name
-  let name ← if isHtml then scalarEntry config.entry name true else pure name
+  let name ← if mode == .scalar then pure name else scalarEntry config.entry name mode
   let info ← getConstInfo name
   let callSignature ← match ← Vir.Interface.analyzeExportInterface info.type with
     | .ok sig => pure sig
@@ -114,7 +128,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
   let form : FormKind ← match callSignature.args, callSignature.result, callSignature.effect with
     | #[{ type := .string, .. }], .string, .pure => pure (.string
         (if config.multiline then .multiline else .line)
-        (if isHtml then .html else .text))
+        (match mode with | .scalar => .text | .html => .html | .sequence => .sequence))
     | #[{ type := .nat, .. }], .nat, .pure => pure .nat
     | #[{ type := .bool, .. }], .bool, .pure => pure .bool
     | #[{ type := .uint64, .. }], .uint64, .pure => pure .uint64
@@ -125,7 +139,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
     if let some input := config.input then
       unless input == "true" || input == "false" do
         throwErrorAt config.entry "Lean Run Boolean preset must be 'true' or 'false'"
-  let name ← if isHtml then pure name else scalarEntry config.entry name false
+  let name ← if mode == .scalar then scalarEntry config.entry name .scalar else pure name
   registerEntry config.entry name
   let env ← getEnv
   let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0

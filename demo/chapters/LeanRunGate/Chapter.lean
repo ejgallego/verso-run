@@ -2,6 +2,8 @@ module
 public import VersoLeanRun
 import LeanRunGate.Helper
 import LeanRunTyped.Examples
+import LeanRunGate.Stack
+import LeanRunSequence.Examples
 public import Illuminate.Render.Svg
 public import Illuminate.Geometry.PathData
 public import Illuminate.Geometry.Matrix
@@ -31,7 +33,7 @@ Write a little program with numbers and operations separated by spaces.
 Run the supplied `6 7 * 2 +` program to compute `(6 × 7) + 2` and see each step.
 Open the implementation to explore its Lean instruction type, parser, and execution rules.
 
-```leanRun (entry := LeanRunGate.Stack.run) (input := "6 7 * 2 +") +collapsed
+```leanRunAnchor stack (module := LeanRunGate.Stack) (entry := LeanRunGate.Stack.run) (input := "6 7 * 2 +") +collapsed
 namespace LeanRunGate.Stack
 
 public inductive Instruction where
@@ -92,6 +94,16 @@ Try another program:
 The stack's top is on the right. `+` and `*` combine two values, `dup` copies one,
 and `swap` exchanges two. A complete program leaves exactly one result.
 The demo accepts at most 32 instructions, 16 stack values, and 80 decimal digits per value.
+
+# Stack stepper
+
+Run the same program, then move through its states. Lean computes the instructions,
+before/after stacks and failures. The player is also written in Lean.
+
+```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +") +collapsed
+public def stackView (program : String) : VersoLeanRun.SequenceView :=
+  (evaluate program).view renderSnapshot
+```
 
 # HTML greeting
 

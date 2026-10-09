@@ -7,7 +7,8 @@ open Lean VersoLeanRun
 -- This is the metadata boundary shared by all three native genre collectors.
 #eval show IO Unit from do
   for form in #[FormKind.string .line .text, .string .multiline .text, .nat, .bool, .uint64,
-      .string .line .html, .string .multiline .html] do
+      .string .line .html, .string .multiline .html,
+      .string .line .sequence, .string .multiline .sequence] do
     let decoded ← IO.ofExcept (fromJson? (toJson form) : Except String FormKind)
     unless decoded == form do throw <| IO.userError s!"form round-trip failed: {repr form}"
   for json in #[Json.str "natHtml", Json.str "multilineBool",
@@ -39,6 +40,8 @@ run_cmd Lean.Elab.Command.liftTermElabM do
       (`ContractFixtures.text, .string .multiline .text),
       (`ContractFixtures.text, .string .line .html),
       (`ContractFixtures.text, .string .multiline .html),
+      (`ContractFixtures.text, .string .line .sequence),
+      (`ContractFixtures.text, .string .multiline .sequence),
       (`ContractFixtures.natural, .nat), (`ContractFixtures.boolean, .bool),
       (`ContractFixtures.unsigned, .uint64)] do
     let info ← Lean.getConstInfo name
