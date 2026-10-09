@@ -1,6 +1,7 @@
 module
 public import VersoLeanRun.Blog
 import LeanRunSequence.Examples
+import LeanRunSequence.Life
 import LeanRunGate.Helper
 import LeanRunTyped.Examples
 
@@ -74,4 +75,16 @@ Run a program, then choose a step to inspect its before and after stacks.
 ```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +") +collapsed
 public def stackView (program : String) : VersoLeanRun.SequenceView :=
   (evaluate program).view renderSnapshot
+```
+
+# Game of Life
+
+Edit a rectangular seed: `#` is a live cell and `.` is a dead cell. The seed is
+centred on an 8×8 board; cells outside the edge stay dead. Lean computes twelve
+generations. Choose a generation or use Previous/Next to watch a glider move.
+Try `###` on one line for a blinker, or `##` on each of two lines for a still life.
+
+```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := ".#.\n..#\n###") +multiline +collapsed
+public def lifeView (seed : String) : VersoLeanRun.SequenceView :=
+  (simulate seed).view renderState
 ```

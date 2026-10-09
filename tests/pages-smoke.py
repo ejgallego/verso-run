@@ -230,6 +230,29 @@ with sync_playwright() as p:
             assert form.locator('.lean-run-sequence-position').text_content() == (
                 f"Step {index + 1} of {len(expected['frames'])}: {frame['label']}")
         checks.append(path + ': Lean DOM selection displays every exact native sequence frame')
+    for genre, path in [('Manual', 'Game-of-Life/'), ('Blog', 'blog/page/'),
+                        ('Blog', 'blog/notes/2026-10-8-running-lean-in-a-post/'),
+                        ('Slides', 'slides/')]:
+        page.goto(base + path)
+        page.wait_for_selector('.lean-run[data-enhanced]')
+        if genre == 'Slides':
+            page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
+            page.evaluate('Reveal.slide(11, 0)')
+            page.wait_for_function('Reveal.getIndices().h === 11')
+        form = page.locator('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]')
+        seed = '.#.\n..#\n###'
+        form.locator('textarea').fill(seed)
+        form.locator('[type=submit]').click()
+        page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                               arg=form.element_handle(), timeout=60000)
+        assert form.get_attribute('data-state') == 'success', form.inner_text()
+        expected = json.loads(oracle('life', seed, 'Manual'))
+        assert len(expected['frames']) == 13
+        for index, frame in enumerate(expected['frames']):
+            form.locator(f'[data-step="{index}"]').click()
+            assert frame['html'] in form.locator('iframe').get_attribute('srcdoc')
+            assert form.locator('.lean-run-sequence-error').text_content() == ''
+        checks.append(path + ': edited Life seed and every generation agree with native Lean')
     assert not errors, errors
     checks.append('no uncaught browser errors')
     browser.close()

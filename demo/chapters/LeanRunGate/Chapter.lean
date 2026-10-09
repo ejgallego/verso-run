@@ -4,6 +4,7 @@ import LeanRunGate.Helper
 import LeanRunTyped.Examples
 import LeanRunGate.Stack
 import LeanRunSequence.Examples
+import LeanRunSequence.Life
 public import Illuminate.Render.Svg
 public import Illuminate.Geometry.PathData
 public import Illuminate.Geometry.Matrix
@@ -251,4 +252,16 @@ public def LeanRunGate.spinLoop (n acc : Nat) : Nat :=
 
 public def LeanRunGate.spin (n : Nat) : Nat :=
   LeanRunGate.spinLoop n 0
+```
+
+# Game of Life
+
+Edit a rectangular seed: `#` is a live cell and `.` is a dead cell. The seed is
+centred on an 8×8 board; cells outside the edge stay dead. Lean computes twelve
+generations. Choose a generation or use Previous/Next to watch a glider move.
+Try `###` on one line for a blinker, or `##` on each of two lines for a still life.
+
+```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := ".#.\n..#\n###") +multiline +collapsed
+public def lifeView (seed : String) : VersoLeanRun.SequenceView :=
+  (simulate seed).view renderState
 ```

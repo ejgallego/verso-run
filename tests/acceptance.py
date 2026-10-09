@@ -652,5 +652,8 @@ command([sys.executable, 'tests/inline-genres.py', '--output', str(OUTPUT/'inlin
 record('inline Page/Post/Slides authoring, retained scopes, native source and actual workers')
 command([sys.executable, 'tests/sequence.py', '--output', str(OUTPUT/'sequence')], 'sequence')
 record('typed sequences and Lean/VIR DOM presentation across all genres, cleanup and acquisition cancellation')
+command([sys.executable, 'tests/life.py', '--site', str(OUTPUT/'sequence/site'),
+         '--output', str(OUTPUT/'life')], 'life')
+record('Game of Life rules, every native generation, edited seeds and all genre views')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)
