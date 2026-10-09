@@ -36,6 +36,7 @@ There are a few more examples to explore:
 
 | Example | Try |
 | --- | --- |
+| [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Move through before/after stacks with Lean-authored controls |
 | [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
 | [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |
 | [Illuminate diagrams](http://127.0.0.1:8795/Illuminate-diagrams/) | `1`, `4`, and `8` nodes |
@@ -77,6 +78,7 @@ The authoring guide explains [imports, block options, HTML, and registration](do
 | `Bool → Bool` | A true/false selector | Plain `true` or `false` |
 | `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
 | `String → Verso.Output.Html` | Text | An isolated HTML preview |
+| `String → SequenceView` | Text | A sequence with previous/next and scrubbing |
 
 Functions must be public, executable, pure, and monomorphic, with one explicit
 argument. Selecting `entry` registers the callable; no VIR attribute is needed.

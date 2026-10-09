@@ -8,6 +8,7 @@ public import VersoLeanRun.Model
 public import Lean.Data.Json.Parser
 public import Vir.Resources
 public import Vir.Resources.Runtime
+public import VersoLeanRunPresenterResources
 public section
 open Vir.Resources
 namespace VersoLeanRun
@@ -21,6 +22,8 @@ structure Publication where
 def preparePublicationWithPrefix (resourcePrefix : String)
     (rendered : Array Experiment) (programs : Array Bundle)
     (runtime : Bundle := Vir.Resources.Runtime.bundle) : Except String Publication := do
+  let sequence := rendered.any (·.output == "sequence")
+  let programs := if sequence then programs.push VersoLeanRunPresenterResources.bundle else programs
   let resources : ResourceSet := { runtime, programs }
   let site ← (resources.forSite resourcePrefix).mapError reprStr
   let mut bindings : Array (String × (String × Lean.Json)) := #[]
@@ -41,14 +44,22 @@ def preparePublicationWithPrefix (resourcePrefix : String)
     if names.contains experiment.program then names else names.push experiment.program
   let programsJson := owners.map fun owner =>
     (owner, Lean.Json.mkObj <| (bindings.filter (·.1 == owner)).toList.map (·.2))
-  let plan := Lean.Json.mkObj [
+  let mut fields : List (String × Lean.Json) := [
     ("runtimeModule", .str site.runtimeModule),
     ("runtimeManifest", .str site.runtimeManifest),
     ("programs", Lean.Json.mkObj programsJson.toList)]
+  if sequence then
+    let expected ← (Lean.Json.parse VersoLeanRunPresenterResources.expectedMount).mapError id
+    fields := fields ++ [("presenters", Lean.Json.mkObj [("sequence", Lean.Json.mkObj [
+      ("manifest", .str site.programManifests[programs.size - 1]!),
+      ("declaration", .str "VersoLeanRun.Presenter.mount"),
+      ("expectedExport", expected)])])]
+  let plan := Lean.Json.mkObj fields
   let mut files := site.files.push { path := "lean-run/publication.json", bytes := plan.compress.toUTF8 }
   for (name, contents) in [("renderer.js", include_str "../../web/renderer.js"),
       ("host.js", include_str "../../web/host.js"), ("worker.js", include_str "../../web/worker.js"),
-      ("contract.js", include_str "../../web/contract.js")] do
+      ("contract.js", include_str "../../web/contract.js"),
+      ("sequence.js", include_str "../../web/sequence.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }
   return { files, plan }
 

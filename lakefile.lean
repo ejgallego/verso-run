@@ -38,11 +38,21 @@ lean_lib VersoLeanRunSlides where
   roots := #[`VersoLeanRun.Slides]
   needs := #[leanRunWeb]
 
+-- The browser presenter is separate from its native resource carrier.
+lean_lib VersoLeanRunPresenter where
+  srcDir := "src"
+  roots := #[`VersoLeanRunPresenter]
+
+lean_lib VersoLeanRunPresenterResources where
+  srcDir := "src"
+  roots := #[`VersoLeanRunPresenterResources]
+  needs := #[`+VersoLeanRunPresenter:virResourcePack]
+
 -- Demo documents and ordinary Lean producers. They never import their carriers.
 
 lean_lib LeanRunGateProgram where
   srcDir := "demo/chapters"
-  roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper]
+  roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper, `LeanRunGate.Stack]
 
 lean_lib LeanRunBlogExamples where
   srcDir := "demo/chapters"
@@ -59,6 +69,10 @@ lean_lib LeanRunSlidesDocuments where
 lean_lib LeanRunTypedExamples where
   srcDir := "demo/chapters"
   roots := #[`LeanRunTyped.Examples]
+
+lean_lib LeanRunSequenceExamples where
+  srcDir := "demo/chapters"
+  roots := #[`LeanRunSequence.Examples]
 
 -- Prepare module-owned packs before embedding them in disjoint carrier libraries.
 -- Keep the graph acyclic: document → module resource facet → carrier → generator.

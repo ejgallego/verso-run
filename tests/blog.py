@@ -30,7 +30,7 @@ plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunBlog.Page', 'LeanRunBlog.Post'}
 assert set(plan['programs']['LeanRunBlog.Post']) == {
     'LeanRunBlog.Examples.greet', 'LeanRunBlog.Examples.card', 'LeanRunBlog.Examples.count',
-    'LeanRunBlog.Post.Inline.greet', 'LeanRunBlog.Post.Inline.card'}
+    'LeanRunBlog.Post.Inline.greet', 'LeanRunBlog.Post.Inline.card', 'LeanRunSequence.Examples.stackView'}
 record('typed Page/Post AST collection publishes independent canonical signatures')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-blog-demo'), '--output', str(output/'native-only')],
@@ -130,7 +130,7 @@ try:
             assert first.locator('.lean-run-output b').count() == 0
             assert call(second, 'independent') == oracle('greet', 'independent')
             assert first.locator('.lean-run-output').text_content() == oracle('greet', '世界 🌍 <b>&')
-            assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 7
+            assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 8
             record(prefix+': Post Unicode and repeated placements have independent worker state')
             card = form('LeanRunBlog.Examples.card')
             assert call(card, '<b>& Ada') == ''

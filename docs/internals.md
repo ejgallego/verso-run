@@ -153,3 +153,31 @@ The VIR pin is the exact source head selected from PR #229. Its Lean toolchain
 and runtime lock must be qualified together. Verso adds the upstream base-85 digit proof and deprecation-check adjustment needed by Lean 4.35, while
 Slides uses its module-owned-assets review snapshot. Illuminate retains its pin; consumer acceptance is recorded separately in
 [validation](validation.md).
+
+## Sequence presentation boundary
+
+`Sequence α` and `SequenceStep α` hold the author's model; `.view` uses an
+`α → Html` function and produces a concrete `SequenceView`. Entry elaboration
+creates a document-owned String serializer and independently classifies its
+actual scalar signature. Publication adds a separate presenter program and its
+compiler-derived DOM call expectation only when a sequence is present.
+
+The native generator embeds the presenter resource pack without statically
+importing its browser-only definitions. The carrier loads the prepared module's
+compiled environment to classify the actual `mount` declaration type; it does
+not infer a contract from the executable manifest or elaborate another source
+frontend. This keeps JS externs out of native C compilation.
+
+`VersoLeanRunPresenter` uses VIR's existing DOM/event/RuntimeRef APIs. It owns
+selection, scrubbing, frame display and the exact listener identities. Its cleanup
+callback removes listeners before the JavaScript lifetime bridge disposes the
+runtime. The bridge handles asynchronous acquisition, generation checks, Stop
+and failure/retry. Computation stays in the dedicated worker; the presenter runs
+in the browser context and receives rendered frame data, not worker DOM handles.
+State frames retain the restrictive Html sandbox. Genre adapters reuse their
+existing placement and navigation lifecycle.
+
+The current Verso Html string serializer can omit closing tags for empty non-void
+elements. Presenter control paragraphs and the iframe have explicit bodies so
+fragment parsing preserves their sibling relationship. This belongs with the
+later Verso upstreaming review; the dependency pin is unchanged.

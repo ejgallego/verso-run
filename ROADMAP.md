@@ -1,6 +1,6 @@
 # Next steps
 
-The current extension supports entry-selected pure scalar and typed HTML calls
+The current extension supports entry-selected pure scalar, typed HTML and sequence views
 in Manual, Blog Page/Post, and Slides, with inline definitions or checked source
 anchors. The [internals](docs/internals.md) describe the implementation and exact
 pins; [history](docs/history.md) records how these features arrived.
@@ -47,3 +47,13 @@ qualifies the drawing-command/SVG path.
 Readers currently edit function inputs. Lean source editing and the broader
 `verso-lab` project remain separate work; they require their own compiler,
 interaction, and lifecycle design.
+
+## Lean-authored sequences
+
+The bounded sequence library exposes typed states and an ordinary Html view,
+with a separate Lean/VIR DOM presenter. The stack stepper shares the Lean parser
+and operational step function and has native-oracle coverage. Further animation
+integration should reuse Illuminate's APIs where they fit, after qualifying its
+diagram/hash provider path. Warm compute-worker reuse remains a separate choice;
+selecting a sequence frame already retains its presenter and does not rerun the
+evaluator.
