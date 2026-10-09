@@ -10,6 +10,17 @@ public section
 open Lean Verso.Output Verso.Output.Html
 namespace VersoLeanRun
 
+/-- Reader controls and invocation need only this description. Native AST metadata
+retains producer ownership and source locations for publication diagnostics. -/
+def Experiment.browserDescription (experiment : Experiment) : Json :=
+  Json.mkObj [
+    ("program", toJson experiment.program),
+    ("declaration", toJson experiment.declaration),
+    ("callable", toJson experiment.callable),
+    ("form", toJson experiment.form),
+    ("initialInput", toJson experiment.initialInput),
+    ("collapsed", toJson experiment.collapsed)]
+
 /-- Shared input, state, output, and preview controls. -/
 def renderControls (experiment : Experiment) : Html := Id.run do
   let label := match experiment.form.scalar with
@@ -52,7 +63,7 @@ def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : 
   let sourcePanel := if experiment.collapsed then
     {{ <details class="lean-run-source"><summary> "View Lean implementation" </summary> {{source}} </details> }}
     else {{ <div class="lean-run-source"> {{source}} </div> }}
-  let console := {{ <section class="lean-run" data-experiment={{(toJson experiment).compress}} data-instance={{instanceId}}>
+  let console := {{ <section class="lean-run" data-experiment={{experiment.browserDescription.compress}} data-instance={{instanceId}}>
     {{sourcePanel}}
     {{renderControls experiment}}
   </section> }}

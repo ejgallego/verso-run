@@ -83,12 +83,26 @@ The graph remains support → producer → document → program preparation → 
 native generator. No per-block packaging or second execution compiler is added.
 Verso's standard external-code path prepares cached highlighting separately.
 
-`Experiment.program` identifies the document placement group and diagnostic
-position; `declaration` is the author-selected Lean entry. `callable` is the full
+`Experiment.program` identifies the document placement group; `sourceLine` and
+`sourceColumn` locate the block for diagnostics. `declaration` is the author-selected
+Lean entry. `callable` is the full
 compiled VIR export name.
 `producerModule` identifies the callable's owning module. Generated scalar/Html
 adapters for imported entries belong to the document, leaving producer modules
 unchanged. Source anchor names and callable export names remain separate.
+The native block metadata retains these identities and source locations for
+collection and publication diagnostics. At HTML rendering, `data-experiment`
+contains only `program`, `declaration`, `callable`, `form`, `initialInput`, and
+`collapsed`. The browser uses document/entry identity to resolve the published
+manifest and expected contract, and callable identity to select the export.
+Producer ownership and source coordinates remain native; they are not sent to
+the worker. Rendering uses an explicit whitelist rather than serializing the
+complete native metadata record; `Experiment.browserDescription` in `Render`
+defines that whitelist. Slides keeps its full wrap metadata through
+native collection and publication, then uses Verso's block rewrite to project
+only the experiment attribute before the stock renderer sees it. Native source
+children, fragments, and other attributes retain their structure.
+
 The publisher matches this module to the generated bundle's `logicalId` and
 preserves the original index-to-manifest mapping. Identical bundles deduplicate.
 Distinct bundles with one logical ID fail `ResourceSet.forSite` validation with
