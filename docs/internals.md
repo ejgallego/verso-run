@@ -198,6 +198,10 @@ in the browser context and receives rendered frame data, not worker DOM handles.
 State frames retain the restrictive Html sandbox. Genre adapters reuse their
 existing placement and navigation lifecycle.
 
+Stop and the loading deadline settle the module-import wait. They do not cancel
+ECMAScript import or its possible later evaluation. Late rejection stays observed,
+and generation checks prevent an abandoned wait from creating a presenter.
+
 The current Verso Html string serializer can omit closing tags for empty non-void
 elements. Presenter control paragraphs and the iframe have explicit bodies so
 fragment parsing preserves their sibling relationship. This belongs with the

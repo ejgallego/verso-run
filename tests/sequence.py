@@ -1,5 +1,5 @@
 """Typed Lean sequences and the Lean/VIR DOM player, with real worker/native agreement."""
-import argparse, functools, http.server, json, shutil, subprocess, threading, time
+import argparse, functools, http.server, json, shutil, subprocess, sys, threading, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -197,5 +197,8 @@ try:
         browser.close()
 finally:
     server.shutdown();server.server_close()
+command([sys.executable, 'tests/sequence-import.py', '--site', str(site/'manual/html-multi'),
+         '--output', str(output/'import-wait')], 'import-wait')
+record('held runtime import settles on deadline/Stop before release, retries and observes late outcomes without stale allocation')
 (output/'results.json').write_text(json.dumps({'checks':checks,'publication':plans},indent=2)+'\n')
 print(f'{len(checks)} sequence checks passed; evidence: {output}',flush=True)

@@ -1,5 +1,18 @@
 // The Lean/VIR presenter owns selection, controls and event listeners.
 // This bridge owns asynchronous acquisition and the placement's lifetime.
+function waitForModule(imported, signal) {
+  let abort;
+  const cancelled = new Promise((_, reject) => {
+    abort = () => reject(signal.reason);
+    if (signal.aborted) abort();
+    else signal.addEventListener("abort", abort, { once: true });
+  });
+  // Import itself can continue and evaluate. The race keeps observing its late
+  // rejection, while only our wait settles on Stop or the loading deadline.
+  return Promise.race([imported, cancelled]).finally(() =>
+    signal.removeEventListener("abort", abort));
+}
+
 export class SequencePlayer {
   constructor(element, onError) {
     this.element = element;
@@ -38,7 +51,8 @@ export class SequencePlayer {
       const presenter = plan.presenters?.sequence;
       if (!presenter?.expectedExport) throw new Error("No published sequence presenter contract");
       const url = path => new URL(path, new URL("../", import.meta.url));
-      const { createProgram } = await import(url(plan.runtimeModule).href);
+      const { createProgram } = await waitForModule(
+        import(url(plan.runtimeModule).href), controller.signal);
       if (generation !== this.generation) return false;
       if (controller.signal.aborted) throw controller.signal.reason;
       program = await createProgram({ runtimeManifestUrl: url(plan.runtimeManifest),
