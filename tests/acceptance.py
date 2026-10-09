@@ -27,7 +27,14 @@ def oracle(role, value):
     return json.loads(output)
 
 command(['lake','build'], 'build')
-command(['lake', 'env', 'lean', 'tests/Model.lean'], 'typed-model')
+model_output = command(['lake', 'env', 'lean', 'tests/Model.lean'], 'typed-model')
+wire_lines = [line.removeprefix('FORM_WIRE ') for line in model_output.splitlines()
+              if line.startswith('FORM_WIRE ')]
+assert len(wire_lines) == 1, model_output
+wire_path = OUTPUT/'form-wire.json'
+wire_path.write_text(wire_lines[0])
+command(['node', 'tests/form-wire.mjs', str(wire_path)], 'form-wire')
+record('native form tags agree with browser codecs and canonical VIR contracts')
 record('typed form round-trips and unsupported metadata rejection')
 command(['node', 'tests/host-lifecycle.mjs'], 'host-lifecycle')
 record('publication acquisition cancellation, shared waiters, late completion, deadline and explicit recovery')
