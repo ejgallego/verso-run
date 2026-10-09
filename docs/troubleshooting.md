@@ -90,6 +90,11 @@ decimal digits; signs, spaces, fractions, and exponent notation are not accepted
 An input edit clears old results. Stop interrupts the worker, and another Run
 creates a fresh instance.
 
+A stopped call settles immediately even while the publication is loading. Other
+placements can keep their shared fetch; cancelling the last waiter lets the next Run
+acquire afresh. Publication acquisition fails after 15 seconds rather than waiting
+indefinitely. Choose Run to retry; acquisition failures are not cached.
+
 Resource or runtime errors appear as plain text with the selected declaration,
 a next step, and the original diagnostic details. HTML previews are cleared on
 failure. Choose Run to retry; failures are never replayed automatically. If the

@@ -31,6 +31,8 @@ def oracle(role, value):
     return json.loads(output)
 
 command(['lake','build'], 'build')
+command(['node', 'tests/host-lifecycle.mjs'], 'host-lifecycle')
+record('publication acquisition cancellation, shared waiters, late completion, deadline and explicit recovery')
 site = OUTPUT/'site'
 generate(site)
 # MultiVerso requires a project marker even when no remotes are configured.
@@ -116,6 +118,67 @@ with sync_playwright() as p:
     page.on('pageerror', lambda e: errors.append(str(e)))
     workers = []
     page.on('worker', lambda worker: workers.append(worker))
+
+    # Exercise the public promise against a held real browser fetch, not only the UI.
+    loading = browser.new_page()
+    loading.on('pageerror', lambda error: errors.append(str(error)))
+    held_publications = []
+    loading.route('**/lean-run/publication.json', lambda route: held_publications.append(route))
+    loading.goto(base+'single/')
+    loading.wait_for_selector('.lean-run[data-enhanced]')
+
+    def start_publication_calls(name, count):
+        loading.evaluate('''async ({name, count}) => {
+            const {ExperimentHost} = await import(new URL('lean-run/host.js?' + name, location.href).href);
+            const description = JSON.parse(document.querySelector(
+                '.lean-run[data-experiment*="LeanRunGate.greet"]').dataset.experiment);
+            const test = globalThis.loadingCase = {hosts: [], outcomes: [], states: []};
+            for (let i = 0; i < count; ++i) {
+                test.outcomes[i] = {pending: true};
+                const host = new ExperimentHost(description, state => test.states[i] = state);
+                test.hosts.push(host);
+                host.invoke('placement ' + i).then(value => test.outcomes[i] = {value},
+                    error => test.outcomes[i] = {error: error.name});
+            }
+        }''', {'name': name, 'count': count})
+
+    def wait_publications(count):
+        deadline = time.monotonic()+10
+        while len(held_publications) < count and time.monotonic() < deadline:
+            loading.wait_for_timeout(25)
+        assert len(held_publications) == count
+
+    start_publication_calls('publication-stop', 1)
+    wait_publications(1)
+    loading.evaluate('loadingCase.hosts[0].stop()')
+    loading.wait_for_function('loadingCase.outcomes[0].error === "AbortError"', timeout=1000)
+    assert loading.evaluate('loadingCase.states[0]') == 'stopped'
+    assert not loading.workers
+    # Leave the stopped response held; retry must acquire a different request.
+    loading.evaluate('''() => {
+        loadingCase.hosts[0].invoke('retry').then(value => loadingCase.retry = {value},
+            error => loadingCase.retry = {error: error.name});
+    }''')
+    wait_publications(2)
+    held_publications[1].fulfill(content_type='application/json', body=json.dumps(plan))
+    loading.wait_for_function('loadingCase.retry?.value !== undefined', timeout=20000)
+    assert loading.evaluate('loadingCase.retry.value') == oracle('greet', 'retry')
+    loading.evaluate('loadingCase.hosts[0].dispose()')
+    # Only now finish the intercepted, already cancelled request in the test harness.
+    held_publications[0].abort()
+    record('held publication Stop promptly rejects AbortError without a response; fresh fetch and real worker recover')
+
+    start_publication_calls('publication-shared', 2)
+    wait_publications(3)
+    loading.evaluate('loadingCase.hosts[0].stop()')
+    loading.wait_for_function('loadingCase.outcomes[0].error === "AbortError"', timeout=1000)
+    assert loading.evaluate('loadingCase.outcomes[1].pending') is True
+    held_publications[2].fulfill(content_type='application/json', body=json.dumps(plan))
+    loading.wait_for_function('loadingCase.outcomes[1].value !== undefined', timeout=20000)
+    assert loading.evaluate('loadingCase.outcomes[1].value') == oracle('greet', 'placement 1')
+    loading.evaluate('loadingCase.hosts.forEach(host => host.dispose())')
+    loading.close()
+    record('simultaneous placements share publication acquisition; stopping one preserves the other real worker call')
 
     def form_for(declaration, index=0):
         return page.locator('.lean-run').filter(has=page.locator('input')).filter(

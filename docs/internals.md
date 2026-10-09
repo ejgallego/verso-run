@@ -104,7 +104,10 @@ and alternative embedding APIs remain deferred.
 
 Execution resources load only on first Run. Separate activated forms have independent
 execution state. Stop terminates the dedicated worker, including pending creation or
-synchronous execution; another Run creates a fresh instance. Input changes terminate
+synchronous execution; another Run creates a fresh instance. Publication loading
+returns a cancellable invocation immediately. Concurrent placements share acquisition;
+cancelling its last waiter aborts the pending fetch. Failed acquisition is evicted,
+and a 15-second deadline gives an explicit retry path. Input changes terminate
 current work and clear the old result. Generation and request identities suppress stale
 results. Duplicate submissions are disabled while loading/running; page navigation
 disposes each owner. Resource and runtime errors are displayed as text, and failure never

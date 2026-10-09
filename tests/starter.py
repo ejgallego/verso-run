@@ -42,11 +42,16 @@ assert all(package["type"] == "git" for package in manifest["packages"])
 extension = next(package for package in manifest["packages"] if package["name"] == "verso_run")
 assert extension["url"] == "https://github.com/ejgallego/verso-run"
 expected = json.loads((ROOT / "examples/manual-starter/lake-manifest.json").read_text())
+assert {(p["name"], p["url"], p["rev"]) for p in manifest["packages"]} == {
+    (p["name"], p["url"], p["rev"]) for p in expected["packages"]}
 expected_revision = next(p["rev"] for p in expected["packages"] if p["name"] == "verso_run")
 assert extension["rev"] == expected_revision
 assert subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project/".lake/packages/verso_run", text=True).strip() == expected_revision
+for package in manifest["packages"]:
+    assert subprocess.check_output(["git", "rev-parse", "HEAD"],
+        cwd=project/".lake/packages"/package["name"].strip("«»"), text=True).strip() == package["rev"]
 vir = next(p for p in manifest["packages"] if p["name"] == "lean_vir")
-assert vir["rev"] == "bda79d5c4ab7d061c971fcd8917f536393ec03ee"
+assert vir["rev"] == "fb5af64788e419affa4a496b144f7f96bed48322"
 import hashlib
 runtime_pack = project / ".lake/packages/lean_vir/.vir-generated/VirResourceRuntime.virres"
 assert hashlib.sha256(runtime_pack.read_bytes()).hexdigest() == "3910c29e40ee68c3b110355fa1d30dae3029f2b34967269642521fc8409848d7"
@@ -57,7 +62,7 @@ command(["lake", "exe", "starter-manual", "--with-html-single", "--with-tex", "-
 site = project / "_out"
 plan = json.loads((site / "html-multi/lean-run/publication.json").read_text())
 bindings = plan["programs"]["Starter.Chapter"]
-assert set(bindings) == {"Starter.greet", "Starter.card.leanRunHtml"}
+assert set(bindings) == {"Starter.greet", "Starter.card"}
 assert all(binding["expectedExport"]["effect"] == "pure"
            for binding in bindings.values())
 assert json.loads((site / "html-single/lean-run/publication.json").read_text()) == plan
@@ -107,7 +112,7 @@ try:
 
                 page.goto(base + prefix + "/HTML-card/")
                 page.wait_for_selector(".lean-run[data-enhanced]")
-                card = page.locator('.lean-run[data-experiment*="Starter.card.leanRunHtml"]')
+                card = page.locator('.lean-run[data-experiment*="Starter.card"]')
                 run(card, '<b>& "Ada" 😀')
                 frame = card.frame_locator("iframe")
                 assert frame.locator("h2").text_content().strip() == 'Hello, <b>& "Ada" 😀!'
@@ -138,5 +143,7 @@ finally:
     server.server_close()
 
 (output / "results.json").write_text(json.dumps({"checks": checks, "publication": plan,
-    "project": str(project), "dependencyRevision": extension["rev"]}, indent=2) + "\n")
+    "project": str(project), "dependencyRevision": extension["rev"], "virRevision": vir["rev"],
+    "runtimePackSha256": hashlib.sha256(runtime_pack.read_bytes()).hexdigest(),
+    "gitManifest": manifest, "cold": True, "lakeArtifactCache": False}, indent=2) + "\n")
 print(f"{len(checks)} starter checks passed; evidence: {output}", flush=True)

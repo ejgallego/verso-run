@@ -3,6 +3,7 @@ import argparse
 import atexit
 import functools
 import http.server
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -46,8 +47,17 @@ for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
     with urlopen(base + path + 'lean-run/publication.json') as response:
         plans[genre] = json.load(response)
     assert plans[genre] == json.loads((root / '_out/html-multi' / path / 'lean-run/publication.json').read_text())
+shared_hashes = {}
+for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
+    shared_hashes[genre] = {}
+    for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js']:
+        with urlopen(base + path + 'lean-run/' + name) as response:
+            contents = response.read()
+        assert contents == (root / '_out/html-multi' / path / 'lean-run' / name).read_bytes(), (genre, name)
+        shared_hashes[genre][name] = hashlib.sha256(contents).hexdigest()
 plan = plans['Manual']
-checks = ['Manual, Blog, and Slides publications match validated local programs and runtime']
+checks = ['Manual, Blog, and Slides publications match validated local programs and runtime',
+          'all three genres serve the exact accepted host, worker, codec and renderer bytes']
 
 def oracle(role, value, genre):
     executable = 'lean-run-blog-oracle' if genre in ['Blog', 'Slides'] else 'lean-run-oracle'
@@ -197,7 +207,7 @@ with sync_playwright() as p:
     checks.append('no uncaught browser errors')
     browser.close()
 
-result = {'build': build_identity, 'url': base, 'checks': checks, 'publication': plan, 'blogPublication': plans['Blog'],
+result = {'sharedHostHashes': shared_hashes, 'build': build_identity, 'url': base, 'checks': checks, 'publication': plan, 'blogPublication': plans['Blog'],
           'slidesPublication': plans['Slides'], 'runtimeResponses': runtime_responses}
 (root / args.output).write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n')
 print(json.dumps({'url': base, 'checks': checks}, indent=2, ensure_ascii=False))

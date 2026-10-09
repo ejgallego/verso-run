@@ -11,7 +11,6 @@ Change a name and choose Run. Both examples execute the displayed Lean function.
 # Greeting
 
 ```leanRun (entry := Starter.greet) (input := "Ada")
-@[vir_export]
 public def Starter.greet (name : String) : String :=
   "Hello, " ++ name ++ "!"
 ```
