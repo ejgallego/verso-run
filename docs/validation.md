@@ -33,13 +33,13 @@ rather than treating successful loading as proof that an example works.
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
-reuse and runs its 11 checks. The starter acquires public extension `cb016c4` and
+reuse and runs its 11 checks. The starter acquires public extension `a830999` and
 the selected runtime through its complete Git manifest, without local seeds.
 
 The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `daa96fee`,
 with VIR's locked runtime `6cddc4b8…`. Resource dependencies and includes now name
-program modules explicitly. The independently pinned starter continues to test
-its published Lean 4.34.0 dependency and older resource API.
+program modules explicitly. The independently pinned starter tests the same Lean 4.35.0-rc4 and
+module-owned-assets API from the published extension revision.
 Publication loading cancellation is qualified before any response, with fresh-fetch
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.
@@ -50,6 +50,13 @@ source/dependency/runtime identities; a hosted run requires the deployed revisio
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
+
+The layout and VIR PR #229 migration passed `lake build`, the 89-check mutation
+suite (including the Blog, Slides, typed-form, and inline campaigns), the
+11-check Git-only cold starter, and the 31-check combined-site gate on
+2026-10-09. Demo packaging also passed. These are local checks; hosted validation
+belongs to the deployed revision.
+
 
 Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.
 The suite writes command logs and `results.json` to that ignored directory.
