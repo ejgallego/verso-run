@@ -62,6 +62,7 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | --- | --- |
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
 | `String → Verso.Output.Html` | An isolated HTML preview |
+| `String → VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
 
 A String containing markup is still plain text. There is no `output` block
 argument. Return `Html` when the result is intended to be rendered as HTML:
@@ -146,9 +147,11 @@ When updating an older example, remove redundant `@[vir_export]` markers and
 `Html` directly. For anchors, move root resource registration from the imported
 producer to the document module. The independently pinned
 [Manual starter](../examples/manual-starter/README.md) demonstrates entry-selected
-registration without annotations. New generators should pass the complete
-`include_vir_assets` result to the ResourceSet publication APIs. Migrate callers
-when updating the prototype. See [resource integration](internals.md#resource-ownership-and-site-integration).
+text and Html functions without explicit export annotations. Its cold Git test
+qualifies that published dependency revision separately from this checkout.
+New generators should pass the complete `include_vir_assets` result to the
+ResourceSet publication APIs. Migrate callers when updating the prototype. See
+[resource integration](internals.md#resource-ownership-and-site-integration).
 
 ## Present a sequence of states
 
@@ -169,8 +172,11 @@ Select it with `leanRun (entry := Demo.greetingSteps)`. No JSON, export marker o
 output argument is needed. `SequenceStep.error` can report a failure at a state;
 `Sequence.initialError` handles an invalid initial input. Models and views are
 ordinary Lean code and can live in imported modules with checked source anchors.
-The [stack example](../demo/chapters/LeanRunSequence/Examples.lean) reuses the calculator's
-Lean parser and operational `step` function and renders both sides of each step.
+The [stack example](../demo/chapters/LeanRunSequence/Examples.lean) renders both sides
+of each step from the calculator's [shared evaluator](../demo/chapters/LeanRunGate/Stack.lean).
+Both views use one parser, execution loop, and set of limits. The stepper can inspect
+a completed program with several stack values; the calculator additionally asks for
+exactly one final result.
 
 The worker computes states and renders their Html. A separate Lean/VIR DOM
 presenter owns selection and event callbacks. Selecting a frame uses the computed

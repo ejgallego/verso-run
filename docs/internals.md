@@ -144,8 +144,9 @@ and non-digits before invoking. Limits are 4,096 UTF-16 code units for a String 
 digits for a Nat input, and 65,536 UTF-16 code units for displayed output. These are
 input/output bounds, not a Wasm heap budget. Stop provides actual interruption; execution
 of trusted compiled code can allocate memory before an output limit is checked. Arbitrary
-Lean evaluation, custom foreign-function providers, browser IO/DOM/React exports, tactics,
-and general dependent interfaces are outside this milestone.
+Lean evaluation, custom foreign-function providers, author-selected browser IO/DOM/React
+exports, tactics, and general dependent interfaces are outside this milestone. The
+internal sequence presenter separately qualifies its exercised DOM bindings.
 
 Forms group the highlighted source above a quiet input/result area, with aligned controls,
 visible keyboard focus, and wrapping on narrow screens. They have labels, keyboard
@@ -201,6 +202,25 @@ and failure/retry. Computation stays in the dedicated worker; the presenter runs
 in the browser context and receives rendered frame data, not worker DOM handles.
 State frames retain the restrictive Html sandbox. Genre adapters reuse their
 existing placement and navigation lifecycle.
+
+### Rendering and transport
+
+Authors return typed `Html` or `SequenceView`. Html generation, including SVG,
+runs in compiled Lean in the worker. The sequence controls and frame selection
+also run in compiled Lean, in the separate browser presenter. JavaScript owns
+asynchronous loading, worker messages and cancellation; it does not evaluate the
+model or interpret the sequence's meaning.
+
+The current String/JSON adapter is an internal transport choice. It is separate
+from the author's result type and from the renderer. A structured VIR payload
+could replace it after qualification of compiler contracts, worker transfer,
+exact values and output budgets. DOM references and callbacks remain owned by
+the browser presenter and must not cross the worker boundary.
+
+Lake already supports this split through the presenter library's module resource
+facet and its separate carrier. Extending that compiled presentation library
+does not require a new Lake rendering API. Its generated resources must remain
+outside the modules they embed, as with document programs.
 
 Stop and the loading deadline settle the module-import wait. They do not cancel
 ECMAScript import or its possible later evaluation. Late rejection stays observed,

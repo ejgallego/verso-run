@@ -58,12 +58,14 @@ def mount (root : Js Element) (data : String) : DomM (Js.Function0 Unit) := do
   let position ← child root ".lean-run-sequence-position"
   let error ← child root ".lean-run-sequence-error"
   let preview ← child root ".lean-run-sequence-frame"
-  let selected ← RuntimeRef.new 0
+  let buttons ← payload.frames.mapIdxM fun i _ => child root s!"[data-step='{i}']"
+  let selected ← RuntimeRef.new (none : Option Nat)
   let alive ← RuntimeRef.new true
   let display : Nat → DomM Unit := fun (index : Nat) => do
     if !(← alive.get) then return
     let index := index.min (payload.frames.size - 1)
-    selected.set index
+    if (← selected.get) == some index then return
+    selected.set (some index)
     let frame := payload.frames[index]!
     text position s!"Step {index + 1} of {payload.frames.size}: {frame.label}"
     text error (frame.error.getD "")
@@ -72,20 +74,18 @@ def mount (root : Js Element) (data : String) : DomM (Js.Function0 Unit) := do
     attr next "aria-disabled" (if index + 1 == payload.frames.size then "true" else "false")
     if let some input ← HTMLInputElement.fromElement range then
       HTMLInputElement.setValue input (← JsValue.ofString (toString index))
-    for i in [:payload.frames.size] do
-      let button ← child root s!"[data-step='{i}']"
+    for (button, i) in buttons.zipIdx do
       attr button "aria-pressed" (if i == index then "true" else "false")
   let click ← JsValue.ofString "click"
   let input ← JsValue.ofString "input"
   let mut listeners : Array (Js Element × Js String × Js EventListener) := #[]
   for (button, move) in [(previous, false), (next, true)] do
     let listener ← EventListener.ofLean fun _ => do
-      let index ← selected.get
+      let index := (← selected.get).getD 0
       display (if move then index + 1 else index - 1)
     Element.addEventListener button click listener
     listeners := listeners.push (button, click, listener)
-  for i in [:payload.frames.size] do
-    let button ← child root s!"[data-step='{i}']"
+  for (button, i) in buttons.zipIdx do
     let listener ← EventListener.ofLean fun _ => display i
     Element.addEventListener button click listener
     listeners := listeners.push (button, click, listener)

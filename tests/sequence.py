@@ -22,7 +22,7 @@ def oracle(value):
         [str(ROOT/'.lake/build/bin/lean-run-oracle'), 'sequence', value], text=True)))
 
 command(['lake','env','lean','tests/SequenceAdapter.lean'],'generic-author')
-record('generic String-state author API selects and reuses the automatic adapter; empty/versioned payloads are rejected')
+record('generic author adapter, known shared stack traces and empty/version/frame-count validation')
 site = output/'site'
 command(['lake','exe','lean-run-demo','--output',str(site/'manual'),'--with-tex'], 'manual')
 command(['lake','exe','lean-run-blog-demo','--output',str(site/'blog')], 'blog')
@@ -112,6 +112,44 @@ with serve_directory(served) as base:
         assert 'Step 2 of 4' in second.locator('.lean-run-sequence-position').text_content()
         assert first.locator('.lean-run-sequence').is_hidden()
         record('two placements retain independent Lean selection and runtime state; clearing one preserves the other')
+
+        visit('root','manual','Stack-stepper/')
+        expected=run('1 2');select(2,expected)
+        assert form().locator('.lean-run-status').text_content() == 'Trace ready'
+        assert form().locator('.lean-run-sequence-error').text_content() == ''
+        # An unchanged selection must preserve the frame document. aria-disabled
+        # endpoints remain focusable, but their handlers must have no effect.
+        form().evaluate('''e => {
+            globalThis.frameWrites=0;
+            globalThis.frameObserver=new MutationObserver(records =>
+                frameWrites += records.filter(r => r.attributeName === 'srcdoc').length);
+            frameObserver.observe(e.querySelector('iframe'), {attributes:true});
+            e.querySelector('.lean-run-sequence-next').click();
+            e.querySelector('[data-step="2"]').click();
+            e.querySelector('input[type=range]').dispatchEvent(new Event('input',{bubbles:true}));
+        }''')
+        page.wait_for_timeout(100)
+        assert page.evaluate('frameWrites') == 0
+        assert 'Step 3 of 3' in form().locator('.lean-run-sequence-position').text_content()
+        page.evaluate('frameObserver.disconnect()')
+        # Programmatic updates do not dispatch input. Submission still clears a
+        # stale presentation when validation rejects the changed value.
+        form().evaluate('''e => {
+            e.querySelector('input[type=text]').value='x'.repeat(4097);
+            e.querySelector('form').requestSubmit();
+        }''')
+        assert form().get_attribute('data-state') == 'invalid input'
+        assert form().locator('.lean-run-sequence').is_hidden()
+        assert form().locator('.lean-run-sequence-controls').count() == 0
+        assert form().locator('[type=submit]').is_enabled()
+        expected=run('');select(0,expected)
+        form().evaluate('''e => {
+            e.querySelector('.lean-run-sequence-prev').click();
+            e.querySelector('.lean-run-sequence-next').click();
+        }''')
+        assert 'Step 1 of 1' in form().locator('.lean-run-sequence-position').text_content()
+        assert 'Enter a program' in form().locator('.lean-run-sequence-error').text_content()
+        record('unchanged selections preserve frames; invalid submissions clear views; single-frame navigation is bounded')
 
         visit('root','manual','Stack-stepper/')
         expected=run('2 +');select(2,expected)
