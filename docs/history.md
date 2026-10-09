@@ -8,8 +8,8 @@ The Verso dependency isolates the one-line highlighting hook from that prototype
 
 Use `VersoLeanRun` and `VersoLeanRun.Publish` as the library imports. The Lean
 package is named `verso_run`; the existing module and executable names are retained.
-Library support lives under `support/`, browser support under `web/`, and demo
-code under `gates/` and `resources/`. Illuminate code belongs to the examples.
+Library support lives under `src/`, browser support under `web/`, and demo
+code under `demo/chapters/` and `resources/`. Illuminate code belongs to the examples.
 
 See [LICENSE](../LICENSE) for the Apache-2.0 license and [AGENTS.md](../AGENTS.md) for
 contributor notes. GitHub CI builds from the exact dependency pins and runs all

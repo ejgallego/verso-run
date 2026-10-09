@@ -47,9 +47,8 @@ text inference. See [anchor authoring](authoring.md#run-an-anchored-example-from
 
 ## Publish a site
 
-Put each Page/Post document's bare Module key in its carrier library's `needs`,
-retain the fixed `:virResourcePack` prerequisite, and embed with no-argument
-`include_vir_program`. See [resource wiring](internals.md#resource-ownership-and-site-integration). Import
+For each Page/Post document, declare `+Module:virResourcePack` in `needs`, and embed with
+`include_vir_assets (modules := #[Module])`. See [resource wiring](internals.md#resource-ownership-and-site-integration). Import
 `VersoLeanRun.Blog.Publish` in the native site generator and call:
 
 ```lean
@@ -80,7 +79,7 @@ breaks; Ctrl+Enter or ⌘+Enter runs the example.
 Return `String → Verso.Output.Html` for an HTML preview. `entry` creates a
 document-owned scalar serializer automatically; a String result always displays
 plain text. There is no `output` argument and no producer VIR annotation.
-The [demo producer](../gates/LeanRunBlog/Examples.lean) shows this arrangement.
+The [demo producer](../demo/chapters/LeanRunBlog/Examples.lean) shows this arrangement.
 
 Input, `+collapsed`, exact Nat transport, isolated HTML previews, independent
 worker ownership, actual Stop, stale-result guards, and explicit retry use the

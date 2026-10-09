@@ -5,11 +5,11 @@ Keep exact dependencies and the current execution boundary.
 
 ## Selected public runtime integration
 
-The selected pair is landed public VIR commit `fb5af647` and runtime `e415…`
-(pack SHA256 `3910c29e…`). Source acquisition and exact public bytes are verified.
-The consumer migration uses bare Module needs and fixed resource prerequisites, full Lean declaration
-names, independent `{args, result, effect}` expectations, and exact BigInt Nat
-results. Publication and runtime admission retain their separate phases.
+The selected pair is VIR PR #229 head `957854b9` and locked runtime `6cddc4b8…`
+on Lean 4.35.0-rc4. Module resource facets and explicit `include_vir_assets`
+replace the former carrier-library selection. Full Lean declaration names,
+independent `{args, result, effect}` expectations, exact BigInt Nat results, and
+the existing public publication API remain the consumer contracts.
 
 The historical bda/e415 consumer acceptance passed: 79 native/browser/mutation checks, 11 cold Git-only
 starter checks without Lake artifact-cache reuse, and actual Pages/native
@@ -18,8 +18,7 @@ JavaScript was served as `application/javascript` on Pages. Evidence is linked
 from [validation](docs/validation.md).
 
 The VIR Module owner retains final-head producer CI and any upstream merge
-decision; neither native precompilation nor alternative embedding APIs are
-selected by this migration. Future producer updates still require matched public
+decision; native precompilation and compiler scheduling remain deferred. Future producer updates still require matched public
 source/runtime qualification.
 
 ## Unsupported-program diagnostics
@@ -53,7 +52,7 @@ The demo includes ordinary and runnable displays of the same source region.
 
 Blog covers Page and Post with native highlighted source, typed site collection,
 shared resource publication, and explicit renderer URLs for nested posts.
-Slides uses the compatible public `35b5d14b` snapshot, native fragmentized
+Slides uses the compatible module-assets `daa96fee` snapshot, native fragmentized
 source, a shared formatter/Run runtime inventory, and the stock asset planner.
 Slide/fragment hiding cancels workers and pending loads; input keys stay with
 the form. Native source remains readable without JavaScript.
@@ -79,7 +78,7 @@ same e415 runtime. The earlier local adoption remains historical evidence: Expli
 with the same e415 runtime passed an isolated local helper adoption gate: build
 and all 85 acceptance checks, including 29 typed checks. Its three genre
 publication plans exactly match the bda/e415 checkpoint. See
-[the successor evidence](evidence/codec-successor.json). The earlier isolated gate granted no publication. The later selected public
+[the qualification history](docs/validation.md#current-results-and-historical-evidence). The earlier isolated gate granted no publication. The later selected public
 adoption covers ordinary consumer publication and fresh hosted/cold starter
 acceptance; alias/config/v4, merge and cleanup remain outside its scope.
 

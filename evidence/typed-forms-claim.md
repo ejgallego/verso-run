@@ -92,7 +92,7 @@ All three genre publication plans exactly match the bda/e415 typed checkpoint;
 all published resource members were checked against their SHA256 identities.
 The isolated gate reused cached dependency builds; no clean consumer build or
 hosted acceptance is claimed. Exact identities and checks are retained in
-[`codec-successor.json`](codec-successor.json).
+the historical `codec-successor.json` (retained in Git at `23f449e`).
 
 The bounded read-only review found no implementation blocker. Its stale Boolean
 rejection example in `docs/troubleshooting.md` is corrected in the preserved main

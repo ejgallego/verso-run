@@ -67,9 +67,9 @@ common console. The generic block-tree walk can be shared, while walking an
 entire Blog site or preparing slide output belongs to its adapter. Malformed
 metadata must fail publication, rather than being treated as an unrelated block.
 
-Before extraction, the [Run module](../support/VersoLeanRun.lean) mixed the portable
+Before extraction, the [Run module](../src/VersoLeanRun.lean) mixed the portable
 `Experiment` and console with Manual's `block_extension`, inline elaborator, and
-scope handling. The [publisher](../support/VersoLeanRun/Publish.lean) mixed
+scope handling. The [publisher](../src/VersoLeanRun/Publish.lean) mixed
 contract validation/resource planning with Manual AST decoding and `ExtraStep`
 output selection. These boundaries now correspond to `Model`, `Callable`,
 `Render`, `Collect`, and `Publication`, with `Anchored` supplying shared source
@@ -152,8 +152,8 @@ Scroll navigation also cancels work. Restoring Reveal's saved HTML when leaving
 scroll view disposes detached workers and reattaches the restored forms.
 
 The historical main checkout `268257a4` on Lean 4.35.0-rc4 was unsuitable for our
-frozen toolchain. Selected `35b5d14b` uses Lean 4.34.0 and the compatible resource APIs.
-The root resolves shared VIR to exact `fb5af647` / runtime `e415…`, overriding
+frozen toolchain. Selected `daa96fee` uses Lean 4.34.0 and the compatible resource APIs.
+The root resolves shared VIR to exact `957854b9` / runtime `6cddc4b8…`, overriding
 the dependency's historical producer pin. Its required Verso `cad4b633` is the parent of our
 existing `3f6366aa` highlighting-hook revision. Lean, Verso and Illuminate pins remain unchanged; only the selected VIR and
 required compatible Slides revisions change. This is an experimental review snapshot,
@@ -191,9 +191,9 @@ The shared extraction, anchored Manual implementation, and Blog Page/Post
 and Slides checks are described in the [validation record](validation.md).
 The separate public VIR source/runtime adoption gate remains in force.
 
-[external]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso/Verso/Code/External.lean
-[manual]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso-manual/VersoManual/ExternalLean.lean
-[blog]: https://github.com/ejgallego/verso/blob/3f6366aa8045b342b0b68c0373a8ebfce7d5611f/src/verso-blog/VersoBlog.lean
+[external]: https://github.com/ejgallego/verso/blob/8de896e6241a48f25794e5b6bbacdee89ad375d7/src/verso/Verso/Code/External.lean
+[manual]: https://github.com/ejgallego/verso/blob/8de896e6241a48f25794e5b6bbacdee89ad375d7/src/verso-manual/VersoManual/ExternalLean.lean
+[blog]: https://github.com/ejgallego/verso/blob/8de896e6241a48f25794e5b6bbacdee89ad375d7/src/verso-blog/VersoBlog.lean
 [subverso]: https://github.com/leanprover/subverso/blob/9b90b7f938d6169246325df002351014f49945ef/src/SubVerso/Highlighting/Anchors/Basic.lean
 [slides-basic]: https://github.com/ejgallego/verso-slides/blob/268257a4fbdac12c77be726213b51c3ce3a1d41e/VersoSlides/Basic.lean
-[slides-assets]: https://github.com/ejgallego/verso-slides/blob/35b5d14bc97d71981d01957f8a6fc6ea7470a6e4/VersoSlides/Render.lean
+[slides-assets]: https://github.com/ejgallego/verso-slides/blob/daa96fee635f289e2be95982418483bfb4351402/VersoSlides/Render.lean

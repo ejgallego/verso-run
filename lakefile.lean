@@ -1,53 +1,55 @@
 import Lake
 open Lake DSL
-require verso from git "https://github.com/ejgallego/verso" @ "3f6366aa8045b342b0b68c0373a8ebfce7d5611f"
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "fb5af64788e419affa4a496b144f7f96bed48322"
+require verso from git "https://github.com/ejgallego/verso" @ "aff0fc92d7b9e56a3b309d409b7ef69629af3770"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "957854b9df1202d4fadbd00ac5fa34e5adf278cc"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "a1a61c9678da010e958ed24cdfa6f635b85f172a"
-require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "35b5d14bc97d71981d01957f8a6fc6ea7470a6e4"
+require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "daa96fee635f289e2be95982418483bfb4351402"
 package verso_run
 lean_lib LeanRunGateProgram where
-  srcDir := "gates"
+  srcDir := "demo/chapters"
   roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper]
 lean_lib LeanRunGateResources where
-  srcDir := "resources"
+  srcDir := "demo/resources"
   roots := #[`LeanRunGate.Resources]
-  needs := #[`+LeanRunGate.Chapter, `@verso_run/LeanRunGateResources:virResourcePack]
+  needs := #[`+LeanRunGate.Chapter:virResourcePack]
 
 lean_lib LeanRunBlogExamples where
-  srcDir := "gates"
+  srcDir := "demo/chapters"
   roots := #[`LeanRunBlog.Examples]
 
 lean_lib LeanRunBlogDocuments where
-  srcDir := "gates"
+  srcDir := "demo/chapters"
   roots := #[`LeanRunBlog.Home, `LeanRunBlog.Page, `LeanRunBlog.Index, `LeanRunBlog.Post]
 
 lean_lib LeanRunBlogResources where
-  srcDir := "resources"
+  srcDir := "demo/resources"
   roots := #[`LeanRunBlog.Resources]
-  needs := #[`+LeanRunBlog.Page, `@verso_run/LeanRunBlogResources:virResourcePack]
+  needs := #[`+LeanRunBlog.Page:virResourcePack]
 
 lean_lib LeanRunSlidesDocuments where
-  srcDir := "gates"
+  srcDir := "demo/chapters"
   roots := #[`LeanRunSlides.Deck]
 
 lean_lib LeanRunTypedExamples where
-  srcDir := "gates"
+  srcDir := "demo/chapters"
   roots := #[`LeanRunTyped.Examples]
 
 lean_lib LeanRunBlogPostResources where
-  srcDir := "resources"
+  srcDir := "demo/resources"
   roots := #[`LeanRunBlog.PostResources]
-  needs := #[`+LeanRunBlog.Post, `@verso_run/LeanRunBlogPostResources:virResourcePack]
+  needs := #[`+LeanRunBlog.Post:virResourcePack]
 
 lean_lib LeanRunSlidesResources where
-  srcDir := "resources"
+  srcDir := "demo/resources"
   roots := #[`LeanRunSlides.Resources]
-  needs := #[`+LeanRunSlides.Deck, `@verso_run/LeanRunSlidesResources:virResourcePack]
+  needs := #[`+LeanRunSlides.Deck:virResourcePack]
 
 lean_exe «lean-run-gate» where
+  srcDir := "tests/native"
   root := `GateMain
 
 lean_exe «lean-run-publication-check» where
+  srcDir := "tests/native"
   root := `PublicationMain
 
 input_dir leanRunWeb where
@@ -55,48 +57,54 @@ input_dir leanRunWeb where
   text := true
 
 lean_lib VersoLeanRun where
-  srcDir := "support"
+  srcDir := "src"
   roots := #[`VersoLeanRun]
   needs := #[leanRunWeb]
 
 @[default_target]
 lean_exe «lean-run-demo» where
+  srcDir := "demo/generators"
   root := `DemoMain
   needs := #[leanRunWeb]
 @[default_target]
 lean_exe «lean-run-oracle» where
+  srcDir := "tests/native"
   root := `OracleMain
 
 @[default_target]
 lean_exe «lean-run-blog-demo» where
+  srcDir := "demo/generators"
   root := `BlogMain
   needs := #[leanRunWeb]
 
 @[default_target]
 lean_exe «lean-run-blog-oracle» where
+  srcDir := "tests/native"
   root := `BlogOracleMain
 
 @[default_target]
 lean_exe «lean-run-slides-demo» where
+  srcDir := "demo/generators"
   root := `SlidesMain
   needs := #[leanRunWeb]
 
 @[default_target]
 lean_exe «lean-run-typed-oracle» where
+  srcDir := "tests/native"
   root := `TypedOracleMain
 
 lean_lib VersoLeanRunPublish where
-  srcDir := "support"
+  srcDir := "src"
   roots := #[`VersoLeanRun.Publish]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunBlog where
-  srcDir := "support"
+  srcDir := "src"
   roots := #[`VersoLeanRun.Blog]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunSlides where
-  srcDir := "support"
+  srcDir := "src"
   roots := #[`VersoLeanRun.Slides]
   needs := #[leanRunWeb]
 

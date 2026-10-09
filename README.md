@@ -15,12 +15,12 @@ Readers need no Lean installation. **Stop** interrupts a running example.
 [Blog authoring](docs/blog.md) ·
 [Slides authoring](docs/slides.md)
 
-![Lean computes a chain of four nodes and renders it with Illuminate](evidence/illuminate-desktop-4.png)
+![Lean computes a chain of four nodes and renders it with Illuminate](docs/images/illuminate-desktop-4.png)
 
 ## Try it locally
 
 Install [elan](https://github.com/leanprover/elan) and Python 3. The checkout selects
-Lean 4.34.0 and fetches its compatible dependencies and runtime automatically.
+Lean 4.35.0-rc4 and fetches its compatible dependencies and runtime automatically.
 
 ```sh
 git clone https://github.com/ejgallego/verso-run.git
@@ -98,6 +98,11 @@ belongs to the future editor work. Ordinary highlighted Lean blocks keep working
 and source remains readable without JavaScript. Manual also retains its TeX output.
 
 ## Find your way around
+
+The library lives in `src/`, browser assets in `web/`, and the complete three-genre
+demo in `demo/`. The independent author project is in `examples/manual-starter/`;
+acceptance checks and native reference executables live in `tests/`.
+
 
 - [Authoring](docs/authoring.md): runnable blocks and typed HTML.
 - [Blog authoring](docs/blog.md): runnable pages, posts, and site publication.
