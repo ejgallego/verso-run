@@ -58,6 +58,16 @@ a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
 
+The sequence integration on the String-presentation foundation passed
+`lake build` and all 90 top-level mutation/browser checks, including 22 Blog,
+20 Slides, and 27 sequence checks. All nine form expectations match independent
+VIR classification. Native resource checks cover presenter registration before
+the document, duplicate registration, and rejection of a conflicting runtime.
+Actual workers compute the frames; the independent DOM contract is checked
+before mounting. Browser regressions cover exact native frames in all genres,
+independent selection, listener cleanup, Stop, late imports, retry, static source,
+and narrow viewports.
+
 The String-presentation refinement passed `lake build` and all 89 top-level
 mutation/browser checks. Its normalized expectations match independent VIR
 classification for every admitted form. The multiline HTML regression exercises
