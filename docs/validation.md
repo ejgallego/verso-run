@@ -11,7 +11,6 @@ rather than treating successful loading as proof that an example works.
 - Idempotent, document-scoped publication bindings with deterministic output;
   conflicting signatures, manifests, and callables reject in either order with
   both source locations, before publication writes.
-
 - All generated browser descriptions contain exactly six reader/invocation fields
   and resolve published bindings in both Manual HTML layouts, Blog Page/Post, and
   Slides. Native genre collectors retain producer ownership and source locations.
@@ -40,10 +39,13 @@ rather than treating successful loading as proof that an example works.
 - Slides typed collection, one formatter/Run runtime inventory, asset collisions
   before output, native fragments, visibility cancellation, keyboard submission,
   pending-load guards, and readable static source.
-
 - Typed sequences, automatic scalar adapters, independently classified DOM
   presenters, every native frame, exact stacks and errors, previous/next and
   scrubbing, independent placements, stale listeners, and presenter-load Stop.
+- Game of Life rules and parsing, exact native generations, SVG views, edited seeds,
+  and invalid-input recovery.
+- Raw Html/sequence scripts, event handlers, external embedded resources, top
+  navigation and form submission under the shared sandbox document policy.
 
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
@@ -59,117 +61,39 @@ Publication loading cancellation is qualified before any response, with fresh-fe
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.
 
-The combined-site gate covers typed, inline and sequence examples and compares all five shared
+The combined-site gate covers typed, inline, sequence and Life examples and compares all five shared
 JavaScript files in every genre. `verso-run-build.json` records the generator's exact
 source/dependency/runtime identities; a hosted run requires the deployed revision and
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
-## Current results and historical evidence
+## Current qualification
 
-The typed-rendering follow-up passed `lake build` and all 92 top-level
-mutation/browser checks, including 22 Blog, 20 Slides, 28 sequence and 14
-rendered-view checks. All 15 admitted forms round-trip through native metadata,
-match independent VIR classification and agree with the browser's input/result
-codecs. The new rendering gate checks Bool → Html and UInt64 → SequenceView in
-Manual, Blog Page/Post and Slides, including exact values above 2^53, UInt64
-wraparound and invalid-input cleanup. Nat → Html uses the existing qualified
-Illuminate drawing-command/SVG path.
+The consolidated campaign exercises the sequence and typed-rendering libraries,
+the stack stepper, and Game of Life together with binding conflict checks and
+browser metadata projection. Command logs and results are written to the selected output directory; CI
+artifacts identify the exact source revision that passed the full gates.
 
-Sequence results now cross the worker boundary as typed VIR data. Node checks
-cover structured cloning, malformed payload rejection and the combined UTF-16
-output budget. Html and sequence frames share the compiled Lean preview policy.
-The real held-module regression still covers deadline, Stop, retry with the same
-pending URL and observed late rejection. Slides initialization checks no longer
-assume the first form is visible after Reveal restores the selected slide.
+All 15 input/presentation forms have independently classified expectations.
+Sequence frames use typed VIR transport with exact integer values and a combined
+65,536 UTF-16 code unit output budget. The real held-module tests cover deadline,
+Stop, retry of the same pending import and observed late rejection. Raw-markup
+checks use the actual compiled Html and sequence presenters, rather than relying
+only on interpolated-text escaping.
 
-The sequence integration on the String-presentation foundation passed
-`lake build` and all 90 top-level mutation/browser checks, including 22 Blog,
-20 Slides, and 27 sequence checks. All nine form expectations match independent
-VIR classification. Native resource checks cover presenter registration before
-the document, duplicate registration, and rejection of a conflicting runtime.
-Actual workers compute the frames; the independent DOM contract is checked
-before mounting. Browser regressions cover exact native frames in all genres,
-independent selection, listener cleanup, Stop, late imports, retry, static source,
-and narrow viewports.
-
-Publication binding validation passed `lake build` and all 91 top-level
-mutation/browser checks, including 22 Blog and 20 Slides checks. Native cases
-cover identical registrations, differing placement options, independent document
-and entry namespaces, stable publication bytes under reordering, empty documents,
-and signature/manifest/callable conflicts in both orders with both source locations.
-The native-to-browser wire check covers all seven form tags, and HTML expectation
-classification uses the actual generated serializer.
-
-The browser-description projection passed `lake build` and all 90 top-level
-mutation/browser checks, including 22 Blog, 20 Slides, and 32 typed-form checks.
-Generated HTML checks cover the six-field description and published binding lookup
-in both Manual layouts, Blog Page/Post, and Slides. Native collectors retain
-producer module and source coordinates, including after serialization. Slides
-projects its full wrap metadata only after native publication planning, before
-stock rendering, preserving native source and fragments. A comparison of 12
-Manual placements reduced description JSON from 2,997 to 2,123 bytes (29.2%), with
-all retained values identical.
-
-The String-presentation refinement passed `lake build` and all 89 top-level
-mutation/browser checks. Its normalized expectations match independent VIR
-classification for every admitted form. The multiline HTML regression exercises
-presets, edited Unicode, escaped markup, keyboard submission, and stale-preview
-cleanup. The starter pins public core `f2a1491` and passed its Git-only no-cache
-build and all 11 browser checks. String input mode and presentation are separate
-from the scalar ABI, preparing the model for the sequence feature in PR #4.
-
-The typed experiment model passed a clean `lake build` and all 88 top-level
-mutation/browser checks, including 22 Blog and 20 Slides checks. Native checks
-round-trip all seven form tags and reject unsupported object encodings and
-obsolete metadata without a form. Browser checks verify scalar contracts, typed
-HTML, multiline controls, cancellation, and the absence of redundant metadata
-fields. The starter pins public core `6442617` and passed its Git-only no-cache
-build and all 11 browser checks.
-
-The ResourceSet simplification passed `lake build` and all 87 top-level mutation
-and browser checks, including 22 Blog and 20 Slides checks. Native tests compare
-inventories without relying on file order, check composition order with distinct
-sets, and reject malformed appended programs at publication. The Slides owner
-hook passed all 22 configuration cases, including collisions with built-in and
-custom theme assets. Shared harness checks confirm logged failures and listener
-cleanup on exceptional exits. The obsolete standalone worker gate and legacy
-API equivalence checks have been removed; current workers are exercised through
-the actual generated sites. The starter pins public core `fa66aee`, passed its
-Git-only no-cache build, and passed all 11 browser checks.
-
-The ResourceSet API follow-up passed the build and 88-check mutation suite,
-including 23 Blog and 21 Slides checks. Native inventory checks cover explicit
-runtime preservation, exact runtime identity conflicts, corrupt repeated runtimes,
-and rejection before writes. The initial ResourceSet revision also compared
-legacy and new generator output; those adapters are now removed. The updated ResourceSet
-starter also passed its Git-only no-cache build and all 11 worker checks.
-
-
-The pre-merge layout follow-up passed `lake build` and the 86-check mutation
-suite on 2026-10-09, including 22 Blog checks for draft policy and real workers.
-Three duplicate removed-`output` parser cases were consolidated; entry registration,
-HTML adaptation, collision diagnostics, and genre lifecycle coverage remain.
-The initial migration also passed the 11-check Git-only cold starter, the
-31-check combined-site gate, and demo packaging. The initial starter used published extension `a830999`; the ResourceSet
-follow-up selects and cold-qualifies its new extension pin explicitly. Hosted validation belongs to the deployed revision.
-
-
-The sequence campaign adds `tests/sequence.py`, including desktop/mobile captures,
-under its selected ignored output directory. PR #4's baseline `4169841` passed
-[fresh-checkout CI](https://github.com/ejgallego/verso-run/actions/runs/37952706175)
-with the bounded import-wait repair. Its regression holds the presenter module
-through deadline/Stop, then observes late evaluation/rejection without stale
-allocation. The review follow-up adds known shared-evaluator traces, frame-count
-boundaries, unchanged-selection checks and invalid-submission cleanup.
-The original sequence qualification
-on the earlier toolchain remains at Git revision `24a31f7`; it is historical
-evidence, not qualification of this stack on the cleanup toolchain.
+Life's known-pattern tests check still lifes, oscillation, extinction, glider
+translation and dead boundaries. Browser tests compare every generation with
+native Lean across all genres at root and nested paths. The dense-board case
+checks the output budget; invalid seeds remain Lean errors with explicit recovery.
 
 Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.
 The suite writes command logs and `results.json` to that ignored directory.
 CI uploads `_out/` as an artifact; consult the
 [CI runs](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml) for
 fresh-checkout validation and deployment results.
+
+Earlier per-PR counts and qualification checkpoints are linked from
+[project history](history.md#lean-authored-views-and-pre-merge-consolidation). They
+describe their own immutable revisions, not this integration automatically.
 
 Generated JSON reports, logs, and prototype screenshots have been removed from
 the source tree. Earlier records remain in Git history at `23f449e`;

@@ -682,5 +682,8 @@ record('typed rendered inputs, exact structured payloads, shared DOM policy and 
 command([sys.executable, 'tests/life.py', '--site', str(OUTPUT/'sequence/site'),
          '--output', str(OUTPUT/'life')], 'life')
 record('Game of Life rules, every native generation, edited seeds and all genre views')
+command([sys.executable, 'tests/preview-policy.py', '--site', str(site/'html-multi'),
+         '--output', str(OUTPUT/'preview-policy')], 'preview-policy')
+record('raw Html and sequence previews block scripts, external resources, top navigation and forms')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)

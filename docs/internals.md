@@ -113,7 +113,8 @@ share one manifest and expected signature while retaining independent controls,
 inputs, and workers. Changing the callable, manifest, or scalar expectation for
 that same key fails with `PUBLICATION_BINDING_CONFLICT`, reporting both source
 locations before any publication writes. Input presets, collapsed state, and
-String presentation options do not change the callable contract. Different
+String input mode does not change the callable contract. Result presentation can
+change its transport type. Different
 documents have independent binding namespaces. Ordered binding maps produce the
 same publication bytes regardless of placement order.
 

@@ -52,7 +52,7 @@ private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := 
 
 /-- Imported callables and rendered views have a document-owned transport adapter.
 The producer need not know that a document will select its function. -/
-private meta def scalarEntry (entry : Ident) (name : Name) (mode : AdapterKind) : DocElabM Name := do
+private meta def callableAdapter (entry : Ident) (name : Name) (mode : AdapterKind) : DocElabM Name := do
   let env ← getEnv
   let imported := (env.getModuleIdxFor? name).isSome
   if mode == .scalar && !imported then return name
@@ -126,7 +126,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
   -- Classify the source interface independently before registering scalar exports.
   -- Html uses markup; SequenceView uses a typed payload with a compiler-derived ABI.
   let sourceName := name
-  let name ← if mode == .scalar then pure name else scalarEntry config.entry name mode
+  let name ← if mode == .scalar then pure name else callableAdapter config.entry name mode
   let info ← getConstInfo name
   let callSignature ← match ← Vir.Interface.analyzeExportInterface info.type with
     | .ok sig => pure sig
@@ -156,7 +156,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
     if let some input := config.input then
       unless input == "true" || input == "false" do
         throwErrorAt config.entry "Lean Run Boolean preset must be 'true' or 'false'"
-  let name ← if mode == .scalar then scalarEntry config.entry name .scalar else pure name
+  let name ← if mode == .scalar then callableAdapter config.entry name .scalar else pure name
   registerEntry config.entry name
   let env ← getEnv
   let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
