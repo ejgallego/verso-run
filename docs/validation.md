@@ -38,7 +38,7 @@ test isolation. CI also cold-builds the independently pinned
 reuse and runs its 11 checks. The starter acquires public extension `c5017a9` and
 the selected runtime through its complete Git manifest, without local seeds.
 
-The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `daa96fee`,
+The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `6e514cd4`,
 with VIR's locked runtime `6cddc4b8…`. Resource dependencies and includes now name
 program modules explicitly. The independently pinned starter tests the same Lean 4.35.0-rc4 and
 module-owned-assets API from the published extension revision.
@@ -53,11 +53,21 @@ a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
 
+The ResourceSet simplification passed `lake build` and all 87 top-level mutation
+and browser checks, including 22 Blog and 20 Slides checks. Native tests compare
+inventories without relying on file order, check composition order with distinct
+sets, and reject malformed appended programs at publication. The Slides owner
+hook passed all 22 configuration cases, including collisions with built-in and
+custom theme assets. Shared harness checks confirm logged failures and listener
+cleanup on exceptional exits. The obsolete standalone worker gate and legacy
+API equivalence checks have been removed; current workers are exercised through
+the actual generated sites.
+
 The ResourceSet API follow-up passed the build and 88-check mutation suite,
 including 23 Blog and 21 Slides checks. Native inventory checks cover explicit
 runtime preservation, exact runtime identity conflicts, corrupt repeated runtimes,
-and rejection before writes. Legacy/new Blog and Slides generators emit identical
-site files; Manual emits identical execution assets. The updated ResourceSet
+and rejection before writes. The initial ResourceSet revision also compared
+legacy and new generator output; those adapters are now removed. The updated ResourceSet
 starter also passed its Git-only no-cache build and all 11 worker checks.
 
 

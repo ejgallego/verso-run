@@ -5,7 +5,7 @@ open Lake DSL
 require verso from git "https://github.com/ejgallego/verso" @ "aff0fc92d7b9e56a3b309d409b7ef69629af3770"
 require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "957854b9df1202d4fadbd00ac5fa34e5adf278cc"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "a1a61c9678da010e958ed24cdfa6f635b85f172a"
-require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "daa96fee635f289e2be95982418483bfb4351402"
+require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "6e514cd443a51a39d92534b5a2ef08a5e47ed262"
 
 package verso_run
 
@@ -119,10 +119,6 @@ lean_exe «lean-run-blog-oracle» where
 lean_exe «lean-run-typed-oracle» where
   srcDir := "tests/native"
   root := `TypedOracleMain
-
-lean_exe «lean-run-gate» where
-  srcDir := "tests/native"
-  root := `GateMain
 
 lean_exe «lean-run-publication-check» where
   srcDir := "tests/native"

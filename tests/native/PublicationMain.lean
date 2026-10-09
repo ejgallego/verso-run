@@ -23,12 +23,11 @@ def conflictingBundle : Vir.Resources.Bundle := Id.run do
 /-- Exercise public registration with real embedded bundles, using the normal generator. -/
 def main (args : List String) : IO UInt32 := do
   let mode :: options := args
-    | throw <| IO.userError "usage: lean-run-publication-check duplicate|missing|conflict|legacy [MANUAL OPTIONS]"
+    | throw <| IO.userError "usage: lean-run-publication-check duplicate|missing|conflict [MANUAL OPTIONS]"
   let programs ← match mode with
     | "duplicate" => pure (LeanRunGate.resources.programs ++ LeanRunGate.resources.programs)
-    | "legacy" => pure LeanRunGate.resources.programs
     | "missing" => pure #[]
     | "conflict" => pure (LeanRunGate.resources.programs.push conflictingBundle)
     | _ => throw <| IO.userError s!"unknown publication check {mode}"
   manualMain (%doc LeanRunGate.Chapter) (options := options)
-    (extraSteps := [VersoLeanRun.publish programs])
+    (extraSteps := [VersoLeanRun.publish { LeanRunGate.resources with programs }])

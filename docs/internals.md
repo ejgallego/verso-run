@@ -62,22 +62,22 @@ Follow VIR's stock resource workflow, demonstrated by the
 
    ```lean
    def main := manualMain (%doc MyChapter)
-     (extraSteps := [VersoLeanRun.publishResources MySite.resources])
+     (extraSteps := [VersoLeanRun.publish MySite.resources])
    ```
 
    Pass every required document's complete set. `combineResources` appends programs
-   only when both sets use the same runtime content identity, validating inventories
-   before composition. Manual and Blog preserve the supplied runtime. Slides combines
-   with its embedded formatter set and rejects a different supplied runtime before
-   generation. VIR owns program compatibility, deduplication, and conflict checks.
+   in order when both sets use the same runtime content identity. It checks a distinct
+   runtime inventory before discarding it; identical inventories need no repeated check.
+   Publication validates the final set once through VIR's `forSite`, which owns
+   program compatibility, deduplication, and conflict checks. Manual and Blog preserve
+   the supplied runtime. Slides combines with its embedded formatter set and rejects
+   a different supplied runtime before generation.
 
-`preparePublicationWithResources` is the common pure planner; its optional
-`resourcePrefix` controls inventory paths. Manual uses `publishResources`, Blog
-uses `blogMainResources`, and Slides uses `slidesMainResources`. The original
-`preparePublication`, `preparePublicationWithPrefix`, `publish`, `blogMain`, and
-`slidesMain` entry points remain Bundle-array compatibility adapters with their
-existing defaults. Explicit legacy Manual/Blog `runtime` arguments still work;
-legacy Slides callers use the stock formatter runtime.
+`preparePublication` is the common pure planner; its optional `resourcePrefix`
+controls inventory paths. Manual uses `publish`, Blog uses `blogMain`, and Slides
+uses `slidesMain`. Each accepts a complete `ResourceSet`. This prototype has no
+backward compatibility policy: Bundle-array adapters and serialized metadata
+fallbacks have been removed. Migrate callers when updating the pin.
 
 The graph remains support → producer → document → program preparation → carrier →
 native generator. No per-block packaging or second execution compiler is added.
@@ -151,7 +151,7 @@ highlighted source without interactive controls.
 | Verso | `aff0fc92d7b9e56a3b309d409b7ef69629af3770` |
 | VIR | `957854b9df1202d4fadbd00ac5fa34e5adf278cc` (PR #229 head) |
 | Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Slides | `daa96fee635f289e2be95982418483bfb4351402` (public review snapshot) |
+| Slides | `6e514cd443a51a39d92534b5a2ef08a5e47ed262` (public review snapshot) |
 | Runtime | `6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20` |
 
 The minimal Verso fork is based on release `cad4b633` and exposes the existing

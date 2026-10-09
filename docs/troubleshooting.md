@@ -66,7 +66,7 @@ not the rejected replacement. CI deploys only after all checks pass.
 
 ## Resource sets disagree about their runtime
 
-`combineResources` and `slidesMainResources` reject `RUNTIME_CONTENT_ID_CONFLICT`
+`combineResources` and `slidesMain` reject `RUNTIME_CONTENT_ID_CONFLICT`
 when sets carry different runtime identities, even if their compiler compatibility
 matches. Build all carriers with the same pinned VIR runtime. Manual and Blog
 preserve the runtime supplied in their set; Slides uses its formatter's runtime
@@ -77,7 +77,7 @@ VIR's original validation error rather than being silently discarded.
 
 Add the document's module resource facet (for example,
 `` `+MyChapter:virResourcePack ``) to the asset library's `needs`, and embed with
-`include_vir_assets (modules := #[Module])`. Pass the returned `ResourceSet` to `VersoLeanRun.publishResources`. Publication reports the declaration,
+`include_vir_assets (modules := #[Module])`. Pass the returned `ResourceSet` to `VersoLeanRun.publish`. Publication reports the declaration,
 callable-owning module, and document position when no matching bundle is available.
 Identical bundles deduplicate; distinct bundles with the same module logical ID
 produce `LOGICAL_ID_CONFLICT` before writing execution resources.

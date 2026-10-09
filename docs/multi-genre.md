@@ -57,8 +57,7 @@ anchor can contain several declarations. Its name does not identify a callable.
 | Static rendering | Source-first fallback policy | Native links, proof states, code styling, and supported output formats |
 
 The core depends on Verso's shared document types and VIR, without importing
-`VersoManual`. Keep the existing module names as compatibility facades over a
-Manual adapter. Separate the callable model/classifier, console renderer, and
+`VersoManual`. Focused genre adapters import the shared core. Separate the callable model/classifier, console renderer, and
 publication planner rather than creating one large genre class.
 
 The narrow Run adapter contract is: wrap an experiment and native source children;
@@ -119,7 +118,7 @@ ordinary Blog example contexts remain separate.
 **Blog, Page and Post:** one adapter uses the existing highlighted-code block
 and component system. Component metadata uses a different encoding from Manual's
 extension JSON, so decoding is adapter-specific. Components provide text JS/CSS
-assets; `VersoLeanRun.Blog.blogMainResources` collects the typed site, validates the shared
+assets; `VersoLeanRun.Blog.blogMain` collects the typed site, validates the shared
 publication plan, calls stock Blog generation, and writes binary resources.
 Both genres emit a `<base>` tag. Blog forms carry explicit renderer paths derived
 from their traversal location; [`bootstrap.js`](../web/bootstrap.js) resolves
@@ -136,13 +135,14 @@ children and shared console controls via `.ofHtml`. Collection strictly decodes
 metadata from the typed AST before any generation. `+collapsed` is enhanced in
 the browser; the no-JavaScript layout retains readable source.
 
-The common `preparePublicationWithResources` planner accepts the complete resource
-set and an optional prefix. The original Bundle APIs retain their defaults as
-compatibility adapters. Slides combines with its formatter's set, requiring the
+The common `preparePublication` planner accepts the complete resource
+set and an optional prefix. All genre entry points accept a `ResourceSet`;
+Bundle-array adapters have been removed. Slides combines with its formatter's
+set, requiring the
 same runtime identity before publication. Slides uses
 `lib/vir/` and includes the native formatter in the same resource set as the Run
-producers. All binary files enter the stock asset collision plan through theme
-assets. Built-in CSS and fonts retain their original paths; custom themes and
+producers. All binary files enter the stock asset collision plan through
+`Config.extraAssets`. Built-in CSS and fonts retain their original paths; custom themes and
 other settings are preserved. There is one compatible runtime inventory, with
 no copied private asset planner or HTML resource discovery.
 
@@ -190,5 +190,5 @@ source/runtime pair and consumer qualification.
 [manual]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso-manual/VersoManual/ExternalLean.lean
 [blog]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso-blog/VersoBlog.lean
 [subverso]: https://github.com/leanprover/subverso/blob/9b90b7f938d6169246325df002351014f49945ef/src/SubVerso/Highlighting/Anchors/Basic.lean
-[slides-basic]: https://github.com/ejgallego/verso-slides/blob/daa96fee635f289e2be95982418483bfb4351402/VersoSlides/Basic.lean
-[slides-assets]: https://github.com/ejgallego/verso-slides/blob/daa96fee635f289e2be95982418483bfb4351402/VersoSlides/Render.lean
+[slides-basic]: https://github.com/ejgallego/verso-slides/blob/6e514cd443a51a39d92534b5a2ef08a5e47ed262/VersoSlides/Basic.lean
+[slides-assets]: https://github.com/ejgallego/verso-slides/blob/6e514cd443a51a39d92534b5a2ef08a5e47ed262/VersoSlides/Render.lean

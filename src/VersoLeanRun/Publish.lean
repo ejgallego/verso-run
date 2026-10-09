@@ -20,15 +20,10 @@ private def decodeExperiment (container : Manual.Block) : Except String (Option 
 
 /-- Manual output adapter for complete embedded assets. The supplied runtime is
 preserved; the common planner validates all bindings before writing. -/
-def publishResources (resources : Vir.Resources.ResourceSet) : ExtraStep := fun mode config _ text => do
+def publish (resources : Vir.Resources.ResourceSet) : ExtraStep := fun mode config _ text => do
   let rendered ← IO.ofExcept <| experiments decodeExperiment text
-  let publication ← IO.ofExcept <| preparePublicationWithResources rendered resources
+  let publication ← IO.ofExcept <| preparePublication rendered resources
   let output := config.destination / (match mode with | .single => "html-single" | .multi => "html-multi")
   writePublication output publication
-
-/-- Compatibility adapter for authors supplying program bundles and an optional runtime. -/
-def publish (programs : Array Vir.Resources.Bundle)
-    (runtime : Vir.Resources.Bundle := Vir.Resources.Runtime.bundle) : ExtraStep :=
-  publishResources { runtime, programs }
 
 end VersoLeanRun

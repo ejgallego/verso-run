@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-const description = { program: "Test", declaration: "Test.echo", shape: "string" };
+const description = { program: "Test", declaration: "Test.echo", callable: "Test.echo", shape: "string" };
 const signature = { args: [{ type: "String", interfaceTag: 3 }],
   result: { type: "String", interfaceTag: 3 }, effect: "pure" };
 const plan = { runtimeModule: "runtime.js", runtimeManifest: "runtime.json",

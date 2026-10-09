@@ -147,5 +147,5 @@ When updating an older example, remove redundant `@[vir_export]` markers and
 producer to the document module. The independently pinned
 [Manual starter](../examples/manual-starter/README.md) demonstrates entry-selected
 registration without annotations. New generators should pass the complete
-`include_vir_assets` result to the ResourceSet publication APIs; the Bundle-array
-APIs remain compatibility adapters. See [resource integration](internals.md#resource-ownership-and-site-integration).
+`include_vir_assets` result to the ResourceSet publication APIs. Migrate callers
+when updating the prototype. See [resource integration](internals.md#resource-ownership-and-site-integration).

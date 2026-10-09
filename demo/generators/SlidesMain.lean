@@ -13,7 +13,7 @@ def main (args : List String) : IO UInt32 := do
   let resources := if mode == "missing" then
     { LeanRunSlides.resources with programs := #[] } else LeanRunSlides.resources
   let doc ← match mode with
-    | "normal" | "missing" | "collision" | "legacy" => pure (%doc LeanRunSlides.Deck)
+    | "normal" | "missing" | "collision" => pure (%doc LeanRunSlides.Deck)
     | "malformed" =>
       let bad : Block VersoSlides.Slides := .other (.wrap #[
         ("data-verso-lean-run", "1"), ("data-experiment", "null")]) #[]
@@ -25,6 +25,4 @@ def main (args : List String) : IO UInt32 := do
     outputDir := destination, theme := "white", center := false,
     transition := "none", slideNumber := true, extraCss
   }
-  if mode == "legacy" then
-    return ← VersoLeanRun.Slides.slidesMain config doc resources.programs
-  VersoLeanRun.Slides.slidesMainResources config doc resources
+  VersoLeanRun.Slides.slidesMain config doc resources

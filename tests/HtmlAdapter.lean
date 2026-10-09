@@ -25,10 +25,10 @@ public def markup (text : String) : String := text
 
 -- String results are text; only Html results request a preview.
 
-```leanRun (entry := legacyMarked)
-@[vir_export] public def legacyMarked (n : Nat) : Nat := n
+```leanRun (entry := alreadyRegistered)
+@[vir_export] public def alreadyRegistered (n : Nat) : Nat := n
 ```
 
-```leanRun (entry := legacyMarked)
-#check legacyMarked
+```leanRun (entry := alreadyRegistered)
+#check alreadyRegistered
 ```

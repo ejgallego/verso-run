@@ -29,31 +29,19 @@ private def decodeExperiment (block : BlockExt) : Except String (Option Experime
 def slideExperiments (doc : Part VersoSlides.Slides) : Except String (Array Experiment) :=
   experiments decodeExperiment doc
 
-private def assetTheme (config : VersoSlides.Config) : CustomTheme :=
-  match config.theme with
-  | .custom theme => theme
-  | .builtin name =>
-    let dir := "lib/reveal.js/dist/theme/"
-    { stylesheet := {
-        filename := dir ++ name ++ ".css"
-        contents := ⟨Vendor.rewriteGoogleFontImports (Vendor.themeCSS name |>.getD Vendor.themeBlack)⟩ },
-      assets := (Vendor.themeFonts name).map (fun (path, bytes) => ⟨dir ++ path, bytes⟩),
-      highlightTheme := config.highlightTheme }
-
 /-- Compose Run resources with the stock formatter inventory and collision plan.
 The embedded stock runtime remains authoritative; a different supplied runtime is
 rejected before generation rather than silently replaced. -/
-def slidesMainResources (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
+def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
     (resources : Vir.Resources.ResourceSet) : IO UInt32 := do
   let found ← IO.ofExcept <| slideExperiments doc
   let resources ← IO.ofExcept <| combineResources VersoSlides.VirPrettyMResources.resources resources
-  let publication ← IO.ofExcept <| preparePublicationWithResources found resources "lib/vir"
-  let theme := assetTheme config
+  let publication ← IO.ofExcept <| preparePublication found resources "lib/vir"
   let assets := publication.files.map fun file =>
     ({ filename := file.path, contents := file.bytes } : ThemeAsset)
   let config := { config with
-    theme := .custom { theme with assets := theme.assets ++ assets ++ #[
-      ⟨"lean-run/slides.js", (include_str "../../../web/slides.js").toUTF8⟩] },
+    extraAssets := config.extraAssets ++ assets ++ #[
+      ⟨"lean-run/slides.js", (include_str "../../../web/slides.js").toUTF8⟩],
     extraCss := config.extraCss ++ #[
       { filename := "lean-run/console.css", contents := ⟨include_str "../../../web/lean-run.css"⟩ },
       { filename := "lean-run/slides.css", contents := ⟨include_str "../../../web/slides.css"⟩ }],
@@ -61,11 +49,5 @@ def slidesMainResources (config : VersoSlides.Config) (doc : Part VersoSlides.Sl
       {{ <script type="module" src="lean-run/slides.js"/> }},
       {{ <noscript><style>{{Html.text false (include_str "../../../web/slides-static.css")}}</style></noscript> }}] }
   VersoSlides.slidesMain config doc
-
-/-- Compatibility adapter; legacy program-only callers use the stock Slides runtime. -/
-def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
-    (programs : Array Vir.Resources.Bundle) : IO UInt32 :=
-  slidesMainResources config doc {
-    runtime := VersoSlides.VirPrettyMResources.resources.runtime, programs }
 
 end VersoLeanRun.Slides

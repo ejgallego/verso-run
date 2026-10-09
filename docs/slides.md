@@ -56,7 +56,7 @@ as in [Blog publication](blog.md#publish-a-site). Import
 `VersoLeanRun.Slides.Publish` in the native generator:
 
 ```lean
-def main := VersoLeanRun.Slides.slidesMainResources
+def main := VersoLeanRun.Slides.slidesMain
   { outputDir := "_slides", theme := "white" }
   (%doc MyDeck) MyDeck.resources
 ```
@@ -65,14 +65,13 @@ The wrapper collects marked metadata from the typed deck, then prepares one
 resource set containing the native Slides formatter and document-selected Run
 callables. The incoming set must use the same runtime content identity as the stock
 formatter; mismatches are rejected before generation rather than silently
-replaced. The complete inventory uses `lib/vir/`. The original `slidesMain`
-Bundle-array API remains available and uses the stock runtime. The shared Run host and
+replaced. The complete inventory uses `lib/vir/`. The shared Run host and
 binding plan live under `lean-run/`.
 
-The complete inventory enters Slides' existing asset planner as binary theme
-assets. Its collision checks run before any output writes. Custom themes retain
-their styles and assets. Built-in themes become equivalent custom asset bundles
-using the same vendored CSS and fonts, at their original paths. Existing extra
+The complete inventory enters Slides' asset planner through `Config.extraAssets`.
+Its collision checks run before any output writes. Custom themes retain their
+styles and assets. Slides owns built-in theme CSS and fonts at their original
+paths, without conversion to custom themes. Existing extra
 CSS, JS, and head elements are preserved. No generated HTML scraping or producer
 file lookup participates in publication.
 
@@ -101,8 +100,11 @@ VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
 ## Compatibility and demo
 
-The selected [Slides snapshot](https://github.com/ejgallego/verso-slides/commit/daa96fee635f289e2be95982418483bfb4351402)
-uses module-owned assets on Lean 4.35.0-rc4. The root Lake manifest locks its
+The selected [Slides snapshot](https://github.com/ejgallego/verso-slides/commit/6e514cd443a51a39d92534b5a2ef08a5e47ed262)
+uses module-owned assets on Lean 4.35.0-rc4 and exposes `Config.extraAssets`
+for binary additions. Slides owns built-in theme CSS, font paths, and asset
+collision checks; the Run adapter supplies only its own files. The ownership
+change is reviewed in [Slides PR #2](https://github.com/ejgallego/verso-slides/pull/2). The root Lake manifest locks its
 shared VIR and Verso dependencies. The Verso fork supplies the Manual highlighting
 hook and two upstream compiler-compatibility adjustments; Illuminate is unchanged.
 See the [exact dependency and runtime pins](internals.md#pinned-dependencies).

@@ -23,13 +23,10 @@ def main (args : List String) : IO UInt32 := do
     LeanRunBlog.pageResources LeanRunBlog.postResources
   let resources := if mode == "missing" then { resources with programs := #[] } else resources
   let selected ← match mode with
-    | "normal" | "missing" | "legacy" => pure site
+    | "normal" | "missing" => pure site
     | "malformed" =>
       let bad : Doc.Block Page := .other (.component `VersoLeanRun.Blog.leanRun .null) #[]
       let home := { (%doc LeanRunBlog.Home) with content := #[bad] }
       pure <| Site.page `Malformed home #[]
     | _ => throw <| IO.userError s!"Unknown Blog check {mode}"
-  if mode == "legacy" then
-    return ← VersoLeanRun.Blog.blogMain Theme.default selected resources.programs destination
-      (runtime := resources.runtime)
-  VersoLeanRun.Blog.blogMainResources Theme.default selected resources destination
+  VersoLeanRun.Blog.blogMain Theme.default selected resources destination

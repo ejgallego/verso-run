@@ -5,5 +5,5 @@ Author: Emilio J. Gallego Arias
 -/
 module
 
--- Compatibility facade for the Manual adapter.
+-- Manual authoring entry point.
 public import VersoLeanRun.Manual

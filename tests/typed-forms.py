@@ -1,5 +1,6 @@
 """Concrete Bool/UInt64/multiline forms, independently compiled signatures and real workers."""
-import argparse, functools, http.server, json, shutil, subprocess, threading, time
+from harness import run_command, serve_directory
+import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -9,15 +10,12 @@ parser.add_argument('--output', default='_out/typed-forms')
 output = Path(parser.parse_args().output).resolve()
 output.mkdir(parents=True, exist_ok=True)
 checks = []
+command = functools.partial(run_command, output=output, cwd=ROOT)
 
 def record(name):
     checks.append({'test': name, 'result': 'pass'})
     print('PASS', name, flush=True)
 
-def command(arguments, log):
-    result = subprocess.run(arguments, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output/(log+'.log')).write_text(result.stdout)
-    assert result.returncode == 0, result.stdout[-5000:]
 
 def oracle(role, value):
     return json.loads(subprocess.check_output(
@@ -41,22 +39,13 @@ for genre, path, owner in [('Manual', site/'manual/html-multi', 'LeanRunGate.Cha
         assert binding['expectedExport'] == {'args': [descriptor], 'result': descriptor, 'effect': 'pure'}
     record(genre+': independent type-only canonical Bool/UInt64/String signatures')
 
-class QuietHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, *_): pass
-    def handle(self):
-        try: super().handle()
-        except (BrokenPipeError, ConnectionResetError): pass
 
 served = output/'served'
 for genre, path in [('manual', site/'manual/html-multi'), ('blog', site/'blog'), ('slides', site/'slides')]:
     for prefix in ['root', 'nested/prefix']:
         shutil.copytree(path, served/prefix/genre, dirs_exist_ok=True)
 shutil.copytree(site/'manual/html-single', served/'single', dirs_exist_ok=True)
-server = http.server.ThreadingHTTPServer(('127.0.0.1', 0),
-    functools.partial(QuietHandler, directory=str(served)))
-threading.Thread(target=server.serve_forever, daemon=True).start()
-base = f'http://127.0.0.1:{server.server_port}/'
-try:
+with serve_directory(served) as base:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
         page = browser.new_page(viewport={'width': 1280, 'height': 1000})
@@ -184,8 +173,5 @@ try:
         assert not errors, errors
         record('no uncaught typed-form browser errors')
         browser.close()
-finally:
-    server.shutdown()
-    server.server_close()
 (output/'results.json').write_text(json.dumps({'checks': checks, 'publications': plans}, indent=2)+'\n')
 print(f'{len(checks)} typed form checks passed; evidence: {output}', flush=True)

@@ -104,13 +104,6 @@ dependency, and runs its text and HTML examples at root and nested URLs. It
 qualifies that published revision; the main acceptance suite checks your working
 tree changes. CI runs both before deploying the demo.
 
-A smaller public VIR worker gate is also available:
-
-```sh
-lake exe lean-run-gate /tmp/verso-lean-run-gate-site
-uv run --with playwright python tests/worker-gate.py
-```
-
 ## Repository layout
 
 | Path | Purpose |

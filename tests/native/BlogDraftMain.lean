@@ -31,8 +31,8 @@ def main (args : List String) : IO UInt32 := do
     -- Pinned Verso's root-blog generator omits the blog's traversal registration.
     -- Qualify our root collector/planner directly; nested checks use real generation.
     let found ← IO.ofExcept <| VersoLeanRun.Blog.siteExperiments site showDrafts
-    let publication ← IO.ofExcept <| VersoLeanRun.preparePublication found programs
+    let publication ← IO.ofExcept <| VersoLeanRun.preparePublication found { LeanRunBlog.postResources with programs }
     VersoLeanRun.writePublication ⟨output⟩ publication
     return 0
-  VersoLeanRun.Blog.blogMain Theme.default site programs
+  VersoLeanRun.Blog.blogMain Theme.default site { LeanRunBlog.postResources with programs }
     (destination := ⟨output⟩) (showDrafts := showDrafts)
