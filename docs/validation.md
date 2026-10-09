@@ -113,7 +113,13 @@ follow-up selects and cold-qualifies its new extension pin explicitly. Hosted va
 
 
 The sequence campaign adds `tests/sequence.py`, including desktop/mobile captures,
-under its selected ignored output directory. The original sequence qualification
+under its selected ignored output directory. PR #4's baseline `4169841` passed
+[fresh-checkout CI](https://github.com/ejgallego/verso-run/actions/runs/37952706175)
+with the bounded import-wait repair. Its regression holds the presenter module
+through deadline/Stop, then observes late evaluation/rejection without stale
+allocation. The review follow-up adds known shared-evaluator traces, frame-count
+boundaries, unchanged-selection checks and invalid-submission cleanup.
+The original sequence qualification
 on the earlier toolchain remains at Git revision `24a31f7`; it is historical
 evidence, not qualification of this stack on the cleanup toolchain.
 

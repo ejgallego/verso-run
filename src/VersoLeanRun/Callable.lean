@@ -49,7 +49,7 @@ private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := 
         | throwErrorAt entry "Missing VIR export attribute"
       withRef entry <| attr.add name entry .global
 
-/-- Imported callables and rendered views have a document-owned scalar boundary.
+/-- Imported callables and rendered views have a document-owned transport adapter.
 The producer need not know that a document will select its function. -/
 private meta def scalarEntry (entry : Ident) (name : Name) (mode : AdapterKind) : DocElabM Name := do
   let env ← getEnv
@@ -90,14 +90,14 @@ private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
       m!"This form needs one explicit argument; found {signature.args.size}. \
         Export a wrapper taking one String, Nat, Bool, or UInt64 input."
     else
-      m!"This form supports exactly String → String, Nat → Nat, Bool → Bool, and UInt64 → UInt64. \
-        Serialize structured inputs and results as text, or return typed HTML."
+      m!"This form supports homogeneous scalar calls and String → Html or String → SequenceView. \
+        Use a supported scalar type or return a typed rendered view."
   throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
     This interface is supported by VIR, but not by this Run form.\n\
-    {reason}\nUse a pure String → String, Nat → Nat, Bool → Bool, UInt64 → UInt64, or String → Html function."
+    {reason}\nUse a pure String → String, Nat → Nat, Bool → Bool, UInt64 → UInt64, String → Html, or String → SequenceView function."
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
-Selected imported entries and HTML adapters are compiled in the document module. -/
+Selected imported entries and rendered-view adapters are compiled in the document module. -/
 meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM Experiment := do
   if isPrivateName name then
     throwErrorAt config.entry "Lean Run entry '{name}' is private. \
@@ -118,7 +118,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
     | _ => false
   let mode : AdapterKind := if isHtml then .html else if isSequence then .sequence else .scalar
   -- Classify the source interface independently before registering scalar exports.
-  -- Html and SequenceView cross VIR through generated String serializers.
+  -- Html and SequenceView use generated scalar transport adapters.
   let sourceName := name
   let name ← if mode == .scalar then pure name else scalarEntry config.entry name mode
   let info ← getConstInfo name

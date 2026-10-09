@@ -3,7 +3,7 @@ import LeanRunSequence.Examples
 import Lean.Data.Json
 
 def main (args : List String) : IO Unit := do
-  let [role, input] := args | throw <| IO.userError "usage: lean-run-oracle greet|stack|htmlGreeting|diagram|double|spin INPUT"
+  let [role, input] := args | throw <| IO.userError "usage: lean-run-oracle greet|stack|sequence|htmlGreeting|diagram|double|spin INPUT"
   let result ← match role with
     | "greet" => pure <| LeanRunGate.greet input
     | "sequence" => pure <| (LeanRunSequence.Examples.stackView input).serialize

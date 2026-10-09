@@ -1,5 +1,4 @@
 module
-public import VersoLeanRun.Sequence
 public section
 
 -- ANCHOR: stack
@@ -29,26 +28,55 @@ public def step : Instruction → List Nat → Except String (List Nat)
 public def showStack (stack : List Nat) : String :=
   "[" ++ ", ".intercalate (stack.reverse.map toString) ++ "]"
 
-public def run (program : String) : String := Id.run do
+/-- One instruction attempt, including the unchanged stack when it fails. -/
+public structure TraceStep where
+  label : String
+  before : List Nat
+  after : List Nat
+  error : Option String := none
+
+/-- The shared evaluator's result, independent of text or HTML presentation. -/
+public structure Trace where
+  steps : Array TraceStep := #[]
+  initialError : Option String := none
+
+public def evaluate (program : String) : Trace := Id.run do
   let words := (program.splitOn " ").filter (!·.isEmpty)
-  if words.isEmpty then return "Enter a program, for example: 6 7 * 2 +"
-  if words.length > 32 then return "Use at most 32 instructions."
+  if words.isEmpty then return { initialError := some "Enter a program, for example: 6 7 * 2 +" }
+  if words.length > 32 then return { initialError := some "Use at most 32 instructions." }
   let mut stack : List Nat := []
-  let mut trace := #["Start: []"]
+  let mut trace : Trace := {}
   for word in words do
     let next := parse word >>= fun instruction => step instruction stack
     match next with
     | .error message =>
-        return "\n".intercalate (trace.toList ++ [s!"Error at '{word}': {message}"])
+        return { trace with steps := trace.steps.push {
+          label := word, before := stack, after := stack,
+          error := some s!"Error at '{word}': {message}" } }
     | .ok values =>
         if values.length > 16 || values.any (fun n => (toString n).length > 80) then
-          return "\n".intercalate (trace.toList ++ ["Stack or number limit reached."])
+          return { trace with steps := trace.steps.push {
+            label := word, before := stack, after := stack,
+            error := some "Stack or number limit reached." } }
+        trace := { trace with steps := trace.steps.push {
+          label := word, before := stack, after := values } }
         stack := values
-        trace := trace.push s!"{word}  →  {showStack stack}"
+  return trace
+
+/-- A calculator adds its single-result rule to the shared operational trace. -/
+public def run (program : String) : String := Id.run do
+  let trace := evaluate program
+  if let some error := trace.initialError then return error
+  let lines := #["Start: []"] ++ trace.steps.map fun step =>
+    step.error.getD s!"{step.label}  →  {showStack step.after}"
+  let text := "\n".intercalate lines.toList
+  let final := trace.steps.back?
+  if (final.bind (·.error)).isSome then return text
+  let stack := (final.map (·.after)).getD []
   let result := match stack with
     | [n] => s!"Result: {n}"
     | _ => "Finish with exactly one value on the stack."
-  return "\n".intercalate trace.toList ++ "\n\n" ++ result
+  return text ++ "\n\n" ++ result
 
 end LeanRunGate.Stack
 -- ANCHOR_END: stack
