@@ -61,7 +61,8 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | Function type | Result display |
 | --- | --- |
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
-| `String → Verso.Output.Html` | An isolated HTML preview |
+| `String`, `Nat`, `Bool`, or `UInt64` → `Verso.Output.Html` | An isolated HTML preview |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
 
 A String containing markup is still plain text. There is no `output` block
 argument. Return `Html` when the result is intended to be rendered as HTML:
@@ -80,7 +81,7 @@ CSS and data images; scripts and external embedded resources are disabled.
 Input edits, Stop, pending calls and failures clear the preview. Errors stay
 plain text; the frame scrolls larger results.
 
-The extension generates a scalar serializer for VIR. Authors select the original
+The extension generates a typed transport adapter for VIR. Authors select the original
 Html function. Repeated placements reuse the serializer; a conflicting declaration
 at its generated name causes an author error.
 
@@ -146,6 +147,50 @@ When updating an older example, remove redundant `@[vir_export]` markers and
 `Html` directly. For anchors, move root resource registration from the imported
 producer to the document module. The independently pinned
 [Manual starter](../examples/manual-starter/README.md) demonstrates entry-selected
-registration without annotations. New generators should pass the complete
-`include_vir_assets` result to the ResourceSet publication APIs. Migrate callers
-when updating the prototype. See [resource integration](internals.md#resource-ownership-and-site-integration).
+text and Html functions without explicit export annotations. Its cold Git test
+qualifies that published dependency revision separately from this checkout.
+New generators should pass the complete `include_vir_assets` result to the
+ResourceSet publication APIs. Migrate callers when updating the prototype. See
+[resource integration](internals.md#resource-ownership-and-site-integration).
+
+## Present a sequence of states
+
+Return `VersoLeanRun.SequenceView` to get previous/next, step selection and a
+scrubber. The same entry works in Manual, Blog Page/Post and Slides. Define your
+model with `Sequence α`, label each `SequenceStep α`, then supply a view using
+Verso's existing `Html` type:
+
+```lean
+public def Demo.greetingSteps (name : String) : VersoLeanRun.SequenceView :=
+  let sequence : VersoLeanRun.Sequence String := {
+    initial := name
+    steps := #[{ label := "Greeting", state := "Hello, " ++ name }] }
+  sequence.view (Verso.Output.Html.text true)
+```
+
+Select it with `leanRun (entry := Demo.greetingSteps)`. No JSON, export marker or
+output argument is needed. `SequenceStep.error` can report a failure at a state;
+`Sequence.initialError` handles an invalid initial input. Models and views are
+ordinary Lean code and can live in imported modules with checked source anchors.
+The [stack example](../demo/chapters/LeanRunSequence/Examples.lean) renders both sides
+of each step from the calculator's [shared evaluator](../demo/chapters/LeanRunGate/Stack.lean).
+Both views use one parser, execution loop, and set of limits. The stepper can inspect
+a completed program with several stack values; the calculator additionally asks for
+exactly one final result.
+
+The worker computes states and renders their Html. Sequence frames cross the worker
+boundary as typed VIR data, without a JSON envelope. Labels, markup and errors have
+a combined 65,536 UTF-16 code unit budget. A separate Lean/VIR DOM
+presenter owns Html documents, selection and event callbacks. Selecting a frame uses the computed
+presentation and does not rerun the evaluator. Each placement owns both runtimes;
+input edits, Stop and genre navigation cancel acquisition and dispose the view.
+State Html uses the same script-disabled sandbox as an ordinary Html result.
+Labels and failures are text, and exact natural numbers are rendered by Lean.
+
+Presentations contain 1–128 frames and share the existing 65,536 UTF-16 output
+limit. Large rendered sequences may exceed that limit even when their computation
+is otherwise valid. Computation remains interruptible by terminating its worker.
+The DOM presenter is a bounded experimental library, not a claim of general VIR
+DOM qualification. Only its exercised bindings are covered here. Illuminate's
+full animation compiler remains unqualified on the current runtime; its existing
+qualified drawing-command/SVG output can be used inside a state Html view.

@@ -1,14 +1,51 @@
-// Closed form names match the build-validated Lean FormKind.
-export function scalarKind(form) {
-  if (["string", "multilineString", "html", "multilineHtml"].includes(form)) return "string";
-  if (["nat", "bool", "uint64"].includes(form)) return form;
-  throw new Error("Unsupported Lean Run form");
+// The finite wire names are checked against Lean's typed form model.
+const FORMS = Object.freeze({
+  string: {input: "string", result: "string"},
+  multilineString: {input: "string", result: "string"},
+  nat: {input: "nat", result: "nat"},
+  bool: {input: "bool", result: "bool"},
+  uint64: {input: "uint64", result: "uint64"},
+  html: {input: "string", result: "string"},
+  multilineHtml: {input: "string", result: "string"},
+  sequence: {input: "string", result: "sequence"},
+  multilineSequence: {input: "string", result: "sequence"},
+  natHtml: {input: "nat", result: "string"},
+  boolHtml: {input: "bool", result: "string"},
+  uint64Html: {input: "uint64", result: "string"},
+  natSequence: {input: "nat", result: "sequence"},
+  boolSequence: {input: "bool", result: "sequence"},
+  uint64Sequence: {input: "uint64", result: "sequence"},
+});
+function description(form) {
+  if (typeof form !== "string" || !Object.hasOwn(FORMS, form)) throw new Error("Unsupported Lean Run form");
+  return FORMS[form];
 }
+export function scalarKind(form) { return description(form).input; }
+export function resultKind(form) { return description(form).result; }
 // Concrete scalar form policy, shared by the host and its worker.
 export const MAX_STRING = 4096;
 export const MAX_NAT_DIGITS = 256;
 export const MAX_OUTPUT = 65536;
 export const MAX_UINT64 = (1n << 64n) - 1n;
+export const MAX_FRAMES = 128;
+export function formatPublishedResult(form, result) {
+  const kind = resultKind(form);
+  if (kind !== "sequence") return formatResult(kind, result);
+  if (!result || result.version !== 1n || !Array.isArray(result.frames) ||
+      result.frames.length < 1 || result.frames.length > MAX_FRAMES) {
+    throw new Error("Lean returned an invalid sequence presentation");
+  }
+  let size = 0;
+  for (const frame of result.frames) {
+    if (!frame || typeof frame.label !== "string" || typeof frame.html !== "string" ||
+        !(frame.error === null || typeof frame.error === "string")) {
+      throw new Error("Lean returned an invalid sequence frame");
+    }
+    size += frame.label.length + frame.html.length + (frame.error?.length ?? 0);
+    if (size > MAX_OUTPUT) throw new Error(`Result exceeds ${MAX_OUTPUT} UTF-16 code units`);
+  }
+  return result;
+}
 export function validateInput(shape, value) {
   if (typeof value !== "string") throw new Error("Input must be text");
   if (shape === "string") {

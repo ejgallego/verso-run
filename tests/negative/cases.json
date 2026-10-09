@@ -6,7 +6,7 @@
       "Lean Run entry 'signedIdentity'",
       "Int → Int",
       "supported by VIR, but not by this Run form",
-      "Serialize structured"
+      "Use a supported scalar"
     ],
     "line": 7
   },
@@ -54,8 +54,8 @@
     "contains": [
       "Lean Run entry 'textLength'",
       "String → Nat",
-      "supports exactly",
-      "Serialize structured"
+      "homogeneous scalar calls",
+      "Use a supported scalar"
     ],
     "line": 7
   },

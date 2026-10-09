@@ -2,6 +2,9 @@ module
 public import VersoLeanRun
 import LeanRunGate.Helper
 import LeanRunTyped.Examples
+import LeanRunGate.Stack
+import LeanRunSequence.Examples
+import LeanRunRendered.Examples
 public import Illuminate.Render.Svg
 public import Illuminate.Geometry.PathData
 public import Illuminate.Geometry.Matrix
@@ -31,7 +34,7 @@ Write a little program with numbers and operations separated by spaces.
 Run the supplied `6 7 * 2 +` program to compute `(6 × 7) + 2` and see each step.
 Open the implementation to explore its Lean instruction type, parser, and execution rules.
 
-```leanRun (entry := LeanRunGate.Stack.run) (input := "6 7 * 2 +") +collapsed
+```leanRunAnchor stack (module := LeanRunGate.Stack) (entry := LeanRunGate.Stack.run) (input := "6 7 * 2 +") +collapsed
 namespace LeanRunGate.Stack
 
 public inductive Instruction where
@@ -58,26 +61,55 @@ public def step : Instruction → List Nat → Except String (List Nat)
 public def showStack (stack : List Nat) : String :=
   "[" ++ ", ".intercalate (stack.reverse.map toString) ++ "]"
 
-public def run (program : String) : String := Id.run do
+/-- One instruction attempt, including the unchanged stack when it fails. -/
+public structure TraceStep where
+  label : String
+  before : List Nat
+  after : List Nat
+  error : Option String := none
+
+/-- The shared evaluator's result, independent of text or HTML presentation. -/
+public structure Trace where
+  steps : Array TraceStep := #[]
+  initialError : Option String := none
+
+public def evaluate (program : String) : Trace := Id.run do
   let words := (program.splitOn " ").filter (!·.isEmpty)
-  if words.isEmpty then return "Enter a program, for example: 6 7 * 2 +"
-  if words.length > 32 then return "Use at most 32 instructions."
+  if words.isEmpty then return { initialError := some "Enter a program, for example: 6 7 * 2 +" }
+  if words.length > 32 then return { initialError := some "Use at most 32 instructions." }
   let mut stack : List Nat := []
-  let mut trace := #["Start: []"]
+  let mut trace : Trace := {}
   for word in words do
     let next := parse word >>= fun instruction => step instruction stack
     match next with
     | .error message =>
-        return "\n".intercalate (trace.toList ++ [s!"Error at '{word}': {message}"])
+        return { trace with steps := trace.steps.push {
+          label := word, before := stack, after := stack,
+          error := some s!"Error at '{word}': {message}" } }
     | .ok values =>
         if values.length > 16 || values.any (fun n => (toString n).length > 80) then
-          return "\n".intercalate (trace.toList ++ ["Stack or number limit reached."])
+          return { trace with steps := trace.steps.push {
+            label := word, before := stack, after := stack,
+            error := some "Stack or number limit reached." } }
+        trace := { trace with steps := trace.steps.push {
+          label := word, before := stack, after := values } }
         stack := values
-        trace := trace.push s!"{word}  →  {showStack stack}"
+  return trace
+
+/-- A calculator adds its single-result rule to the shared operational trace. -/
+public def run (program : String) : String := Id.run do
+  let trace := evaluate program
+  if let some error := trace.initialError then return error
+  let lines := #["Start: []"] ++ trace.steps.map fun step =>
+    step.error.getD s!"{step.label}  →  {showStack step.after}"
+  let text := "\n".intercalate lines.toList
+  let final := trace.steps.back?
+  if (final.bind (·.error)).isSome then return text
+  let stack := (final.map (·.after)).getD []
   let result := match stack with
     | [n] => s!"Result: {n}"
     | _ => "Finish with exactly one value on the stack."
-  return "\n".intercalate trace.toList ++ "\n\n" ++ result
+  return text ++ "\n\n" ++ result
 
 end LeanRunGate.Stack
 ```
@@ -92,6 +124,19 @@ Try another program:
 The stack's top is on the right. `+` and `*` combine two values, `dup` copies one,
 and `swap` exchanges two. A complete program leaves exactly one result.
 The demo accepts at most 32 instructions, 16 stack values, and 80 decimal digits per value.
+
+# Stack stepper
+
+Run the same program, then move through its states. Lean computes the instructions,
+before/after stacks and failures using the calculator’s shared evaluator. The player
+is also written in Lean. The stepper can inspect a program that leaves several values;
+the calculator additionally requires exactly one final result. Open the calculator’s
+implementation above to read the evaluator and its trace data.
+
+```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +") +collapsed
+public def stackView (program : String) : VersoLeanRun.SequenceView :=
+  (evaluate program).view renderSnapshot
+```
 
 # HTML greeting
 
@@ -126,46 +171,43 @@ Try `1`, `4`, and `8`: the labels, links, and layout are computed by Lean in you
 ```leanRun (entry := LeanRunGate.diagram) (input := "4") +collapsed
 open Illuminate Verso.Output.Html
 
-public def LeanRunGate.diagram (input : String) : Verso.Output.Html :=
+public def LeanRunGate.diagram (count : Nat) : Verso.Output.Html :=
   let message := "Choose a whole number of nodes from 1 to 8."
-  match input.toNat? with
-  | none => {{ <p role="alert"> {{message}} </p> }}
-  | some count =>
-    if count < 1 || count > 8 then
-      {{ <p role="alert"> {{message}} </p> }}
-    else
-      let ink := Color.rgb 40 85 117
-      let stroke : Stroke := {color := ink, width := 2}
-      let circle := PathData.circle 20
-      let commands : Array (DrawCmd Empty) :=
-        (List.range count).foldl (init := #[]) fun commands n =>
-          let x := n.toFloat * 60
-          let commands := commands
-            |>.push (.pushTransform (Matrix.translate x 0))
-            |>.push (.fillPath circle
-              (.solid {color := Color.rgb 237 245 255}) none)
-            |>.push (.strokePath circle stroke)
-            |>.push (.drawTextRun (toString (n + 1))
-              {fontSize := 16, color := ink} ⟨0, 0⟩)
-            |>.push .popTransform
-          if n + 1 < count then
-            commands.push (.strokePath
-              (PathData.line ⟨x + 21, 0⟩ ⟨x + 39, 0⟩) stroke)
-          else commands
-      let svg := Svg.render commands {
-        minX := -29, minY := -29
-        width := (count - 1).toFloat * 60 + 58
-        height := 58
-      } "chain_"
-      let width := s!"width:100%;max-width:{count * 64 + 16}px;margin:1rem auto"
-      {{ <section style="padding:1rem;background:#f5f8fc">
-        <p style="margin:0;color:#536273">
-          {{s!"{count} nodes, {count - 1} links"}}
-        </p>
-        <div style={{width}}>
-          {{Verso.Output.Html.text false svg}}
-        </div>
-      </section> }}
+  if count < 1 || count > 8 then
+    {{ <p role="alert"> {{message}} </p> }}
+  else
+    let ink := Color.rgb 40 85 117
+    let stroke : Stroke := {color := ink, width := 2}
+    let circle := PathData.circle 20
+    let commands : Array (DrawCmd Empty) :=
+      (List.range count).foldl (init := #[]) fun commands n =>
+        let x := n.toFloat * 60
+        let commands := commands
+          |>.push (.pushTransform (Matrix.translate x 0))
+          |>.push (.fillPath circle
+            (.solid {color := Color.rgb 237 245 255}) none)
+          |>.push (.strokePath circle stroke)
+          |>.push (.drawTextRun (toString (n + 1))
+            {fontSize := 16, color := ink} ⟨0, 0⟩)
+          |>.push .popTransform
+        if n + 1 < count then
+          commands.push (.strokePath
+            (PathData.line ⟨x + 21, 0⟩ ⟨x + 39, 0⟩) stroke)
+        else commands
+    let svg := Svg.render commands {
+      minX := -29, minY := -29
+      width := (count - 1).toFloat * 60 + 58
+      height := 58
+    } "chain_"
+    let width := s!"width:100%;max-width:{count * 64 + 16}px;margin:1rem auto"
+    {{ <section style="padding:1rem;background:#f5f8fc">
+      <p style="margin:0;color:#536273">
+        {{s!"{count} nodes, {count - 1} links"}}
+      </p>
+      <div style={{width}}>
+        {{Verso.Output.Html.text false svg}}
+      </div>
+    </section> }}
 ```
 
 Lean positions the circles, labels, and links using Illuminate drawing commands.
@@ -246,4 +288,21 @@ public def LeanRunGate.spinLoop (n acc : Nat) : Nat :=
 
 public def LeanRunGate.spin (n : Nat) : Nat :=
   LeanRunGate.spinLoop n 0
+```
+
+# Typed rendering
+
+The input type selects its control; the result type selects its view.
+
+```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true") +collapsed
+public def badge (enabled : Bool) : Html :=
+  {{ <p><strong>{{if enabled then "Enabled" else "Disabled"}}</strong></p> }}
+```
+
+```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615") +collapsed
+public def wordSteps (seed : UInt64) : SequenceView :=
+  let sequence : Sequence UInt64 := {
+    initial := seed
+    steps := #[{ label := "Increment", state := seed + 1 }] }
+  sequence.view fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
 ```

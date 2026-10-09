@@ -36,7 +36,8 @@ private def identities (programs : Array Vir.Resources.Bundle) : Array (String �
   programs.map fun program => (program.descriptor.logicalId, program.contentId)
 
 def main : IO Unit := do
-  let experiments ← IO.ofExcept rendered
+  let allExperiments ← IO.ofExcept rendered
+  let experiments := allExperiments.filter (fun experiment => !experiment.form.isSequence && !experiment.form.isHtml)
   let resources := LeanRunGate.resources
   let direct ← IO.ofExcept <| VersoLeanRun.preparePublication experiments resources
   let site ← IO.ofExcept <| resources.forSite "lean-run/resources" |>.mapError reprStr
@@ -62,6 +63,15 @@ def main : IO Unit := do
   check (alternateDirect.plan != direct.plan) "alternate runtime identity was ignored"
   match VersoLeanRun.combineResources resources alternate with
   | .ok _ => throw <| IO.userError "different runtime identities were silently combined"
+  | .error error => check (error.startsWith "RUNTIME_CONTENT_ID_CONFLICT") error
+  let sequencePublication ← IO.ofExcept <| VersoLeanRun.preparePublication allExperiments resources
+  let presenterFirst := { resources with programs :=
+    VersoLeanRunPresenterResources.resources.programs ++ resources.programs }
+  let reorderedPublication ← IO.ofExcept <| VersoLeanRun.preparePublication allExperiments presenterFirst
+  check (samePublication sequencePublication reorderedPublication)
+    "sequence presenter lookup depends on program position or repeats its assets"
+  match VersoLeanRun.preparePublication allExperiments alternate with
+  | .ok _ => throw <| IO.userError "sequence publication discarded a conflicting presenter runtime"
   | .error error => check (error.startsWith "RUNTIME_CONTENT_ID_CONFLICT") error
   let corrupt := { resources.runtime with files := resources.runtime.files.push {
     path := "undeclared.txt", bytes := "invalid inventory".toUTF8 } }

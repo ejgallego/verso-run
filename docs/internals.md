@@ -99,15 +99,19 @@ construction. VIR's `createProgram` validates actual root declarations and their
 signatures before runtime instantiation. `forSite` does not check callable types;
 there is no embedded-interface parser or reopening of producer files here.
 
-VIR's `analyzeExportInterface` independently classifies the callable. Only pure,
-homogeneous, single-argument String/Nat/Bool/UInt64 signatures are admitted.
-`Experiment.form : FormKind` retains that scalar type and its allowed presentation.
-Its String constructor carries a `StringInputMode` and `StringPresentation`;
-Nat, Bool, and UInt64 have no presentation parameters. This lets additional String
-views extend the presentation type without weakening scalar invariants. The wire tags are
-`string`, `multilineString`, `nat`, `bool`, `uint64`, `html`, or `multilineHtml`.
-HTML forms invoke a compiled String serializer. Unsupported combinations have no
-constructor, and unknown form tags fail native metadata decoding.
+VIR's `analyzeExportInterface` independently classifies the callable. Plain-text
+calls retain pure, homogeneous String/Nat/Bool/UInt64 signatures. Any of these
+inputs may instead return `Html` or `SequenceView`. `Experiment.form : FormKind`
+contains an `InputKind` and `PresentationKind`; multiline mode exists only inside
+`InputKind.string`. Unknown tags and unsupported object encodings fail metadata
+decoding. The fifteen wire names are checked against the shared browser codec.
+
+Html adapters retain the actual input type and return markup Strings. Sequence
+adapters return `SequenceWire.Payload` with arrays, labels, markup and optional
+errors. VIR's native structure codec converts these values; worker messages use
+structured clone, including exact BigInt fields. Publication constructs primitive
+contracts through VIR's canonical encoder and derives structured contracts from
+the actual compiled payload type. Both are independent of downloaded executables.
 
 Shape, display mode, and multiline controls are derived from this form. A second
 signature or JSON encoded inside a String is no longer carried in every experiment.
@@ -143,8 +147,9 @@ and non-digits before invoking. Limits are 4,096 UTF-16 code units for a String 
 digits for a Nat input, and 65,536 UTF-16 code units for displayed output. These are
 input/output bounds, not a Wasm heap budget. Stop provides actual interruption; execution
 of trusted compiled code can allocate memory before an output limit is checked. Arbitrary
-Lean evaluation, custom foreign-function providers, browser IO/DOM/React exports, tactics,
-and general dependent interfaces are outside this milestone.
+Lean evaluation, custom foreign-function providers, author-selected browser IO/DOM/React
+exports, tactics, and general dependent interfaces are outside this milestone. The
+internal sequence presenter separately qualifies its exercised DOM bindings.
 
 Forms group the highlighted source above a quiet input/result area, with aligned controls,
 visible keyboard focus, and wrapping on narrow screens. They have labels, keyboard
@@ -174,3 +179,57 @@ The VIR pin is the exact source head selected from PR #229. Its Lean toolchain
 and runtime lock must be qualified together. Verso adds the upstream base-85 digit proof and deprecation-check adjustment needed by Lean 4.35, while
 Slides uses its module-owned-assets review snapshot. Illuminate retains its pin; consumer acceptance is recorded separately in
 [validation](validation.md).
+
+## Sequence presentation boundary
+
+`Sequence α` and `SequenceStep α` hold the author's model; `.view` uses an
+`α → Html` function and produces a concrete `SequenceView`. Entry elaboration
+creates a document-owned typed payload adapter and independently classifies its
+actual export signature. Publication adds the separate presenter program and its
+compiler-derived DOM contracts whenever Html or sequence views are present. The
+presenter carrier retains its complete `ResourceSet`; `combineResources` checks
+its runtime identity against the supplied set before publication. Its manifest
+is resolved by module identity rather than inventory position.
+
+The native generator embeds the presenter resource pack without statically
+importing its browser-only definitions. The carrier loads the prepared module's
+compiled environment to classify the actual `mount` and `mountHtml` declaration types; it does
+not infer a contract from the executable manifest or elaborate another source
+frontend. This keeps JS externs out of native C compilation.
+
+`VersoLeanRunPresenter` uses VIR's existing DOM/event/RuntimeRef APIs. It owns
+Html preview documents, selection, scrubbing, frame display and exact listener identities. Its cleanup
+callback removes listeners before the JavaScript lifetime bridge disposes the
+runtime. The bridge handles asynchronous acquisition, generation checks, Stop
+and failure/retry. Computation stays in the dedicated worker; the presenter runs
+in the browser context and receives rendered frame data, not worker DOM handles.
+State frames retain the restrictive Html sandbox. Genre adapters reuse their
+existing placement and navigation lifecycle.
+
+### Rendering and transport
+
+Authors return typed `Html` or `SequenceView`. Html generation, including SVG,
+runs in compiled Lean in the worker. The sequence controls and frame selection
+also run in compiled Lean, in the separate browser presenter. JavaScript owns
+asynchronous loading, worker messages and cancellation; it does not evaluate the
+model or interpret the sequence's meaning.
+
+Sequence transport is typed data, with no JSON encoding or parsing in the execution
+path. Html markup remains a String at the sandboxed document boundary. Both previews
+use `Preview.document` in compiled Lean, so their CSP and document style have one
+implementation. The browser bridge owns loading and disposal, not document markup. DOM references and callbacks remain owned by
+the browser presenter and must not cross the worker boundary.
+
+Lake already supports this split through the presenter library's module resource
+facet and its separate carrier. Extending that compiled presentation library
+does not require a new Lake rendering API. Its generated resources must remain
+outside the modules they embed, as with document programs.
+
+Stop and the loading deadline settle the module-import wait. They do not cancel
+ECMAScript import or its possible later evaluation. Late rejection stays observed,
+and generation checks prevent an abandoned wait from creating a presenter.
+
+The current Verso Html string serializer can omit closing tags for empty non-void
+elements. Presenter control paragraphs and the iframe have explicit bodies so
+fragment parsing preserves their sibling relationship. This belongs with the
+later Verso upstreaming review; the dependency pin is unchanged.

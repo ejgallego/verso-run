@@ -33,6 +33,10 @@ rather than treating successful loading as proof that an example works.
   before output, native fragments, visibility cancellation, keyboard submission,
   pending-load guards, and readable static source.
 
+- Typed sequences, automatic scalar adapters, independently classified DOM
+  presenters, every native frame, exact stacks and errors, previous/next and
+  scrubbing, independent placements, stale listeners, and presenter-load Stop.
+
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
@@ -47,12 +51,38 @@ Publication loading cancellation is qualified before any response, with fresh-fe
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.
 
-The combined-site gate covers typed and inline examples and compares all four shared
+The combined-site gate covers typed, inline and sequence examples and compares all five shared
 JavaScript files in every genre. `verso-run-build.json` records the generator's exact
 source/dependency/runtime identities; a hosted run requires the deployed revision and
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
+
+The typed-rendering follow-up passed `lake build` and all 92 top-level
+mutation/browser checks, including 22 Blog, 20 Slides, 28 sequence and 14
+rendered-view checks. All 15 admitted forms round-trip through native metadata,
+match independent VIR classification and agree with the browser's input/result
+codecs. The new rendering gate checks Bool → Html and UInt64 → SequenceView in
+Manual, Blog Page/Post and Slides, including exact values above 2^53, UInt64
+wraparound and invalid-input cleanup. Nat → Html uses the existing qualified
+Illuminate drawing-command/SVG path.
+
+Sequence results now cross the worker boundary as typed VIR data. Node checks
+cover structured cloning, malformed payload rejection and the combined UTF-16
+output budget. Html and sequence frames share the compiled Lean preview policy.
+The real held-module regression still covers deadline, Stop, retry with the same
+pending URL and observed late rejection. Slides initialization checks no longer
+assume the first form is visible after Reveal restores the selected slide.
+
+The sequence integration on the String-presentation foundation passed
+`lake build` and all 90 top-level mutation/browser checks, including 22 Blog,
+20 Slides, and 27 sequence checks. All nine form expectations match independent
+VIR classification. Native resource checks cover presenter registration before
+the document, duplicate registration, and rejection of a conflicting runtime.
+Actual workers compute the frames; the independent DOM contract is checked
+before mounting. Browser regressions cover exact native frames in all genres,
+independent selection, listener cleanup, Stop, late imports, retry, static source,
+and narrow viewports.
 
 The String-presentation refinement passed `lake build` and all 89 top-level
 mutation/browser checks. Its normalized expectations match independent VIR
@@ -97,6 +127,17 @@ The initial migration also passed the 11-check Git-only cold starter, the
 31-check combined-site gate, and demo packaging. The initial starter used published extension `a830999`; the ResourceSet
 follow-up selects and cold-qualifies its new extension pin explicitly. Hosted validation belongs to the deployed revision.
 
+
+The sequence campaign adds `tests/sequence.py`, including desktop/mobile captures,
+under its selected ignored output directory. PR #4's baseline `4169841` passed
+[fresh-checkout CI](https://github.com/ejgallego/verso-run/actions/runs/37952706175)
+with the bounded import-wait repair. Its regression holds the presenter module
+through deadline/Stop, then observes late evaluation/rejection without stale
+allocation. The review follow-up adds known shared-evaluator traces, frame-count
+boundaries, unchanged-selection checks and invalid-submission cleanup.
+The original sequence qualification
+on the earlier toolchain remains at Git revision `24a31f7`; it is historical
+evidence, not qualification of this stack on the cleanup toolchain.
 
 Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.
 The suite writes command logs and `results.json` to that ignored directory.
