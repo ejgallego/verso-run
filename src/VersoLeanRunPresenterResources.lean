@@ -1,5 +1,6 @@
 module
 public import Vir.Resources.Assets
+public import Lean.Data.Json.Parser
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Vir.Compiler.Interface.Encode
 public meta import Lean.Elab.Term

@@ -1,5 +1,6 @@
 """Typed Lean sequences and the Lean/VIR DOM player, with real worker/native agreement."""
-import argparse, functools, http.server, json, shutil, subprocess, sys, threading, time
+from harness import run_command, serve_directory
+import argparse, functools, json, shutil, subprocess, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -14,10 +15,7 @@ def record(name):
     checks.append({'test': name, 'result': 'pass'})
     print('PASS', name, flush=True)
 
-def command(args, name):
-    run = subprocess.run(args, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output/(name+'.log')).write_text(run.stdout)
-    assert run.returncode == 0, run.stdout[-4000:]
+command = functools.partial(run_command, output=output, cwd=ROOT)
 
 def oracle(value):
     return json.loads(json.loads(subprocess.check_output(
@@ -43,20 +41,11 @@ for genre, path in [('manual',site/'manual/html-multi'),('blog',site/'blog'),('s
                 'result':{'type':'String','interfaceTag':3},'effect':'pure'}
 record('all genres independently classify pure sequence adapters and the separate DOM presenter')
 
-class QuietHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self,*_): pass
-    def handle(self):
-        try: super().handle()
-        except (BrokenPipeError,ConnectionResetError): pass
-
 served = output/'served'
 for prefix in ['root','nested/prefix']:
     for genre,path in [('manual',site/'manual/html-multi'),('blog',site/'blog'),('slides',site/'slides')]:
         shutil.copytree(path,served/prefix/genre,dirs_exist_ok=True)
-server = http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(QuietHandler,directory=str(served)))
-threading.Thread(target=server.serve_forever,daemon=True).start()
-base = f'http://127.0.0.1:{server.server_port}/'
-try:
+with serve_directory(served) as base:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True,executable_path=shutil.which('google-chrome'))
         page = browser.new_page(viewport={'width':1280,'height':1000})
@@ -195,8 +184,6 @@ try:
         assert not errors, errors
         record('no uncaught sequence browser errors')
         browser.close()
-finally:
-    server.shutdown();server.server_close()
 command([sys.executable, 'tests/sequence-import.py', '--site', str(site/'manual/html-multi'),
          '--output', str(output/'import-wait')], 'import-wait')
 record('held runtime import settles on deadline/Stop before release, retries and observes late outcomes without stale allocation')
