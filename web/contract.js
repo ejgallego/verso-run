@@ -1,3 +1,9 @@
+// Closed form names match the build-validated Lean FormKind.
+export function scalarKind(form) {
+  if (["string", "multilineString", "html", "multilineHtml"].includes(form)) return "string";
+  if (["nat", "bool", "uint64"].includes(form)) return form;
+  throw new Error("Unsupported Lean Run form");
+}
 // Concrete scalar form policy, shared by the host and its worker.
 export const MAX_STRING = 4096;
 export const MAX_NAT_DIGITS = 256;

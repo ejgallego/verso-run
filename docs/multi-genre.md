@@ -50,7 +50,7 @@ anchor can contain several declarations. Its name does not identify a callable.
 | Responsibility | Shared implementation | Genre adapter |
 | --- | --- | --- |
 | Source selection | Existing external-code loader and checked anchor selection | `ExternalCode` instance; native source block and options |
-| Callable description | Explicit entry, VIR classification, shape/output policy, diagnostics, compiled expected signature | Inline command elaboration and scope handling, where supported |
+| Callable description | Explicit entry, VIR classification, closed form policy, diagnostics, retained scalar interface | Inline command elaboration and scope handling, where supported |
 | Run block | Portable `Experiment` data and common console HTML | Typed wrapper containing native source children; encoding and decoding its metadata |
 | Publication | Match actual declarations to supplied bundles, validate contracts, prepare one VIR resource inventory and form bindings | Gather experiments from documents/site, select output root, write through the generator's asset mechanism |
 | Browser execution | Input validation, dedicated worker, expected-export checks, Stop, stale-result suppression, HTML isolation | Asset URL supplied by the genre; navigation/visibility lifecycle hooks |

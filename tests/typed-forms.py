@@ -81,7 +81,8 @@ with serve_directory(served) as base:
             assert description['producerModule'] == description['program']
             assert description['callable'].startswith(description['program']+'.')
             assert description['callable'].endswith('.'+role+'.leanRun')
-            assert description['output'] == 'text'
+            assert description['form'] == {'flip': 'bool', 'increment': 'uint64', 'lines': 'multilineString'}[role]
+            assert not {'shape', 'output', 'multiline', 'signature'} & description.keys()
             assert '@[vir_export]' not in selected.locator('.lean-run-source').text_content()
             if genre == 'slides':
                 page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')

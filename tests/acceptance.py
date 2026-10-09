@@ -27,6 +27,8 @@ def oracle(role, value):
     return json.loads(output)
 
 command(['lake','build'], 'build')
+command(['lake', 'env', 'lean', 'tests/Model.lean'], 'typed-model')
+record('typed form round-trips and unsupported metadata rejection')
 command(['node', 'tests/host-lifecycle.mjs'], 'host-lifecycle')
 record('publication acquisition cancellation, shared waiters, late completion, deadline and explicit recovery')
 site = OUTPUT/'site'

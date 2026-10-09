@@ -7,14 +7,18 @@ module
 public import VersoLeanRun.Model
 public meta import VersoLeanRun.Model
 public import Verso.Doc.Elab
+meta import Verso.Instances.Deriving
 public import Verso.Output.Html
 public meta import Vir.Attributes
 public meta import Vir.Compiler.Interface.Classify.Signature
-public meta import Vir.Compiler.Interface.Encode
 public meta import Lean.ToExpr
 public section
 open Lean Verso Doc Elab ArgParse
 namespace VersoLeanRun
+
+meta section
+deriving instance Quote for FormKind
+end
 
 structure Config where
   entry : Ident
@@ -64,7 +68,7 @@ private meta def scalarEntry (entry : Ident) (name : Name) (isHtml : Bool) : Doc
   return adapter
 
 private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
-    (signature : Vir.Interface.ClassifiedSignature) : DocElabM String := do
+    (signature : Vir.Interface.ClassifiedSignature) : DocElabM FormKind := do
   let reason : MessageData :=
     if signature.effect != .pure then
       m!"This form cannot run effectful functions (effect: {signature.effect.label}). \
@@ -95,7 +99,6 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
       info.levelParams.isEmpty && domain.isConstOf ``String &&
         result.isConstOf ``Verso.Output.Html
     | _ => false
-  let output := if isHtml then "html" else "text"
   -- Classify the source interface independently before registering scalar exports.
   -- Html crosses VIR through a generated String serializer.
   let sourceName := name
@@ -106,15 +109,17 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
     | .error error => throwErrorAt config.entry
         "Lean Run entry '{name}' has an unsupported VIR interface.\n\
           Type: {info.type}\nVIR: {error.toMessageData}"
-  let shape ← match callSignature.args, callSignature.result, callSignature.effect with
-    | #[{ type := .string, .. }], .string, .pure => pure "string"
-    | #[{ type := .nat, .. }], .nat, .pure => pure "nat"
-    | #[{ type := .bool, .. }], .bool, .pure => pure "bool"
-    | #[{ type := .uint64, .. }], .uint64, .pure => pure "uint64"
+  let form : FormKind ← match callSignature.args, callSignature.result, callSignature.effect with
+    | #[{ type := .string, .. }], .string, .pure => pure (if isHtml then
+        if config.multiline then .multilineHtml else .html
+      else if config.multiline then .multilineString else .string)
+    | #[{ type := .nat, .. }], .nat, .pure => pure .nat
+    | #[{ type := .bool, .. }], .bool, .pure => pure .bool
+    | #[{ type := .uint64, .. }], .uint64, .pure => pure .uint64
     | _, _, _ => unsupportedForm config.entry name info.type callSignature
-  if config.multiline && shape != "string" then
+  if config.multiline && form.scalar != .string then
     throwErrorAt config.entry "Lean Run multiline input requires a String argument"
-  if shape == "bool" then
+  if form.scalar == .bool then
     if let some input := config.input then
       unless input == "true" || input == "false" do
         throwErrorAt config.entry "Lean Run Boolean preset must be 'true' or 'false'"
@@ -122,29 +127,24 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
   registerEntry config.entry name
   let env ← getEnv
   let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
-  let signature := callSignature.toExpectedSignatureJson
   let experiment : Experiment := {
-    program := env.mainModule.toString, declaration := sourceName.toString, callable := name.toString, shape, signature,
+    program := env.mainModule.toString, declaration := sourceName.toString, callable := name.toString, form,
     producerModule := match env.getModuleIdxFor? name with
       | some idx => env.header.moduleNames[idx.toNat]!.toString
       | none => env.mainModule.toString,
-    initialInput := config.input.getD (if shape == "nat" || shape == "uint64" then "0"
-      else if shape == "bool" then "false" else ""),
-    multiline := config.multiline,
+    initialInput := config.input.getD (if form.scalar == .nat || form.scalar == .uint64 then "0"
+      else if form.scalar == .bool then "false" else ""),
     collapsed := config.collapsed,
-    output,
     sourceLine := pos.line, sourceColumn := pos.column }
   return experiment
 
 /-- Quote validated metadata for native genre constructors. -/
 meta def quoteExperiment (experiment : Experiment) : DocElabM Term := do
   return ← `(VersoLeanRun.Experiment.mk
-    $(quote experiment.program) $(quote experiment.declaration) $(quote experiment.shape)
+    $(quote experiment.program) $(quote experiment.declaration) $(quote experiment.form)
     $(quote experiment.initialInput)
     $(quote experiment.collapsed)
-    $(quote experiment.output)
-    $(quote experiment.signature)
     $(quote experiment.sourceLine) $(quote experiment.sourceColumn)
-    $(quote experiment.producerModule) $(quote experiment.multiline) $(quote experiment.callable))
+    $(quote experiment.producerModule) $(quote experiment.callable))
 
 end VersoLeanRun

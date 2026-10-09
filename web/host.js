@@ -1,4 +1,4 @@
-import { validateInput } from "./contract.js";
+import { validateInput, scalarKind } from "./contract.js";
 let publication;
 // Pending acquisition is shared only while a placement still needs it. A stopped
 // placement releases its interest, without aborting another placement's fetch.
@@ -48,7 +48,7 @@ export class ExperimentHost {
   async invoke(input) {
     if (this.disposed) throw new Error("Experiment is disposed");
     if (this.pending) throw new Error("Experiment is already running");
-    validateInput(this.description.shape, input);
+    validateInput(scalarKind(this.description.form), input);
     const generation = this.generation;
     const requestId = ++this.request;
     let resolve, reject;

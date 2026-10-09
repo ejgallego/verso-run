@@ -6,6 +6,7 @@ rather than treating successful loading as proof that an example works.
 
 ## What the suite checks
 
+- Closed form metadata round-trips and rejection of unsupported combinations.
 - Entry-selected exports without author annotations, type-derived result display,
   unannotated imported producers and document-owned scalar/HTML wrappers.
 - Text, Unicode, exact natural numbers, calculator traces and bounds, typed

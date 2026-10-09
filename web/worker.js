@@ -1,5 +1,5 @@
 // One worker owns one VIR program. Terminating this worker cancels synchronous calls.
-import { decodeInput, formatResult } from "./contract.js";
+import { decodeInput, formatResult, scalarKind } from "./contract.js";
 let program = null;
 let description = null;
 let creating = null;
@@ -19,7 +19,7 @@ onmessage = async ({ data }) => {
   const { requestId } = data;
   try {
     if (data.operation !== "invoke" || creating) throw new Error("Invalid or overlapping worker request");
-    const argument = decodeInput(data.description.shape, data.input);
+    const argument = decodeInput(scalarKind(data.description.form), data.input);
     if (!program) {
       description = data.description;
       const { createProgram } = await import(data.publication.runtimeModule);
@@ -32,12 +32,12 @@ onmessage = async ({ data }) => {
       });
       creating = null;
     }
-    if (description.declaration !== data.description.declaration || description.shape !== data.description.shape || description.callable !== data.description.callable) {
+    if (description.declaration !== data.description.declaration || description.form !== data.description.form || description.callable !== data.description.callable) {
       throw new Error("Worker experiment identity changed");
     }
     postMessage({ requestId, state: "running" });
     const result = program.call(description.callable, argument);
-    postMessage({ requestId, state: "success", result: formatResult(description.shape, result) });
+    postMessage({ requestId, state: "success", result: formatResult(scalarKind(description.form), result) });
   } catch (error) {
     creating = null;
     try { program?.dispose(); } catch (cleanup) { error.cleanupError = cleanup; }
