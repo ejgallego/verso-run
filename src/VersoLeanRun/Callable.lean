@@ -33,10 +33,12 @@ meta instance : FromArgs Config DocElabM where
   fromArgs := Config.mk <$> .named `entry .ident false <*> .named `input .string true <*>
     .flag `collapsed false <*> .flag `multiline false
 
+meta section
 /-- Scalar aliases keep their original type; rendered results need serializers. -/
 private inductive AdapterKind where
   | scalar | html | sequence
   deriving BEq
+end
 
 /-- Registration is selected by the Run entry, after independent type/form checks.
 Keep VIR's attribute validator authoritative for executable IR and dependencies. -/
@@ -47,7 +49,7 @@ private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := 
         | throwErrorAt entry "Missing VIR export attribute"
       withRef entry <| attr.add name entry .global
 
-/-- Imported callables and typed HTML have a document-owned scalar boundary.
+/-- Imported callables and rendered views have a document-owned scalar boundary.
 The producer need not know that a document will select its function. -/
 private meta def scalarEntry (entry : Ident) (name : Name) (mode : AdapterKind) : DocElabM Name := do
   let env ← getEnv
@@ -116,7 +118,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
     | _ => false
   let mode : AdapterKind := if isHtml then .html else if isSequence then .sequence else .scalar
   -- Classify the source interface independently before registering scalar exports.
-  -- Html crosses VIR through a generated String serializer.
+  -- Html and SequenceView cross VIR through generated String serializers.
   let sourceName := name
   let name ← if mode == .scalar then pure name else scalarEntry config.entry name mode
   let info ← getConstInfo name

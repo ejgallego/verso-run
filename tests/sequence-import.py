@@ -1,5 +1,6 @@
 """Hold the real presenter module request across deadline/Stop and late evaluation."""
-import argparse, functools, http.server, json, shutil, threading, time
+from harness import serve_directory
+import argparse, json, shutil, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -13,18 +14,8 @@ output = Path(args.output).resolve()
 output.mkdir(parents=True, exist_ok=True)
 plan = json.loads((site/'lean-run/publication.json').read_text())
 
-class QuietHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, *_): pass
-    def handle(self):
-        try: super().handle()
-        except (BrokenPipeError, ConnectionResetError): pass
-
-server = http.server.ThreadingHTTPServer(('127.0.0.1', 0),
-    functools.partial(QuietHandler, directory=str(site)))
-threading.Thread(target=server.serve_forever, daemon=True).start()
-base = f'http://127.0.0.1:{server.server_port}/'
 checks = []
-try:
+with serve_directory(site) as base:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
         for mode in ['deadline', 'stop']:
@@ -114,6 +105,4 @@ try:
             print('PASS held module: ' + mode + ', prompt settlement, retry and observed late outcome', flush=True)
             page.close()
         browser.close()
-finally:
-    server.shutdown(); server.server_close()
 (output/'results.json').write_text(json.dumps({'checks': checks, 'publication': plan}, indent=2)+'\n')

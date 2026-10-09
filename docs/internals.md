@@ -105,7 +105,8 @@ homogeneous, single-argument String/Nat/Bool/UInt64 signatures are admitted.
 Its String constructor carries a `StringInputMode` and `StringPresentation`;
 Nat, Bool, and UInt64 have no presentation parameters. This lets additional String
 views extend the presentation type without weakening scalar invariants. The wire tags are
-`string`, `multilineString`, `nat`, `bool`, `uint64`, `html`, or `multilineHtml`.
+`string`, `multilineString`, `nat`, `bool`, `uint64`, `html`, `multilineHtml`,
+`sequence`, or `multilineSequence`.
 HTML forms invoke a compiled String serializer. Unsupported combinations have no
 constructor, and unknown form tags fail native metadata decoding.
 
@@ -181,7 +182,10 @@ Slides uses its module-owned-assets review snapshot. Illuminate retains its pin;
 `α → Html` function and produces a concrete `SequenceView`. Entry elaboration
 creates a document-owned String serializer and independently classifies its
 actual scalar signature. Publication adds a separate presenter program and its
-compiler-derived DOM call expectation only when a sequence is present.
+compiler-derived DOM call expectation only when a sequence is present. The
+presenter carrier retains its complete `ResourceSet`; `combineResources` checks
+its runtime identity against the supplied set before publication. Its manifest
+is resolved by module identity rather than inventory position.
 
 The native generator embeds the presenter resource pack without statically
 importing its browser-only definitions. The carrier loads the prepared module's
