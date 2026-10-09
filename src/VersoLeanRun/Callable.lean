@@ -5,6 +5,7 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import VersoLeanRun.Model
+public import VersoLeanRun.Sequence
 public meta import VersoLeanRun.Model
 public import Verso.Doc.Elab
 public import Verso.Output.Html
@@ -37,16 +38,19 @@ private meta def registerEntry (entry : Ident) (name : Name) : DocElabM Unit := 
 
 /-- Imported callables and typed HTML have a document-owned scalar boundary.
 The producer need not know that a document will select its function. -/
-private meta def scalarEntry (entry : Ident) (name : Name) (isHtml : Bool) : DocElabM Name := do
+private meta def scalarEntry (entry : Ident) (name : Name) (mode : String) : DocElabM Name := do
   let env ← getEnv
   let imported := (env.getModuleIdxFor? name).isSome
-  if !isHtml && !imported then return name
+  if mode == "text" && !imported then return name
   let adapter := (if imported then env.mainModule ++ name else name) ++
-    (if isHtml then `leanRunHtml else `leanRun)
+    (if mode == "html" then `leanRunHtml else if mode == "sequence" then `leanRunSequence else `leanRun)
   let info ← getConstInfo name
   let string := mkConst ``String
-  let type ← if isHtml then mkArrow string string else pure info.type
-  let value := if isHtml then
+  let type ← if mode != "text" then mkArrow string string else pure info.type
+  let value := if mode == "sequence" then
+    mkLambda `input .default string <| mkApp (mkConst ``SequenceView.serialize)
+      (mkApp (mkConst name) (.bvar 0))
+    else if mode == "html" then
     mkLambda `input .default string <|
       mkApp3 (mkConst ``Verso.Output.Html.asString)
         (mkApp (mkConst name) (.bvar 0)) (mkNatLit 0) (mkConst ``Bool.true)
@@ -77,7 +81,7 @@ private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
         Serialize structured inputs and results as text, or return typed HTML."
   throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
     This interface is supported by VIR, but not by this Run form.\n\
-    {reason}\nUse a pure String → String, Nat → Nat, Bool → Bool, UInt64 → UInt64, or String → Html function."
+    {reason}\nUse a pure String → String, Nat → Nat, Bool → Bool, UInt64 → UInt64, String → Html, or String → SequenceView function."
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
 Selected imported entries and HTML adapters are compiled in the document module. -/
@@ -96,13 +100,17 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
       info.levelParams.isEmpty && domain.isConstOf ``String &&
         result.isConstOf ``Verso.Output.Html
     | _ => false
-  if isHtml && !allowHtml then
-    throwErrorAt config.entry "Lean Run entry '{name}' returns Html, but this context requires a scalar result"
-  let output := if isHtml then "html" else "text"
+  let isSequence := match entryType with
+    | .forallE _ domain result .default =>
+      info.levelParams.isEmpty && domain.isConstOf ``String && result.isConstOf ``SequenceView
+    | _ => false
+  if (isHtml || isSequence) && !allowHtml then
+    throwErrorAt config.entry "Lean Run entry '{name}' returns a rendered view, but this context requires a scalar result"
+  let output := if isHtml then "html" else if isSequence then "sequence" else "text"
   -- Classify the source interface independently before registering scalar exports.
   -- Html crosses VIR through a generated String serializer.
   let sourceName := name
-  let name ← if isHtml then scalarEntry config.entry name true else pure name
+  let name ← if isHtml || isSequence then scalarEntry config.entry name output else pure name
   let info ← getConstInfo name
   let callSignature ← match ← Vir.Interface.analyzeExportInterface info.type with
     | .ok sig => pure sig
@@ -121,7 +129,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
     if let some input := config.input then
       unless input == "true" || input == "false" do
         throwErrorAt config.entry "Lean Run Boolean preset must be 'true' or 'false'"
-  let name ← if isHtml then pure name else scalarEntry config.entry name false
+  let name ← if isHtml || isSequence then pure name else scalarEntry config.entry name "text"
   registerEntry config.entry name
   let env ← getEnv
   let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0

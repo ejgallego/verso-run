@@ -7,7 +7,7 @@ require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ 
 package verso_run
 lean_lib LeanRunGateProgram where
   srcDir := "demo/chapters"
-  roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper]
+  roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper, `LeanRunGate.Stack]
 lean_lib LeanRunGateResources where
   srcDir := "demo/resources"
   roots := #[`LeanRunGate.Resources]
@@ -43,6 +43,20 @@ lean_lib LeanRunSlidesResources where
   srcDir := "demo/resources"
   roots := #[`LeanRunSlides.Resources]
   needs := #[`+LeanRunSlides.Deck:virResourcePack]
+
+lean_lib LeanRunSequenceExamples where
+  srcDir := "demo/chapters"
+  roots := #[`LeanRunSequence.Examples]
+
+-- The DOM presenter is a separate program and never imports its resource carrier.
+lean_lib VersoLeanRunPresenter where
+  srcDir := "src"
+  roots := #[`VersoLeanRunPresenter]
+
+lean_lib VersoLeanRunPresenterResources where
+  srcDir := "src"
+  roots := #[`VersoLeanRunPresenterResources]
+  needs := #[`+VersoLeanRunPresenter:virResourcePack]
 
 lean_exe «lean-run-gate» where
   srcDir := "tests/native"

@@ -133,3 +133,14 @@ General Illuminate diagrams require the recorded VIR float-provider work in
 `evidence/illuminate-gates.md`. Wider browser and accessibility qualification
 remain later work. Editor support and the more ambitious `verso-lab` project
 are separate from this compiled Run extension.
+
+## Lean-authored sequences
+
+The first bounded sequence library exposes typed states and an ordinary Html
+view, with a separate Lean/VIR DOM player. The stack stepper shares the existing
+Lean parser/evaluator rules and has native-oracle coverage. Further animation
+integration should reuse Illuminate's types/player where they fit, after
+qualifying the existing diagram/hash provider path. This slice enables no new
+runtime or compiler scheduling configuration. Warm compute-worker reuse remains
+an independent discussion; selecting sequence frames already keeps its presenter
+instance and does not invoke the evaluator again.

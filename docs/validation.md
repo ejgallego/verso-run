@@ -30,6 +30,10 @@ rather than treating successful loading as proof that an example works.
   before output, native fragments, visibility cancellation, keyboard submission,
   pending-load guards, and readable static source.
 
+- Typed sequences, automatic scalar adapters, independently classified DOM
+  presenters, every native frame, exact stacks and errors, previous/next and
+  scrubbing, independent placements, stale listeners, and presenter-load Stop.
+
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
@@ -44,7 +48,7 @@ Publication loading cancellation is qualified before any response, with fresh-fe
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.
 
-The combined-site gate covers typed and inline examples and compares all four shared
+The combined-site gate covers typed, inline and sequence examples and compares all five shared
 JavaScript files in every genre. `verso-run-build.json` records the generator's exact
 source/dependency/runtime identities; a hosted run requires the deployed revision and
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
@@ -57,6 +61,11 @@ suite (including the Blog, Slides, typed-form, and inline campaigns), the
 2026-10-09. Demo packaging also passed. These are local checks; hosted validation
 belongs to the deployed revision.
 
+
+The sequence campaign adds `tests/sequence.py`, including desktop/mobile captures,
+under its selected ignored output directory. The original sequence qualification
+on the earlier toolchain remains at Git revision `24a31f7`; it is historical
+evidence, not qualification of this stack on the cleanup toolchain.
 
 Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.
 The suite writes command logs and `results.json` to that ignored directory.

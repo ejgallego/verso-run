@@ -147,3 +147,40 @@ When updating an older example, remove redundant `@[vir_export]` markers and
 producer to the document module. The independently pinned
 [Manual starter](../examples/manual-starter/README.md) still demonstrates the older
 published revision; its explicit annotations are kept until its dependency update.
+
+## Present a sequence of states
+
+Return `VersoLeanRun.SequenceView` to get previous/next, step selection and a
+scrubber. The same entry works in Manual, Blog Page/Post and Slides. Define your
+model with `Sequence α`, label each `SequenceStep α`, then supply a view using
+Verso's existing `Html` type:
+
+```lean
+public def Demo.greetingSteps (name : String) : VersoLeanRun.SequenceView :=
+  let sequence : VersoLeanRun.Sequence String := {
+    initial := name
+    steps := #[{ label := "Greeting", state := "Hello, " ++ name }] }
+  sequence.view (Verso.Output.Html.text true)
+```
+
+Select it with `leanRun (entry := Demo.greetingSteps)`. No JSON, export marker or
+output argument is needed. `SequenceStep.error` can report a failure at a state;
+`Sequence.initialError` handles an invalid initial input. Models and views are
+ordinary Lean code and can live in imported modules with checked source anchors.
+The [stack example](../demo/chapters/LeanRunSequence/Examples.lean) reuses the calculator's
+Lean parser and operational `step` function and renders both sides of each step.
+
+The worker computes states and renders their Html. A separate Lean/VIR DOM
+presenter owns selection and event callbacks. Selecting a frame uses the computed
+presentation and does not rerun the evaluator. Each placement owns both runtimes;
+input edits, Stop and genre navigation cancel acquisition and dispose the view.
+State Html uses the same script-disabled sandbox as an ordinary Html result.
+Labels and failures are text, and exact natural numbers are rendered by Lean.
+
+Presentations contain 1–128 frames and share the existing 65,536 UTF-16 output
+limit. Large rendered sequences may exceed that limit even when their computation
+is otherwise valid. Computation remains interruptible by terminating its worker.
+The DOM presenter is a bounded experimental library, not a claim of general VIR
+DOM qualification. Only its exercised bindings are covered here. Illuminate's
+full animation compiler remains unqualified on the current runtime; its existing
+qualified drawing-command/SVG output can be used inside a state Html view.
