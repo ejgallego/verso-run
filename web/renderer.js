@@ -1,5 +1,5 @@
 import { ExperimentHost } from "./host.js";
-import { validateInput } from "./contract.js";
+import { validateInput, scalarKind } from "./contract.js";
 const owners = new Set();
 addEventListener("pagehide", event => {
   for (const host of owners) {
@@ -54,7 +54,7 @@ export function enhance(element) {
   form.addEventListener("submit", event => {
     event.preventDefault();
     if (busy) return;
-    try { validateInput(description.shape, input.value); }
+    try { validateInput(scalarKind(description.form), input.value); }
     catch (error) {
       clearPreview();
       element.dataset.state = "invalid input";

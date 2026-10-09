@@ -85,7 +85,7 @@ Verso's standard external-code path prepares cached highlighting separately.
 
 `Experiment.program` identifies the document placement group and diagnostic
 position; `declaration` is the author-selected Lean entry. `callable` is the full
-compiled VIR export name (with a fallback to `declaration` for older metadata).
+compiled VIR export name.
 `producerModule` identifies the callable's owning module. Generated scalar/Html
 adapters for imported entries belong to the document, leaving producer modules
 unchanged. Source anchor names and callable export names remain separate.
@@ -99,11 +99,21 @@ construction. VIR's `createProgram` validates actual root declarations and their
 signatures before runtime instantiation. `forSite` does not check callable types;
 there is no embedded-interface parser or reopening of producer files here.
 
-VIR's `analyzeExportInterface` supplies each independently elaborated signature,
-with canonical type descriptors and effect. `callSignature.toExpectedSignatureJson` supplies the type-only contract.
-The publisher places that exact
-`{args, result, effect}` object in `expectedExport`; the worker uses the full
-Lean `callable` declaration as both expectation key and call name. A missing expectation
+VIR's `analyzeExportInterface` independently classifies the callable. Only pure,
+homogeneous, single-argument String/Nat/Bool/UInt64 signatures are admitted.
+`Experiment.form : FormKind` retains that scalar type and its allowed presentation.
+Its String constructor carries a `StringInputMode` and `StringPresentation`;
+Nat, Bool, and UInt64 have no presentation parameters. This lets additional String
+views extend the presentation type without weakening scalar invariants. The wire tags are
+`string`, `multilineString`, `nat`, `bool`, `uint64`, `html`, or `multilineHtml`.
+HTML forms invoke a compiled String serializer. Unsupported combinations have no
+constructor, and unknown form tags fail native metadata decoding.
+
+Shape, display mode, and multiline controls are derived from this form. A second
+signature or JSON encoded inside a String is no longer carried in every experiment.
+Publication encodes the retained type through VIR's `ClassifiedSignature` encoder
+as `{args, result, effect}` in `expectedExport`. The worker uses the full Lean
+`callable` declaration as both expectation key and call name. A missing expectation
 fails before worker creation. Missing declarations or argument/result/arity/effect
 mismatches fail in VIR's program-validation phase before invocation. Native/browser
 oracle comparisons establish the demonstrated semantic agreement.

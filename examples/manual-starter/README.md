@@ -26,7 +26,7 @@ Single-page HTML is in `_out/html-single`; TeX is in `_out/tex`.
 Serve the complete HTML directory over HTTP, including `lean-run/` and all
 generated assets. Copying it under a nested URL prefix also works.
 
-This starter pins public extension `fa66aee`, which uses the current `entry` API:
+This starter pins public extension `f2a1491`, which uses the current `entry` API:
 no export attribute is required, and the result type selects text or HTML display.
 See [the authoring guide](../../docs/authoring.md).
 

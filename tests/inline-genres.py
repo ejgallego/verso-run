@@ -117,7 +117,7 @@ with serve_directory(served) as base:
                 data = json.loads(first.get_attribute('data-experiment'))
                 assert data['program'] == data['producerModule'] == owner
                 assert data['callable'] == data['declaration'] == owner+'.Inline.greet'
-                assert data['output'] == 'text'
+                assert data['form'] == 'string'
                 assert '@[vir_export]' not in first.locator('.lean-run-source').text_content()
                 assert first.locator('.lean-run-source .hl.lean').count() > 0
                 value = '世界 🌍 <b>&'
@@ -143,7 +143,7 @@ with serve_directory(served) as base:
                 data = json.loads(card.get_attribute('data-experiment'))
                 assert data['declaration'] == owner+'.Inline.card'
                 assert data['callable'] == owner+'.Inline.card.leanRunHtml'
-                assert data['output'] == 'html'
+                assert data['form'] == 'html'
                 assert success(card, '<b>& 🌍') == ''
                 iframe = card.locator('iframe')
                 assert oracle(role+'InlineCard', '<b>& 🌍') in iframe.get_attribute('srcdoc')

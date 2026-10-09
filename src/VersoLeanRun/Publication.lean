@@ -7,6 +7,7 @@ module
 public import VersoLeanRun.Model
 public import Lean.Data.Json.Parser
 public import Vir.Resources
+public import Vir.Compiler.Interface.Encode
 public section
 open Vir.Resources
 namespace VersoLeanRun
@@ -30,6 +31,18 @@ def combineResources (resources additional : ResourceSet) : Except String Resour
     throw s!"RUNTIME_CONTENT_ID_CONFLICT: cannot combine resource sets with runtimes {resources.runtime.contentId} and {additional.runtime.contentId}"
   return { resources with programs := resources.programs ++ additional.programs }
 
+/-- The classifier admits one pure, homogeneous scalar callable. Encode its
+retained type with VIR's canonical encoder, independently of the program bundle. -/
+def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
+  let type : Vir.Interface.InterfaceType := match form.scalar with
+    | .string => .string
+    | .nat => .nat
+    | .bool => .bool
+    | .uint64 => .uint64
+  let signature : Vir.Interface.ClassifiedSignature := {
+    args := #[{ name := "input", type }], result := type, effect := .pure }
+  Lean.Json.parse signature.toExpectedSignatureJson
+
 /-- Plan the supplied inventory without acquiring or replacing its runtime.
 Resolve declarations and validate contracts before performing any output writes. -/
 def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
@@ -44,7 +57,7 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     -- Preserve the original index-to-manifest mapping for identical repetitions.
     let some i := programs.findIdx? (fun bundle => bundle.descriptor.logicalId == producer)
       | throw s!"{provenance}: no published program bundle for {experiment.declaration} (producer module {producer}). Add +Module:virResourcePack to the asset library needs, embed with include_vir_assets (modules := #[Module]), and supply its ResourceSet to VersoLeanRun.publish."
-    let signature ← (Lean.Json.parse experiment.signature).mapError fun error =>
+    let signature ← experiment.form.expectedExport.mapError fun error =>
       s!"{provenance}: invalid compiled VIR signature: {error}"
     let binding := Lean.Json.mkObj [
       ("manifest", .str site.programManifests[i]!),
