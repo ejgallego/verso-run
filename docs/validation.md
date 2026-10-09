@@ -36,7 +36,7 @@ rather than treating successful loading as proof that an example works.
 The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
 test isolation. CI also cold-builds the independently pinned
 [author starter](../examples/manual-starter/README.md) without Lake artifact-cache
-reuse and runs its 11 checks. The starter acquires public extension `6442617` and
+reuse and runs its 11 checks. The starter acquires public extension `f2a1491` and
 the selected runtime through its complete Git manifest, without local seeds.
 
 The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `6e514cd4`,
@@ -53,6 +53,14 @@ source/dependency/runtime identities; a hosted run requires the deployed revisio
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
 
 ## Current results and historical evidence
+
+The String-presentation refinement passed `lake build` and all 89 top-level
+mutation/browser checks. Its normalized expectations match independent VIR
+classification for every admitted form. The multiline HTML regression exercises
+presets, edited Unicode, escaped markup, keyboard submission, and stale-preview
+cleanup. The starter pins public core `f2a1491` and passed its Git-only no-cache
+build and all 11 browser checks. String input mode and presentation are separate
+from the scalar ABI, preparing the model for the sequence feature in PR #4.
 
 The typed experiment model passed a clean `lake build` and all 88 top-level
 mutation/browser checks, including 22 Blog and 20 Slides checks. Native checks
