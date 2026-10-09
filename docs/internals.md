@@ -94,6 +94,15 @@ preserves the original index-to-manifest mapping. Identical bundles deduplicate.
 Distinct bundles with one logical ID fail `ResourceSet.forSite` validation with
 `LOGICAL_ID_CONFLICT`, before per-form binding or output writes.
 
+Bindings are keyed by document and author-selected declaration. Repeated placements
+share one manifest and expected signature while retaining independent controls,
+inputs, and workers. Changing the callable, manifest, or scalar expectation for
+that same key fails with `PUBLICATION_BINDING_CONFLICT`, reporting both source
+locations before any publication writes. Input presets, collapsed state, and
+String presentation options do not change the callable contract. Different
+documents have independent binding namespaces. Ordered binding maps produce the
+same publication bytes regardless of placement order.
+
 Publication validates resources, module availability, and independent expectation
 construction. VIR's `createProgram` validates actual root declarations and their
 signatures before runtime instantiation. `forSite` does not check callable types;

@@ -6,6 +6,7 @@ Author: Emilio J. Gallego Arias
 module
 public import VersoLeanRun.Model
 public import Lean.Data.Json.Parser
+public import Std.Data.TreeMap.Basic
 public import Vir.Resources
 public import Vir.Compiler.Interface.Encode
 public import VersoLeanRun.Sequence
@@ -61,6 +62,29 @@ def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
     args := #[{ name := "input", type }], result := if form.isHtml then .string else type, effect := .pure }
   Lean.Json.parse signature.toExpectedSignatureJson
 
+private structure RegisteredBinding where
+  source : Experiment
+  value : Lean.Json
+
+private abbrev PublicationBindings :=
+  Std.TreeMap String (Std.TreeMap String RegisteredBinding)
+
+/-- One binding per document/entry, retaining the first registration for diagnostics.
+Placement options remain on each form and do not participate in this identity. -/
+private def registerBinding (bindings : PublicationBindings) (experiment : Experiment)
+    (binding : Lean.Json) : Except String PublicationBindings := do
+  let declarations := (bindings[experiment.program]?).getD {}
+  if let some previous := declarations[experiment.declaration]? then
+    let first := previous.source
+    unless previous.value == binding && first.callable == experiment.callable do
+      throw <| s!"{experiment.program}:{experiment.sourceLine}:{experiment.sourceColumn}: PUBLICATION_BINDING_CONFLICT: conflicting registration for {experiment.declaration} in document {experiment.program}. " ++
+        s!"First at {first.program}:{first.sourceLine}:{first.sourceColumn} (producer {first.producerModule}, callable {first.callable}, binding {previous.value.compress}); " ++
+        s!"incoming producer {experiment.producerModule}, callable {experiment.callable}, binding {binding.compress}. " ++
+        "Repeated placements must use the same callable, manifest, and expected signature."
+    return bindings
+  return bindings.insert experiment.program <|
+    declarations.insert experiment.declaration { source := experiment, value := binding }
+
 /-- Plan the supplied inventory without acquiring or replacing its runtime.
 Resolve declarations and validate contracts before performing any output writes. -/
 def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
@@ -71,7 +95,9 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     combineResources resources VersoLeanRunPresenterResources.resources else pure resources
   let programs := resources.programs
   let site ← (resources.forSite resourcePrefix).mapError reprStr
-  let mut bindings : Array (String × (String × Lean.Json)) := #[]
+  -- Key by placement document and author entry, not by form instance. Keep the
+  -- first source location for diagnostics; ordered maps give stable output.
+  let mut bindings : PublicationBindings := {}
   for experiment in rendered do
     let provenance := s!"{experiment.program}:{experiment.sourceLine}:{experiment.sourceColumn}"
     let producer := experiment.producerModule
@@ -84,15 +110,13 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     let binding := Lean.Json.mkObj [
       ("manifest", .str site.programManifests[i]!),
       ("expectedExport", signature)]
-    bindings := bindings.push (experiment.program, (experiment.declaration, binding))
-  let owners := rendered.foldl (init := #[]) fun names experiment =>
-    if names.contains experiment.program then names else names.push experiment.program
-  let programsJson := owners.map fun owner =>
-    (owner, Lean.Json.mkObj <| (bindings.filter (·.1 == owner)).toList.map (·.2))
+    bindings ← registerBinding bindings experiment binding
+  let programsJson := bindings.toList.map fun document =>
+    (document.1, Lean.Json.mkObj <| document.2.toList.map fun entry => (entry.1, entry.2.value))
   let mut fields : List (String × Lean.Json) := [
     ("runtimeModule", .str site.runtimeModule),
     ("runtimeManifest", .str site.runtimeManifest),
-    ("programs", Lean.Json.mkObj programsJson.toList)]
+    ("programs", Lean.Json.mkObj programsJson)]
   if sequence || html then
     let some presenterIndex := programs.findIdx? (·.descriptor.logicalId == "VersoLeanRunPresenter")
       | throw "No published Lean view presenter program"
