@@ -14,38 +14,57 @@ inductive ScalarKind where
   | string | nat | bool | uint64
   deriving BEq, Repr
 
-/-- Forms admitted by the callable classifier. Presentation is part of the form,
-so multiline and HTML controls can only carry String inputs and results. -/
-inductive FormKind where
-  | string | multilineString | nat | bool | uint64 | html | multilineHtml
-  deriving BEq, Repr, ToJson
+inductive StringInputMode where
+  | line | multiline
+  deriving BEq, Repr
 
-/-- The wire representation is a closed string tag, not an extensible record.
-Reject object encodings that could silently discard unsupported options. -/
+/-- String transport and result presentation are separate. A new String view does
+not change the callable ABI or permit rendered views on numeric/Boolean forms. -/
+inductive StringPresentation where
+  | text | html
+  deriving BEq, Repr
+
+inductive FormKind where
+  | string (input : StringInputMode) (presentation : StringPresentation)
+  | nat | bool | uint64
+  deriving BEq, Repr
+
+instance : ToJson FormKind where
+  toJson form := .str <| match form with
+    | .string .line .text => "string"
+    | .string .multiline .text => "multilineString"
+    | .string .line .html => "html"
+    | .string .multiline .html => "multilineHtml"
+    | .nat => "nat"
+    | .bool => "bool"
+    | .uint64 => "uint64"
+
+/-- Accept exactly the supported string tags. Object encodings must not silently
+lose unsupported options at the native metadata boundary. -/
 instance : FromJson FormKind where
   fromJson? json := do
     match ← json.getStr? with
-    | "string" => pure .string
-    | "multilineString" => pure .multilineString
+    | "string" => pure (.string .line .text)
+    | "multilineString" => pure (.string .multiline .text)
     | "nat" => pure .nat
     | "bool" => pure .bool
     | "uint64" => pure .uint64
-    | "html" => pure .html
-    | "multilineHtml" => pure .multilineHtml
+    | "html" => pure (.string .line .html)
+    | "multilineHtml" => pure (.string .multiline .html)
     | tag => throw s!"Unsupported Lean Run form '{tag}'"
 
 def FormKind.scalar : FormKind → ScalarKind
   | .nat => .nat
   | .bool => .bool
   | .uint64 => .uint64
-  | .string | .multilineString | .html | .multilineHtml => .string
+  | .string .. => .string
 
 def FormKind.multiline : FormKind → Bool
-  | .multilineString | .multilineHtml => true
+  | .string .multiline _ => true
   | _ => false
 
 def FormKind.isHtml : FormKind → Bool
-  | .html | .multilineHtml => true
+  | .string _ .html => true
   | _ => false
 
 /-- Portable call description admitted from the independently classified Lean

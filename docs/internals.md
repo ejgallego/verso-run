@@ -101,7 +101,10 @@ there is no embedded-interface parser or reopening of producer files here.
 
 VIR's `analyzeExportInterface` independently classifies the callable. Only pure,
 homogeneous, single-argument String/Nat/Bool/UInt64 signatures are admitted.
-`Experiment.form : FormKind` retains that scalar type and its allowed presentation:
+`Experiment.form : FormKind` retains that scalar type and its allowed presentation.
+Its String constructor carries a `StringInputMode` and `StringPresentation`;
+Nat, Bool, and UInt64 have no presentation parameters. This lets additional String
+views extend the presentation type without weakening scalar invariants. The wire tags are
 `string`, `multilineString`, `nat`, `bool`, `uint64`, `html`, or `multilineHtml`.
 HTML forms invoke a compiled String serializer. Unsupported combinations have no
 constructor, and unknown form tags fail native metadata decoding.

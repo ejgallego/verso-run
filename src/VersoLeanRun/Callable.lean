@@ -17,6 +17,8 @@ open Lean Verso Doc Elab ArgParse
 namespace VersoLeanRun
 
 meta section
+deriving instance Quote for StringInputMode
+deriving instance Quote for StringPresentation
 deriving instance Quote for FormKind
 end
 
@@ -110,9 +112,9 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
         "Lean Run entry '{name}' has an unsupported VIR interface.\n\
           Type: {info.type}\nVIR: {error.toMessageData}"
   let form : FormKind ← match callSignature.args, callSignature.result, callSignature.effect with
-    | #[{ type := .string, .. }], .string, .pure => pure (if isHtml then
-        if config.multiline then .multilineHtml else .html
-      else if config.multiline then .multilineString else .string)
+    | #[{ type := .string, .. }], .string, .pure => pure (.string
+        (if config.multiline then .multiline else .line)
+        (if isHtml then .html else .text))
     | #[{ type := .nat, .. }], .nat, .pure => pure .nat
     | #[{ type := .bool, .. }], .bool, .pure => pure .bool
     | #[{ type := .uint64, .. }], .uint64, .pure => pure .uint64

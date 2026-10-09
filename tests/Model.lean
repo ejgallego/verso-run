@@ -1,10 +1,13 @@
-import VersoLeanRun.Model
+import VersoLeanRun.Publication
+import Vir.Compiler.Interface.Classify.Signature
+import Lean.Elab.Command
 
 open Lean VersoLeanRun
 
 -- This is the metadata boundary shared by all three native genre collectors.
 #eval show IO Unit from do
-  for form in #[FormKind.string, .multilineString, .nat, .bool, .uint64, .html, .multilineHtml] do
+  for form in #[FormKind.string .line .text, .string .multiline .text, .nat, .bool, .uint64,
+      .string .line .html, .string .multiline .html] do
     let decoded ← IO.ofExcept (fromJson? (toJson form) : Except String FormKind)
     unless decoded == form do throw <| IO.userError s!"form round-trip failed: {repr form}"
   for json in #[Json.str "natHtml", Json.str "multilineBool",
@@ -21,3 +24,29 @@ open Lean VersoLeanRun
   | .error _ => pure ()
   | .ok _ => throw <| IO.userError "obsolete metadata without a typed form decoded"
   IO.println "typed form round-trips and unsupported metadata rejection passed"
+
+namespace ContractFixtures
+def text (input : String) : String := input
+def natural (input : Nat) : Nat := input
+def boolean (input : Bool) : Bool := input
+def unsigned (input : UInt64) : UInt64 := input
+end ContractFixtures
+
+-- Compare normalization with independent VIR classification, including both HTML
+-- presentations whose generated serializer has a String → String type.
+run_cmd Lean.Elab.Command.liftTermElabM do
+  for (name, form) in #[(`ContractFixtures.text, FormKind.string .line .text),
+      (`ContractFixtures.text, .string .multiline .text),
+      (`ContractFixtures.text, .string .line .html),
+      (`ContractFixtures.text, .string .multiline .html),
+      (`ContractFixtures.natural, .nat), (`ContractFixtures.boolean, .bool),
+      (`ContractFixtures.unsigned, .uint64)] do
+    let info ← Lean.getConstInfo name
+    let .ok signature ← Vir.Interface.analyzeExportInterface info.type
+      | throwError "classification failed for {name}"
+    let .ok classified := Lean.Json.parse signature.toExpectedSignatureJson
+      | throwError "invalid compiler expectation for {name}"
+    let .ok normalized := form.expectedExport
+      | throwError "invalid form expectation for {name}"
+    unless classified == normalized do
+      throwError "normalized expectation differs from VIR classification for {name}"

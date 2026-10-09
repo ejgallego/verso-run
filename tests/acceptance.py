@@ -281,6 +281,20 @@ with serve_directory(server_root) as base:
         record('HTML preview is isolated and cleared on input changes before a fresh invocation')
 
         assert diagram_form.locator('input').input_value() == '4'
+        multiline_html = form_for('LeanRunGate.htmlGreeting', 1)
+        assert json.loads(multiline_html.get_attribute('data-experiment'))['form'] == 'multilineHtml'
+        field = multiline_html.locator('textarea')
+        assert field.input_value() == 'Ada\nGrace'
+        value = 'first line\n<b>& 世界 🌍'
+        field.fill(value)
+        field.press('Control+Enter')
+        page.wait_for_function('e => e.dataset.state === "success"', arg=multiline_html.element_handle())
+        assert oracle('htmlGreeting', value) in multiline_html.locator('iframe').get_attribute('srcdoc')
+        assert multiline_html.frame_locator('iframe').locator('b, script').count() == 0
+        field.fill('edited\nagain')
+        assert multiline_html.locator('iframe').is_hidden()
+        record('multiline typed HTML preserves presets and edited Unicode, escapes markup, and clears stale previews')
+
         diagram_widths = []
         for count in [1, 4, 8, 2]:
             assert call(diagram_form, str(count)) == ''

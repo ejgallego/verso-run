@@ -111,6 +111,13 @@ public def LeanRunGate.htmlGreeting (name : String) : Verso.Output.Html :=
   </section> }}
 ```
 
+The same typed HTML function also accepts multiline text. Line breaks and reader
+markup remain text inside the isolated preview.
+
+```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada\nGrace") +multiline +collapsed
+#check LeanRunGate.htmlGreeting
+```
+
 # Illuminate diagrams
 
 Choose a number from 1 to 8, then Run to build a chain of numbered nodes.
