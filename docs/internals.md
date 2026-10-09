@@ -43,30 +43,41 @@ Follow VIR's stock resource workflow, demonstrated by the
    The demo registers the Manual chapter, Blog Page/Post and Slides deck as
    separate document roots. There are no JSON recipes or handwritten interface
    IDs. Keep document and carrier libraries disjoint.
-3. Embed the prepared bundle in its carrier library. The chapter imports
+3. Embed the complete prepared resource set in its carrier library. The chapter imports
    extension support, never its carrier:
 
    ```lean
    module
    public import Vir.Resources.Assets
 
-   public def MySite.program : Vir.Resources.Bundle :=
-     (include_vir_assets (modules := #[MyChapter])).programs[0]!
+   public def MySite.resources : Vir.Resources.ResourceSet :=
+     include_vir_assets (modules := #[MyChapter])
    ```
 
    The include names the program module and returns a `ResourceSet` containing
-   the locked runtime and prepared programs. This example selects its single
-   program bundle to preserve the existing `VersoLeanRun.publish` API.
+   the locked runtime and prepared programs. Pass this value directly; no singleton
+   extraction or reconstruction of runtime ownership is needed.
    Module resource facets support custom source/build directories.
 4. Import the chapter, carrier, and `VersoLeanRun.Publish` in the native generator:
 
    ```lean
    def main := manualMain (%doc MyChapter)
-     (extraSteps := [VersoLeanRun.publish #[MySite.program]])
+     (extraSteps := [VersoLeanRun.publish MySite.resources])
    ```
 
-   Pass every required document bundle. The publisher uses VIR's locked runtime
-   by default; a compatible explicit runtime may use the named `runtime` argument.
+   Pass every required document's complete set. `combineResources` appends programs
+   in order when both sets use the same runtime content identity. It checks a distinct
+   runtime inventory before discarding it; identical inventories need no repeated check.
+   Publication validates the final set once through VIR's `forSite`, which owns
+   program compatibility, deduplication, and conflict checks. Manual and Blog preserve
+   the supplied runtime. Slides combines with its embedded formatter set and rejects
+   a different supplied runtime before generation.
+
+`preparePublication` is the common pure planner; its optional `resourcePrefix`
+controls inventory paths. Manual uses `publish`, Blog uses `blogMain`, and Slides
+uses `slidesMain`. Each accepts a complete `ResourceSet`. This prototype has no
+backward compatibility policy: Bundle-array adapters and serialized metadata
+fallbacks have been removed. Migrate callers when updating the pin.
 
 The graph remains support → producer → document → program preparation → carrier →
 native generator. No per-block packaging or second execution compiler is added.
@@ -140,7 +151,7 @@ highlighted source without interactive controls.
 | Verso | `aff0fc92d7b9e56a3b309d409b7ef69629af3770` |
 | VIR | `957854b9df1202d4fadbd00ac5fa34e5adf278cc` (PR #229 head) |
 | Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Slides | `daa96fee635f289e2be95982418483bfb4351402` (public review snapshot) |
+| Slides | `6e514cd443a51a39d92534b5a2ef08a5e47ed262` (public review snapshot) |
 | Runtime | `6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20` |
 
 The minimal Verso fork is based on release `cad4b633` and exposes the existing

@@ -1,5 +1,6 @@
 """Inline Page/Post/Slides authoring, native source, independent workers and Html."""
-import argparse, functools, http.server, json, shutil, subprocess, threading
+from harness import run_command, serve_directory
+import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -9,16 +10,12 @@ parser.add_argument('--output', default='_out/inline-genres')
 output = Path(parser.parse_args().output).resolve()
 output.mkdir(parents=True, exist_ok=True)
 checks = []
+command = functools.partial(run_command, output=output, cwd=ROOT)
 
 def record(name):
     checks.append({'test': name, 'result': 'pass'})
     print('PASS', name, flush=True)
 
-def command(args, log, expected=0):
-    run = subprocess.run(args, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output/(log+'.log')).write_text(run.stdout)
-    assert (run.returncode == 0) if expected == 0 else (run.returncode != 0), run.stdout[-5000:]
-    return run.stdout
 
 fixtures = output/'author'
 fixtures.mkdir(exist_ok=True)
@@ -75,24 +72,16 @@ for genre, owner in [('blog', 'LeanRunBlog.Page'), ('blog', 'LeanRunBlog.Post'),
             'args': [descriptor], 'result': descriptor, 'effect': 'pure'}
 record('independent canonical String signatures for inline scalar and Html callables')
 
-class QuietHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, *_): pass
-    def handle(self):
-        try: super().handle()
-        except (BrokenPipeError, ConnectionResetError): pass
 
 served = output/'served'
 for prefix in ['root', 'nested/prefix']:
     for genre in ['blog', 'slides']:
         shutil.copytree(site/genre, served/prefix/genre, dirs_exist_ok=True)
-server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietHandler, directory=str(served)))
-threading.Thread(target=server.serve_forever, daemon=True).start()
-base = f'http://127.0.0.1:{server.server_port}/'
+with serve_directory(served) as base:
 
-def oracle(role, value):
-    return json.loads(subprocess.check_output([str(ROOT/'.lake/build/bin/lean-run-blog-oracle'), role, value], text=True))
+    def oracle(role, value):
+        return json.loads(subprocess.check_output([str(ROOT/'.lake/build/bin/lean-run-blog-oracle'), role, value], text=True))
 
-try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
         page = browser.new_page(viewport={'width': 1280, 'height': 900})
@@ -177,9 +166,6 @@ try:
         assert not errors, errors
         record('no uncaught inline genre browser errors')
         browser.close()
-finally:
-    server.shutdown()
-    server.server_close()
 
 (output/'results.json').write_text(json.dumps({'checks': checks, 'publications': plans}, indent=2)+'\n')
 print(f'{len(checks)} inline genre checks passed; evidence: {output}', flush=True)

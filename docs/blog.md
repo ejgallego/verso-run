@@ -64,12 +64,14 @@ For each Page/Post document, declare `+Module:virResourcePack` in `needs`, and e
 `VersoLeanRun.Blog.Publish` in the native site generator and call:
 
 ```lean
-def main := VersoLeanRun.Blog.blogMain Theme.default mySite
-  #[MyPage.resources, MyPost.resources] (destination := "_site")
+def main : IO UInt32 := do
+  let resources ← IO.ofExcept <| VersoLeanRun.combineResources MyPage.resources MyPost.resources
+  VersoLeanRun.Blog.blogMain Theme.default mySite resources (destination := "_site")
 ```
 
-The wrapper takes a typed Blog `Site`, a theme, embedded bundles, an explicit
-destination, and optional draft policy, runtime, components, and link targets.
+The wrapper takes a typed Blog `Site`, a theme, a complete `ResourceSet`, an explicit
+destination, and optional draft policy, components, and link targets. It preserves
+the set's runtime; composition rejects different runtime identities.
 It collects Page/Post AST metadata and validates the common resource plan before
 calling stock Blog generation. On successful generation it writes the complete
 binary inventory. It never discovers programs by scraping HTML or reopening

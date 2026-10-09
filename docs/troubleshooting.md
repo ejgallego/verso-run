@@ -64,11 +64,20 @@ A failed rebuild must exit unsuccessfully and leave the previous accepted
 publication intact. Its retained output represents the earlier successful build,
 not the rejected replacement. CI deploys only after all checks pass.
 
+## Resource sets disagree about their runtime
+
+`combineResources` and `slidesMain` reject `RUNTIME_CONTENT_ID_CONFLICT`
+when sets carry different runtime identities, even if their compiler compatibility
+matches. Build all carriers with the same pinned VIR runtime. Manual and Blog
+preserve the runtime supplied in their set; Slides uses its formatter's runtime
+and requires the supplied document set to match it. Corrupt inventories retain
+VIR's original validation error rather than being silently discarded.
+
 ## A program bundle or callable is missing
 
 Add the document's module resource facet (for example,
 `` `+MyChapter:virResourcePack ``) to the asset library's `needs`, and embed with
-`include_vir_assets (modules := #[Module])`. Select the program bundle from the returned `ResourceSet` and supply it to `VersoLeanRun.publish`. Publication reports the declaration,
+`include_vir_assets (modules := #[Module])`. Pass the returned `ResourceSet` to `VersoLeanRun.publish`. Publication reports the declaration,
 callable-owning module, and document position when no matching bundle is available.
 Identical bundles deduplicate; distinct bundles with the same module logical ID
 produce `LOGICAL_ID_CONFLICT` before writing execution resources.

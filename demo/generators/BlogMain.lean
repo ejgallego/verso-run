@@ -19,8 +19,9 @@ def main (args : List String) : IO UInt32 := do
     | ["--output", path] => pure ("normal", (⟨path⟩ : System.FilePath))
     | ["--check", mode, "--output", path] => pure (mode, (⟨path⟩ : System.FilePath))
     | _ => throw <| IO.userError "usage: lean-run-blog-demo [--output DIRECTORY]"
-  let programs := if mode == "missing" then #[]
-    else #[LeanRunBlog.pageResources, LeanRunBlog.postResources]
+  let resources ← IO.ofExcept <| VersoLeanRun.combineResources
+    LeanRunBlog.pageResources LeanRunBlog.postResources
+  let resources := if mode == "missing" then { resources with programs := #[] } else resources
   let selected ← match mode with
     | "normal" | "missing" => pure site
     | "malformed" =>
@@ -28,4 +29,4 @@ def main (args : List String) : IO UInt32 := do
       let home := { (%doc LeanRunBlog.Home) with content := #[bad] }
       pure <| Site.page `Malformed home #[]
     | _ => throw <| IO.userError s!"Unknown Blog check {mode}"
-  VersoLeanRun.Blog.blogMain Theme.default selected programs destination
+  VersoLeanRun.Blog.blogMain Theme.default selected resources destination

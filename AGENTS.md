@@ -1,9 +1,10 @@
 # verso-run contributor notes
 
 This is an experimental Verso Manual/Blog/Slides extension for calling compiled Lean
-functions through VIR in a dedicated browser worker. Keep the existing
-VersoLeanRun module API and the separation between elaboration, invocation,
-resource publication, and rendering.
+functions through VIR in a dedicated browser worker. This prototype has no
+backward-compatibility policy: evolve APIs directly and migrate in-repository
+callers instead of retaining aliases or serialized fallbacks. Preserve the
+separation between elaboration, invocation, resource publication, and rendering.
 
 - Preserve exact Lean, Verso, VIR, and Illuminate pins unless a dependency
   update is explicitly part of the task. Runtime assets must match VIR's lock.

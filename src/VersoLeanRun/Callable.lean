@@ -81,8 +81,7 @@ private meta def unsupportedForm (entry : Ident) (name : Name) (type : Expr)
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
 Selected imported entries and HTML adapters are compiled in the document module. -/
-meta def describeEntry (config : Config) (name : Name) (str : StrLit)
-    (allowHtml : Bool := true) : DocElabM Experiment := do
+meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM Experiment := do
   if isPrivateName name then
     throwErrorAt config.entry "Lean Run entry '{name}' is private. \
       Export a public wrapper or remove 'private'."
@@ -96,8 +95,6 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
       info.levelParams.isEmpty && domain.isConstOf ``String &&
         result.isConstOf ``Verso.Output.Html
     | _ => false
-  if isHtml && !allowHtml then
-    throwErrorAt config.entry "Lean Run entry '{name}' returns Html, but this context requires a scalar result"
   let output := if isHtml then "html" else "text"
   -- Classify the source interface independently before registering scalar exports.
   -- Html crosses VIR through a generated String serializer.
@@ -139,7 +136,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit)
     sourceLine := pos.line, sourceColumn := pos.column }
   return experiment
 
-/-- Preserve the existing serialized experiment and constructor shape. -/
+/-- Quote validated metadata for native genre constructors. -/
 meta def quoteExperiment (experiment : Experiment) : DocElabM Term := do
   return ← `(VersoLeanRun.Experiment.mk
     $(quote experiment.program) $(quote experiment.declaration) $(quote experiment.shape)

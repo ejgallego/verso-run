@@ -1,13 +1,12 @@
 """Build the copyable starter from Git and exercise its published Wasm worker."""
+from harness import run_command, serve_directory
 import argparse
 import functools
-import http.server
 import json
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
-import threading
 
 from playwright.sync_api import sync_playwright
 
@@ -21,18 +20,12 @@ project = Path(tempfile.mkdtemp(prefix="verso-run-starter-"))
 shutil.copytree(ROOT / "examples/manual-starter", project, dirs_exist_ok=True,
                 ignore=shutil.ignore_patterns(".lake", ".vir-generated", "_out"))
 checks = []
+command = functools.partial(run_command, output=output, cwd=project)
 
 
 def record(name):
     checks.append({"test": name, "result": "pass"})
     print("PASS", name, flush=True)
-
-
-def command(args, log):
-    with (output / f"{log}.log").open("w") as stream:
-        result = subprocess.run(args, cwd=project, stdout=stream, stderr=subprocess.STDOUT)
-    if result.returncode:
-        raise RuntimeError(f"{args} failed: see {output / f'{log}.log'}")
 
 
 assert not (project / ".lake").exists()
@@ -72,19 +65,10 @@ assert "Starter.greet" in tex and "Starter.card" in tex
 record("TeX retains both examples' source")
 
 
-class QuietHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, *_):
-        pass
-
-
 served = output / "served"
 for destination in [served / "root", served / "verso-run/starter"]:
     shutil.copytree(site / "html-multi", destination, dirs_exist_ok=True)
-server = http.server.ThreadingHTTPServer(("127.0.0.1", 0),
-    functools.partial(QuietHandler, directory=str(served)))
-threading.Thread(target=server.serve_forever, daemon=True).start()
-base = f"http://127.0.0.1:{server.server_port}/"
-try:
+with serve_directory(served) as base:
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True,
                                             executable_path=shutil.which("google-chrome"))
@@ -138,9 +122,6 @@ try:
             record("no-JavaScript output retains source and disabled Run controls")
         finally:
             browser.close()
-finally:
-    server.shutdown()
-    server.server_close()
 
 (output / "results.json").write_text(json.dumps({"checks": checks, "publication": plan,
     "project": str(project), "dependencyRevision": extension["rev"], "virRevision": vir["rev"],

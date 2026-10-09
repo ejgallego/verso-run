@@ -1,5 +1,6 @@
 """Native Slides publication and real Reveal/worker behavior at root and nested URLs."""
-import argparse, functools, http.server, json, shutil, subprocess, threading, time
+from harness import run_command, inventory, serve_directory
+import argparse, functools, json, shutil, subprocess, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -9,16 +10,12 @@ parser.add_argument('--output', default='_out/slides-acceptance')
 output = Path(parser.parse_args().output).resolve()
 output.mkdir(parents=True, exist_ok=True)
 checks = []
+command = functools.partial(run_command, output=output, cwd=ROOT)
 
 def record(name):
     checks.append({'test': name, 'result': 'pass'})
     print('PASS', name, flush=True)
 
-def command(arguments, log, expected=0, cwd=ROOT):
-    result = subprocess.run(arguments, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output/(log+'.log')).write_text(result.stdout)
-    assert (result.returncode == 0) if expected == 0 else (result.returncode != 0), result.stdout[-5000:]
-    return result.stdout
 
 def oracle(role, value):
     return json.loads(subprocess.check_output(
@@ -37,6 +34,8 @@ record('typed deck collection composes one runtime with formatter and document-s
 command([str(ROOT/'.lake/build/bin/lean-run-slides-demo'), '--output', str(output/'native-only')],
         'native-only', cwd=output)
 assert plan == json.loads((output/'native-only/lean-run/publication.json').read_text())
+assert inventory(site/'lib/vir') == inventory(output/'native-only/lib/vir')
+assert inventory(site/'lean-run') == inventory(output/'native-only/lean-run')
 record('Slides native generator runs outside checkout with embedded code and assets')
 accepted = (site/'lean-run/publication.json').read_bytes()
 index = (site/'index.html').read_bytes()
@@ -53,20 +52,11 @@ for mode, reason in [('missing', 'no published program bundle'),
     assert not (output/('rejected-'+mode)/'lean-run/publication.json').exists()
     record(mode+' fails before any fresh or accepted slide publication is overwritten')
 
-class QuietHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, *_): pass
-    def handle(self):
-        try: super().handle()
-        except (BrokenPipeError, ConnectionResetError): pass
 
 served = output/'served'
 for prefix in ['root', 'nested/prefix/slides']:
     shutil.copytree(site, served/prefix, dirs_exist_ok=True)
-server = http.server.ThreadingHTTPServer(('127.0.0.1', 0),
-    functools.partial(QuietHandler, directory=str(served)))
-threading.Thread(target=server.serve_forever, daemon=True).start()
-base = f'http://127.0.0.1:{server.server_port}/'
-try:
+with serve_directory(served) as base:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
         page = browser.new_page(viewport={'width': 1280, 'height': 900})
@@ -246,8 +236,5 @@ try:
         assert not errors, errors
         record('no uncaught Slides browser errors')
         browser.close()
-finally:
-    server.shutdown()
-    server.server_close()
 (output/'results.json').write_text(json.dumps({'checks': checks, 'publication': plan}, indent=2)+'\n')
 print(f'{len(checks)} Slides checks passed; evidence: {output}', flush=True)

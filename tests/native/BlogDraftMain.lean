@@ -24,15 +24,15 @@ def main (args : List String) : IO UInt32 := do
     throw <| IO.userError s!"unknown placement {placement}"
   unless ["hide", "show", "missing"].contains mode do
     throw <| IO.userError s!"unknown draft policy {mode}"
-  let programs := if mode == "show" then #[LeanRunBlog.postResources] else #[]
+  let programs := if mode == "show" then LeanRunBlog.postResources.programs else #[]
   let site := draftSite (placement == "nested")
   let showDrafts := mode != "hide"
   if placement == "root" then
     -- Pinned Verso's root-blog generator omits the blog's traversal registration.
     -- Qualify our root collector/planner directly; nested checks use real generation.
     let found ← IO.ofExcept <| VersoLeanRun.Blog.siteExperiments site showDrafts
-    let publication ← IO.ofExcept <| VersoLeanRun.preparePublication found programs
+    let publication ← IO.ofExcept <| VersoLeanRun.preparePublication found { LeanRunBlog.postResources with programs }
     VersoLeanRun.writePublication ⟨output⟩ publication
     return 0
-  VersoLeanRun.Blog.blogMain Theme.default site programs
+  VersoLeanRun.Blog.blogMain Theme.default site { LeanRunBlog.postResources with programs }
     (destination := ⟨output⟩) (showDrafts := showDrafts)
