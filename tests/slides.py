@@ -25,10 +25,10 @@ site = output/'site'
 command(['lake', 'exe', 'lean-run-slides-demo', '--output', str(site)], 'generate')
 plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunSlides.Deck'}
-assert len(plan['programs']['LeanRunSlides.Deck']) == 9
+assert len(plan['programs']['LeanRunSlides.Deck']) == 13
 assert plan['runtimeModule'].startswith('lib/vir/')
 assert len(list(site.rglob('runtime.js'))) == 1
-assert len(list(site.rglob('bundle.json'))) == 3  # runtime, formatter, document-selected callables
+assert len(list(site.rglob('bundle.json'))) == 4  # runtime, formatter, document callables, DOM presenter
 record('typed deck collection composes one runtime with formatter and document-selected callables')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-slides-demo'), '--output', str(output/'native-only')],
@@ -93,7 +93,7 @@ with serve_directory(served) as base:
 
         for prefix in ['root', 'nested/prefix/slides']:
             page.goto(base+prefix+'/')
-            page.wait_for_selector('.lean-run[data-enhanced]')
+            page.wait_for_selector('.lean-run[data-enhanced]', state='attached')
             page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
             assert len(page.workers) == 0
             selected = form('LeanRunGate.Helper.twice')
@@ -125,7 +125,7 @@ with serve_directory(served) as base:
             record(prefix+': native fragment show/hide stops its worker and supports fresh invocation')
             slide(2)
             count = form('LeanRunBlog.Examples.count')
-            assert count.locator('details.lean-run-source').count() == 1
+            assert count.locator('div.lean-run-source').count() == 1
             assert call(count, '10') == oracle('count', '10')
             for stop_by_slide in [False, True]:
                 count.locator('input').fill('1000000000000')
@@ -152,7 +152,9 @@ with serve_directory(served) as base:
 
         # Failure and cancellation during acquisition use the shared host guards.
         page.reload()
-        page.wait_for_selector('.lean-run[data-enhanced]')
+        # Reload preserves Reveal's selected slide. Initialization does not
+        # require the first form to be on that slide.
+        page.wait_for_selector('.lean-run[data-enhanced]', state='attached')
         page.wait_for_function('Reveal.isReady()')
         slide(2)
         count = form('LeanRunBlog.Examples.count')

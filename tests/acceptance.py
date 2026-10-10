@@ -37,6 +37,7 @@ command(['node', 'tests/form-wire.mjs', str(wire_path)], 'form-wire')
 record('native form tags agree with browser codecs and canonical VIR contracts')
 record('typed form round-trips and unsupported metadata rejection')
 command(['node', 'tests/host-lifecycle.mjs'], 'host-lifecycle')
+command(['node', 'tests/automaton-player.mjs'], 'automaton-player')
 record('publication acquisition cancellation, shared waiters, late completion, deadline and explicit recovery')
 site = OUTPUT/'site'
 generate(site)
@@ -50,13 +51,16 @@ assert plan == json.loads((site/'html-single/lean-run/publication.json').read_te
 assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.json').read_text())
 assert inventory(site/'html-multi/lean-run') == inventory(OUTPUT/'native-only/html-multi/lean-run')
 published = plan['programs']['LeanRunGate.Chapter']
-for declaration, type_name in [('greet', 'String'), ('Stack.run', 'String'), ('htmlGreeting', 'String'), ('diagram', 'String'), ('double', 'Nat'), ('Helper.twice', 'Nat'), ('spin', 'Nat')]:
+for declaration, input_type, result_type in [('greet', 'String', 'String'),
+        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'String'),
+        ('diagram', 'Nat', 'String'), ('double', 'Nat', 'Nat'),
+        ('Helper.twice', 'Nat', 'Nat'), ('spin', 'Nat', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert set(contract) == {'args', 'result', 'effect'}
     assert contract['effect'] == 'pure'
     assert len(contract['args']) == 1
-    assert contract['args'][0]['type'] == type_name
-    assert contract['result']['type'] == type_name
+    assert contract['args'][0]['type'] == input_type
+    assert contract['result']['type'] == result_type
 chapter_manifest = json.loads((site/'html-multi'/published['LeanRunGate.greet']['manifest']).read_text())
 helper_manifest = json.loads((site/'html-multi'/published['LeanRunGate.Helper.twice']['manifest']).read_text())
 assert chapter_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
@@ -66,6 +70,8 @@ assert helper_manifest == chapter_manifest
 record('entry-selected local/imported callables share a document-owned resource and independent signatures')
 command(['lake', 'exe', 'lean-run-resource-set-check'], 'resource-set-adapter')
 record('ResourceSet planner preserves inventories and explicit runtimes and rejects conflicting or corrupt runtimes')
+command(['lake', 'exe', 'lean-run-publication-check', 'bindings'], 'publication-bindings')
+record('publication bindings deduplicate placements and reject conflicting signatures, manifests and callables')
 duplicates = OUTPUT/'duplicate-registration'
 command(['lake', 'exe', 'lean-run-publication-check', 'duplicate', '--output', str(duplicates)],
     'duplicate-registration')
@@ -84,6 +90,7 @@ assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
 command(['lake', 'env', 'lean', 'tests/EntryRegistration.lean'], 'entry-registration')
+command(['lake', 'env', 'lean', 'tests/AutomatonAdapter.lean'], 'automaton-adapter')
 record('entry registers unannotated scalar functions and typed Html without an output option')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():
@@ -321,12 +328,17 @@ with serve_directory(server_root) as base:
             diagram_widths.append(bounds[2])
         assert diagram_widths[0] < diagram_widths[1] < diagram_widths[2]
         record('Illuminate SVG drawing commands execute in Wasm with native markup, labels, links and changing geometry')
-        for value in ['', '0', '9', '-1', '1.5', 'nodes', '100000000000000000000']:
+        for value in ['0', '9', '100000000000000000000']:
             assert call(diagram_form, value) == ''
             assert oracle('diagram', value) in diagram_form.locator('iframe').get_attribute('srcdoc')
             frame = diagram_form.frame_locator('iframe')
             assert 'from 1 to 8' in frame.locator('[role=alert]').inner_text()
             assert frame.locator('svg').count() == 0
+        for value in ['', '-1', '1.5', 'nodes']:
+            diagram_form.locator('input').fill(value)
+            diagram_form.locator('[type=submit]').click()
+            assert diagram_form.get_attribute('data-state') == 'invalid input'
+            assert diagram_form.locator('iframe').is_hidden()
         assert call(diagram_form, '3') == ''
         assert diagram_form.frame_locator('iframe').locator('svg text').count() == 3
         diagram_form.locator('input').fill('5')
@@ -527,7 +539,7 @@ with serve_directory(server_root) as base:
         plain_calculator.locator('summary').click()
         assert 'public inductive Instruction' in plain_calculator.locator('.lean-run-source').inner_text()
         plain_diagram = plain.locator('.lean-run[data-experiment*="LeanRunGate.diagram"]')
-        plain_diagram.locator('summary').click()
+        assert plain_diagram.locator('details.lean-run-source').count() == 0
         assert 'public def LeanRunGate.diagram' in plain_diagram.locator('.lean-run-source').inner_text()
         assert 'Svg.render' in plain_diagram.locator('.lean-run-source').inner_text()
         plain_anchor = plain.locator('.lean-run[data-experiment*="LeanRunGate.Helper.twice"]')
@@ -664,5 +676,16 @@ command([sys.executable, 'tests/typed-forms.py', '--output', str(OUTPUT/'typed')
 record('Bool/UInt64/multiline native signatures, shared codec, and all genre controls')
 command([sys.executable, 'tests/inline-genres.py', '--output', str(OUTPUT/'inline')], 'inline-genres')
 record('inline Page/Post/Slides authoring, retained scopes, native source and actual workers')
+command([sys.executable, 'tests/sequence.py', '--output', str(OUTPUT/'sequence')], 'sequence')
+record('typed sequences and Lean/VIR DOM presentation across all genres, cleanup and acquisition cancellation')
+command(['node', 'tests/rendered-wire.mjs'], 'rendered-wire')
+command([sys.executable, 'tests/rendered.py', '--output', str(OUTPUT/'rendered')], 'rendered')
+record('typed rendered inputs, exact structured payloads, shared DOM policy and cross-genre native agreement')
+command([sys.executable, 'tests/life.py', '--site', str(OUTPUT/'sequence/site'),
+         '--output', str(OUTPUT/'life')], 'life')
+record('Game of Life rules, every native generation, edited seeds and all genre views')
+command([sys.executable, 'tests/preview-policy.py', '--site', str(site/'html-multi'),
+         '--output', str(OUTPUT/'preview-policy')], 'preview-policy')
+record('raw Html and sequence previews block scripts, external resources, top navigation and forms')
 (OUTPUT/'results.json').write_text(json.dumps(dict(checks=results,publication=plan),ensure_ascii=False,indent=2)+'\n')
 print(f'{len(results)} checks passed; evidence: {OUTPUT}',flush=True)

@@ -19,7 +19,7 @@ async function promptly(promise) {
 }
 const outcome = promise => promise.then(value => ({ value }), error => ({ error }));
 let caseId = 0;
-async function fixture({ honorAbort = true } = {}) {
+async function fixture({ honorAbort = true, holdWorker = false, experiment = description } = {}) {
   const requests = [], workers = [];
   globalThis.fetch = (url, { signal } = {}) => new Promise((resolve, reject) => {
     requests.push({ signal, reject,
@@ -30,12 +30,15 @@ async function fixture({ honorAbort = true } = {}) {
   });
   globalThis.Worker = class {
     constructor() { workers.push(this); }
-    postMessage(data) { queueMicrotask(() => this.onmessage({ data: {
-      requestId: data.requestId, state: "success", result: data.input } })); }
+    postMessage(data) {
+      (this.messages ??= []).push(data);
+      if (!holdWorker) queueMicrotask(() => this.onmessage({ data: {
+        requestId: data.requestId, state: "success", result: data.input } }));
+    }
     terminate() { this.terminated = true; }
   };
   const { ExperimentHost } = await import(`../web/host.js?lifecycle=${++caseId}`);
-  return { requests, workers, host: () => new ExperimentHost(description) };
+  return { requests, workers, host: onState => new ExperimentHost(experiment, onState) };
 }
 async function test(name, run) { await run(); checks.push(name); console.log("PASS", name); }
 
@@ -144,4 +147,25 @@ await test("A publication deadline fails all waiting placements and allows expli
   }
 });
 
+await test("Automaton advance reuses the worker; Stop settles held work and ignores late frames; restart owns a fresh session", async () => {
+  const { requests, workers, host } = await fixture({ holdWorker: true,
+    experiment: {...description, form: "automaton"} });
+  const states = [], h = host((state, value) => states.push([state, value]));
+  const reply = (worker, result) => worker.onmessage({data: {
+    requestId: worker.messages.at(-1).requestId, state: "success", result }});
+  const initial = h.invoke("seed"); requests[0].reply(); await tick();
+  reply(workers[0], "initial"); assert.equal(await initial, "initial");
+  const held = outcome(h.advance()); await tick();
+  assert.equal(workers[0].messages.at(-1).operation, "advance");
+  await assert.rejects(h.advance(), /already running/);
+  h.stop(); assert.equal((await promptly(held)).error.name, "AbortError");
+  assert.equal(workers[0].terminated, true);
+  reply(workers[0], "late"); assert.equal(states.at(-1)[0], "stopped");
+  const restarted = h.invoke("new seed"); await tick();
+  assert.equal(workers.length, 2);
+  reply(workers[1], "new initial"); assert.equal(await restarted, "new initial");
+  const next = h.advance(); await tick(); reply(workers[1], "next");
+  assert.equal(await next, "next"); assert.equal(workers.length, 2);
+  h.dispose();
+});
 console.log(JSON.stringify({ checks, count: checks.length }));

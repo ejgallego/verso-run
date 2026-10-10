@@ -2,6 +2,10 @@ module
 public import VersoLeanRun
 import LeanRunGate.Helper
 import LeanRunTyped.Examples
+import LeanRunGate.Stack
+import LeanRunSequence.Examples
+import LeanRunRendered.Examples
+import LeanRunSequence.Life
 public import Illuminate.Render.Svg
 public import Illuminate.Geometry.PathData
 public import Illuminate.Geometry.Matrix
@@ -31,7 +35,7 @@ Write a little program with numbers and operations separated by spaces.
 Run the supplied `6 7 * 2 +` program to compute `(6 × 7) + 2` and see each step.
 Open the implementation to explore its Lean instruction type, parser, and execution rules.
 
-```leanRun (entry := LeanRunGate.Stack.run) (input := "6 7 * 2 +") +collapsed
+```leanRunAnchor stack (module := LeanRunGate.Stack) (entry := LeanRunGate.Stack.run) (input := "6 7 * 2 +") +collapsed
 namespace LeanRunGate.Stack
 
 public inductive Instruction where
@@ -58,26 +62,55 @@ public def step : Instruction → List Nat → Except String (List Nat)
 public def showStack (stack : List Nat) : String :=
   "[" ++ ", ".intercalate (stack.reverse.map toString) ++ "]"
 
-public def run (program : String) : String := Id.run do
+/-- One instruction attempt, including the unchanged stack when it fails. -/
+public structure TraceStep where
+  label : String
+  before : List Nat
+  after : List Nat
+  error : Option String := none
+
+/-- The shared evaluator's result, independent of text or HTML presentation. -/
+public structure Trace where
+  steps : Array TraceStep := #[]
+  initialError : Option String := none
+
+public def evaluate (program : String) : Trace := Id.run do
   let words := (program.splitOn " ").filter (!·.isEmpty)
-  if words.isEmpty then return "Enter a program, for example: 6 7 * 2 +"
-  if words.length > 32 then return "Use at most 32 instructions."
+  if words.isEmpty then return { initialError := some "Enter a program, for example: 6 7 * 2 +" }
+  if words.length > 32 then return { initialError := some "Use at most 32 instructions." }
   let mut stack : List Nat := []
-  let mut trace := #["Start: []"]
+  let mut trace : Trace := {}
   for word in words do
     let next := parse word >>= fun instruction => step instruction stack
     match next with
     | .error message =>
-        return "\n".intercalate (trace.toList ++ [s!"Error at '{word}': {message}"])
+        return { trace with steps := trace.steps.push {
+          label := word, before := stack, after := stack,
+          error := some s!"Error at '{word}': {message}" } }
     | .ok values =>
         if values.length > 16 || values.any (fun n => (toString n).length > 80) then
-          return "\n".intercalate (trace.toList ++ ["Stack or number limit reached."])
+          return { trace with steps := trace.steps.push {
+            label := word, before := stack, after := stack,
+            error := some "Stack or number limit reached." } }
+        trace := { trace with steps := trace.steps.push {
+          label := word, before := stack, after := values } }
         stack := values
-        trace := trace.push s!"{word}  →  {showStack stack}"
+  return trace
+
+/-- A calculator adds its single-result rule to the shared operational trace. -/
+public def run (program : String) : String := Id.run do
+  let trace := evaluate program
+  if let some error := trace.initialError then return error
+  let lines := #["Start: []"] ++ trace.steps.map fun step =>
+    step.error.getD s!"{step.label}  →  {showStack step.after}"
+  let text := "\n".intercalate lines.toList
+  let final := trace.steps.back?
+  if (final.bind (·.error)).isSome then return text
+  let stack := (final.map (·.after)).getD []
   let result := match stack with
     | [n] => s!"Result: {n}"
     | _ => "Finish with exactly one value on the stack."
-  return "\n".intercalate trace.toList ++ "\n\n" ++ result
+  return text ++ "\n\n" ++ result
 
 end LeanRunGate.Stack
 ```
@@ -93,13 +126,26 @@ The stack's top is on the right. `+` and `*` combine two values, `dup` copies on
 and `swap` exchanges two. A complete program leaves exactly one result.
 The demo accepts at most 32 instructions, 16 stack values, and 80 decimal digits per value.
 
+# Stack stepper
+
+Run the same program, then move through its states. Lean computes the instructions,
+before/after stacks and failures using the calculator’s shared evaluator. The player
+is also written in Lean. The stepper can inspect a program that leaves several values;
+the calculator additionally requires exactly one final result. Open the calculator’s
+implementation above to read the evaluator and its trace data.
+
+```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +")
+public def stackView (program : String) : VersoLeanRun.SequenceView :=
+  (evaluate program).view renderSnapshot
+```
+
 # HTML greeting
 
 Lean can also return HTML. Change the name and run this example to build a small greeting card.
 The function returns Verso's `Html` type. The form serializes it for the HTML preview,
 and interpolated text is escaped automatically.
 
-```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada") +collapsed
+```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada")
 open Verso.Output.Html
 
 public def LeanRunGate.htmlGreeting (name : String) : Verso.Output.Html :=
@@ -114,7 +160,7 @@ public def LeanRunGate.htmlGreeting (name : String) : Verso.Output.Html :=
 The same typed HTML function also accepts multiline text. Line breaks and reader
 markup remain text inside the isolated preview.
 
-```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada\nGrace") +multiline +collapsed
+```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada\nGrace") +multiline
 #check LeanRunGate.htmlGreeting
 ```
 
@@ -123,49 +169,46 @@ markup remain text inside the isolated preview.
 Choose a number from 1 to 8, then Run to build a chain of numbered nodes.
 Try `1`, `4`, and `8`: the labels, links, and layout are computed by Lean in your browser.
 
-```leanRun (entry := LeanRunGate.diagram) (input := "4") +collapsed
+```leanRun (entry := LeanRunGate.diagram) (input := "4")
 open Illuminate Verso.Output.Html
 
-public def LeanRunGate.diagram (input : String) : Verso.Output.Html :=
+public def LeanRunGate.diagram (count : Nat) : Verso.Output.Html :=
   let message := "Choose a whole number of nodes from 1 to 8."
-  match input.toNat? with
-  | none => {{ <p role="alert"> {{message}} </p> }}
-  | some count =>
-    if count < 1 || count > 8 then
-      {{ <p role="alert"> {{message}} </p> }}
-    else
-      let ink := Color.rgb 40 85 117
-      let stroke : Stroke := {color := ink, width := 2}
-      let circle := PathData.circle 20
-      let commands : Array (DrawCmd Empty) :=
-        (List.range count).foldl (init := #[]) fun commands n =>
-          let x := n.toFloat * 60
-          let commands := commands
-            |>.push (.pushTransform (Matrix.translate x 0))
-            |>.push (.fillPath circle
-              (.solid {color := Color.rgb 237 245 255}) none)
-            |>.push (.strokePath circle stroke)
-            |>.push (.drawTextRun (toString (n + 1))
-              {fontSize := 16, color := ink} ⟨0, 0⟩)
-            |>.push .popTransform
-          if n + 1 < count then
-            commands.push (.strokePath
-              (PathData.line ⟨x + 21, 0⟩ ⟨x + 39, 0⟩) stroke)
-          else commands
-      let svg := Svg.render commands {
-        minX := -29, minY := -29
-        width := (count - 1).toFloat * 60 + 58
-        height := 58
-      } "chain_"
-      let width := s!"width:100%;max-width:{count * 64 + 16}px;margin:1rem auto"
-      {{ <section style="padding:1rem;background:#f5f8fc">
-        <p style="margin:0;color:#536273">
-          {{s!"{count} nodes, {count - 1} links"}}
-        </p>
-        <div style={{width}}>
-          {{Verso.Output.Html.text false svg}}
-        </div>
-      </section> }}
+  if count < 1 || count > 8 then
+    {{ <p role="alert"> {{message}} </p> }}
+  else
+    let ink := Color.rgb 40 85 117
+    let stroke : Stroke := {color := ink, width := 2}
+    let circle := PathData.circle 20
+    let commands : Array (DrawCmd Empty) :=
+      (List.range count).foldl (init := #[]) fun commands n =>
+        let x := n.toFloat * 60
+        let commands := commands
+          |>.push (.pushTransform (Matrix.translate x 0))
+          |>.push (.fillPath circle
+            (.solid {color := Color.rgb 237 245 255}) none)
+          |>.push (.strokePath circle stroke)
+          |>.push (.drawTextRun (toString (n + 1))
+            {fontSize := 16, color := ink} ⟨0, 0⟩)
+          |>.push .popTransform
+        if n + 1 < count then
+          commands.push (.strokePath
+            (PathData.line ⟨x + 21, 0⟩ ⟨x + 39, 0⟩) stroke)
+        else commands
+    let svg := Svg.render commands {
+      minX := -29, minY := -29
+      width := (count - 1).toFloat * 60 + 58
+      height := 58
+    } "chain_"
+    let width := s!"width:100%;max-width:{count * 64 + 16}px;margin:1rem auto"
+    {{ <section style="padding:1rem;background:#f5f8fc">
+      <p style="margin:0;color:#536273">
+        {{s!"{count} nodes, {count - 1} links"}}
+      </p>
+      <div style={{width}}>
+        {{Verso.Output.Html.text false svg}}
+      </div>
+    </section> }}
 ```
 
 Lean positions the circles, labels, and links using Illuminate drawing commands.
@@ -220,7 +263,7 @@ public def LeanRunTyped.Examples.increment (value : UInt64) : UInt64 := value + 
 
 Enter preserves line breaks. Ctrl+Enter or ⌘+Enter runs the example.
 
-```leanRunAnchor lines (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.lines) (input := "Hello\nLean") +multiline +collapsed
+```leanRunAnchor lines (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.lines) (input := "Hello\nLean") +multiline
 public def LeanRunTyped.Examples.lines (text : String) : String :=
   String.intercalate "\n" <|
     (text.splitOn "\n").zipIdx.map fun (line, index) =>
@@ -246,4 +289,96 @@ public def LeanRunGate.spinLoop (n acc : Nat) : Nat :=
 
 public def LeanRunGate.spin (n : Nat) : Nat :=
   LeanRunGate.spinLoop n 0
+```
+
+# Typed rendering
+
+The input type selects its control; the result type selects its view.
+
+```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true")
+public def badge (enabled : Bool) : Html :=
+  {{ <p><strong>{{if enabled then "Enabled" else "Disabled"}}</strong></p> }}
+```
+
+```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615")
+public def wordSteps (seed : UInt64) : SequenceView :=
+  let sequence : Sequence UInt64 := {
+    initial := { label := "Start", state := seed }
+    steps := #[{ label := "Increment", state := seed + 1 }] }
+  sequence.view fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
+```
+
+# Game of Life
+
+Edit a rectangular seed: `#` is a live cell and `.` is a dead cell. The seed is
+centred on an 8×8 board; cells outside the edge stay dead. Lean computes each
+generation on demand. Choose Play to keep running, Pause to inspect the board,
+or Step to advance once. Edit a new seed while it runs, then choose Restart
+to apply it. Stop releases the worker.
+Try `###` on one line for a blinker, or `##` on each of two lines for a still life.
+
+```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := "...\n###\n...") +multiline
+public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
+  match parse seed with
+  | .error message => AutomatonView.error message
+  | .ok board =>
+    let machine : Automaton State := {
+      initial := { board }, step := State.step }
+    machine.view renderState (fun n => s!"Generation {n}")
+```
+
+**The transition**
+
+Every new cell reads the old board: birth with three neighbours, survival with
+two or three. This pure function contains the complete Life rule.
+
+```anchor lifeRules (module := LeanRunSequence.Life)
+def Board.neighbours (board : Board) (row col : Nat) : Nat := Id.run do
+  let mut count := 0
+  for dr in [:3] do
+    for dc in [:3] do
+      if dr == 1 && dc == 1 then continue
+      if (dr == 0 && row == 0) || (dc == 0 && col == 0) then continue
+      if board.alive (row + dr - 1) (col + dc - 1) then count := count + 1
+  return count
+
+/-- B3/S23: birth with three neighbours, survival with two or three.
+Every new cell reads the old board, so updates are simultaneous. -/
+def Board.step (board : Board) : Board :=
+  { cells := (Array.range (side * side)).map fun i =>
+      let row := i / side
+      let col := i % side
+      let n := board.neighbours row col
+      n == 3 || (board.alive row col && n == 2) }
+```
+
+**The model**
+
+The model adds a generation counter to the board. The player calls this transition
+without interpreting the board in JavaScript.
+
+```anchor lifeState (module := LeanRunSequence.Life)
+structure State where
+  generation : Nat := 0
+  board : Board := {}
+
+def State.step (state : State) : State :=
+  { generation := state.generation + 1, board := state.board.step }
+```
+
+**The view**
+
+Lean renders the board as ordinary SVG inside Verso Html.
+
+```anchor lifeSvg (module := LeanRunSequence.Life)
+def renderState (state : State) : Html :=
+  {{ <div style="padding:.5rem">
+    <p style="margin:0 0 .5rem;font-weight:600">{{s!"Generation {state.generation} · {state.board.population} living cells"}}</p>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img"
+         aria-label={{s!"Game of Life generation {state.generation}, {state.board.population} living cells"}}
+         style="display:block;width:176px;height:176px;max-width:100%;background:#f3f6fa">
+      <path class="life-cells" d={{livePath state.board}} fill="#285674"> " " </path>
+      <path d={{gridPath}} fill="none" stroke="#ccd9e5" stroke-width=".5"> " " </path>
+    </svg>
+  </div> }}
 ```

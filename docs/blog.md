@@ -90,7 +90,7 @@ The shared scalar boundary admits pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` chooses a textarea
 for String inputs without changing the callable signature. Enter preserves line
 breaks; Ctrl+Enter or ⌘+Enter runs the example.
-Return `String → Verso.Output.Html` for an HTML preview. `entry` creates a
+Return `Html` from a String, Nat, Bool or UInt64 input for an HTML preview. `entry` creates a
 document-owned scalar serializer automatically; a String result always displays
 plain text. There is no `output` argument and no producer VIR annotation.
 The [demo producer](../demo/chapters/LeanRunBlog/Examples.lean) shows this arrangement.
@@ -107,3 +107,6 @@ Page, and a dated Post. `python3 scripts/build-demo-site.py` generates the combi
 site under `_out/html-multi`: the overview becomes the landing page, Blog lives
 under `blog/`, Slides lives under `slides/`, and existing Manual chapter URLs
 remain available. The landing links to runnable examples in all three genres.
+
+Rendered inputs can also return `SequenceView`. The same typed payloads and shared
+Lean/VIR presenter serve every genre; see [authoring](authoring.md#present-a-sequence-of-states).

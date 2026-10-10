@@ -42,6 +42,29 @@ starter was cold-qualified against published extension `a830999`.
 See [internals](internals.md#pinned-dependencies) for the current exact pins,
 and [validation](validation.md) for qualification scope and limits.
 
+## Lean-authored views and pre-merge consolidation
+
+[PR #4](https://github.com/ejgallego/verso-run/pull/4) introduced typed finite
+sequences and a Lean/VIR DOM presenter, demonstrated by a stack-machine stepper.
+The calculator and stepper share one Lean parser and trace evaluator.
+[PR #7](https://github.com/ejgallego/verso-run/pull/7) added the finite Game of Life
+model and its integer-coordinate SVG view.
+[PR #10](https://github.com/ejgallego/verso-run/pull/10) separated input controls
+from result presentation, adopted structured VIR sequence transport, and moved
+Html preview documents into the same compiled presenter.
+
+The pre-merge consolidation ports Life to those final contracts and retains the
+publication-binding validation from [PR #8](https://github.com/ejgallego/verso-run/pull/8)
+and browser-description projection from [PR #9](https://github.com/ejgallego/verso-run/pull/9).
+Life's tests reuse the shared command/server harness and locate their slide by its
+entry, rather than relying on a slide number. Native provenance remains available
+for diagnostics while browser descriptions contain only the six required fields.
+
+Original validation records remain in those PRs and at the
+[typed-rendering checkpoint](https://github.com/ejgallego/verso-run/blob/c192579d528a9a5dd87fbf56921415c227650a6a/docs/validation.md).
+The consolidated branch receives its own mutation, browser, and fresh CI gates;
+prior green runs are not treated as integration qualification.
+
 ## Current layout
 
 Library code lives under `src/`, browser assets under `web/`, and demo chapters,
