@@ -1,12 +1,11 @@
 module
-public import VersoLeanRun.Sequence
+public import VersoLeanRun.Automaton
 public section
 
 namespace LeanRunSequence.Life
 open VersoLeanRun Verso.Output Verso.Output.Html
 
 def side : Nat := 8
-def generations : Nat := 12
 
 /-- The finite board has dead cells outside its boundary; it does not wrap. -/
 structure Board where
@@ -61,8 +60,6 @@ structure State where
 def State.step (state : State) : State :=
   { generation := state.generation + 1, board := state.board.step }
 
-def simulate (initial : Board) : Sequence State :=
-  Sequence.iterate State.step { board := initial } generations
 
 private def livePath (board : Board) : String := Id.run do
   let mut path := ""
@@ -90,10 +87,12 @@ def renderState (state : State) : Html :=
   </div> }}
 
 -- ANCHOR: lifeView
-public def lifeView (seed : String) : VersoLeanRun.SequenceView :=
+public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
   match parse seed with
-  | .error message => SequenceView.error message
-  | .ok board => (simulate board).view renderState
+  | .error message => AutomatonView.error message
+  | .ok board =>
+    let machine : Automaton State := { initial := { board }, step := State.step }
+    machine.view renderState (fun n => s!"Generation {n}")
 -- ANCHOR_END: lifeView
 
 end LeanRunSequence.Life

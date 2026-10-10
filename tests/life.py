@@ -39,7 +39,7 @@ with serve_directory(served) as base:
         browser = p.chromium.launch(headless=True,executable_path=shutil.which('google-chrome'))
         page = browser.new_page(viewport={'width':1280,'height':1000})
         errors = []; page.on('pageerror',lambda error: errors.append(str(error)))
-        def form(): return page.locator('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]')
+        def form(): return page.locator('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]').first
         def visit(prefix,genre,path):
             page.goto(base+prefix+'/'+genre+'/'+path)
             page.wait_for_selector('.lean-run[data-enhanced]', state='attached')
@@ -47,47 +47,114 @@ with serve_directory(served) as base:
                 page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
                 form().evaluate('e => {const sections=[...document.querySelectorAll(".reveal .slides > section")];Reveal.slide(sections.indexOf(e.closest(".reveal .slides > section")),0);}')
                 form().wait_for(state='visible')
-        def run(seed):
+        def current(frame):
+            assert frame['html'] in form().locator('iframe').get_attribute('srcdoc')
+            assert form().locator('iframe').get_attribute('sandbox') == ''
+            assert form().locator('.lean-run-sequence-error').text_content() == (frame['error'] or '')
+            assert form().locator('.lean-run-sequence-position').text_content() == frame['label']
+        def step(frame):
+            form().locator('.lean-run-step').click()
+            page.wait_for_function('e => ["success","failed"].includes(e.dataset.state)',arg=form().element_handle())
+            assert form().get_attribute('data-state') == 'success', form().inner_text()
+            current(frame)
+        def run(seed, count=12):
             form().locator('textarea').fill(seed)
             form().locator('[type=submit]').click()
             page.wait_for_function('e => ["success","failed"].includes(e.dataset.state)',arg=form().element_handle(),timeout=30000)
             assert form().get_attribute('data-state')=='success',form().inner_text()
             expected = oracle(seed)
-            for index, frame in enumerate(expected['frames']):
-                form().locator(f'[data-step="{index}"]').click()
-                assert frame['html'] in form().locator('iframe').get_attribute('srcdoc')
-                assert form().locator('iframe').get_attribute('sandbox')==''
-                assert form().locator('.lean-run-sequence-error').text_content()==(frame['error'] or '')
-                if frame['error']:
-                    assert form().frame_locator('iframe').locator('svg').count() == 0
-                else:
-                    assert form().frame_locator('iframe').locator('svg').get_attribute('aria-label').startswith('Game of Life generation')
+            current(expected[0])
+            if expected[0]['error']:
+                assert form().frame_locator('iframe').locator('svg').count() == 0
+                assert form().locator('.lean-run-play').is_disabled()
+                assert form().locator('.lean-run-step').is_disabled()
+            else:
+                for frame in expected[1:count+1]: step(frame)
+                assert form().frame_locator('iframe').locator('svg').get_attribute('aria-label').startswith('Game of Life generation')
             return expected
         for prefix in ['root','nested/prefix']:
             for genre,path in [('manual','Game-of-Life/'),('blog','page/'),
                                ('blog','notes/2026-10-8-running-lean-in-a-post/'),('slides','')]:
                 visit(prefix,genre,path)
                 expected=run('.#.\n..#\n###')
-                assert len(expected['frames'])==13 and all(f['error'] is None for f in expected['frames'])
-                assert 'Generation 12 · 5 living cells' in expected['frames'][-1]['html']
+                assert len(expected)==141 and all(f['error'] is None for f in expected)
+                assert 'Generation 12 · 5 living cells' in expected[12]['html']
                 record(prefix+'/'+genre+'/'+path+': editable glider and every Lean generation agree with native execution')
         visit('root','manual','Game-of-Life/')
         for seed in ['.##.\n.##.','...\n###\n...','#', '\n'.join(['########']*8)]:
             expected=run(seed)
-            assert len(expected['frames'])==13 and all(f['error'] is None for f in expected['frames'])
+            assert len(expected)==141 and all(f['error'] is None for f in expected)
         record('still life, blinker, extinction and dense boards execute and render within the worker budget')
         for seed in ['', '#\n..', '#########', '\n'.join(['.']*9), '<script>']:
             expected=run(seed)
-            assert len(expected['frames'])==1 and expected['frames'][0]['error']
+            assert expected[0]['error']
         expected=run('.#.\n..#\n###')
-        record('invalid shape/character/size is a Lean sequence error; a valid seed recovers')
+        record('invalid shape/character/size is a Lean error frame; a valid seed recovers')
         form().locator('textarea').fill('#')
-        assert form().locator('.lean-run-sequence').is_hidden()
-        expected=run('...\n###\n...')
-        slider=form().locator('input[type=range]')
-        slider.evaluate('(e) => {e.value="1";e.dispatchEvent(new Event("input",{bubbles:true}));}')
-        assert expected['frames'][1]['html'] in form().locator('iframe').get_attribute('srcdoc')
-        record('editing invalidates the old board; the shared scrubber selects the new Lean state')
+        assert form().locator('.lean-run-automaton').is_hidden()
+        expected=run('...\n###\n...', count=130)
+        record('forward execution passes generations 12 and 128 with exact native agreement')
+        assert form().locator('[data-step], input[type=range]').count() == 0
+        before = form().locator('.lean-run-automaton *').count()
+        step(expected[131])
+        assert form().locator('.lean-run-automaton *').count() == before
+        form().locator('.lean-run-play').click()
+        page.wait_for_function('e => e.querySelector(".lean-run-sequence-position").textContent === "Generation 134"',arg=form().element_handle())
+        form().locator('.lean-run-play').click()
+        page.wait_for_function('e => e.querySelector(".lean-run-status").textContent === "Paused"',arg=form().element_handle())
+        label = form().locator('.lean-run-sequence-position').text_content()
+        index = int(label.split()[-1]); current(expected[index])
+        page.wait_for_timeout(500)
+        assert form().locator('.lean-run-sequence-position').text_content() == label
+        step(expected[index+1])
+        form().locator('.lean-run-play').click()
+        page.wait_for_function('(e) => e.querySelector(".lean-run-sequence-position").textContent !== "Generation '+str(index+1)+'"',arg=form().element_handle())
+        form().locator('.lean-run-stop').click()
+        assert form().get_attribute('data-state') == 'stopped'
+        assert form().locator('.lean-run-automaton').is_hidden()
+        page.wait_for_timeout(500)
+        assert form().get_attribute('data-state') == 'stopped'
+        run('...\n###\n...', count=1)
+        record('Play advances continuously, Pause preserves the model, Step advances once and Stop prevents late updates; Run restarts')
+        # A second placement uses its own worker/model, while sharing resources.
+        page.evaluate("""async url => {
+            const original = document.querySelector('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]');
+            const copy = original.cloneNode(true);
+            delete copy.dataset.enhanced;
+            copy.id = 'independent-life';
+            original.after(copy);
+            const {enhance} = await import(url);
+            enhance(copy);
+        }""", base+'root/manual/lean-run/renderer.js')
+        other = page.locator('#independent-life')
+        other.locator('textarea').fill('.##.\n.##.')
+        other.locator('[type=submit]').click()
+        page.wait_for_function('e => e.dataset.state === "success"', arg=other.element_handle())
+        run('...\n###\n...', count=2)
+        expected_other = oracle('.##.\n.##.')
+        assert expected_other[0]['html'] in other.locator('iframe').get_attribute('srcdoc')
+        other.locator('.lean-run-step').click()
+        page.wait_for_function('e => e.dataset.state === "success"', arg=other.element_handle())
+        assert expected_other[1]['html'] in other.locator('iframe').get_attribute('srcdoc')
+        assert oracle('...\n###\n...')[2]['html'] in form().locator('iframe').get_attribute('srcdoc')
+        other.evaluate('e => {e.dispatchEvent(new Event("lean-run-dispose")); e.remove();}')
+        record('simultaneous live placements have independent models and can be disposed independently')
+        visit('root', 'slides', '')
+        run('...\n###\n...', count=1)
+        form().locator('.lean-run-play').click()
+        page.evaluate('Reveal.slide(0,0)')
+        page.wait_for_function('e => ["idle","stopped"].includes(e.dataset.state)',arg=form().element_handle())
+        assert form().locator('.lean-run-automaton').is_hidden()
+        visit('root', 'manual', 'Game-of-Life/')
+        run('...\n###\n...', count=1)
+        form().locator('.lean-run-play').click()
+        page.evaluate('dispatchEvent(new PageTransitionEvent("pagehide",{persisted:true}))')
+        assert form().get_attribute('data-state') == 'idle'
+        assert form().locator('.lean-run-automaton').is_hidden()
+        run('...\n###\n...', count=1)
+        record('leaving an active slide stops playback; cached-page lifetime discards the session and permits restart')
+
+
         for width in [1280,390]:
             page.set_viewport_size({'width':width,'height':1000})
             run('.#.\n..#\n###')

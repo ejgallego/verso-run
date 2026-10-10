@@ -30,3 +30,11 @@ assert.throws(() => formatPublishedResult("sequence", {
 assert.throws(() => formatPublishedResult("sequence", {
   ...limit, frames: [{...limit.frames[0], label: "x"}]}), /exceeds/);
 console.log("typed rendering wire, clone, strict forms and UTF-16 budgets passed");
+
+const frame = payload.frames[0];
+assert.equal(formatPublishedResult("automaton", frame), frame);
+assert.deepEqual(structuredClone(frame), frame);
+for (const invalid of [null, "{}", {...frame, error: undefined}, {...frame, html: 0}]) {
+  assert.throws(() => formatPublishedResult("automaton", invalid), /invalid sequence frame/);
+}
+assert.throws(() => formatPublishedResult("automaton", {...frame, html: "x".repeat(MAX_OUTPUT)}), /exceeds/);

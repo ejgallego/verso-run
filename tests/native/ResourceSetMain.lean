@@ -52,7 +52,7 @@ private def identities (programs : Array Vir.Resources.Bundle) : Array (String �
 
 def main : IO Unit := do
   let allExperiments ← IO.ofExcept rendered
-  let experiments := allExperiments.filter (fun experiment => !experiment.form.isSequence && !experiment.form.isHtml)
+  let experiments := allExperiments.filter (fun experiment => experiment.form.presentation == .text)
   checkProvenance allExperiments
   checkProvenance (← IO.ofExcept <| VersoLeanRun.Slides.slideExperiments (%doc LeanRunSlides.Deck))
   checkProvenance (← IO.ofExcept <| VersoLeanRun.Blog.siteExperiments <|

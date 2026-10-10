@@ -16,14 +16,19 @@ assert.equal(new Set(forms.map(({ form }) => form)).size, forms.length);
 const covered = new Set();
 for (const { form, expectedExport } of forms) {
   assert.equal(typeof form, "string");
-  assert.equal(expectedExport.effect, "pure");
+  assert.equal(expectedExport.effect, resultKind(form) === "automaton" ? "runtime" : "pure");
   assert.equal(expectedExport.args.length, 1);
   const type = expectedExport.args[0].type;
   assert.ok(Object.hasOwn(scalars, type), `unsupported input ABI: ${type}`);
   const { kind, input, decoded, result } = scalars[type];
   assert.equal(scalarKind(form), kind, `input wire projection for ${form}`);
   assert.equal(decodeInput(scalarKind(form), input), decoded);
-  if (resultKind(form) === "sequence") {
+  if (resultKind(form) === "automaton") {
+    assert.equal(expectedExport.result.kind, "structure");
+    assert.equal(expectedExport.result.name, "VersoLeanRun.AutomatonWire.Session");
+    const frame = { label: "Generation 129", html: "<p>Frame</p>", error: null };
+    assert.equal(formatPublishedResult(form, frame), frame);
+  } else if (resultKind(form) === "sequence") {
     assert.equal(expectedExport.result.kind, "structure");
     assert.equal(expectedExport.result.name, "VersoLeanRun.SequenceWire.Payload");
     const payload = { version: 1n, frames: [{ label: input, html: "<p>Frame</p>", error: null }] };

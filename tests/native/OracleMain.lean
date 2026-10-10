@@ -9,7 +9,12 @@ def main (args : List String) : IO Unit := do
   let result ← match role with
     | "greet" => pure <| LeanRunGate.greet input
     | "sequence" => pure <| (Lean.toJson (LeanRunSequence.Examples.stackView input).toPayload).compress
-    | "life" => pure <| (Lean.toJson (LeanRunSequence.Life.lifeView input).toPayload).compress
+    | "life" => do
+      let session ← Lean.Vir.RuntimeM.run (LeanRunSequence.Life.lifeView input).start
+      let mut frames := #[session.initial]
+      for _ in [:140] do
+        frames := frames.push (← Lean.Vir.RuntimeM.run session.advance)
+      pure <| (Lean.toJson frames).compress
     | "stack" => pure <| LeanRunGate.Stack.run input
     | "htmlGreeting" => pure <| (LeanRunGate.htmlGreeting input).asString
     | "diagram" => do

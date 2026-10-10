@@ -34,7 +34,7 @@ with serve_directory(Path(args.site).resolve()) as base, sync_playwright() as p:
         <form action="{base}preview-external-form"><button id="submit">Submit</button></form>'''
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
-    for kind in ['html', 'sequence']:
+    for kind in ['html', 'sequence', 'automaton']:
         await_result = page.evaluate('''async ({kind, markup}) => {
             globalThis.previewMessages = [];
             globalThis.observePreview ??= event => {
@@ -49,16 +49,17 @@ with serve_directory(Path(args.site).resolve()) as base, sync_playwright() as p:
             if (kind === 'html') { root.setAttribute('sandbox', ''); root.referrerPolicy = 'no-referrer'; }
             document.body.append(root);
             globalThis.policyView = new ViewHost(root, kind, error => { throw error; });
-            return await policyView.show(kind === 'html' ? markup : {
-                version: 1n, frames: [{label: '<img src=x onerror=alert(1)>', html: markup,
-                    error: '<script>alert(1)</script>'}]});
+            const frame = {label: '<img src=x onerror=alert(1)>', html: markup,
+                    error: '<script>alert(1)</script>'};
+            return await policyView.show(kind === 'html' ? markup : kind === 'automaton' ? frame : {
+                version: 1n, frames: [frame]});
         }''', {'kind': kind, 'markup': markup})
         assert await_result is True
         frame = page.locator('#policy-preview' if kind == 'html' else '#policy-preview iframe')
         assert frame.get_attribute('sandbox') == ''
         inside = page.frame_locator('#policy-preview' if kind == 'html' else '#policy-preview iframe')
         assert inside.locator('#benign').inner_text() == 'Raw Html remains visible'
-        if kind == 'sequence':
+        if kind != 'html':
             assert page.locator('#policy-preview .lean-run-sequence-strip img').count() == 0
             assert page.locator('#policy-preview .lean-run-sequence-error script').count() == 0
         checks.append(kind+': raw markup renders; control labels and errors remain text')

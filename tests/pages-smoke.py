@@ -37,7 +37,7 @@ with ExitStack() as servers:
     shared_hashes = {}
     for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
         shared_hashes[genre] = {}
-        for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js', 'presenter.js']:
+        for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js', 'presenter.js', 'automaton.js']:
             with urlopen(base + path + 'lean-run/' + name) as response:
                 contents = response.read()
             assert contents == (root / '_out/html-multi' / path / 'lean-run' / name).read_bytes(), (genre, name)
@@ -235,12 +235,16 @@ with ExitStack() as servers:
                                    arg=form.element_handle(), timeout=60000)
             assert form.get_attribute('data-state') == 'success', form.inner_text()
             expected = json.loads(oracle('life', seed, 'Manual'))
-            assert len(expected['frames']) == 13
-            for index, frame in enumerate(expected['frames']):
-                form.locator(f'[data-step="{index}"]').click()
+            assert len(expected) == 141
+            for index, frame in enumerate(expected[:14]):
+                if index:
+                    form.locator('.lean-run-step').click()
+                    page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                                           arg=form.element_handle(), timeout=60000)
+                    assert form.get_attribute('data-state') == 'success', form.inner_text()
                 assert frame['html'] in form.locator('iframe').get_attribute('srcdoc')
                 assert form.locator('.lean-run-sequence-error').text_content() == ''
-            checks.append(path + ': edited Life seed and every generation agree with native Lean')
+            checks.append(path + ': Life advances beyond its former limit and agrees with native Lean')
         assert not errors, errors
         checks.append('no uncaught browser errors')
         browser.close()

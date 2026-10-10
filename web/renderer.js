@@ -1,4 +1,5 @@
 import { ExperimentHost } from "./host.js";
+import { AutomatonPlayer } from "./automaton.js";
 import { ViewHost } from "./presenter.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Set();
@@ -9,6 +10,9 @@ addEventListener("pagehide", event => {
     else host.dispose();
   }
   if (!event.persisted) owners.clear();
+});
+addEventListener("visibilitychange", () => {
+  if (document.hidden) for (const host of owners) host.player?.pause();
 });
 let instance = 0;
 export function enhance(element) {
@@ -25,23 +29,55 @@ export function enhance(element) {
   const output = element.querySelector(".lean-run-output");
   const preview = element.querySelector(".lean-run-preview");
   const sequenceElement = element.querySelector(".lean-run-sequence");
+  const automatonElement = element.querySelector(".lean-run-automaton");
+  let ready = false;
+  let player;
+  const liveControls = () => {
+    if (!automatonElement) return;
+    const play = automatonElement.querySelector(".lean-run-play");
+    const step = automatonElement.querySelector(".lean-run-step");
+    if (!play || !step) return;
+    play.textContent = player.playing ? "Pause" : "Play";
+    play.setAttribute("aria-pressed", String(player.playing));
+    play.disabled = !ready;
+    step.disabled = !ready || player.playing || player.pending;
+    stop.disabled = !ready && !busy;
+    if (ready && !busy) status.textContent = player.playing ? "Playing" : "Paused";
+  };
   let busy = false;
   const setState = (state, value = "") => {
     element.dataset.state = state;
-    busy = ["loading", "running", "loading view"].includes(state);
+    busy = ["loading", "running", "loading view", "advancing"].includes(state);
     run.disabled = busy;
-    stop.disabled = !busy;
-    status.textContent = state === "idle" ? "Ready" :
+    stop.disabled = !busy && !(automatonElement && ready);
+    status.textContent = automatonElement && ready && (state === "success" || state === "advancing") ?
+      (player.playing ? "Playing" : state === "advancing" ? "Advancing" : "Paused") :
+      state === "idle" ? "Ready" :
       state === "success" && sequenceElement ? "Trace ready" :
       state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
   };
-  const pane = sequenceElement || preview;
-  const view = pane ? new ViewHost(pane, sequenceElement ? "sequence" : "html", error => {
+  const pane = automatonElement || sequenceElement || preview;
+  const view = pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", error => {
+    if (automatonElement) host.stop();
     setState("failed", `Could not display the view. Try Run again. ${error.message}`);
   }) : null;
   const clearResult = () => view?.clear();
   const host = new ExperimentHost(description, (state, value = "") => {
+    if (automatonElement && state === "advancing") {
+      setState(state);
+      liveControls();
+      return;
+    }
+    if (automatonElement && state === "success" && view.program) {
+      try { view.update(value); }
+      catch (error) { host.fail(error); return; }
+      if (value.error !== null) { ready = false; player.pause(); }
+      setState("success");
+      liveControls();
+      return;
+    }
+    if (automatonElement) { ready = false; player.reset(); }
     clearResult();
     setState(state, state === "success" && view ? "" : value);
     if (state === "success" && view) {
@@ -49,9 +85,21 @@ export function enhance(element) {
       void view.show(value).then(shown => {
         if (!shown) return;
         setState("success");
+        if (automatonElement) {
+          ready = value.error === null;
+          automatonElement.querySelector(".lean-run-play").addEventListener("click", () => {
+            if (player.playing) player.pause(); else player.play();
+          });
+          automatonElement.querySelector(".lean-run-step").addEventListener("click", () => { void player.step(); });
+          liveControls();
+        }
       });
     }
   });
+  if (automatonElement) {
+    player = new AutomatonPlayer(() => host.advance(), liveControls);
+    host.player = player;
+  }
   owners.add(host);
   run.disabled = false;
   form.addEventListener("submit", event => {
@@ -59,7 +107,7 @@ export function enhance(element) {
     if (busy) return;
     try { validateInput(scalarKind(description.form), input.value); }
     catch (error) {
-      clearResult();
+      host.stop("idle");
       setState("invalid input", error.message);
       return;
     }

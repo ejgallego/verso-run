@@ -9,7 +9,7 @@ public meta import VersoLeanRun.Model
 public import Verso.Doc.Elab
 meta import Verso.Instances.Deriving
 public import Verso.Output.Html
-public import VersoLeanRun.Sequence
+public import VersoLeanRun.Automaton
 public meta import Vir.Attributes
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Lean.ToExpr
@@ -37,7 +37,7 @@ meta instance : FromArgs Config DocElabM where
 meta section
 /-- Scalar aliases keep their type; rendered results use typed transport adapters. -/
 private inductive AdapterKind where
-  | scalar | html | sequence
+  | scalar | html | sequence | automaton
   deriving BEq
 end
 
@@ -57,16 +57,21 @@ private meta def callableAdapter (entry : Ident) (name : Name) (mode : AdapterKi
   let imported := (env.getModuleIdxFor? name).isSome
   if mode == .scalar && !imported then return name
   let adapter := (if imported then env.mainModule ++ name else name) ++
-    (match mode with | .scalar => `leanRun | .html => `leanRunHtml | .sequence => `leanRunSequence)
+    (match mode with | .scalar => `leanRun | .html => `leanRunHtml | .sequence => `leanRunSequence | .automaton => `leanRunAutomaton)
   let info ← getConstInfo name
   let string := mkConst ``String
   let domain ← if mode == .scalar then pure string else do
     let .forallE _ domain _ .default ← Lean.Meta.whnf info.type
       | throwErrorAt entry "Rendered entries need one explicit scalar input"
     pure domain
-  let result := if mode == .sequence then mkConst ``SequenceWire.Payload else string
+  let result := if mode == .sequence then mkConst ``SequenceWire.Payload
+    else if mode == .automaton then mkApp (mkConst ``Lean.Vir.RuntimeM) (mkConst ``AutomatonWire.Session)
+    else string
   let type ← if mode == .scalar then pure info.type else mkArrow domain result
-  let value := if mode == .sequence then
+  let value := if mode == .automaton then
+    mkLambda `input .default domain <| mkApp (mkConst ``AutomatonView.start)
+      (mkApp (mkConst name) (.bvar 0))
+    else if mode == .sequence then
     mkLambda `input .default domain <| mkApp (mkConst ``SequenceView.toPayload)
       (mkApp (mkConst name) (.bvar 0))
     else if mode == .html then
@@ -96,11 +101,11 @@ private meta def unsupportedForm {α : Type} (entry : Ident) (name : Name) (type
       m!"This form needs one explicit argument; found {signature.args.size}. \
         Export a wrapper taking one String, Nat, Bool, or UInt64 input."
     else
-      m!"This form supports homogeneous scalar calls or a scalar input returning Html or SequenceView. \
+      m!"This form supports homogeneous scalar calls or a scalar input returning Html, SequenceView, or AutomatonView. \
         Use a supported scalar type or return a typed rendered view."
   throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
     This interface is supported by VIR, but not by this Run form.\n\
-    {reason}\nUse a pure homogeneous scalar call, or a String, Nat, Bool, or UInt64 input returning Html or SequenceView."
+    {reason}\nUse a pure homogeneous scalar call, or a String, Nat, Bool, or UInt64 input returning Html, SequenceView, or AutomatonView."
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
 Selected imported entries and rendered-view adapters are compiled in the document module. -/
@@ -119,7 +124,8 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
         Lean.Meta.withLocalDecl binder .default domain fun argument => do
           let result ← Lean.Meta.whnf (result.instantiate1 argument)
           return if result.isConstOf ``Verso.Output.Html then .html
-            else if result.isConstOf ``SequenceView then .sequence else .scalar
+            else if result.isConstOf ``SequenceView then .sequence
+            else if result.isConstOf ``AutomatonView then .automaton else .scalar
     | _ => pure .scalar
   -- Classify the source interface independently before registering scalar exports.
   -- Html uses markup; SequenceView uses a typed payload with a compiler-derived ABI.
@@ -132,7 +138,9 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
         "Lean Run entry '{name}' has an unsupported VIR interface.\n\
           Type: {info.type}\nVIR: {error.toMessageData}"
   let form : FormKind ← match callSignature.args, callSignature.effect with
-    | #[argument], .pure => do
+    | #[argument], effect => do
+      unless effect == (if mode == .automaton then .runtime else .pure) do
+        unsupportedForm (α := Unit) config.entry sourceName entryType callSignature
       let input ← match argument.type with
         | .string => pure (InputKind.string (if config.multiline then .multiline else .line))
         | .nat => pure .nat
@@ -141,12 +149,13 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
         | _ => unsupportedForm config.entry sourceName entryType callSignature
       let admitted := match mode, callSignature.result with
         | .sequence, .structure result .. => result == ``SequenceWire.Payload
+        | .automaton, .structure result .. => result == ``AutomatonWire.Session
         | .html, .string => true
         | .scalar, result => result == argument.type
         | _, _ => false
       unless admitted do
         unsupportedForm (α := Unit) config.entry sourceName entryType callSignature
-      pure { input, presentation := match mode with | .scalar => .text | .html => .html | .sequence => .sequence }
+      pure { input, presentation := match mode with | .scalar => .text | .html => .html | .sequence => .sequence | .automaton => .automaton }
     | _, _ => unsupportedForm config.entry sourceName entryType callSignature
   if config.multiline && form.scalar != .string then
     throwErrorAt config.entry "Lean Run multiline input requires a String argument"

@@ -61,7 +61,7 @@ Publication loading cancellation is qualified before any response, with fresh-fe
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.
 
-The combined-site gate covers typed, inline, sequence and Life examples and compares all five shared
+The combined-site gate covers typed, inline, sequence and Life examples and compares all six shared
 JavaScript files in every genre. `verso-run-build.json` records the generator's exact
 source/dependency/runtime identities; a hosted run requires the deployed revision and
 a clean build using `tests/pages-smoke.py --revision COMMIT`.
@@ -73,15 +73,15 @@ the stack stepper, and Game of Life together with binding conflict checks and
 browser metadata projection. Command logs and results are written to the selected output directory; CI
 artifacts identify the exact source revision that passed the full gates.
 
-All 15 input/presentation forms have independently classified expectations.
+All 20 input/presentation forms have independently classified expectations.
 Sequence frames use typed VIR transport with exact integer values and a combined
 65,536 UTF-16 code unit output budget. The real held-module tests cover deadline,
 Stop, retry of the same pending import and observed late rejection. Raw-markup
-checks use the actual compiled Html and sequence presenters, rather than relying
+checks use the actual compiled Html, sequence, and automaton presenters, rather than relying
 only on interpolated-text escaping.
 
 Life's known-pattern tests check still lifes, oscillation, extinction, glider
-translation and dead boundaries. Browser tests compare every generation with
+translation and dead boundaries. Browser tests compare exercised generations with
 native Lean across all genres at root and nested paths. The dense-board case
 checks the output budget; invalid seeds remain Lean errors with explicit recovery.
 
@@ -111,3 +111,9 @@ actual browser back-cache restoration remains unqualified.
 
 General Illuminate diagram compilation is also unqualified. Only the documented
 drawing-command/SVG path is supported by this demo.
+
+The live Life gate compares native and worker frames beyond generations 12 and
+128, exercises Play/Pause/Step and Stop/restart, and checks that updating a frame
+keeps the DOM size constant. Native known-pattern tests remain independent of
+that agreement oracle. Scheduler tests hold transitions open to qualify
+backpressure, pause, reset generations, and failure recovery.

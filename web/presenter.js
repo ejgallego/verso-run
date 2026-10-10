@@ -15,13 +15,14 @@ function waitForModule(imported, signal) {
 
 export class ViewHost {
   constructor(element, kind, onError) {
-    if (!["html", "sequence"].includes(kind)) throw new Error("Unsupported Lean view");
+    if (!["html", "sequence", "automaton"].includes(kind)) throw new Error("Unsupported Lean view");
     this.element = element;
     this.kind = kind;
     this.onError = onError;
     this.generation = 0;
     this.program = null;
     this.cleanup = null;
+    this.declaration = null;
     this.controller = null;
   }
   clear() {
@@ -31,6 +32,7 @@ export class ViewHost {
     const cleanup = this.cleanup, program = this.program;
     this.cleanup = null;
     this.program = null;
+    this.declaration = null;
     let failure;
     try { cleanup?.(); } catch (error) { failure = error; }
     try { program?.dispose(); } catch (error) { failure ??= error; }
@@ -39,6 +41,11 @@ export class ViewHost {
     this.element.hidden = true;
     // Cleanup must never prevent the host from settling Stop or disposal.
     if (failure) console.error("View cleanup failed", failure);
+  }
+  update(frame) {
+    if (this.kind !== "automaton" || !this.program) throw new Error("No live presenter to update");
+    const result = this.program.call(this.declaration, this.element, frame);
+    if (result !== undefined) throw new Error("Automaton presenter returned an invalid Unit");
   }
   async show(data) {
     this.clear();
@@ -63,11 +70,12 @@ export class ViewHost {
         expectedExports: { [presenter.declaration]: presenter.expectedExport } });
       if (generation !== this.generation) { program.dispose(); return false; }
       this.program = program;
+      this.declaration = presenter.declaration;
       const cleanup = program.call(presenter.declaration, this.element, data);
       if (this.kind === "sequence") {
         if (typeof cleanup !== "function") throw new Error("Sequence presenter did not return its cleanup callback");
         this.cleanup = cleanup;
-      } else if (cleanup !== undefined) throw new Error("HTML presenter returned an invalid Unit");
+      } else if (cleanup !== undefined) throw new Error("View presenter returned an invalid Unit");
       this.element.hidden = false;
       this.controller = null;
       return true;

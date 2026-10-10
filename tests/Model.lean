@@ -9,7 +9,7 @@ open Lean VersoLeanRun
 #eval show IO Unit from do
   let mut wire := #[]
   for input in #[InputKind.string .line, .string .multiline, .nat, .bool, .uint64] do
-    for presentation in #[PresentationKind.text, .html, .sequence] do
+    for presentation in #[PresentationKind.text, .html, .sequence, .automaton] do
       let form : FormKind := { input, presentation }
       let decoded ← IO.ofExcept (fromJson? (toJson form) : Except String FormKind)
       unless decoded == form do throw <| IO.userError s!"form round-trip failed: {repr form}"
@@ -43,6 +43,11 @@ def unsignedHtml (input : UInt64) : String := toString input
 def naturalSequence (input : Nat) : SequenceWire.Payload := { version := input, frames := #[] }
 def booleanSequence (input : Bool) : SequenceWire.Payload := { version := if input then 1 else 0, frames := #[] }
 def unsignedSequence (input : UInt64) : SequenceWire.Payload := { version := input.toNat, frames := #[] }
+def live (input : String) : Lean.Vir.RuntimeM AutomatonWire.Session :=
+  (AutomatonView.error input).start
+def naturalLive (input : Nat) : Lean.Vir.RuntimeM AutomatonWire.Session := live (toString input)
+def booleanLive (input : Bool) : Lean.Vir.RuntimeM AutomatonWire.Session := live (toString input)
+def unsignedLive (input : UInt64) : Lean.Vir.RuntimeM AutomatonWire.Session := live (toString input)
 end ContractFixtures
 
 -- Every admitted input/presentation pair matches independent compiler classification.
@@ -62,7 +67,12 @@ run_cmd Lean.Elab.Command.liftTermElabM do
     (`ContractFixtures.unsignedHtml, ⟨.uint64, .html⟩),
     (`ContractFixtures.naturalSequence, ⟨.nat, .sequence⟩),
     (`ContractFixtures.booleanSequence, ⟨.bool, .sequence⟩),
-    (`ContractFixtures.unsignedSequence, ⟨.uint64, .sequence⟩)]
+    (`ContractFixtures.unsignedSequence, ⟨.uint64, .sequence⟩),
+    (`ContractFixtures.live, ⟨.string .line, .automaton⟩),
+    (`ContractFixtures.live, ⟨.string .multiline, .automaton⟩),
+    (`ContractFixtures.naturalLive, ⟨.nat, .automaton⟩),
+    (`ContractFixtures.booleanLive, ⟨.bool, .automaton⟩),
+    (`ContractFixtures.unsignedLive, ⟨.uint64, .automaton⟩)]
   for (name, form) in cases do
     let info ← Lean.getConstInfo name
     let .ok signature ← Vir.Interface.analyzeExportInterface info.type

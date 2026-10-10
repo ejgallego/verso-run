@@ -9,7 +9,7 @@ public import Lean.Data.Json.Parser
 public import Std.Data.TreeMap.Basic
 public import Vir.Resources
 public import Vir.Compiler.Interface.Encode
-public import VersoLeanRun.Sequence
+public import VersoLeanRun.Automaton
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Vir.Compiler.Interface.Encode
 public meta import Lean.Elab.Term
@@ -23,6 +23,14 @@ elab "sequenceCallableExpected%" input:ident : term => do
   let type := mkForall `input .default (mkConst input.getId) (mkConst ``SequenceWire.Payload)
   let .ok signature ← Vir.Interface.analyzeExportInterface type
     | throwError "Cannot classify the typed sequence transport"
+  return mkStrLit signature.toExpectedSignatureJson
+
+open Lean Elab Term in
+elab "automatonCallableExpected%" input:ident : term => do
+  let result := mkApp (mkConst ``Lean.Vir.RuntimeM) (mkConst ``AutomatonWire.Session)
+  let type := mkForall `input .default (mkConst input.getId) result
+  let .ok signature ← Vir.Interface.analyzeExportInterface type
+    | throwError "Cannot classify the typed automaton transport"
   return mkStrLit signature.toExpectedSignatureJson
 
 /-- Complete validated inventory, ready for a genre's output or asset planner. -/
@@ -47,6 +55,12 @@ def combineResources (resources additional : ResourceSet) : Except String Resour
 /-- Encode the admitted input/result pair through VIR, independently of the
 program bundle. Structured results use the compiled payload layout. -/
 def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
+  if form.isAutomaton then
+    return ← Lean.Json.parse <| match form.scalar with
+      | .string => (automatonCallableExpected% String)
+      | .nat => (automatonCallableExpected% Nat)
+      | .bool => (automatonCallableExpected% Bool)
+      | .uint64 => (automatonCallableExpected% UInt64)
   if form.isSequence then
     return ← Lean.Json.parse <| match form.scalar with
       | .string => (sequenceCallableExpected% String)
@@ -89,9 +103,10 @@ private def registerBinding (bindings : PublicationBindings) (experiment : Exper
 Resolve declarations and validate contracts before performing any output writes. -/
 def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     (resourcePrefix : String := "lean-run/resources") : Except String Publication := do
+  let automaton := rendered.any (·.form.isAutomaton)
   let sequence := rendered.any (·.form.isSequence)
   let html := rendered.any (·.form.isHtml)
-  let resources ← if sequence || html then
+  let resources ← if automaton || sequence || html then
     combineResources resources VersoLeanRunPresenterResources.resources else pure resources
   let programs := resources.programs
   let site ← (resources.forSite resourcePrefix).mapError reprStr
@@ -117,11 +132,16 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     ("runtimeModule", .str site.runtimeModule),
     ("runtimeManifest", .str site.runtimeManifest),
     ("programs", Lean.Json.mkObj programsJson)]
-  if sequence || html then
+  if automaton || sequence || html then
     let some presenterIndex := programs.findIdx? (·.descriptor.logicalId == "VersoLeanRunPresenter")
       | throw "No published Lean view presenter program"
     let manifest := site.programManifests[presenterIndex]!
     let mut presenters : List (String × Lean.Json) := []
+    if automaton then
+      let expected ← VersoLeanRunPresenterResources.expectedAutomaton
+      presenters := presenters ++ [("automaton", Lean.Json.mkObj [
+        ("manifest", .str manifest), ("declaration", .str "VersoLeanRun.Presenter.showAutomaton"),
+        ("expectedExport", expected)])]
     if sequence then
       let expected ← VersoLeanRunPresenterResources.expectedMount
       presenters := presenters ++ [("sequence", Lean.Json.mkObj [
@@ -138,7 +158,8 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
   for (name, contents) in [("renderer.js", include_str "../../web/renderer.js"),
       ("host.js", include_str "../../web/host.js"), ("worker.js", include_str "../../web/worker.js"),
       ("contract.js", include_str "../../web/contract.js"),
-      ("presenter.js", include_str "../../web/presenter.js")] do
+      ("presenter.js", include_str "../../web/presenter.js"),
+      ("automaton.js", include_str "../../web/automaton.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }
   return { files, plan }
 

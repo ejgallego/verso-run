@@ -208,7 +208,7 @@
   }
 }
 
-.lean-run-sequence-controls { display: grid; gap: .65rem; }
+.lean-run-automaton-controls, .lean-run-sequence-controls { display: grid; gap: .65rem; }
 .lean-run-sequence-strip { display: flex; gap: .35rem; flex-wrap: wrap; }
 .lean-run .lean-run-sequence-step { padding: .25rem .5rem; font-size: .85rem; }
 .lean-run button.lean-run-sequence-step[aria-pressed="true"] { background: #285575; color: white; }

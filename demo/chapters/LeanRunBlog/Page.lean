@@ -98,13 +98,16 @@ public def wordSteps (seed : UInt64) : SequenceView :=
 # Game of Life
 
 Edit a rectangular seed: `#` is a live cell and `.` is a dead cell. The seed is
-centred on an 8×8 board; cells outside the edge stay dead. Lean computes twelve
-generations. Choose a generation or use Previous/Next to watch a glider move.
+centred on an 8×8 board; cells outside the edge stay dead. Lean computes each
+generation on demand. Choose Play to keep running, Pause to inspect the board,
+or Step to advance once. Stop releases the worker.
 Try `###` on one line for a blinker, or `##` on each of two lines for a still life.
 
-```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := ".#.\n..#\n###") +multiline +collapsed
-public def lifeView (seed : String) : VersoLeanRun.SequenceView :=
+```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := "...\n###\n...") +multiline +collapsed
+public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
   match parse seed with
-  | .error message => SequenceView.error message
-  | .ok board => (simulate board).view renderState
+  | .error message => AutomatonView.error message
+  | .ok board =>
+    let machine : Automaton State := { initial := { board }, step := State.step }
+    machine.view renderState (fun n => s!"Generation {n}")
 ```

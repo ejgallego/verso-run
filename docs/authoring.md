@@ -195,10 +195,7 @@ model state exists with `SequenceView.error`, rather than constructing a dummy
 state:
 
 ```lean
-public def lifeView (seed : String) : SequenceView :=
-  match parse seed with
-  | .error message => SequenceView.error message
-  | .ok board => (simulate board).view renderState
+SequenceView.error "The input could not be parsed."
 ```
 
 Result-type abbreviations for `Html` and `SequenceView` work like the underlying
@@ -222,9 +219,38 @@ DOM qualification. Only its exercised bindings are covered here. Illuminate's
 full animation compiler remains unqualified on the current runtime; its existing
 qualified drawing-command/SVG output can be used inside a state Html view.
 
-The [Game of Life example](../demo/chapters/LeanRunSequence/Life.lean) is another
-ordinary `String → SequenceView` function. Its input is a rectangular `#`/`.` seed
-of at most 8 rows and columns, centred on an 8×8 board. The model computes twelve
-generations with dead cells beyond the edge, then its view renders an SVG board.
-It uses the same player and worker lifecycle as the stack stepper. No JavaScript
-implements the simulation or interprets its trace.
+## Run an automaton continuously
+
+Return `AutomatonView` when a model should advance on demand instead of computing
+an entire trace. `Automaton α` holds an initial model and a pure transition
+`α → α`; `.view` supplies its `α → Html` rendering and an optional iteration label:
+
+```lean
+public def counter (seed : Nat) : VersoLeanRun.AutomatonView :=
+  let machine : VersoLeanRun.Automaton Nat := {
+    initial := seed, step := (· + 1) }
+  machine.view (fun n => Verso.Output.Html.text true (toString n))
+    (fun i => s!"Iteration {i}")
+```
+
+Use the same `leanRun (entry := counter)` directive. Run creates the initial
+state. Play advances continuously, Pause keeps the current model, and Step
+advances once while paused. Pause allows an already requested transition to
+finish; Stop terminates the worker and clears the view. Run starts again from
+the current input. Editing the input or leaving a slide discards the session;
+background tabs pause playback.
+
+Each placement owns its model and worker. The worker keeps only the current
+state, without collecting a frame history or imposing a generation count. The
+player waits for a transition to finish before scheduling another, rather than
+queuing ticks. Each rendered frame retains the 65,536 UTF-16 code unit budget
+and the same sandbox policy as sequence views. A transition that does not return
+remains interruptible with Stop. Report invalid input with
+`AutomatonView.error`; its view disables Play and Step.
+
+The [Game of Life example](../demo/chapters/LeanRunSequence/Life.lean) uses this
+interface. Its input is a rectangular `#`/`.` seed of at most 8 rows and columns,
+centred on an 8×8 board with dead cells beyond the edge. Lean computes and renders
+every generation. A still life or an empty board continues to advance its
+counter; Play has no trace boundary at which to stop. Use `SequenceView` instead
+when readers need to inspect earlier states of a bounded computation.

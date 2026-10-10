@@ -26,7 +26,7 @@ inductive InputKind where
 /-- Presentation is independent of the concrete input control. Plain text retains
 the input's scalar type; rendered results use their own transport contract. -/
 inductive PresentationKind where
-  | text | html | sequence
+  | text | html | sequence | automaton
   deriving BEq, Repr
 
 structure FormKind where
@@ -51,6 +51,11 @@ instance : ToJson FormKind where
     | ⟨.nat, .sequence⟩ => "natSequence"
     | ⟨.bool, .sequence⟩ => "boolSequence"
     | ⟨.uint64, .sequence⟩ => "uint64Sequence"
+    | ⟨.string .line, .automaton⟩ => "automaton"
+    | ⟨.string .multiline, .automaton⟩ => "multilineAutomaton"
+    | ⟨.nat, .automaton⟩ => "natAutomaton"
+    | ⟨.bool, .automaton⟩ => "boolAutomaton"
+    | ⟨.uint64, .automaton⟩ => "uint64Automaton"
 
 /-- Accept exactly the supported string tags. Object encodings must not silently
 lose unsupported options at the native metadata boundary. -/
@@ -72,6 +77,11 @@ instance : FromJson FormKind where
     | "natSequence" => pure ⟨.nat, .sequence⟩
     | "boolSequence" => pure ⟨.bool, .sequence⟩
     | "uint64Sequence" => pure ⟨.uint64, .sequence⟩
+    | "automaton" => pure ⟨.string .line, .automaton⟩
+    | "multilineAutomaton" => pure ⟨.string .multiline, .automaton⟩
+    | "natAutomaton" => pure ⟨.nat, .automaton⟩
+    | "boolAutomaton" => pure ⟨.bool, .automaton⟩
+    | "uint64Automaton" => pure ⟨.uint64, .automaton⟩
     | tag => throw s!"Unsupported Lean Run form '{tag}'"
 
 def InputKind.scalar : InputKind → ScalarKind
@@ -88,6 +98,8 @@ def FormKind.multiline (form : FormKind) : Bool :=
 def FormKind.isHtml (form : FormKind) : Bool := form.presentation == .html
 
 def FormKind.isSequence (form : FormKind) : Bool := form.presentation == .sequence
+
+def FormKind.isAutomaton (form : FormKind) : Bool := form.presentation == .automaton
 
 /-- Portable call description admitted from the independently classified Lean
 interface. Runtime URLs and encoded expected signatures belong to publication. -/

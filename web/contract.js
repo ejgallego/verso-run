@@ -15,6 +15,11 @@ const FORMS = Object.freeze({
   natSequence: {input: "nat", result: "sequence"},
   boolSequence: {input: "bool", result: "sequence"},
   uint64Sequence: {input: "uint64", result: "sequence"},
+  automaton: {input: "string", result: "automaton"},
+  multilineAutomaton: {input: "string", result: "automaton"},
+  natAutomaton: {input: "nat", result: "automaton"},
+  boolAutomaton: {input: "bool", result: "automaton"},
+  uint64Automaton: {input: "uint64", result: "automaton"},
 });
 function description(form) {
   if (typeof form !== "string" || !Object.hasOwn(FORMS, form)) throw new Error("Unsupported Lean Run form");
@@ -30,6 +35,7 @@ export const MAX_UINT64 = (1n << 64n) - 1n;
 export const MAX_FRAMES = 128;
 export function formatPublishedResult(form, result) {
   const kind = resultKind(form);
+  if (kind === "automaton") { validateFrame(result); return result; }
   if (kind !== "sequence") return formatResult(kind, result);
   if (!result || result.version !== 1n || !Array.isArray(result.frames) ||
       result.frames.length < 1 || result.frames.length > MAX_FRAMES) {
@@ -37,14 +43,19 @@ export function formatPublishedResult(form, result) {
   }
   let size = 0;
   for (const frame of result.frames) {
-    if (!frame || typeof frame.label !== "string" || typeof frame.html !== "string" ||
-        !(frame.error === null || typeof frame.error === "string")) {
-      throw new Error("Lean returned an invalid sequence frame");
-    }
-    size += frame.label.length + frame.html.length + (frame.error?.length ?? 0);
+    size += validateFrame(frame);
     if (size > MAX_OUTPUT) throw new Error(`Result exceeds ${MAX_OUTPUT} UTF-16 code units`);
   }
   return result;
+}
+function validateFrame(frame) {
+  if (!frame || typeof frame.label !== "string" || typeof frame.html !== "string" ||
+      !(frame.error === null || typeof frame.error === "string")) {
+    throw new Error("Lean returned an invalid sequence frame");
+  }
+  const size = frame.label.length + frame.html.length + (frame.error?.length ?? 0);
+  if (size > MAX_OUTPUT) throw new Error(`Result exceeds ${MAX_OUTPUT} UTF-16 code units`);
+  return size;
 }
 export function validateInput(shape, value) {
   if (typeof value !== "string") throw new Error("Input must be text");

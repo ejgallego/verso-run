@@ -37,6 +37,7 @@ command(['node', 'tests/form-wire.mjs', str(wire_path)], 'form-wire')
 record('native form tags agree with browser codecs and canonical VIR contracts')
 record('typed form round-trips and unsupported metadata rejection')
 command(['node', 'tests/host-lifecycle.mjs'], 'host-lifecycle')
+command(['node', 'tests/automaton-player.mjs'], 'automaton-player')
 record('publication acquisition cancellation, shared waiters, late completion, deadline and explicit recovery')
 site = OUTPUT/'site'
 generate(site)
@@ -89,6 +90,7 @@ assert not (OUTPUT/'missing-registration/html-multi/lean-run/publication.json').
 record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
 command(['lake', 'env', 'lean', 'tests/EntryRegistration.lean'], 'entry-registration')
+command(['lake', 'env', 'lean', 'tests/AutomatonAdapter.lean'], 'automaton-adapter')
 record('entry registers unannotated scalar functions and typed Html without an output option')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():

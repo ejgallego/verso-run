@@ -31,7 +31,10 @@ with serve_directory(site) as base, sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     for genre, root, path in paths:
         plan = json.loads((root/'lean-run/publication.json').read_text())
-        assert set(plan['presenters']) == {'html','sequence'}
+        assert set(plan['presenters']) == {'html','sequence','automaton'}
+        assert plan['presenters']['automaton']['expectedExport']['effect'] == 'dom'
+        assert plan['presenters']['automaton']['expectedExport']['result']['type'] == 'Unit'
+        assert plan['presenters']['automaton']['expectedExport']['args'][1]['name'] == 'VersoLeanRun.SequenceWire.Frame'
         assert plan['presenters']['html']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['html']['expectedExport']['result']['type'] == 'Unit'
         assert plan['presenters']['sequence']['expectedExport']['args'][1]['kind'] == 'structure'

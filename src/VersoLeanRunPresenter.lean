@@ -50,6 +50,26 @@ private def controls (frames : Array SequenceWire.Frame) : Html := Id.run do
     <iframe class="lean-run-sequence-frame" title="Sequence state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
   </div> }}
 
+/-- Live controls persist while each new Lean frame replaces the previous one.
+The asynchronous worker bridge owns Play/Pause scheduling and backpressure. -/
+@[vir_export]
+def showAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit := do
+  let controls ← Element.querySelector root (← JsValue.ofString ".lean-run-automaton-controls")
+  if (← Js.Nullable.toOption controls).isNone then
+    let markup := {{ <div class="lean-run-automaton-controls">
+      <div class="lean-run-sequence-navigation">
+        <button type="button" class="lean-run-play"> "Play" </button>
+        <button type="button" class="lean-run-step"> "Step" </button>
+      </div>
+      <p class="lean-run-sequence-position" role="status"> " " </p>
+      <p class="lean-run-sequence-error" role="alert"> " " </p>
+      <iframe class="lean-run-sequence-frame" title="Automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
+    </div> }}
+    Element.setInnerHTML root (← JsValue.ofString markup.asString)
+  text (← child root ".lean-run-sequence-position") frame.label
+  text (← child root ".lean-run-sequence-error") (frame.error.getD "")
+  attr (← child root ".lean-run-sequence-frame") "srcdoc" (Preview.document frame.html)
+
 /-- The bounded presenter runs in the browser; computation stays in the worker.
 The returned callback removes listeners before the host disposes its runtime. -/
 @[vir_export]

@@ -214,14 +214,14 @@ views require an initial record, making their nonempty invariant structural.
 Entry elaboration reduces the result type to recognize aliases before choosing
 a document-owned typed payload adapter and independently classifies its
 actual export signature. Publication adds the separate presenter program and its
-compiler-derived DOM contracts whenever Html or sequence views are present. The
+compiler-derived DOM contracts whenever rendered views are present. The
 presenter carrier retains its complete `ResourceSet`; `combineResources` checks
 its runtime identity against the supplied set before publication. Its manifest
 is resolved by module identity rather than inventory position.
 
 The native generator embeds the presenter resource pack without statically
 importing its browser-only definitions. The carrier loads the prepared module's
-compiled environment to classify the actual `mount` and `mountHtml` declaration types; it does
+compiled environment to classify the actual `mount`, `mountHtml`, and `showAutomaton` declaration types; it does
 not infer a contract from the executable manifest or elaborate another source
 frontend. This keeps JS externs out of native C compilation.
 
@@ -234,9 +234,29 @@ in the browser context and receives rendered frame data, not worker DOM handles.
 State frames retain the restrictive Html sandbox. Genre adapters reuse their
 existing placement and navigation lifecycle.
 
+### On-demand automata
+
+`Automaton α` retains the pure initial/transition interface. `Automaton.view`
+returns an `AutomatonView` whose start action allocates a worker-owned
+`RuntimeRef (α × Nat)`. The document adapter runs that action and returns an
+`AutomatonWire.Session`: an initial frame and a zero-argument, runtime-effect
+advance callback. Publication independently classifies that exact nested
+contract through VIR. This effect belongs to the generated session adapter;
+ordinary scalar exports retain their pure interface.
+
+The worker retains the callback and current model. Advance messages call it and
+transfer one validated `SequenceWire.Frame`; neither the callback nor a DOM handle
+crosses `postMessage`. Reinitialisation creates a fresh worker so old session
+handles cannot accumulate. The presenter updates one frame in place. JavaScript
+owns asynchronous scheduling with one request in flight and a delay between
+completed transitions; Pause keeps the session, while Stop/edit/navigation
+terminate it. Generation checks also discard late completions after a reset.
+There is no retained frame history. Invalid author input produces an error frame
+and disabled live controls.
+
 ### Rendering and transport
 
-Authors return typed `Html` or `SequenceView`. Html generation, including SVG,
+Authors return typed `Html`, `SequenceView`, or `AutomatonView`. Html generation, including SVG,
 runs in compiled Lean in the worker. The sequence controls and frame selection
 also run in compiled Lean, in the separate browser presenter. JavaScript owns
 asynchronous loading, worker messages and cancellation; it does not evaluate the

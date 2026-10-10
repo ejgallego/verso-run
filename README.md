@@ -36,7 +36,7 @@ There are a few more examples to explore:
 
 | Example | Try |
 | --- | --- |
-| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then step through its generations |
+| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then Play continuously or Step once |
 | [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Move through before/after stacks with Lean-authored controls |
 | [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
 | [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |
@@ -80,6 +80,7 @@ The authoring guide explains [imports, block options, HTML, and registration](do
 | `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
 | `String/Nat/Bool/UInt64 → Verso.Output.Html` | The corresponding control above | An isolated HTML preview |
 | `String/Nat/Bool/UInt64 → SequenceView` | The corresponding control above | A sequence with previous/next and scrubbing |
+| `String/Nat/Bool/UInt64 → AutomatonView` | The corresponding control above | An on-demand model with Play, Pause and Step |
 
 Functions must be public, executable, pure, and monomorphic, with one explicit
 argument. Selecting `entry` registers the callable; no VIR attribute is needed.
