@@ -13,6 +13,30 @@ function waitForModule(imported, signal) {
     signal.removeEventListener("abort", abort));
 }
 
+// The visible document stays untouched until its replacement has loaded and
+// had a rendering opportunity. Stop observes the same abort signal as loading.
+function waitForPreview(frame, signal) {
+  return new Promise((resolve, reject) => {
+    let paint;
+    const finish = error => {
+      cancelAnimationFrame(paint);
+      frame.removeEventListener("load", loaded);
+      signal.removeEventListener("abort", aborted);
+      if (error) reject(error); else resolve();
+    };
+    const aborted = () => finish(signal.reason);
+    const loaded = () => {
+      if (document.hidden) finish();
+      else paint = requestAnimationFrame(() => {
+        paint = requestAnimationFrame(() => finish());
+      });
+    };
+    frame.addEventListener("load", loaded, { once: true });
+    signal.addEventListener("abort", aborted, { once: true });
+    if (signal.aborted) aborted();
+  });
+}
+
 export class ViewHost {
   constructor(element, kind, onError) {
     if (!["html", "sequence", "automaton"].includes(kind)) throw new Error("Unsupported Lean view");
@@ -23,6 +47,7 @@ export class ViewHost {
     this.program = null;
     this.cleanup = null;
     this.declaration = null;
+    this.commit = null;
     this.controller = null;
   }
   clear() {
@@ -33,6 +58,7 @@ export class ViewHost {
     this.cleanup = null;
     this.program = null;
     this.declaration = null;
+    this.commit = null;
     let failure;
     try { cleanup?.(); } catch (error) { failure = error; }
     try { program?.dispose(); } catch (error) { failure ??= error; }
@@ -42,10 +68,35 @@ export class ViewHost {
     // Cleanup must never prevent the host from settling Stop or disposal.
     if (failure) console.error("View cleanup failed", failure);
   }
-  update(frame) {
+  async commitFrame(frame, generation, signal) {
+    const next = this.element.querySelector('[data-preview="next"]');
+    if (!next) throw new Error("Missing staged automaton preview");
+    await waitForPreview(next, signal);
+    if (generation !== this.generation) return false;
+    const result = this.program.call(this.commit, this.element, frame);
+    if (result !== undefined) throw new Error("Automaton commit returned an invalid Unit");
+    return true;
+  }
+  async update(frame) {
     if (this.kind !== "automaton" || !this.program) throw new Error("No live presenter to update");
-    const result = this.program.call(this.declaration, this.element, frame);
-    if (result !== undefined) throw new Error("Automaton presenter returned an invalid Unit");
+    if (this.controller) throw new Error("A frame is already being presented");
+    const generation = this.generation;
+    const controller = this.controller = new AbortController();
+    const deadline = setTimeout(() => controller.abort(
+      new Error("Frame loading timed out. Try Run again.")), 15000);
+    try {
+      const result = this.program.call(this.declaration, this.element, frame);
+      if (result !== undefined) throw new Error("Automaton presenter returned an invalid Unit");
+      return await this.commitFrame(frame, generation, controller.signal);
+    } catch (error) {
+      if (generation !== this.generation) return false;
+      this.clear();
+      this.onError(error);
+      return false;
+    } finally {
+      clearTimeout(deadline);
+      if (this.controller === controller) this.controller = null;
+    }
   }
   async show(data) {
     this.clear();
@@ -60,6 +111,11 @@ export class ViewHost {
       const plan = await response.json();
       const presenter = plan.presenters?.[this.kind];
       if (!presenter?.expectedExport) throw new Error(`No published ${this.kind} presenter contract`);
+      if (this.kind === "automaton" && !presenter.commit?.expectedExport) {
+        throw new Error("No published automaton commit contract");
+      }
+      const expectedExports = { [presenter.declaration]: presenter.expectedExport };
+      if (this.kind === "automaton") expectedExports[presenter.commit.declaration] = presenter.commit.expectedExport;
       const url = path => new URL(path, new URL("../", import.meta.url));
       const { createProgram } = await waitForModule(
         import(url(plan.runtimeModule).href), controller.signal);
@@ -67,15 +123,17 @@ export class ViewHost {
       if (controller.signal.aborted) throw controller.signal.reason;
       program = await createProgram({ runtimeManifestUrl: url(plan.runtimeManifest),
         programManifestUrl: url(presenter.manifest), signal: controller.signal,
-        expectedExports: { [presenter.declaration]: presenter.expectedExport } });
+        expectedExports });
       if (generation !== this.generation) { program.dispose(); return false; }
       this.program = program;
       this.declaration = presenter.declaration;
+      this.commit = presenter.commit?.declaration;
       const cleanup = program.call(presenter.declaration, this.element, data);
       if (this.kind === "sequence") {
         if (typeof cleanup !== "function") throw new Error("Sequence presenter did not return its cleanup callback");
         this.cleanup = cleanup;
       } else if (cleanup !== undefined) throw new Error("View presenter returned an invalid Unit");
+      if (this.kind === "automaton" && !await this.commitFrame(data, generation, controller.signal)) return false;
       this.element.hidden = false;
       this.controller = null;
       return true;

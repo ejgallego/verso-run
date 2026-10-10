@@ -125,7 +125,7 @@ with serve_directory(served) as base:
             record(prefix+': native fragment show/hide stops its worker and supports fresh invocation')
             slide(2)
             count = form('LeanRunBlog.Examples.count')
-            assert count.locator('details.lean-run-source').count() == 1
+            assert count.locator('div.lean-run-source').count() == 1
             assert call(count, '10') == oracle('count', '10')
             for stop_by_slide in [False, True]:
                 count.locator('input').fill('1000000000000')

@@ -539,7 +539,7 @@ with serve_directory(server_root) as base:
         plain_calculator.locator('summary').click()
         assert 'public inductive Instruction' in plain_calculator.locator('.lean-run-source').inner_text()
         plain_diagram = plain.locator('.lean-run[data-experiment*="LeanRunGate.diagram"]')
-        plain_diagram.locator('summary').click()
+        assert plain_diagram.locator('details.lean-run-source').count() == 0
         assert 'public def LeanRunGate.diagram' in plain_diagram.locator('.lean-run-source').inner_text()
         assert 'Svg.render' in plain_diagram.locator('.lean-run-source').inner_text()
         plain_anchor = plain.locator('.lean-run[data-experiment*="LeanRunGate.Helper.twice"]')

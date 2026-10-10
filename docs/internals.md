@@ -221,8 +221,8 @@ is resolved by module identity rather than inventory position.
 
 The native generator embeds the presenter resource pack without statically
 importing its browser-only definitions. The carrier loads the prepared module's
-compiled environment to classify the actual `mount`, `mountHtml`, and `showAutomaton` declaration types; it does
-not infer a contract from the executable manifest or elaborate another source
+compiled environment to classify the actual `mount`, `mountHtml`,
+`stageAutomaton`, and `commitAutomaton` declaration types. It does not infer a contract from the executable manifest or elaborate another source
 frontend. This keeps JS externs out of native C compilation.
 
 `VersoLeanRunPresenter` uses VIR's existing DOM/event/RuntimeRef APIs. It owns
@@ -247,10 +247,14 @@ ordinary scalar exports retain their pure interface.
 The worker retains the callback and current model. Advance messages call it and
 transfer one validated `SequenceWire.Frame`; neither the callback nor a DOM handle
 crosses `postMessage`. Reinitialisation creates a fresh worker so old session
-handles cannot accumulate. The presenter updates one frame in place. JavaScript
-owns asynchronous scheduling with one request in flight and a delay between
-completed transitions; Pause keeps the session, while Stop/edit/navigation
-terminate it. Generation checks also discard late completions after a reset.
+handles cannot accumulate. The presenter stages the next sandbox document in a
+second iframe, then commits
+the frame and its label together after loading. The visible iframe is never
+navigated during a transition. Both stage and commit exports have independently
+classified DOM contracts. JavaScript owns asynchronous scheduling with one request in flight and a delay between
+completed transitions; Pause keeps the session, while Stop/navigation terminate
+it. Input edits remain a draft until Restart. Generation checks also discard late
+completions after a reset.
 There is no retained frame history. Invalid author input produces an error frame
 and disabled live controls.
 

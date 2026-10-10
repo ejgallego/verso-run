@@ -53,7 +53,7 @@ private def controls (frames : Array SequenceWire.Frame) : Html := Id.run do
 /-- Live controls persist while each new Lean frame replaces the previous one.
 The asynchronous worker bridge owns Play/Pause scheduling and backpressure. -/
 @[vir_export]
-def showAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit := do
+def stageAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit := do
   let controls ← Element.querySelector root (← JsValue.ofString ".lean-run-automaton-controls")
   if (← Js.Nullable.toOption controls).isNone then
     let markup := {{ <div class="lean-run-automaton-controls">
@@ -63,12 +63,27 @@ def showAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit :
       </div>
       <p class="lean-run-sequence-position" role="status"> " " </p>
       <p class="lean-run-sequence-error" role="alert"> " " </p>
-      <iframe class="lean-run-sequence-frame" title="Automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
+      <div class="lean-run-automaton-preview">
+        <iframe class="lean-run-sequence-frame" data-preview="current" aria-hidden="false" title="Automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
+        <iframe class="lean-run-sequence-frame" data-preview="next" aria-hidden="true" title="Next automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
+      </div>
     </div> }}
     Element.setInnerHTML root (← JsValue.ofString markup.asString)
+  attr (← child root "[data-preview='next']") "srcdoc" (Preview.document frame.html)
+
+/-- Commit only after the staged sandbox document has loaded. Keep both frames
+allocated so presentation never navigates the currently visible document. -/
+@[vir_export]
+def commitAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit := do
+  let current ← child root "[data-preview='current']"
+  let next ← child root "[data-preview='next']"
   text (← child root ".lean-run-sequence-position") frame.label
   text (← child root ".lean-run-sequence-error") (frame.error.getD "")
-  attr (← child root ".lean-run-sequence-frame") "srcdoc" (Preview.document frame.html)
+  attr current "aria-hidden" "true"
+  attr next "aria-hidden" "false"
+  attr next "title" "Automaton state"
+  attr current "data-preview" "next"
+  attr next "data-preview" "current"
 
 /-- The bounded presenter runs in the browser; computation stays in the worker.
 The returned callback removes listeners before the host disposes its runtime. -/

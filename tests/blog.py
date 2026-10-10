@@ -155,7 +155,7 @@ with serve_directory(served) as base:
         page.set_viewport_size({'width': 390, 'height': 844})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.screenshot(path=str(output/'post-mobile.png'), full_page=True)
-        record('Blog controls and collapsed source fit a narrow viewport')
+        record('Blog controls and visible checked source fit a narrow viewport')
         plain = browser.new_context(java_script_enabled=False)
         tab = plain.new_page()
         for path, name in [('page/', 'LeanRunGate.Helper.twice'),

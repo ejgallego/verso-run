@@ -46,12 +46,15 @@ def renderControls (experiment : Experiment) : Html := Id.run do
     else if experiment.form.isSequence then
       {{ <div class="lean-run-sequence" hidden="hidden"/> }}
     else .empty
+  let inputNote := if experiment.form.isAutomaton then
+    {{ <p class="lean-run-input-note" role="status"> "" </p> }} else .empty
   return {{ <div class="lean-run-console">
       <form>
         <label> {{label}} {{control}} </label>
         <button type="submit" disabled="disabled"> "Run" </button>
         <button type="button" class="lean-run-stop" disabled="disabled"> "Stop" </button>
       </form>
+      {{inputNote}}
       <p class="lean-run-status" role="status" aria-live="polite"> "Ready" </p>
       <pre class="lean-run-output" aria-label="Result"/>
       {{preview}}

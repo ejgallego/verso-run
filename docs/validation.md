@@ -117,3 +117,9 @@ The live Life gate compares native and worker frames beyond generations 12 and
 keeps the DOM size constant. Native known-pattern tests remain independent of
 that agreement oracle. Scheduler tests hold transitions open to qualify
 backpressure, pause, reset generations, and failure recovery.
+
+Live preview tests hold a staged iframe load while asserting that the previous
+visible document and label remain unchanged. Stop must discard that pending swap.
+Seed drafts are checked during active playback, including explicit Restart and
+resumption with the new model. Short showcase source is visible by default;
+Life includes checked anchors for its transition, state, and SVG view.

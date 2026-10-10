@@ -242,7 +242,7 @@ with ExitStack() as servers:
                     page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
                                            arg=form.element_handle(), timeout=60000)
                     assert form.get_attribute('data-state') == 'success', form.inner_text()
-                assert frame['html'] in form.locator('iframe').get_attribute('srcdoc')
+                assert frame['html'] in form.locator('iframe[data-preview="current"]').get_attribute('srcdoc')
                 assert form.locator('.lean-run-sequence-error').text_content() == ''
             checks.append(path + ': Life advances beyond its former limit and agrees with native Lean')
         assert not errors, errors

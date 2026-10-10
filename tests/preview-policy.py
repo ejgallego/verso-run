@@ -55,9 +55,10 @@ with serve_directory(Path(args.site).resolve()) as base, sync_playwright() as p:
                 version: 1n, frames: [frame]});
         }''', {'kind': kind, 'markup': markup})
         assert await_result is True
-        frame = page.locator('#policy-preview' if kind == 'html' else '#policy-preview iframe')
+        selector = '#policy-preview' if kind == 'html' else '#policy-preview iframe' + ('[data-preview="current"]' if kind == 'automaton' else '')
+        frame = page.locator(selector)
         assert frame.get_attribute('sandbox') == ''
-        inside = page.frame_locator('#policy-preview' if kind == 'html' else '#policy-preview iframe')
+        inside = page.frame_locator(selector)
         assert inside.locator('#benign').inner_text() == 'Raw Html remains visible'
         if kind != 'html':
             assert page.locator('#policy-preview .lean-run-sequence-strip img').count() == 0

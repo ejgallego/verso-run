@@ -18,6 +18,7 @@ def Board.alive (board : Board) (row col : Nat) : Bool :=
 def Board.population (board : Board) : Nat :=
   board.cells.foldl (fun n live => if live then n + 1 else n) 0
 
+-- ANCHOR: lifeRules
 def Board.neighbours (board : Board) (row col : Nat) : Nat := Id.run do
   let mut count := 0
   for dr in [:3] do
@@ -36,6 +37,8 @@ def Board.step (board : Board) : Board :=
       let n := board.neighbours row col
       n == 3 || (board.alive row col && n == 2) }
 
+-- ANCHOR_END: lifeRules
+
 /-- Centre a rectangular text seed on the board. One final newline is allowed. -/
 def parse (input : String) : Except String Board := do
   let rows := (input.replace "\r\n" "\n").splitOn "\n"
@@ -53,6 +56,7 @@ def parse (input : String) : Except String Board := do
       board := { cells := board.cells.set! index (cell == '#') }
   return board
 
+-- ANCHOR: lifeState
 structure State where
   generation : Nat := 0
   board : Board := {}
@@ -60,6 +64,7 @@ structure State where
 def State.step (state : State) : State :=
   { generation := state.generation + 1, board := state.board.step }
 
+-- ANCHOR_END: lifeState
 
 private def livePath (board : Board) : String := Id.run do
   let mut path := ""
@@ -75,6 +80,7 @@ private def gridPath : String := Id.run do
     path := path ++ s!"M{i * 16} 0V128M0 {i * 16}H128"
   return path
 
+-- ANCHOR: lifeSvg
 def renderState (state : State) : Html :=
   {{ <div style="padding:.5rem">
     <p style="margin:0 0 .5rem;font-weight:600">{{s!"Generation {state.generation} · {state.board.population} living cells"}}</p>
@@ -86,12 +92,15 @@ def renderState (state : State) : Html :=
     </svg>
   </div> }}
 
+-- ANCHOR_END: lifeSvg
+
 -- ANCHOR: lifeView
 public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
   match parse seed with
   | .error message => AutomatonView.error message
   | .ok board =>
-    let machine : Automaton State := { initial := { board }, step := State.step }
+    let machine : Automaton State := {
+      initial := { board }, step := State.step }
     machine.view renderState (fun n => s!"Generation {n}")
 -- ANCHOR_END: lifeView
 

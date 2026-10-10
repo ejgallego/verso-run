@@ -236,8 +236,9 @@ public def counter (seed : Nat) : VersoLeanRun.AutomatonView :=
 Use the same `leanRun (entry := counter)` directive. Run creates the initial
 state. Play advances continuously, Pause keeps the current model, and Step
 advances once while paused. Pause allows an already requested transition to
-finish; Stop terminates the worker and clears the view. Run starts again from
-the current input. Editing the input or leaving a slide discards the session;
+finish; Stop terminates the worker and clears the view. Restart applies the
+current input and resumes playback if it was playing. Seed edits are a draft
+and leave the active model running. Leaving a slide discards the session;
 background tabs pause playback.
 
 Each placement owns its model and worker. The worker keeps only the current

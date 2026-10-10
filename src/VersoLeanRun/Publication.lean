@@ -139,9 +139,13 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     let mut presenters : List (String × Lean.Json) := []
     if automaton then
       let expected ← VersoLeanRunPresenterResources.expectedAutomaton
+      let commit ← VersoLeanRunPresenterResources.expectedAutomatonCommit
       presenters := presenters ++ [("automaton", Lean.Json.mkObj [
-        ("manifest", .str manifest), ("declaration", .str "VersoLeanRun.Presenter.showAutomaton"),
-        ("expectedExport", expected)])]
+        ("manifest", .str manifest), ("declaration", .str "VersoLeanRun.Presenter.stageAutomaton"),
+        ("expectedExport", expected),
+        ("commit", Lean.Json.mkObj [
+          ("declaration", .str "VersoLeanRun.Presenter.commitAutomaton"),
+          ("expectedExport", commit)])])]
     if sequence then
       let expected ← VersoLeanRunPresenterResources.expectedMount
       presenters := presenters ++ [("sequence", Lean.Json.mkObj [

@@ -27,5 +27,7 @@ def expectedMount : Except String Lean.Json :=
 def expectedHtml : Except String Lean.Json :=
   Lean.Json.parse (presenterSignature% VersoLeanRun.Presenter.mountHtml)
 def expectedAutomaton : Except String Lean.Json :=
-  Lean.Json.parse (presenterSignature% VersoLeanRun.Presenter.showAutomaton)
+  Lean.Json.parse (presenterSignature% VersoLeanRun.Presenter.stageAutomaton)
+def expectedAutomatonCommit : Except String Lean.Json :=
+  Lean.Json.parse (presenterSignature% VersoLeanRun.Presenter.commitAutomaton)
 end VersoLeanRunPresenterResources

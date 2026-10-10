@@ -31,6 +31,15 @@ export function enhance(element) {
   const sequenceElement = element.querySelector(".lean-run-sequence");
   const automatonElement = element.querySelector(".lean-run-automaton");
   let ready = false;
+  let appliedInput = null;
+  let resumeAfterStart = false;
+  let presenting = Promise.resolve(true);
+  const note = element.querySelector(".lean-run-input-note");
+  const inputState = () => {
+    if (!automatonElement) return;
+    run.textContent = ready ? "Restart" : "Run";
+    note.textContent = ready && input.value !== appliedInput ? "Edits apply on Restart." : "";
+  };
   let player;
   const liveControls = () => {
     if (!automatonElement) return;
@@ -48,7 +57,7 @@ export function enhance(element) {
   const setState = (state, value = "") => {
     element.dataset.state = state;
     busy = ["loading", "running", "loading view", "advancing"].includes(state);
-    run.disabled = busy;
+    run.disabled = busy && !(automatonElement && ready);
     stop.disabled = !busy && !(automatonElement && ready);
     status.textContent = automatonElement && ready && (state === "success" || state === "advancing") ?
       (player.playing ? "Playing" : state === "advancing" ? "Advancing" : "Paused") :
@@ -56,6 +65,7 @@ export function enhance(element) {
       state === "success" && sequenceElement ? "Trace ready" :
       state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
+    inputState();
   };
   const pane = automatonElement || sequenceElement || preview;
   const view = pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", error => {
@@ -64,17 +74,20 @@ export function enhance(element) {
   }) : null;
   const clearResult = () => view?.clear();
   const host = new ExperimentHost(description, (state, value = "") => {
+    if (["idle", "stopped", "failed"].includes(state)) resumeAfterStart = false;
     if (automatonElement && state === "advancing") {
       setState(state);
       liveControls();
       return;
     }
     if (automatonElement && state === "success" && view.program) {
-      try { view.update(value); }
-      catch (error) { host.fail(error); return; }
-      if (value.error !== null) { ready = false; player.pause(); }
-      setState("success");
-      liveControls();
+      presenting = view.update(value).then(shown => {
+        if (!shown) return false;
+        if (value.error !== null) { ready = false; player.pause(); }
+        setState("success");
+        liveControls();
+        return true;
+      });
       return;
     }
     if (automatonElement) { ready = false; player.reset(); }
@@ -91,25 +104,37 @@ export function enhance(element) {
             if (player.playing) player.pause(); else player.play();
           });
           automatonElement.querySelector(".lean-run-step").addEventListener("click", () => { void player.step(); });
+          inputState();
           liveControls();
+          if (ready && resumeAfterStart) player.play();
+          resumeAfterStart = false;
         }
       });
     }
   });
   if (automatonElement) {
-    player = new AutomatonPlayer(() => host.advance(), liveControls);
+    player = new AutomatonPlayer(async () => {
+      await host.advance();
+      if (!await presenting) throw new DOMException("Presentation stopped", "AbortError");
+    }, liveControls);
     host.player = player;
   }
   owners.add(host);
   run.disabled = false;
   form.addEventListener("submit", event => {
     event.preventDefault();
-    if (busy) return;
+    if (busy && !(automatonElement && ready)) return;
     try { validateInput(scalarKind(description.form), input.value); }
     catch (error) {
       host.stop("idle");
       setState("invalid input", error.message);
       return;
+    }
+    if (automatonElement) {
+      const wasPlaying = player.playing;
+      host.stop("idle");
+      resumeAfterStart = wasPlaying;
+      appliedInput = input.value;
     }
     host.invoke(input.value).catch(() => {}); // Host owns all state/error reporting.
   });
@@ -119,7 +144,10 @@ export function enhance(element) {
     host.dispose();
     owners.delete(host);
   });
-  input.addEventListener("input", () => host.stop("idle"));
+  input.addEventListener("input", () => {
+    if (automatonElement) inputState();
+    else host.stop("idle");
+  });
   if (input.tagName === "TEXTAREA") input.addEventListener("keydown", event => {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
