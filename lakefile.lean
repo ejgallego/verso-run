@@ -162,7 +162,13 @@ lean_lib LeanRunGateFailures where
 @[test_driver]
 script test (args) do
   let pkg ← getRootPackage
+  -- Keep test caches inside the checkout; callers can still select their own.
+  let uvCache ← IO.getEnv "UV_CACHE_DIR"
+  let pythonCache ← IO.getEnv "UV_PYTHON_INSTALL_DIR"
   let result ← IO.Process.spawn {
+    env := #[
+      ("UV_CACHE_DIR", some (uvCache.getD (pkg.dir / ".cache/uv").toString)),
+      ("UV_PYTHON_INSTALL_DIR", some (pythonCache.getD (pkg.dir / ".cache/uv-python").toString))]
     cwd := some pkg.dir
     cmd := "uv"
     args := #["run", "--with", "playwright", "python", "tests/acceptance.py"] ++ args.toArray

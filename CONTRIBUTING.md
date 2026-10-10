@@ -82,6 +82,11 @@ lake build
 lake test -- --mutations --output _out/acceptance
 ```
 
+`lake test` keeps uv and Python caches in the checkout’s ignored `.cache/`
+directory, avoiding shared-cache write permissions. Set `UV_CACHE_DIR` or
+`UV_PYTHON_INSTALL_DIR` to override those locations. For direct browser commands,
+use `UV_CACHE_DIR="$PWD/.cache/uv" uv run …`.
+
 The suite builds the native oracle and generator, checks author diagnostics,
 compares real worker calls to native Lean, and exercises Manual's two HTML layouts
 and TeX, plus Blog Page/Post and Slides. Mutation checks temporarily edit the chapter, helper, and Lake
