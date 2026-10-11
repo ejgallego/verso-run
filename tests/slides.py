@@ -112,7 +112,8 @@ with serve_directory(served) as base:
             assert greeting.locator('[type=submit]').is_disabled()
             # A hidden form cannot start a worker even through synthetic submission.
             greeting.locator('form').evaluate('(e) => e.dispatchEvent(new Event("submit", {bubbles:true,cancelable:true}))')
-            assert greeting.get_attribute('data-state') == 'stopped'
+            assert greeting.locator('.lean-run-status').text_content().strip() == 'Ready'
+            no_workers()
             page.evaluate('Reveal.nextFragment()')
             assert call(greeting, '世界 🌍 <b>&') == oracle('greet', '世界 🌍 <b>&')
             assert greeting.locator('.lean-run-output b').count() == 0

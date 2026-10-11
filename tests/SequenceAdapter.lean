@@ -13,7 +13,7 @@ def rejected (value : Except String α) : Bool :=
 #guard rejected (SequenceWire.validate { version := 2, frames := #[] })
 
 def payloadWithFrames (count : Nat) : SequenceWire.Payload :=
-  { version := 1, frames := Array.replicate count (SequenceWire.Frame.mk "Frame" "<p>State</p>" none) }
+  { version := 1, frames := Array.replicate count (ViewWire.Frame.mk "Frame" "<p>State</p>" none) }
 
 #guard !rejected (SequenceWire.validate (payloadWithFrames 128))
 #guard rejected (SequenceWire.validate (payloadWithFrames 129))
@@ -32,6 +32,23 @@ def successors := Sequence.iterate (· + 2) (3 : Nat) 3 (fun i => s!"State {i}")
 #guard (SequenceView.error "No initial model").toPayload.frames.size == 1
 #guard (SequenceView.error "No initial model").initial.html.asString == ""
 #guard (SequenceView.error "No initial model").initial.error == some "No initial model"
+
+def failingBoundary : Automaton Nat := {
+  initial := 0
+  step := fun n => if n < 3 then n + 1 else panic! "trace evaluated past its boundary" }
+#guard (failingBoundary.trace 0).initial.state == 0
+#guard (failingBoundary.trace 3).steps.map (·.state) == #[1, 2, 3]
+
+def marked : Sequence Nat := {
+  initial := { label := "First", state := 1, error := some "initial note" }
+  steps := #[{ label := "Second", state := 2, error := some "step note" }] }
+#guard (toString <$> marked).initial.state == "1"
+#guard (toString <$> marked).initial.label == marked.initial.label
+#guard (toString <$> marked).initial.error == marked.initial.error
+#guard ((toString <$> marked).steps[0]?.bind (·.error)) ==
+  (marked.steps[0]?.bind (·.error))
+#guard (marked.map (· + 1)).steps.map (·.state) == #[3]
+#guard ((Sequence.iterate id "<b>&" 0).viewText).initial.html.asString == "&lt;b&gt;&amp;"
 
 public abbrev TraceView := SequenceView
 

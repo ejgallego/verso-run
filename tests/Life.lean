@@ -48,3 +48,25 @@ def corners := board "#......#\n........\n........\n........\n........\n........
   unless session.initial.html == "true" do throw <| IO.userError "wrong initial Bool state"
   unless (← Lean.Vir.RuntimeM.run session.advance).html == "false" do
     throw <| IO.userError "wrong next Bool state"
+  let counter : VersoLeanRun.Automaton Nat := { initial := 10, step := (· + 1) }
+  let live ← Lean.Vir.RuntimeM.run counter.viewText.start
+  unless live.initial.html == "10" && live.initial.label == "0" do
+    throw <| IO.userError "wrong initial text observation"
+  for frame in (counter.trace 4).viewText.toPayload.frames do
+    -- The trace labels and text observations agree with the live session.
+    if frame.label != "0" then
+      let next ← Lean.Vir.RuntimeM.run live.advance
+      unless next.label == frame.label && next.html == frame.html do
+        throw <| IO.userError "trace and live observations disagree"
+  let recorded : VersoLeanRun.Sequence Nat := {
+    initial := { label := "A", state := 1 }
+    steps := #[{ label := "B", state := 1, error := some "note" }, { label := "C", state := 2 }] }
+  let replay ← Lean.Vir.RuntimeM.run (recorded.cycleView fun n => .text true (toString n)).start
+  let independent ← Lean.Vir.RuntimeM.run (recorded.cycleView fun n => .text true (toString n)).start
+  unless replay.initial.label == "A" do throw <| IO.userError "wrong replay initial"
+  for label in #["B", "C", "A", "B", "C", "A"] do
+    let next ← Lean.Vir.RuntimeM.run replay.advance
+    unless next.label == label && next.error == (if label == "B" then some "note" else none) do
+      throw <| IO.userError "replay lost order or error metadata"
+  unless (← Lean.Vir.RuntimeM.run independent.advance).label == "B" do
+    throw <| IO.userError "replay cursors are shared"

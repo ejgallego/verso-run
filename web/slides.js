@@ -44,7 +44,9 @@ addEventListener("DOMContentLoaded", () => {
   const stopHidden = () => {
     for (const element of forms) {
       const shown = visible(element);
-      if (!shown && element.dataset.state !== "stopped") {
+      // Unvisited placements have no session to stop. Keep their initial Ready
+      // state; entering a slide must not imply an earlier Run or cancellation.
+      if (!shown && element.dataset.state && element.dataset.state !== "stopped") {
         element.dispatchEvent(new Event("lean-run-stop"));
       }
       element.querySelector('[type="submit"]').disabled = !shown ||

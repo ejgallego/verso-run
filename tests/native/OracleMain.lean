@@ -5,7 +5,7 @@ import LeanRunSequence.Life
 import Lean.Data.Json
 
 def main (args : List String) : IO Unit := do
-  let [role, input] := args | throw <| IO.userError "usage: lean-run-oracle greet|stack|sequence|life|htmlGreeting|diagram|badge|wordSteps|double|spin INPUT"
+  let [role, input] := args | throw <| IO.userError "usage: lean-run-oracle greet|stack|sequence|life|htmlGreeting|diagram|badge|wordSteps|wordCycle|double|spin INPUT"
   let result ← match role with
     | "greet" => pure <| LeanRunGate.greet input
     | "sequence" => pure <| (Lean.toJson (LeanRunSequence.Examples.stackView input).toPayload).compress
@@ -28,6 +28,14 @@ def main (args : List String) : IO Unit := do
       let some n := input.toNat? | throw <| IO.userError "invalid UInt64"
       if n > 18446744073709551615 then throw <| IO.userError "UInt64 out of range"
       pure <| (Lean.toJson (LeanRunRendered.Examples.wordSteps n.toUInt64).toPayload).compress
+    | "wordCycle" => do
+      let some n := input.toNat? | throw <| IO.userError "invalid UInt64"
+      if n > 18446744073709551615 then throw <| IO.userError "UInt64 out of range"
+      let session ← Lean.Vir.RuntimeM.run (LeanRunRendered.Examples.wordCycle n.toUInt64).start
+      let mut frames := #[session.initial]
+      for _ in [:5] do
+        frames := frames.push (← Lean.Vir.RuntimeM.run session.advance)
+      pure <| (Lean.toJson frames).compress
     | "double" => do
       let some n := input.toNat? | throw <| IO.userError "invalid Nat"
       pure <| toString (LeanRunGate.double n)

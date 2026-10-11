@@ -1,6 +1,6 @@
 # Next steps
 
-The current extension supports entry-selected pure scalar, typed HTML and sequence views
+The current extension supports entry-selected pure scalar, typed HTML, finite sequences and live automata
 in Manual, Blog Page/Post, and Slides, with inline definitions or checked source
 anchors. The [internals](docs/internals.md) describe the implementation and exact
 pins; [history](docs/history.md) records how these features arrived.
@@ -48,12 +48,14 @@ Readers currently edit function inputs. Lean source editing and the broader
 `verso-lab` project remain separate work; they require their own compiler,
 interaction, and lifecycle design.
 
-## Lean-authored sequences
+## Lean-authored observations
 
-The bounded sequence library exposes typed states and an ordinary Html view,
+Finite traces and live automata expose typed states and ordinary Html observations,
 with a separate Lean/VIR DOM presenter. The stack stepper shares the Lean parser
 and operational step function and has native-oracle coverage. Further animation
 integration should reuse Illuminate's APIs where they fit, after qualifying its
-diagram/hash provider path. Warm compute-worker reuse remains a separate choice;
-selecting a sequence frame already retains its presenter and does not rerun the
-evaluator.
+diagram/hash provider path. Automata retain a warm worker between transitions;
+sequence selection retains its presenter without rerunning the evaluator. Reusing
+idle scalar workers across input edits remains a separate choice. Finite on-demand
+computation with explicit successful completion would give the next API experiment
+a different lifecycle from endless automata and precomputed traces.

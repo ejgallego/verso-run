@@ -35,7 +35,7 @@ with serve_directory(site) as base, sync_playwright() as p:
         assert plan['presenters']['automaton']['commit']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['automaton']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['automaton']['expectedExport']['result']['type'] == 'Unit'
-        assert plan['presenters']['automaton']['expectedExport']['args'][1]['name'] == 'VersoLeanRun.SequenceWire.Frame'
+        assert plan['presenters']['automaton']['expectedExport']['args'][1]['name'] == 'VersoLeanRun.ViewWire.Frame'
         assert plan['presenters']['html']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['html']['expectedExport']['result']['type'] == 'Unit'
         assert plan['presenters']['sequence']['expectedExport']['args'][1]['kind'] == 'structure'
@@ -77,6 +77,23 @@ with serve_directory(site) as base, sync_playwright() as p:
         assert steps.locator('.lean-run-sequence').is_hidden()
         assert steps.locator('[type=submit]').is_enabled()
         record(genre+': invalid typed input clears its old presentation before invoking')
+    page.goto(base+'manual/html-multi/Typed-rendering/')
+    page.wait_for_selector('.lean-run[data-enhanced]')
+    replay = page.locator('.lean-run[data-experiment*="LeanRunRendered.Examples.wordCycle"]')
+    assert json.loads(replay.get_attribute('data-experiment'))['form'] == 'uint64Automaton'
+    expected = json.loads(oracle('wordCycle', '18446744073709551615'))
+    replay.locator('[type=submit]').click()
+    page.wait_for_function('e => e.dataset.state === "success"', arg=replay.element_handle(), timeout=30000)
+    for index, frame in enumerate(expected):
+        if index:
+            replay.locator('.lean-run-step').click()
+            page.wait_for_function('e => e.dataset.state === "success" && !e.querySelector(".lean-run-step").disabled', arg=replay.element_handle())
+        assert replay.locator('.lean-run-sequence-position').inner_text() == frame['label']
+        assert frame['html'] in replay.locator('iframe[data-preview="current"]').get_attribute('srcdoc')
+    assert [frame['label'] for frame in expected] == ['Start', 'Increment'] * 3
+    replay.locator('.lean-run-stop').click()
+    assert replay.locator('.lean-run-automaton').is_hidden()
+    record('finite UInt64 trace replays cyclically through an independent live worker with original labels and exact wraparound')
     page.goto(base+'manual/html-multi/Illuminate-diagrams/')
     page.wait_for_selector('.lean-run[data-enhanced]')
     diagram = page.locator('.lean-run[data-experiment*="LeanRunGate.diagram"]')

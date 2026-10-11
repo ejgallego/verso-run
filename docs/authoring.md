@@ -219,27 +219,68 @@ DOM qualification. Only its exercised bindings are covered here. Illuminate's
 full animation compiler remains unqualified on the current runtime; its existing
 qualified drawing-command/SVG output can be used inside a state Html view.
 
+## Map and replay observations
+
+The same pure machine can produce a finite trace or a live view:
+
+```lean
+let machine : Automaton Nat := { initial := 10, step := (· + 1) }
+-- Finite: the initial state plus five transitions.
+let finite : SequenceView := (machine.trace 5).viewText
+-- Live: one transition per Step, with no retained history.
+let live : AutomatonView := machine.viewText
+```
+
+`trace 0` observes the initial state without calling the transition. Trace
+construction uses Lean's standard `List.scanl`. `Sequence.map` and the lawful
+`Functor` instance (`f <$> trace`) transform states while preserving labels and
+errors. `viewText` uses `ToString` and escapes the resulting text. Rich views can
+still supply an explicit `α → Html` renderer.
+
+To repeat a finite recording, use `trace.cycleView render`. It returns an
+`AutomatonView`, replaying the initial observation and all later observations
+before wrapping to the start. Duplicate states retain their distinct positions
+and labels. Errors remain errors and pause playback. This is an explicit replay
+policy; a recorded trace does not determine the transition that produced it.
+The [exact-word example](../demo/chapters/LeanRunRendered/Examples.lean) shows a
+finite trace and a cyclic replay of the same states.
+
+For domain-specific live labels or failures, use `machine.observe`: its callback
+receives the iteration index and state and returns a `Frame` containing `label`,
+`html`, and optional `error`. Rendering remains pure; the library owns the worker
+session. All views share `Frame.toWire` at the sandbox boundary.
+
 ## Run an automaton continuously
 
 Return `AutomatonView` when a model should advance on demand instead of computing
 an entire trace. `Automaton α` holds an initial model and a pure transition
-`α → α`; `.view` supplies its `α → Html` rendering and an optional iteration label:
+`α → α`. `viewText` uses `ToString`; `view` accepts an `α → Html` renderer.
+Both accept an optional iteration label:
 
 ```lean
 public def counter (seed : Nat) : VersoLeanRun.AutomatonView :=
   let machine : VersoLeanRun.Automaton Nat := {
     initial := seed, step := (· + 1) }
-  machine.view (fun n => Verso.Output.Html.text true (toString n))
-    (fun i => s!"Iteration {i}")
+  machine.viewText (fun i => s!"Iteration {i}")
 ```
 
-Use the same `leanRun (entry := counter)` directive. Run creates the initial
-state. Play advances continuously, Pause keeps the current model, and Step
-advances once while paused. Pause allows an already requested transition to
-finish; Stop terminates the worker and clears the view. Restart applies the
-current input and resumes playback if it was playing. Seed edits are a draft
-and leave the active model running. Leaving a slide discards the session;
-background tabs pause playback.
+Use the same `leanRun (entry := counter)` directive. The reader explicitly
+starts the model and its playback:
+
+| Action | Model and playback |
+| --- | --- |
+| Page load or first slide entry | Ready; no model or playback starts. |
+| Run | Create the initial model, paused. |
+| Play / Step | Advance continuously / advance once while paused. |
+| Pause or hide the tab | Keep the model; an already requested transition may finish. |
+| Return to the tab | Stay paused. |
+| Edit input | Keep running the current model; edits are a draft. |
+| Restart | Apply the draft to a fresh model; resume only if previously playing. |
+| Stop, leave the placement, or cached-page exit | Terminate the worker and clear the view. |
+
+Hiding during Restart cancels its pending resume intent even if the tab becomes
+visible again before loading finishes. Stop and leaving the placement cancel it
+too. Error frames disable Play/Step; Stop remains available to release their worker.
 
 Each placement owns its model and worker. The worker keeps only the current
 state, without collecting a frame history or imposing a generation count. The

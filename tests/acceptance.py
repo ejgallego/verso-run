@@ -38,7 +38,9 @@ record('native form tags agree with browser codecs and canonical VIR contracts')
 record('typed form round-trips and unsupported metadata rejection')
 command(['node', 'tests/host-lifecycle.mjs'], 'host-lifecycle')
 command(['node', 'tests/automaton-player.mjs'], 'automaton-player')
+command(['node', 'tests/presenter-lifecycle.mjs'], 'presenter-lifecycle')
 record('publication acquisition cancellation, shared waiters, late completion, deadline and explicit recovery')
+record('loaded preview paint waits settle on hide, with guarded Stop, deadline and listener cleanup')
 site = OUTPUT/'site'
 generate(site)
 # MultiVerso requires a project marker even when no remotes are configured.

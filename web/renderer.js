@@ -4,15 +4,15 @@ import { ViewHost } from "./presenter.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Set();
 addEventListener("pagehide", event => {
-  for (const host of owners) {
+  for (const owner of owners) {
     // A cached page retains its controls and listeners when Back restores it.
-    if (event.persisted) host.stop("idle");
-    else host.dispose();
+    if (event.persisted) owner.stop("idle");
+    else owner.dispose();
   }
   if (!event.persisted) owners.clear();
 });
 addEventListener("visibilitychange", () => {
-  if (document.hidden) for (const host of owners) host.player?.pause();
+  if (document.hidden) for (const owner of owners) owner.pause();
 });
 let instance = 0;
 export function enhance(element) {
@@ -50,7 +50,9 @@ export function enhance(element) {
     play.setAttribute("aria-pressed", String(player.playing));
     play.disabled = !ready;
     step.disabled = !ready || player.playing || player.pending;
-    stop.disabled = !ready && !busy;
+    // An error observation is not playable, but its worker still belongs to
+    // this placement and must remain explicitly stoppable.
+    stop.disabled = !host.worker && !busy;
     if (ready && !busy) status.textContent = player.playing ? "Playing" : "Paused";
   };
   let busy = false;
@@ -100,13 +102,18 @@ export function enhance(element) {
         setState("success");
         if (automatonElement) {
           ready = value.error === null;
+          const generation = view.generation;
+          const active = () => ready && generation === view.generation && !document.hidden;
           automatonElement.querySelector(".lean-run-play").addEventListener("click", () => {
+            if (!active()) return;
             if (player.playing) player.pause(); else player.play();
           });
-          automatonElement.querySelector(".lean-run-step").addEventListener("click", () => { void player.step(); });
+          automatonElement.querySelector(".lean-run-step").addEventListener("click", () => {
+            if (active()) void player.step();
+          });
           inputState();
           liveControls();
-          if (ready && resumeAfterStart) player.play();
+          if (ready && resumeAfterStart && !document.hidden) player.play();
           resumeAfterStart = false;
         }
       });
@@ -117,9 +124,15 @@ export function enhance(element) {
       await host.advance();
       if (!await presenting) throw new DOMException("Presentation stopped", "AbortError");
     }, liveControls);
-    host.player = player;
   }
-  owners.add(host);
+  // A placement owns execution, presentation and pending playback intent.
+  // Hiding it cancels automatic resumption even while Restart is loading.
+  const owner = {
+    stop: state => host.stop(state),
+    dispose: () => host.dispose(),
+    pause: () => { resumeAfterStart = false; player?.pause(); },
+  };
+  owners.add(owner);
   run.disabled = false;
   form.addEventListener("submit", event => {
     event.preventDefault();
@@ -142,7 +155,7 @@ export function enhance(element) {
   element.addEventListener("lean-run-stop", () => host.stop());
   element.addEventListener("lean-run-dispose", () => {
     host.dispose();
-    owners.delete(host);
+    owners.delete(owner);
   });
   input.addEventListener("input", () => {
     if (automatonElement) inputState();

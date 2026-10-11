@@ -65,6 +65,20 @@ Original validation records remain in those PRs and at the
 The consolidated branch receives its own mutation, browser, and fresh CI gates;
 prior green runs are not treated as integration qualification.
 
+## Finite and live observation APIs
+
+The continuous Life extension retained the pure `Automaton α` transition model
+and added worker-owned sessions. The review pass connects it to finite sequences
+through `Automaton.trace`, using the pinned standard library's `List.scanl`.
+`Sequence.cycleView` supplies an explicit replay policy for recorded states;
+it does not infer a transition from observations. Shared `Frame` values separate
+pure model observation from sandbox transport. Lean's `Functor`/`LawfulFunctor`
+and `ToString` interfaces provide state mapping and simple text views.
+
+These helpers belong to verso-run. Execution and DOM effects use VIR's existing
+RuntimeRef and browser APIs; they are not an implementation of Illuminate's
+animation framework. Its drawing-command/SVG path remains separately qualified.
+
 ## Current layout
 
 Library code lives under `src/`, browser assets under `web/`, and demo chapters,

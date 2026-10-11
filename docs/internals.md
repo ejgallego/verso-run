@@ -158,9 +158,11 @@ execution state. Stop terminates the dedicated worker, including pending creatio
 synchronous execution; another Run creates a fresh instance. Publication loading
 returns a cancellable invocation immediately. Concurrent placements share acquisition;
 cancelling its last waiter aborts the pending fetch. Failed acquisition is evicted,
-and a 15-second deadline gives an explicit retry path. Input changes terminate
-current work and clear the old result. Generation and request identities suppress stale
-results. Duplicate submissions are disabled while loading/running; page navigation
+and a 15-second deadline gives an explicit retry path. Scalar/Html/sequence input changes terminate
+current work and clear the old result. Automaton input changes are drafts; Restart
+applies them to a fresh session. Generation and request identities suppress stale
+results. Duplicate submissions are disabled while loading/running, except an explicit
+live Restart may cancel an active transition and replace the session. Page navigation
 disposes each owner. Resource and runtime errors are displayed as text, and failure never
 automatically replays the previous call.
 
@@ -206,7 +208,9 @@ Slides uses its module-owned-assets review snapshot. Illuminate retains its pin;
 
 ## Sequence presentation boundary
 
-`Sequence α` and `SequenceStep α` hold the author's model; `.view` uses an
+`Sequence α` and `SequenceStep α` hold the author's model. Its lawful `Functor`
+instance maps observations while retaining labels and errors. `List.scanl` records
+exactly the requested transitions. `.view` uses an
 `α → Html` function and produces a concrete `SequenceView`. Both sequences and
 views require an initial record, making their nonempty invariant structural.
 `Sequence.iterate` traces a pure `α → α` automaton for an explicit transition count;
@@ -244,19 +248,33 @@ advance callback. Publication independently classifies that exact nested
 contract through VIR. This effect belongs to the generated session adapter;
 ordinary scalar exports retain their pure interface.
 
+`Frame` and `ViewWire.Frame` are shared observations; `Frame.toWire` is the one
+Html-to-markup conversion. `Automaton.observe` permits domain-specific labels and
+errors. `Automaton.trace` creates a finite observation without starting a session;
+`Sequence.cycleView` explicitly replays stored observations with a bounded `Fin`
+cursor. Replay is not reconstruction of a transition function.
+
 The worker retains the callback and current model. Advance messages call it and
-transfer one validated `SequenceWire.Frame`; neither the callback nor a DOM handle
+transfer one validated `ViewWire.Frame`; neither the callback nor a DOM handle
 crosses `postMessage`. Reinitialisation creates a fresh worker so old session
 handles cannot accumulate. The presenter stages the next sandbox document in a
 second iframe, then commits
 the frame and its label together after loading. The visible iframe is never
-navigated during a transition. Both stage and commit exports have independently
+navigated during a transition. If the tab becomes hidden after the document has
+loaded, the pending paint wait settles; an unloaded document must still load or
+be cancelled. Abort, visibility and load listeners belong to that one wait and
+are removed on settlement. Both stage and commit exports have independently
 classified DOM contracts. JavaScript owns asynchronous scheduling with one request in flight and a delay between
 completed transitions; Pause keeps the session, while Stop/navigation terminate
 it. Input edits remain a draft until Restart. Generation checks also discard late
 completions after a reset.
-There is no retained frame history. Invalid author input produces an error frame
-and disabled live controls.
+Page load and slide entry are idle. Restart resumes only previously active
+playback; hiding, Stop, cached-page exit or genre exit cancels pending resume
+intent. Returning to visibility does not resume automatically. Event handlers
+from retired controls cannot act on a replacement session. Error observations
+disable Play/Step, while Stop can still release their worker.
+There is no growing frame history. A cycling trace retains its fixed recorded
+states; an ordinary live model keeps only its current state.
 
 ### Rendering and transport
 

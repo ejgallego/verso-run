@@ -35,7 +35,7 @@ private def child (root : Js Element) (selector : String) : DomM (Js Element) :=
   return element
 
 -- Explicit bodies keep empty non-void tags closed in the pinned Html serializer.
-private def controls (frames : Array SequenceWire.Frame) : Html := Id.run do
+private def controls (frames : Array ViewWire.Frame) : Html := Id.run do
   let labels := Html.fromArray <| frames.mapIdx fun i frame =>
     {{ <button type="button" class="lean-run-sequence-step" data-step={{toString i}}>{{frame.label}}</button> }}
   return {{ <div class="lean-run-sequence-controls">
@@ -53,7 +53,7 @@ private def controls (frames : Array SequenceWire.Frame) : Html := Id.run do
 /-- Live controls persist while each new Lean frame replaces the previous one.
 The asynchronous worker bridge owns Play/Pause scheduling and backpressure. -/
 @[vir_export]
-def stageAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit := do
+def stageAutomaton (root : Js Element) (frame : ViewWire.Frame) : DomM Unit := do
   let controls ← Element.querySelector root (← JsValue.ofString ".lean-run-automaton-controls")
   if (← Js.Nullable.toOption controls).isNone then
     let markup := {{ <div class="lean-run-automaton-controls">
@@ -74,7 +74,7 @@ def stageAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit 
 /-- Commit only after the staged sandbox document has loaded. Keep both frames
 allocated so presentation never navigates the currently visible document. -/
 @[vir_export]
-def commitAutomaton (root : Js Element) (frame : SequenceWire.Frame) : DomM Unit := do
+def commitAutomaton (root : Js Element) (frame : ViewWire.Frame) : DomM Unit := do
   let current ← child root "[data-preview='current']"
   let next ← child root "[data-preview='next']"
   text (← child root ".lean-run-sequence-position") frame.label

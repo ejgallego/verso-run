@@ -40,9 +40,17 @@ with serve_directory(served) as base:
         page = browser.new_page(viewport={'width':1280,'height':1000})
         errors = []; page.on('pageerror',lambda error: errors.append(str(error)))
         page.add_init_script("""globalThis.advanceRequests = 0;
+          globalThis.invokeRequests = 0;
+          globalThis.terminatedWorkers = 0;
+          const terminate = Worker.prototype.terminate;
+          Worker.prototype.terminate = function() {
+            ++terminatedWorkers;
+            return terminate.call(this);
+          };
           const send = Worker.prototype.postMessage;
           Worker.prototype.postMessage = function(data, ...rest) {
             if (data.operation === 'advance') ++advanceRequests;
+            if (data.operation === 'invoke') ++invokeRequests;
             return send.call(this, data, ...rest);
           };""")
         def form(): return page.locator('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]').first
@@ -82,6 +90,10 @@ with serve_directory(served) as base:
             for genre,path in [('manual','Game-of-Life/'),('blog','page/'),
                                ('blog','notes/2026-10-8-running-lean-in-a-post/'),('slides','')]:
                 visit(prefix,genre,path)
+                page.wait_for_timeout(250)
+                assert form().locator('.lean-run-status').inner_text().strip() == 'Ready'
+                assert form().locator('.lean-run-automaton').is_hidden()
+                assert page.evaluate('invokeRequests') == 0
                 expected=run('.#.\n..#\n###')
                 assert len(expected)==141 and all(f['error'] is None for f in expected)
                 assert 'Generation 12 · 5 living cells' in expected[12]['html']
@@ -94,8 +106,12 @@ with serve_directory(served) as base:
         for seed in ['', '#\n..', '#########', '\n'.join(['.']*9), '<script>']:
             expected=run(seed)
             assert expected[0]['error']
+            assert form().locator('.lean-run-stop').is_enabled()
+            terminated = page.evaluate('terminatedWorkers')
+            form().locator('.lean-run-stop').click()
+            assert page.evaluate('terminatedWorkers') == terminated + 1
         expected=run('.#.\n..#\n###')
-        record('invalid shape/character/size is a Lean error frame; a valid seed recovers')
+        record('Lean error frames remain stoppable and release their worker; a valid seed recovers')
         form().locator('textarea').fill('#')
         assert form().locator('.lean-run-automaton').is_visible()
         assert 'Restart' in form().locator('.lean-run-input-note').inner_text()
@@ -202,6 +218,105 @@ with serve_directory(served) as base:
         assert form().locator('.lean-run-automaton').is_hidden()
         record('staging retains the visible frame and label, applies paint backpressure, swaps after load, and cannot commit after Stop')
 
+        # A real loaded iframe may stop receiving RAF callbacks on tab hide.
+        # Hold only paint scheduling, then dispatch visibility after load has
+        # finished, exercising both the presenter and placement pause policy.
+        for painted in [0, 1]:
+            expected = run('...\n###\n...', count=0)
+            count = page.evaluate('advanceRequests')
+            page.wait_for_timeout(300)
+            assert page.evaluate('advanceRequests') == count  # Run stays paused.
+            page.evaluate("""painted => {
+                globalThis.heldPaints = new Map();
+                let id = 0;
+                const raf = requestAnimationFrame, cancel = cancelAnimationFrame;
+                globalThis.requestAnimationFrame = callback => {
+                    heldPaints.set(++id, callback); return id;
+                };
+                globalThis.cancelAnimationFrame = id => heldPaints.delete(id);
+                globalThis.setHidden = hidden => {
+                    Object.defineProperty(document, 'hidden', {configurable:true, value:hidden});
+                    document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
+                };
+                globalThis.restorePaints = () => {
+                    globalThis.requestAnimationFrame = raf;
+                    globalThis.cancelAnimationFrame = cancel;
+                    delete document.hidden;
+                };
+                const next = document.querySelector('.lean-run-automaton [data-preview=next]');
+                next.addEventListener('load', () => setTimeout(() => {
+                    // All load handlers have now run; the host is waiting for paint.
+                    if (painted) {
+                        const [id, callback] = heldPaints.entries().next().value;
+                        heldPaints.delete(id); callback(performance.now());
+                    }
+                    setHidden(true);
+                }, 0), {once:true});
+            }""", painted)
+            form().locator('.lean-run-play').evaluate('e => e.click()')
+            page.wait_for_function('e => document.hidden && e.dataset.state === "success" && e.querySelector(".lean-run-status").textContent === "Paused"', arg=form().element_handle(), polling=100)
+            current(expected[1])
+            assert page.evaluate('heldPaints.size') == 0
+            assert page.evaluate('advanceRequests') == count + 1
+            terminated = page.evaluate('terminatedWorkers')
+            page.evaluate('setHidden(false); restorePaints()')
+            page.wait_for_timeout(300)
+            assert page.evaluate('advanceRequests') == count + 1
+            step(expected[2])
+            assert page.evaluate('terminatedWorkers') == terminated
+        record('hiding after iframe load before either paint commits once, pauses without losing the model, and never auto-resumes')
+
+        def hold_new_preview():
+            page.evaluate("""() => {
+                globalThis.loadsHeld = 0;
+                let frame;
+                const hold = event => {
+                    if (!event.target.matches?.('.lean-run-automaton [data-preview=next]') ||
+                        event.target.closest('.lean-run').dataset.state !== 'loading view') return;
+                    frame = event.target;
+                    ++loadsHeld; event.stopImmediatePropagation();
+                };
+                document.addEventListener('load', hold, true);
+                globalThis.releasePreview = () => {
+                    document.removeEventListener('load', hold, true);
+                    frame.dispatchEvent(new Event('load'));
+                };
+            }""")
+
+        run('...\n###\n...', count=0)
+        page.evaluate("""globalThis.retiredControls = [...document.querySelectorAll(
+            '.lean-run-automaton .lean-run-play, .lean-run-automaton .lean-run-step')];""")
+        form().locator('.lean-run-play').click()
+        hold_new_preview()
+        form().locator('[type=submit]').click()
+        page.wait_for_function('loadsHeld > 0')
+        page.evaluate("""() => {
+            Object.defineProperty(document, 'hidden', {configurable:true, value:true});
+            document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
+            delete document.hidden;
+            document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
+            releasePreview();
+        }""")
+        page.wait_for_function('e => e.dataset.state === "success"', arg=form().element_handle())
+        assert form().locator('.lean-run-status').inner_text() == 'Paused'
+        count = page.evaluate('advanceRequests')
+        page.evaluate('retiredControls.forEach(e => {e.disabled = false; e.click();})')
+        page.wait_for_timeout(300)
+        assert form().locator('.lean-run-sequence-position').inner_text() == 'Generation 0'
+        assert page.evaluate('advanceRequests') == count
+        step(oracle('...\n###\n...')[1])
+        record('hiding during Restart cancels resume intent even after visibility returns; retired controls cannot advance the new session')
+
+        form().locator('.lean-run-play').click()
+        hold_new_preview()
+        form().locator('[type=submit]').click()
+        page.wait_for_function('loadsHeld > 0')
+        form().locator('.lean-run-stop').click()
+        page.evaluate('releasePreview()')
+        page.wait_for_timeout(300)
+        assert form().get_attribute('data-state') == 'stopped'
+        assert form().locator('.lean-run-automaton').is_hidden()
+        record('Stop cancels a pending Restart and its playback intent before a late preview load')
 
         visit('root', 'slides', '')
         run('...\n###\n...', count=1)

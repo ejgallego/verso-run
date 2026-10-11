@@ -140,10 +140,9 @@ public def badge (enabled : Bool) : Html :=
 
 ```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615")
 public def wordSteps (seed : UInt64) : SequenceView :=
-  let sequence : Sequence UInt64 := {
-    initial := { label := "Start", state := seed }
-    steps := #[{ label := "Increment", state := seed + 1 }] }
-  sequence.view fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
+  let machine : Automaton UInt64 := { initial := seed, step := (· + 1) }
+  (machine.trace 1 (fun i => if i == 0 then "Start" else "Increment")).view
+    fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
 ```
 
 # Game of Life

@@ -123,3 +123,13 @@ visible document and label remain unchanged. Stop must discard that pending swap
 Seed drafts are checked during active playback, including explicit Restart and
 resumption with the new model. Short showcase source is visible by default;
 Life includes checked anchors for its transition, state, and SVG view.
+
+The review gate also checks hide-after-load paint waits before either animation
+frame, hiding while a load is still pending, Stop and late callbacks, and listener
+cleanup. Browser cases retain the same model after backgrounding, cancel pending
+Restart resumption, reject events from retired controls, and keep error sessions
+stoppable. Trace/replay native checks cover zero transitions, repeated states,
+labels, failures, independent cursors and escaped text; the UInt64 demo qualifies
+`List.scanl` and cyclic replay in real workers.
+Visibility races use controlled visibility events and suspended paint callbacks
+around real iframe loads; they do not qualify operating-system tab throttling.

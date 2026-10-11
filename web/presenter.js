@@ -17,15 +17,22 @@ function waitForModule(imported, signal) {
 // had a rendering opportunity. Stop observes the same abort signal as loading.
 function waitForPreview(frame, signal) {
   return new Promise((resolve, reject) => {
-    let paint;
+    let paint, hasLoaded = false, finished = false;
     const finish = error => {
+      if (finished) return;
+      finished = true;
       cancelAnimationFrame(paint);
       frame.removeEventListener("load", loaded);
       signal.removeEventListener("abort", aborted);
+      document.removeEventListener("visibilitychange", visibility);
       if (error) reject(error); else resolve();
     };
     const aborted = () => finish(signal.reason);
+    // A loaded document will paint on return to the tab. Do not wait for RAF
+    // while hidden, but never commit a document whose load is still pending.
+    const visibility = () => { if (hasLoaded && document.hidden) finish(); };
     const loaded = () => {
+      hasLoaded = true;
       if (document.hidden) finish();
       else paint = requestAnimationFrame(() => {
         paint = requestAnimationFrame(() => finish());
@@ -33,6 +40,7 @@ function waitForPreview(frame, signal) {
     };
     frame.addEventListener("load", loaded, { once: true });
     signal.addEventListener("abort", aborted, { once: true });
+    document.addEventListener("visibilitychange", visibility);
     if (signal.aborted) aborted();
   });
 }

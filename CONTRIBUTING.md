@@ -138,8 +138,9 @@ adapt it to Manual elaboration, native source blocks, and generator output.
 adapt the same core to Page/Post. `Slides` and `Slides.Publish` retain native code
 and compose with the stock Slides asset plan. See the [genre review](docs/multi-genre.md).
 
-`Sequence` holds pure author states and typed frame transport; `Preview` owns the
-shared sandbox document policy. `VersoLeanRunPresenter` implements browser DOM
+`Sequence` holds finite author states; `Automaton` holds pure live transitions
+and worker sessions. `Frame` supplies their shared observations and typed
+transport. `Preview` owns the sandbox document policy. `VersoLeanRunPresenter` implements browser DOM
 presentation through VIR. Its separate resource carrier keeps browser-only
 definitions out of native generator compilation. `web/presenter.js` owns loading,
 cancellation and disposal for both Html and sequence views.
