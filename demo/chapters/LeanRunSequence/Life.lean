@@ -1,5 +1,5 @@
 module
-public import VersoLeanRun.Automaton
+public import VersoLeanRun.Views
 public section
 
 namespace LeanRunSequence.Life

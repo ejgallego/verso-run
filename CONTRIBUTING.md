@@ -134,7 +134,7 @@ illustrations used by documentation in `docs/images/`.
 Within `src/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
 `Collect`, and `Publication` hold the common machinery. `Manual` and `Publish`
 adapt it to Manual elaboration, native source blocks, and generator output.
-`VersoLeanRun` remains the compatibility facade. `Blog` and `Blog.Publish`
+`VersoLeanRun` remains the Manual authoring facade. `Blog` and `Blog.Publish`
 adapt the same core to Page/Post. `Slides` and `Slides.Publish` retain native code
 and compose with the stock Slides asset plan. See the [genre review](docs/multi-genre.md).
 
@@ -143,7 +143,10 @@ and worker sessions. `Frame` supplies their shared observations and typed
 transport. `Preview` owns the sandbox document policy. `VersoLeanRunPresenter` implements browser DOM
 presentation through VIR. Its separate resource carrier keeps browser-only
 definitions out of native generator compilation. `web/presenter.js` owns loading,
-cancellation and disposal for both Html and sequence views.
+cancellation and disposal for Html, sequence and automaton views.
+`VersoLeanRun.Views` is the model/view import for ordinary producers. Its library
+has no document or browser-asset prerequisite. The Lake ownership table and
+upstream import constraints are described in [internals](docs/internals.md#library-boundaries).
 
 ## Changing the code
 

@@ -27,6 +27,8 @@ def oracle(role, value):
     return json.loads(output)
 
 command(['lake','build'], 'build')
+command([sys.executable, 'tests/client.py', '--output', str(OUTPUT/'client')], 'client-library')
+record('view/client/authoring library ownership, import phases, standalone native publication and direct worker agreement')
 model_output = command(['lake', 'env', 'lean', 'tests/Model.lean'], 'typed-model')
 wire_lines = [line.removeprefix('FORM_WIRE ') for line in model_output.splitlines()
               if line.startswith('FORM_WIRE ')]
