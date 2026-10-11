@@ -8,7 +8,7 @@ rather than treating successful loading as proof that an example works.
 
 `tests/client.py` checks that each module lives in its unique Lake owner's source
 directory and checks imports, then builds a
-plain Lean producer and native resource carrier. The standalone binary publishes
+plain Lean producer and native resource carrier in the root Lake workspace. The standalone binary publishes
 without a Verso document or project marker. Direct VIR workers compare finite
 traces, live UInt64 wraparound and independent sessions with native output at
 root and nested URLs. The upstream Html quoter and host-validation import limits

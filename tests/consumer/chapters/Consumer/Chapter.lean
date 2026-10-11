@@ -9,15 +9,19 @@ set_option compiler.postponeCompile false
 
 The model, document, carrier, and publisher belong to this project.
 
-# Examples
+# Scalar
 
 ```leanRun (entry := Consumer.increment) (input := "18446744073709551615")
 #check Consumer.increment
 ```
 
+# Finite
+
 ```leanRun (entry := Consumer.finite) (input := "18446744073709551615")
 #check Consumer.finite
 ```
+
+# Live
 
 ```leanRun (entry := Consumer.live) (input := "18446744073709551615")
 #check Consumer.live

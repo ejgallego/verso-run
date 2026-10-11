@@ -96,7 +96,7 @@ try:
     assert all(case['independent'] == case['live'][1] for case in native)
     record('consumer-owned ordinary model produces finite, live and scalar native references including UInt64 wraparound')
     command(['lake', 'exe', 'consumer-manual', '--output', str(project / '_out'), '--with-html-single'], 'generate')
-    site = project / '_out/html-single'
+    site = project / '_out/html-multi'
     plan = json.loads((site / 'lean-run/publication.json').read_text())
     report['publication'] = plan
     bindings = plan['programs']['Consumer.Chapter']
@@ -125,7 +125,7 @@ try:
     with serve_directory(served) as base, sync_playwright() as p:
         browser = p.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
         try:
-            page = browser.new_page()
+            page = browser.new_page(viewport={'width': 1280, 'height': 1000})
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
 
@@ -143,7 +143,7 @@ try:
                 frame = form.locator('iframe[data-preview="current"]')
                 assert expected['html'] in frame.get_attribute('srcdoc')
                 assert frame.get_attribute('sandbox') == ''
-                assert form.locator('.lean-run-sequence-position').text_content() == expected['label']
+                expect(form.locator('.lean-run-sequence-position')).to_have_text(expected['label'])
                 assert form.locator('.lean-run-sequence-error').text_content() == (expected['error'] or '')
                 expect(form.frame_locator('iframe[data-preview="current"]').locator('body')).to_have_text(expected['html'])
 
@@ -153,15 +153,16 @@ try:
                 live_frame(form, expected)
 
             for prefix in ['root', 'nested/manual']:
-                page.goto(base + prefix + '/')
-                page.wait_for_selector('.lean-run[data-enhanced]')
                 scalar = page.locator('.lean-run[data-experiment*="Consumer.increment"]')
                 finite = page.locator('.lean-run[data-experiment*="Consumer.finite"]')
                 live = page.locator('.lean-run[data-experiment*="Consumer.live"]')
-                assert live.count() == 2
                 for case in native:
+                    page.goto(base + prefix + '/Scalar/')
+                    page.wait_for_selector('.lean-run[data-enhanced]')
                     run(scalar, case['seed'])
                     assert scalar.locator('.lean-run-output').text_content() == case['scalar']
+                    page.goto(base + prefix + '/Finite/')
+                    page.wait_for_selector('.lean-run[data-enhanced]')
                     run(finite, case['seed'])
                     for index, expected in enumerate(case['finite']['frames']):
                         finite.locator(f'[data-step="{index}"]').click()
@@ -169,11 +170,16 @@ try:
                             f"Step {index + 1} of {len(case['finite']['frames'])}: {expected['label']}")
                         expect(finite.frame_locator('iframe').locator('body')).to_have_text(expected['html'])
                         assert finite.locator('.lean-run-sequence-error').text_content() == (expected['error'] or '')
+                    page.goto(base + prefix + '/Live/')
+                    page.wait_for_selector('.lean-run[data-enhanced]')
+                    assert live.count() == 2
                     run(live.nth(0), case['seed'])
                     live_frame(live.nth(0), case['live'][0])
                     for expected in case['live'][1:]:
                         advance(live.nth(0), expected)
                 record(prefix + ': scalar calls, every finite frame and live advancements agree with the native consumer')
+                page.goto(base + prefix + '/Live/')
+                page.wait_for_selector('.lean-run[data-enhanced]')
                 first, second = live.nth(0), live.nth(1)
                 a, b = native[-1], native[1]
                 run(first, a['seed'])
