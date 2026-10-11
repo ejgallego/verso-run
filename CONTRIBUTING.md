@@ -148,6 +148,16 @@ cancellation and disposal for Html, sequence and automaton views.
 has no document or browser-asset prerequisite. The Lake ownership table and
 upstream import constraints are described in [internals](docs/internals.md#library-boundaries).
 
+## Documentation
+
+Authoring and genre guides describe current usage. `docs/internals.md` explains
+architecture and contracts; `docs/validation.md` gives reproducible gates and
+their limits. Keep exact run results in CI artifacts or ignored `_out/` evidence.
+`ROADMAP.md` records future directions, with concrete work tracked in issues.
+`docs/history.md` retains origin and design provenance. PR descriptions and Git
+history carry the detailed change record. Rewrite current guidance when behavior
+changes instead of appending a review checkpoint or work log.
+
 ## Changing the code
 
 Keep `VersoLeanRun` and `VersoLeanRun.Publish` as the public imports. Keep document

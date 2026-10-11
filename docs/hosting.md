@@ -23,17 +23,15 @@ covered by acceptance checks. No generated site files are committed to Git.
 
 ## Runtime MIME compatibility and acceptance
 
-The old frozen loader rejected GitHub Pages' `application/javascript` response
-for assets declared `text/javascript`. The selected runtime `6cddc4b8…` accepts
-that equivalent JavaScript spelling while preserving file/manifest integrity and
-Wasm MIME checks. Earlier Pages acceptance on runtime `e415…` verified Greeting,
-exact Nat, escaped HTML, and Illuminate SVG against native Lean, with matching
-hosted/local publication and `application/javascript` responses. Those records
-remain in [Git history](validation.md#current-results-and-historical-evidence).
-The PR #229 runtime is checked locally; repeat the hosted gate after deployment.
+Serve JavaScript as `text/javascript` or `application/javascript`, and Wasm as
+`application/wasm`. The selected runtime accepts both JavaScript spellings and
+checks file/manifest integrity and Wasm MIME. See the current source/runtime
+[pins](internals.md#pinned-dependencies) and [qualification scope](validation.md).
+Each deployment needs its own hosted gate; earlier runtime results remain in
+their CI artifacts and Git history.
 
-Run `uv run --with playwright python tests/pages-smoke.py` after deployment to
-repeat the source-inspected hosted harness. Regenerate local output first; this
+Run `UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python tests/pages-smoke.py`
+after deployment. Regenerate local output first; this
 check deliberately rejects a different hosted program/runtime publication.
 
 ## Share a complete copy

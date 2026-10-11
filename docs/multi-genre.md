@@ -97,19 +97,18 @@ The existing `Experiment.program` remains a document-owner/binding key. The
 public-pair migration adds `producerModule` from Lean's actual declaration
 ownership, which selects the generated module bundle independently of that key.
 
-The initial anchored implementation required producer-owned scalar exports.
-The current entry-selected API creates document-owned callable adapters for both
+The entry-selected API creates document-owned callable adapters for both
 imported scalars and typed HTML. The original producer remains ordinary Lean;
 its IR is included as a dependency of the document bundle. This qualifies the
-previously deferred anchored Html path without changing VIR's scalar boundary.
+anchored Html path using VIR's typed boundary.
 
-## Adapter findings
+## Genre adapters
 
 **Manual:** retain the highlighted block produced by `ExternalCode Manual` as a
 child of the Run wrapper. Its traversal registers definitions and its native
 renderers preserve reference links, `defSite`, proof states, and TeX. Rendering
 the source into a raw HTML blob before traversal would bypass these facilities.
-The inline `leanRun` authoring mode now works across all three genres through a
+The inline `leanRun` authoring mode works across all three genres through a
 shared selection/registration helper with native source renderers. External
 anchors remain an optional source-reuse route. Slides retains its formatting-aware
 command elaborator; Blog Run code is retained in the document environment, while
@@ -162,8 +161,8 @@ for the exact source/runtime pair. The Slides pin is a review snapshot; upstream
 integration remains separate from this consumer's qualification.
 
 Only Manual's TeX fallback is established. Blog retains native source without
-JavaScript; this adapter does not add a Blog TeX backend. Slides should retain
-its own supported static output; Slides now has a readable HTML fallback.
+JavaScript; this adapter does not add a Blog TeX backend. Slides retains a
+readable HTML fallback.
 
 ## Acceptance invariants
 

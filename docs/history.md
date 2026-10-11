@@ -1,93 +1,54 @@
-# Project history
+# Origin and design provenance
 
-The initial runnable-Manual prototype lived in `experiments/lean-run` on Verso's
-local `feat/lean-run` branch. Its eight development commits were extracted from
-Verso commit `06860e5e`. Earlier generated reports and captures remain in Git
-history at `23f449e`; they describe their recorded revisions.
+The first runnable-Manual prototype lived in Verso's `experiments/lean-run` on
+`feat/lean-run`. Its eight development commits were extracted from Verso commit
+`06860e5e`. The extension was published as `verso-vir`, briefly named `verso-lab`,
+and renamed to `verso-run`. `verso-lab` is reserved for broader source-editor work.
+The public `VersoLeanRun` name was retained.
 
-The project was initially published as `verso-vir`, briefly named `verso-lab`,
-and renamed to `verso-run`. The public `VersoLeanRun` module and executable names
-were retained. `verso-lab` is reserved for future source-editor work.
+## Decisions that shaped the extension
 
-## Shared machinery and genre support
+**Retain elaborated source.** Run blocks reuse Verso's command elaboration and
+highlighted source. Their declarations compile in the document environment;
+imported anchors reuse Verso's checked `ExternalCode` path. This keeps the shown
+implementation connected to execution and preserves each genre's native source
+rendering, links and static fallback.
 
-The original Manual integration was separated into a callable classifier,
-portable experiment model, native-source adapters, console renderer, typed AST
-collector, and pure publication planner. Checked anchors reuse Verso's
-`ExternalCode` path rather than recovering declarations from rendered HTML.
-Imported entries and typed HTML use document-owned scalar adapters.
+**Derive contracts from the compiler.** Publication supplies expected callable
+signatures independently of the downloaded executable. VIR validates that
+contract when creating the program. Input controls and presentation kinds do not
+reconstruct an ABI in JavaScript. Module-owned resource facets and carriers keep
+preparation before embedding and publication outside elaboration.
 
-Blog Page/Post and Slides then adopted the shared callable and publication
-machinery while retaining their own source renderers. Inline definitions keep
-command scopes across Run blocks. Bool, UInt64, and multiline String controls
-share the host/worker codec and cancellation behavior across genres. Selecting
-`entry` now registers the export; authors do not need an export annotation or
-an `output` option.
+**Keep computation in Lean.** The stack calculator and stepper share one parser
+and evaluator. Life supplies a pure transition and SVG view. `Sequence` describes
+a finite recording; `Automaton` describes a live transition system. Shared frames
+and observation helpers connect their presentations. `trace` uses Lean's
+`List.scanl`, sequence mapping uses `Functor`/`LawfulFunctor`, and text views use
+`ToString`. These helpers belong to verso-run; they are not Illuminate's animation
+framework. Illuminate's drawing-command/SVG path is qualified separately.
 
-## VIR resource and signature integration
+**Make execution lifetime explicit.** Each placement owns a dedicated worker.
+Stop can interrupt synchronous Wasm execution. Live playback keeps only the
+current model and waits for execution and presentation before advancing again.
+Finite selection uses recorded states. Run and Play are explicit reader actions;
+Restart, hiding and navigation have documented lifetime rules.
 
-VIR supplies the compiler-derived expected-signature encoder and validates
-actual callable interfaces during program creation. Earlier encoder and typed
-form campaigns are recorded in the historical
-[consumer claim](../evidence/typed-forms-claim.md). The older `e415…` runtime was
-also qualified on Pages, including its JavaScript MIME handling; those hosted
-results do not qualify a later runtime automatically.
+**Isolate generated markup.** Lean renders Html; a separate Lean/VIR DOM presenter
+puts it in a sandboxed document. The parent page does not insert returned markup
+into its own DOM. Qualification covers the exercised policy and bindings, with
+browser and accessibility limits recorded separately.
 
-The layout migration adopted [VIR PR #229](https://github.com/ejgallego/lean-vir/pull/229):
-explicit module resource facets and `include_vir_assets` replaced implicit
-carrier-library program selection. Its Lean 4.35.0-rc4 requirement needed two
-upstream compatibility adjustments on the existing Verso highlighting fork and
-a Slides revision using the same module-owned-assets interface. The independent
-starter was cold-qualified against published extension `a830999`.
-See [internals](internals.md#pinned-dependencies) for the current exact pins,
-and [validation](validation.md) for qualification scope and limits.
+## Development records
 
-## Lean-authored views and pre-merge consolidation
+[PRs](https://github.com/ejgallego/verso-run/pulls?q=is%3Apr) and
+[Git history](https://github.com/ejgallego/verso-run/commits/main/) contain the
+detailed change record. The [views consolidation](https://github.com/ejgallego/verso-run/pull/11)
+links its earlier implementation slices and review fixes. Exact validation
+results belong to the associated CI run or retained evidence, rather than this
+provenance page. Generated prototype reports and captures remain in Git history
+at `23f449e` and describe their recorded revisions.
 
-[PR #4](https://github.com/ejgallego/verso-run/pull/4) introduced typed finite
-sequences and a Lean/VIR DOM presenter, demonstrated by a stack-machine stepper.
-The calculator and stepper share one Lean parser and trace evaluator.
-[PR #7](https://github.com/ejgallego/verso-run/pull/7) added the finite Game of Life
-model and its integer-coordinate SVG view.
-[PR #10](https://github.com/ejgallego/verso-run/pull/10) separated input controls
-from result presentation, adopted structured VIR sequence transport, and moved
-Html preview documents into the same compiled presenter.
-
-The pre-merge consolidation ports Life to those final contracts and retains the
-publication-binding validation from [PR #8](https://github.com/ejgallego/verso-run/pull/8)
-and browser-description projection from [PR #9](https://github.com/ejgallego/verso-run/pull/9).
-Life's tests reuse the shared command/server harness and locate their slide by its
-entry, rather than relying on a slide number. Native provenance remains available
-for diagnostics while browser descriptions contain only the six required fields.
-
-Original validation records remain in those PRs and at the
-[typed-rendering checkpoint](https://github.com/ejgallego/verso-run/blob/c192579d528a9a5dd87fbf56921415c227650a6a/docs/validation.md).
-The consolidated branch receives its own mutation, browser, and fresh CI gates;
-prior green runs are not treated as integration qualification.
-
-## Finite and live observation APIs
-
-The continuous Life extension retained the pure `Automaton α` transition model
-and added worker-owned sessions. The review pass connects it to finite sequences
-through `Automaton.trace`, using the pinned standard library's `List.scanl`.
-`Sequence.cycleView` supplies an explicit replay policy for recorded states;
-it does not infer a transition from observations. Shared `Frame` values separate
-pure model observation from sandbox transport. Lean's `Functor`/`LawfulFunctor`
-and `ToString` interfaces provide state mapping and simple text views.
-
-These helpers belong to verso-run. Execution and DOM effects use VIR's existing
-RuntimeRef and browser APIs; they are not an implementation of Illuminate's
-animation framework. Its drawing-command/SVG path remains separately qualified.
-
-## Current layout
-
-Library code lives under `src/`, browser assets under `web/`, and demo chapters,
-resource carriers, and generators under `demo/`. Native references and acceptance
-fixtures live under `tests/`. Illuminate examples remain outside the library.
-The package is named `verso_run`; `VersoLeanRun` and `VersoLeanRun.Publish` remain
-the public Manual imports. Generated reports, screenshots, and site files belong
-in ignored output directories or CI artifacts; documentation artwork lives in
-`docs/images/`.
-
-See [LICENSE](../LICENSE) for the Apache-2.0 license and [CONTRIBUTING](../CONTRIBUTING.md)
-for the build, validation, and review workflow.
+For current behavior use the [authoring guide](authoring.md), for architecture
+use [internals](internals.md), and for qualification use [validation](validation.md).
+Future directions live in the [roadmap](../ROADMAP.md).

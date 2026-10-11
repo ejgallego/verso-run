@@ -1,144 +1,105 @@
-# Validation and retained evidence
+# Validation
 
-The main acceptance suite exercises the real native generator and the real
-Chromium worker. It compares edited-input results with a native Lean oracle,
-rather than treating successful loading as proof that an example works.
+The acceptance suite executes the native generators and real Chromium workers.
+It compares browser results with native Lean and checks known semantic cases
+independently of that agreement.
 
-## Client library boundary
+## Reproduce the gates
 
-`tests/client.py` checks unique Lake module ownership and imports, then builds a
-plain Lean producer and native resource carrier. The standalone binary publishes
-without a Verso document or project marker. Direct VIR workers compare finite
-traces, live UInt64 wraparound and independent sessions with native output at
-root and nested URLs. The upstream Html quoter and host-validation import limits
-are described in [internals](internals.md#library-boundaries).
+Run these sequentially; mutation tests temporarily edit sources and restore them:
 
-## What the suite checks
+```sh
+lake build
+lake test -- --mutations --output _out/acceptance
+```
 
-- Closed form metadata round-trips and rejection of unsupported combinations;
-  native wire tags checked against browser codecs and the generated HTML serializer.
-- Idempotent, document-scoped publication bindings with deterministic output;
-  conflicting signatures, manifests, and callables reject in either order with
-  both source locations, before publication writes.
-- All generated browser descriptions contain exactly six reader/invocation fields
-  and resolve published bindings in both Manual HTML layouts, Blog Page/Post, and
-  Slides. Native genre collectors retain producer ownership and source locations.
-- Entry-selected exports without author annotations, type-derived result display,
-  unannotated imported producers and document-owned scalar/HTML wrappers.
-- Text, Unicode, exact natural numbers, calculator traces and bounds, typed
-  HTML escaping and isolation, and Illuminate SVG markup and geometry.
-- Independent forms, repeated placements, real Stop, pending-load cancellation,
-  stale-result suppression, explicit retry, and preview cleanup.
-- Author diagnostics, source locations, unsupported interfaces and dependency
-  closures, compiler signatures, and rejection before invocation.
-- Embedded native-only generation, root and nested copied sites, both HTML
-  layouts, no-JavaScript source, and TeX output.
-- Source/helper invalidation, restored identity, missing/duplicate stock
-  registration and logical-ID conflicts, and relocated carrier source/build roots.
-- Rejected replacements and wrong producer registrations after a successful build,
-  including preservation of the last accepted publication.
-- Imported scalar anchors, semantic entry membership, checked source bodies,
-  native definition links, and duplicate/unclosed/stale-anchor rebuild rejection.
-- Inline Page/Post/Slides definitions, retained namespaces and repeated selection,
-  scalar/Html authoring, native source and source-located rejection diagnostics.
-- Blog Page/Post typed collection, native-only publication, malformed metadata,
-  nested asset URLs, automatic typed HTML, no-JavaScript source, and the combined landing.
-- Blog draft policy for root collection/planning and nested native generation:
-  hidden drafts require no bundle; shown drafts require registration before writes.
-- Slides typed collection, one formatter/Run runtime inventory, asset collisions
-  before output, native fragments, visibility cancellation, keyboard submission,
-  pending-load guards, and readable static source.
-- Typed sequences, automatic scalar adapters, independently classified DOM
-  presenters, every native frame, exact stacks and errors, previous/next and
-  scrubbing, independent placements, stale listeners, and presenter-load Stop.
-- Game of Life rules and parsing, exact native generations, SVG views, edited seeds,
-  and invalid-input recovery.
-- Raw Html/sequence scripts, event handlers, external embedded resources, top
-  navigation and form submission under the shared sandbox document policy.
+The suite writes command logs and structured results to the selected ignored
+output directory. See [contributing](../CONTRIBUTING.md#build-and-test) for caches,
+individual commands and mutation isolation.
 
-The [contributor guide](../CONTRIBUTING.md) gives commands and explains mutation
-test isolation. CI also cold-builds the independently pinned
-[author starter](../examples/manual-starter/README.md) without Lake artifact-cache
-reuse and runs its 11 checks. The starter acquires public extension `f2a1491` and
-the selected runtime through its complete Git manifest, without local seeds.
+CI also builds the [independently pinned author starter](../examples/manual-starter/README.md)
+from its complete Git manifest without artifact-cache reuse. That gate qualifies
+its published dependency revision; working-tree acceptance qualifies the current
+extension sources. CI then packages the three-genre demo and runs its smoke gate.
+A main-branch workflow deploys only after these checks pass.
 
-The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `6e514cd4`,
-with VIR's locked runtime `6cddc4b8…`. Resource dependencies and includes now name
-program modules explicitly. The independently pinned starter tests the same Lean 4.35.0-rc4 and
-module-owned-assets API from the published extension revision.
-Publication loading cancellation is qualified before any response, with fresh-fetch
-retry and concurrent placements. The browser test also checks actual public promise
-settlement; runtime-Wasm cancellation remains a separate test.
+For a local package check:
 
-The combined-site gate covers typed, inline, sequence and Life examples and compares all six shared
-JavaScript files in every genre. `verso-run-build.json` records the generator's exact
-source/dependency/runtime identities; a hosted run requires the deployed revision and
-a clean build using `tests/pages-smoke.py --revision COMMIT`.
+```sh
+python3 scripts/build-demo-site.py
+UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python tests/pages-smoke.py \
+  --site _out/html-multi --revision "$(git rev-parse HEAD)" \
+  --output _out/demo-site-results.json
+```
 
-## Current qualification
+The build must be clean. `verso-run-build.json` records source, dependencies and
+runtime; smoke checks verify the publication and execution against the local
+native oracle. A hosted run additionally requires that deployed revision. See
+[hosting](hosting.md) for deployment and packaging.
 
-The consolidated campaign exercises the sequence and typed-rendering libraries,
-the stack stepper, and Game of Life together with binding conflict checks and
-browser metadata projection. Command logs and results are written to the selected output directory; CI
-artifacts identify the exact source revision that passed the full gates.
+## Coverage
 
-All 20 input/presentation forms have independently classified expectations.
-Sequence frames use typed VIR transport with exact integer values and a combined
-65,536 UTF-16 code unit output budget. The real held-module tests cover deadline,
-Stop, retry of the same pending import and observed late rejection. Raw-markup
-checks use the actual compiled Html, sequence, and automaton presenters, rather than relying
-only on interpolated-text escaping.
+- **Interfaces and authoring:** all admitted input/presentation forms, exact
+  compiler expectations, metadata rejection, source-located author diagnostics,
+  imported and inline entries, checked anchors and unsupported dependencies.
+- **Library boundaries:** one Lake owner per source; the standalone `Views` import
+  excludes genre adapters, VIR compiler and DOM modules. Ordinary presenter
+  imports exclude Verso authoring; its native carrier excludes the DOM
+  implementation. A plain Lean fixture publishes without a document or project
+  marker, then compares finite/live worker frames with native output at root and
+  nested URLs, including UInt64 wraparound and independent sessions.
+- **Publication:** complete embedded inventories, resource roles, matching
+  runtimes, idempotent bindings, conflicts before writes, native generation
+  outside the checkout, relocated carrier roots, and source/helper mutation with
+  restored program identity. Runtime identity remains independent of source edits.
+- **Execution:** exact scalar values, Unicode and multiline input, independent
+  workers, useful failures and explicit recovery, pending-load/import cancellation,
+  shared publication acquisition, real interruption of synchronous Wasm, stale
+  completion suppression and disposal.
+- **Views and lifetimes:** every exercised native sequence frame, selection and
+  scrubbing without reevaluation, raw-markup isolation, frame budgets, listener
+  cleanup, held loads and paint backpressure. Native Life rules cover still lifes,
+  oscillation, extinction, glider movement and dead boundaries. Live playback
+  passes the former generation limits without growing the DOM. Drafts, Restart,
+  visibility, retired controls, error-session Stop and late loads are exercised.
+- **Genres and static output:** Manual's two HTML layouts and TeX; Blog Page/Post
+  collection, draft policy and relative paths; Slides asset composition, native
+  fragments, hidden submission guards, navigation cancellation and scroll-view
+  restoration. Source remains readable without JavaScript.
 
-Life's known-pattern tests check still lifes, oscillation, extinction, glider
-translation and dead boundaries. Browser tests compare exercised generations with
-native Lean across all genres at root and nested paths. The dense-board case
-checks the output budget; invalid seeds remain Lean errors with explicit recovery.
-
-Run `lake build`, followed by `lake test -- --mutations --output _out/acceptance`.
-The suite writes command logs and `results.json` to that ignored directory.
-CI uploads `_out/` as an artifact; consult the
-[CI runs](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml) for
-fresh-checkout validation and deployment results.
-
-Earlier per-PR counts and qualification checkpoints are linked from
-[project history](history.md#lean-authored-views-and-pre-merge-consolidation). They
-describe their own immutable revisions, not this integration automatically.
-
-Generated JSON reports, logs, and prototype screenshots have been removed from
-the source tree. Earlier records remain in Git history at `23f449e`;
-they describe their own revisions, not the current checkout. The written
-[Illuminate qualification](../evidence/illuminate-gates.md) and
-[typed-form review](../evidence/typed-forms-claim.md) retain their scope and limits.
-The [README illustration](images/illuminate-desktop-4.png) is documentation artwork.
+The library-boundary fixture is `tests/client.py`; its producer imports
+`VersoLeanRun.Views` and its worker calls VIR directly. The import gate accounts
+for the pinned upstream Html quoter and VIR host-validation imports described in
+[internals](internals.md#library-boundaries).
 
 ## Qualification limits
 
 Browser execution is qualified in Chromium. Firefox, Safari, physical mobile
-devices, and assistive-technology audits remain outside this evidence.
-The cached-page handler is tested with a persisted `PageTransitionEvent`;
-actual browser back-cache restoration remains unqualified.
+devices and assistive-technology audits require separate qualification.
+Visibility races use controlled events and suspended paint callbacks around real
+iframe loads; they do not qualify operating-system tab throttling. Cached-page
+handling uses a synthetic persisted `PageTransitionEvent`; actual browser
+back-cache restoration remains unqualified.
 
-General Illuminate diagram compilation is also unqualified. Only the documented
-drawing-command/SVG path is supported by this demo.
+Raw Html tests exercise scripts, event handlers, external resources, top
+navigation and forms under the shared sandbox policy. They establish the tested
+behavior, not a comprehensive HTML-security audit. Only exercised VIR DOM
+bindings are covered. Illuminate qualification is limited to drawing-command/SVG
+output; broader diagram rendering retains the float-provider gaps recorded in
+[its evidence](../evidence/illuminate-gates.md).
 
-The live Life gate compares native and worker frames beyond generations 12 and
-128, exercises Play/Pause/Step and Stop/restart, and checks that updating a frame
-keeps the DOM size constant. Native known-pattern tests remain independent of
-that agreement oracle. Scheduler tests hold transitions open to qualify
-backpressure, pause, reset generations, and failure recovery.
+Compiler scheduling and native precompilation remain separate work. Keep the
+[current pins](internals.md#pinned-dependencies) until a matched source/runtime
+update is deliberately qualified.
 
-Live preview tests hold a staged iframe load while asserting that the previous
-visible document and label remain unchanged. Stop must discard that pending swap.
-Seed drafts are checked during active playback, including explicit Restart and
-resumption with the new model. Short showcase source is visible by default;
-Life includes checked anchors for its transition, state, and SVG view.
+## Exact results and retained evidence
 
-The review gate also checks hide-after-load paint waits before either animation
-frame, hiding while a load is still pending, Stop and late callbacks, and listener
-cleanup. Browser cases retain the same model after backgrounding, cancel pending
-Restart resumption, reject events from retired controls, and keep error sessions
-stoppable. Trace/replay native checks cover zero transitions, repeated states,
-labels, failures, independent cursors and escaped text; the UInt64 demo qualifies
-`List.scanl` and cyclic replay in real workers.
-Visibility races use controlled visibility events and suspended paint callbacks
-around real iframe loads; they do not qualify operating-system tab throttling.
+Use the [CI runs](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml)
+and their artifacts for exact source revisions, results, logs and packaged sites.
+PR descriptions link review evidence; ignored `_out/` directories hold local
+campaigns. A result qualifies its recorded source/runtime pair and configuration.
+
+Earlier generated reports remain in Git history at `23f449e`. The historical
+[typed-form claim](../evidence/typed-forms-claim.md) records its bounded campaign;
+it is not the current API specification. The [provenance page](history.md)
+explains design origins, and [internals](internals.md) describes current contracts.
