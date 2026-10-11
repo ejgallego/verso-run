@@ -1,0 +1,27 @@
+landing_page = "VersoLeanRun.Views"
+order = ["VersoLeanRun.Views", "VersoLeanRun.Frame", "VersoLeanRun.Sequence", "VersoLeanRun.Automaton"]
+docstrings_as_text = true
+hide_commands = ["module", "public section", "namespace", "end", "open"]
+
+[[targets]]
+library = "VersoLeanRunViews"
+
+[metadata]
+title = "verso-run · View API"
+description = "Lean models and presentations for finite traces and live automata."
+
+[modules."VersoLeanRun"]
+title = "View API"
+url = ""
+
+[modules."VersoLeanRun.Views"]
+title = "Start here"
+
+[modules."VersoLeanRun.Frame"]
+title = "Frames"
+
+[modules."VersoLeanRun.Sequence"]
+title = "Finite sequences"
+
+[modules."VersoLeanRun.Automaton"]
+title = "Live automata"

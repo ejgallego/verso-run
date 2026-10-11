@@ -6,6 +6,13 @@ Author: Emilio J. Gallego Arias
 module
 public import VersoLeanRun.Frame
 public import Init.Data.List.Scan.Basic
+
+/-!
+# Finite sequences
+
+A sequence records domain states and their labels and failures. Render that
+recorded trace as HTML or text without changing its meaning.
+-/
 public section
 
 namespace VersoLeanRun
@@ -13,13 +20,18 @@ open Verso.Output Lean
 
 /-- One labelled state, optionally reporting a failure at this step. -/
 structure SequenceStep (α : Type) where
+  /-- The step's domain label. -/
   label : String
+  /-- The model state at this step. -/
   state : α
+  /-- An optional failure associated with this state. -/
   error : Option String := none
 
 /-- A finite computation or explanation. Its state and meaning stay in Lean. -/
 structure Sequence (α : Type) where
+  /-- The initial observation; even an empty trace contains this state. -/
   initial : SequenceStep α
+  /-- Subsequent observations, in execution order. -/
   steps : Array (SequenceStep α) := #[]
 
 /-- Transform observations while retaining their labels and failures. -/
@@ -95,3 +107,45 @@ def SequenceView.toPayload (view : SequenceView) : SequenceWire.Payload :=
   { version := 1, frames := #[view.initial.toWire] ++ view.steps.map Frame.toWire }
 
 end VersoLeanRun
+
+/-!
+## Working with a trace
+
+{name}`VersoLeanRun.Sequence` records a nonempty trace: an initial state followed
+by an array of labelled steps. It stores domain states, so rendering remains a
+separate choice. {name}`VersoLeanRun.Sequence.view` produces HTML observations;
+{name}`VersoLeanRun.Sequence.viewText` uses the state's {name}`ToString` instance.
+
+```lean
+open VersoLeanRun
+
+def counting : Sequence Nat :=
+  Sequence.iterate Nat.succ 0 4 (fun n => s!"Step {n}")
+
+def countingView : SequenceView := counting.viewText
+
+def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
+```
+
+{name}`VersoLeanRun.Sequence.map` supplies the standard {name}`Functor` interface
+and preserves step labels and errors. Mapping changes observations, not the
+recorded execution history.
+
+## Trace size and replay
+
+{name}`VersoLeanRun.Sequence.iterate` records the initial state and exactly the
+requested number of transitions. A zero-length iteration still has its initial
+observation. The browser accepts at most 128 frames, including that initial
+frame. For longer or unbounded computations, use an on-demand automaton view.
+
+{lit}`Sequence.cycleView` explicitly loops over a recorded trace,
+preserving labels and errors. It repeats observations without inferring a state
+transition. See the live automaton page for that adapter.
+
+## Transport
+
+{name}`VersoLeanRun.SequenceView.toPayload` and the {lit}`SequenceWire` namespace
+are used by generated document adapters. Normal author functions return
+{name}`VersoLeanRun.SequenceView`; they do not serialize JSON or construct
+browser call contracts.
+-/

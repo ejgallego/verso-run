@@ -25,3 +25,8 @@ The Blog genre covers ordinary pages and dated posts, with the same Run controls
 A presentation with native code highlighting and Reveal fragments. Run a function
 during a talk, then move on: hidden slides and fragments stop their workers.
 [Try the runnable slides](../slides/).
+
+# Write your own model
+
+The [View API reference](../api/) explains finite traces, live automata, and HTML
+observations, with Lean-checked examples and the library's source.

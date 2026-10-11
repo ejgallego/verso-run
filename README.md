@@ -111,6 +111,7 @@ acceptance checks and native reference executables live in `tests/`.
 
 
 - [Authoring](docs/authoring.md): runnable blocks and typed HTML.
+- [View API reference](https://ejgallego.github.io/verso-run/api/): generated library documentation and checked examples.
 - [Blog authoring](docs/blog.md): runnable pages, posts, and site publication.
 - [Slides authoring](docs/slides.md): native fragments, visibility-based Stop, and asset composition.
 - [Troubleshooting](docs/troubleshooting.md): unsupported programs and build/runtime errors.

@@ -29,6 +29,9 @@ def oracle(role, value):
 command(['lake','build'], 'build')
 command([sys.executable, 'tests/client.py', '--output', str(OUTPUT/'client')], 'client-library')
 record('view/client/authoring library ownership, import phases, standalone native publication and direct worker agreement')
+command([sys.executable, 'tests/api-reference.py', '--output', str(OUTPUT/'api-reference')]
+        + (['--mutations'] if args.mutations else []), 'api-reference')
+record('generated view API reference: checked examples, declaration links, search and root/nested layouts')
 model_output = command(['lake', 'env', 'lean', 'tests/Model.lean'], 'typed-model')
 wire_lines = [line.removeprefix('FORM_WIRE ') for line in model_output.splitlines()
               if line.startswith('FORM_WIRE ')]

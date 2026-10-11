@@ -127,6 +127,28 @@ public pin until a new baseline has landed and its acquisition is qualified.
 
 ## Repository layout
 
+### Generated library reference
+
+Run `python3 scripts/build-api-reference.py` to generate the public view library's reference in
+`.lake/build/literate-html/`. `literate.toml` selects `VersoLeanRunViews` and its
+landing page; module prose and Lean-checked examples live with the library source.
+Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.
+The helper invokes Verso's `lake build :literateHtml` facet and supplies the source
+dependency missing from the pinned facet: documentation-only edits must refresh
+HTML even when the public olean stays unchanged.
+`scripts/build-demo-site.py` includes the reference at `/api/` in the demo and
+Pages artifact. Generated HTML stays out of Git.
+
+Use `lake test` for the reference's module scope, links, search, and root/nested
+browser checks. To check a packaged reference directly, run:
+
+```sh
+UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
+  uv run --with playwright python tests/api-reference.py --site _out/html-multi/api
+```
+
+### Source directories
+
 | Path | Purpose |
 | --- | --- |
 | `src/views/` | Pure models, observations, and VIR worker-session adapters |

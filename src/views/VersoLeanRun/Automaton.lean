@@ -6,6 +6,13 @@ Author: Emilio J. Gallego Arias
 module
 public import VersoLeanRun.Sequence
 public import Vir.Runtime
+
+/-!
+# Live automata
+
+An automaton defines a pure transition on a Lean state. Observe it as a finite
+trace or as a worker-owned session that advances one state at a time.
+-/
 public section
 
 namespace VersoLeanRun
@@ -13,7 +20,9 @@ open Lean.Vir
 
 /-- A pure transition system, advanced one state at a time. -/
 structure Automaton (α : Type) where
+  /-- The state used by each newly started session. -/
   initial : α
+  /-- One pure transition, evaluated only when the session advances. -/
   step : α → α
 
 /-- Observe the initial state and exactly `count` transitions as a finite trace.
@@ -81,3 +90,58 @@ def AutomatonView.error (message : String) : AutomatonView :=
   { start := pure { initial := frame, advance := pure frame } }
 
 end VersoLeanRun
+
+/-!
+## Choosing a live view
+
+An {name}`VersoLeanRun.Automaton` is a pure model: an initial state and a transition
+{lit}`α → α`. It has no playback timer or browser effects. The same model can be
+recorded as a finite trace with {name}`VersoLeanRun.Automaton.trace`, or advanced
+on demand using {name}`VersoLeanRun.Automaton.view`.
+
+```lean
+open VersoLeanRun
+
+def counter (seed : Nat) : Automaton Nat :=
+  { initial := seed, step := Nat.succ }
+
+def recorded (seed : Nat) : SequenceView :=
+  ((counter seed).trace 4).viewText
+
+def live (seed : Nat) : AutomatonView :=
+  (counter seed).viewText (fun n => s!"Generation {n}")
+```
+
+## Observations and failures
+
+Use {name}`VersoLeanRun.Automaton.observe` when the label, markup, or failure
+depends on both the iteration index and the current state. Index zero observes
+the initial state; each advance applies the transition once before observing.
+
+```lean
+open VersoLeanRun
+
+def watched (seed : Nat) : AutomatonView :=
+  ({ initial := seed, step := Nat.succ } : Automaton Nat).observe fun index state =>
+    { label := s!"Step {index}"
+      html := .text true (toString state)
+      error := if state > 100 then some "Observation limit reached" else none }
+```
+
+The live player pauses on a frame with a domain error. Input failures can return
+{name}`VersoLeanRun.AutomatonView.error` before allocating a model. A model that
+never terminates can continue indefinitely while retaining only its current
+state; a retained growing data structure can still consume growing memory.
+
+## Session lifetime
+
+Each Run starts a worker-owned session from the model's initial state. Pause
+retains the current state; Stop destroys the session. Play does not start on page
+load or slide entry. Leaving a placement, hiding the page, or disposing the host
+cancels active playback. JavaScript selects observations and schedules advances;
+the transition and rendering stay in Lean.
+
+The {lit}`AutomatonWire` session and {name}`VersoLeanRun.AutomatonView.start`
+implement that execution boundary. Normal document authors return
+{name}`VersoLeanRun.AutomatonView` and let the generated adapter start it.
+-/
