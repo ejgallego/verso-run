@@ -1,3 +1,8 @@
+/* Unclassified code tokens follow the page theme, including dark mode. */
+.code-content {
+    --verso-code-color: var(--verso-text-color);
+}
+
 /* Checked examples use block code elements rather than Markdown pre elements. */
 .code-content .mod-doc .hl.lean.block {
     margin: 0.85rem 0 1rem;
@@ -22,4 +27,23 @@
 .code-content .hl.lean a:visited {
     --verso-code-const-color: var(--verso-link-visited-color);
     color: var(--verso-link-visited-color);
+}
+
+/* Keep field descriptions beside their declarations, with prose that wraps. */
+.code-content .code-box :is(.md-text, .verso-text) {
+    width: auto;
+    max-width: 100%;
+    margin-top: 0.65rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.code-content .code-box :is(.md-text, .verso-text) > * {
+    width: auto;
+}
+
+.code-content .code-box :is(.md-text, .verso-text)::before,
+.code-content .code-box :is(.md-text, .verso-text)::after {
+    content: none;
 }

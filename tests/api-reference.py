@@ -124,7 +124,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
     for prefix in ['root/api', 'nested/docs/api']:
         reference = base + prefix + '/'
         assert page.goto(reference).status == 200
-        assert page.get_by_role('heading', name='Lean models, interactive views', exact=True).count() == 1
+        assert page.get_by_role('heading', name='Interactive Lean examples', exact=True).count() == 1
         for theme in ['light', 'dark']:
             page.emulate_media(color_scheme=theme, reduced_motion='reduce')
             styles = page.locator('.code-content > .mod-doc .hl.lean.block').first.evaluate('''block => {
@@ -135,6 +135,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
                     scrollable: s.overflowX === 'auto',
                     padding: parseFloat(s.paddingLeft) > parseFloat(getComputedStyle(inline).paddingLeft),
                     border: s.borderStyle === 'solid' && parseFloat(s.borderWidth) > 0,
+                    plain: s.color === getComputedStyle(document.body).color,
                     keyword: getComputedStyle(block.querySelector('.keyword')).color !== s.color,
                     link: getComputedStyle(link).color !== getComputedStyle(document.body).color
                 };
@@ -150,7 +151,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
         page.set_viewport_size({'width': 1280, 'height': 900})
         page.get_by_role('link', name='Finite sequences', exact=True).click()
         assert page.url.startswith(reference + 'VersoLeanRun/Sequence/')
-        assert page.get_by_role('heading', name='Working with a trace', exact=True).count() == 1
+        assert page.get_by_role('heading', name='Record and display a sequence', exact=True).count() == 1
         page.goto(reference + 'search/?q=Automaton.observe')
         result = page.locator('#search-page-results a').filter(has_text='Automaton.observe').first
         result.wait_for()
@@ -158,9 +159,41 @@ with serve_directory(served) as base, sync_playwright() as playwright:
         assert page.url.startswith(reference + 'VersoLeanRun/Automaton/#')
         assert page.evaluate('document.getElementById(decodeURIComponent(location.hash.slice(1))) !== null')
         record(prefix + ': reference navigation, declaration search, and desktop/mobile layouts work')
+        for module, fields in {
+            'Frame': ['Frame.label', 'Frame.html', 'Frame.error'],
+            'Sequence': ['Sequence.initial', 'Sequence.steps', 'SequenceView.initial', 'SequenceView.steps'],
+            'Automaton': ['Automaton.initial', 'Automaton.step', 'AutomatonView.start'],
+        }.items():
+            page.goto(reference + f'VersoLeanRun/{module}/')
+            for theme in ['light', 'dark']:
+                page.emulate_media(color_scheme=theme, reduced_motion='reduce')
+                for width in [1280, 390]:
+                    page.set_viewport_size({'width': width, 'height': 900})
+                    for field in fields:
+                        identity = 'VersoLeanRun___' + field.replace('.', '___')
+                        layout = page.locator(f'[id="{identity}"]').evaluate('''field => {
+                            const code = field.closest('code');
+                            const doc = code.previousElementSibling;
+                            const box = code.closest('.code-box');
+                            if (!doc?.matches('.md-text, .verso-text') || !box) return false;
+                            const bounds = box.getBoundingClientRect();
+                            return doc.textContent.trim().length > 0 &&
+                                [...doc.querySelectorAll('p')].every(p => {
+                                    const r = p.getBoundingClientRect();
+                                    return r.left >= bounds.left && r.right <= bounds.right;
+                                }) && getComputedStyle(doc, '::before').content === 'none' &&
+                                getComputedStyle(doc, '::after').content === 'none';
+                        }''')
+                        assert layout, (prefix, module, field, theme, width)
+                    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (prefix, module, width)
+                    if module == 'Frame':
+                        page.locator('.code-content .code-box').first.screenshot(
+                            path=str(output / f'{prefix.replace("/", "-")}-fields-{theme}-{width}.png'),
+                            animations='disabled')
+        record(prefix + ': field descriptions stay beside their declarations and wrap in light/dark desktop/phone layouts')
     static = browser.new_context(java_script_enabled=False).new_page()
     static.goto(base + 'root/api/')
-    assert static.get_by_role('heading', name='Finite or live?', exact=True).count() == 1
+    assert static.get_by_role('heading', name='Record a few steps or keep running?', exact=True).count() == 1
     assert 'def firstFive' in static.locator('main').inner_text()
     assert not errors, errors
     assert not failed_styles, failed_styles

@@ -10,26 +10,27 @@ public import Lean.Data.Json.FromToJson
 /-!
 # Frames
 
-A frame is one labelled HTML observation with an optional domain failure.
-Finite sequences and live automata use the same observation type.
+A frame is what the reader sees at one step: a label, some HTML or SVG, and an
+optional error message. Recorded sequences and live simulations use the same
+frame type.
 -/
 public section
 
 namespace VersoLeanRun
 open Verso.Output
 
-/-- A labelled observation, shared by finite traces and live models. -/
+/-- One displayed step, with a label, HTML content, and an optional error message. -/
 structure Frame where
-  /-- A short domain label, such as a generation or instruction name. -/
+  /-- The heading for this step, such as “Generation 3” or “Add”. -/
   label : String
-  /-- The visible observation, displayed in a sandboxed preview. -/
+  /-- The HTML or SVG to display in the isolated preview. -/
   html : Html
-  /-- A domain failure associated with this observation. -/
+  /-- An error in the computation, such as stack underflow. Defaults to no error. -/
   error : Option String := none
 
 namespace ViewWire
 
-/-- Typed VIR transport. Markup becomes text only at the sandbox boundary. -/
+/-- The `ViewWire.Frame` format sent to the browser, with HTML rendered to a string. -/
 structure Frame where
   label : String
   html : String
@@ -38,19 +39,18 @@ structure Frame where
 
 end ViewWire
 
-/-- One conversion policy for every rendered observation. -/
+/-- Convert a frame to the format sent to the browser. Document adapters call this for you. -/
 def Frame.toWire (frame : Frame) : ViewWire.Frame :=
   { label := frame.label, html := frame.html.asString, error := frame.error }
 
 end VersoLeanRun
 
 /-!
-## Using frames
+## Describe a step
 
-A {name}`VersoLeanRun.Frame` is one visible observation: a label, HTML content,
-and an optional domain failure. Finite sequences and live automata use the same
-observation type. Return HTML or SVG using {name}`Verso.Output.Html`; reader text
-can be escaped with {name}`Verso.Output.Html.text`.
+Build a {name}`VersoLeanRun.Frame` when you want to choose the heading, display,
+and error message together. For example, a simulation might show a generation
+number above a drawing of its board. This smaller example displays a number:
 
 ```lean
 open VersoLeanRun Verso.Output
@@ -60,15 +60,23 @@ def snapshot (generation : Nat) (value : Nat) : Frame :=
     html := .text true s!"Value: {value}" }
 ```
 
-An error belongs to the model's meaning, such as an instruction underflow or an
-invalid seed. It differs from a host failure to fetch or execute a program.
-Use {lit}`SequenceView.error` or {lit}`AutomatonView.error`
-when input validation fails before a model state exists.
+The {lit}`html` field accepts {name}`Verso.Output.Html`, including SVG elements.
+Use {name}`Verso.Output.Html.text` with {lit}`true`, as above, to escape text
+rather than treat it as markup. This is especially useful for displaying reader input.
 
-## Transport
+## Explain an error
 
-{name}`VersoLeanRun.Frame.toWire` serializes markup at the preview boundary.
-{name}`VersoLeanRun.ViewWire.Frame` is the corresponding typed VIR transport.
-Author renderers normally work with {name}`VersoLeanRun.Frame` and let the view
-adapter perform this conversion.
+Set {lit}`error` to {lit}`some message` to explain a problem in the computation,
+such as a calculator instruction that needs more values on the stack. A live
+simulation pauses when it reaches a frame with an error.
+
+If the input is invalid and there is no state to display, return
+{lit}`SequenceView.error` or {lit}`AutomatonView.error`. Problems loading or
+running the compiled program are reported separately by verso-run.
+
+## For custom integrations
+
+{name}`VersoLeanRun.Frame.toWire` converts the HTML to a string in
+{name}`VersoLeanRun.ViewWire.Frame` for sending to the browser. Document adapters
+handle this conversion; use {name}`VersoLeanRun.Frame` when writing a display.
 -/

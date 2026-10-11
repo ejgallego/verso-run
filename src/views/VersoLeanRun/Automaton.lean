@@ -10,42 +10,45 @@ public import Vir.Runtime
 /-!
 # Live automata
 
-An automaton defines a pure transition on a Lean state. Observe it as a finite
-trace or as a worker-owned session that advances one state at a time.
+Let readers advance a computation one step at a time, or play it continuously.
+Define the initial state and a Lean function that computes the next state;
+verso-run provides Step, Play, Pause, and Stop controls.
 -/
 public section
 
 namespace VersoLeanRun
 open Lean.Vir
 
-/-- A pure transition system, advanced one state at a time. -/
+/-- An initial state and a function that computes its successor. -/
 structure Automaton (α : Type) where
-  /-- The state used by each newly started session. -/
+  /-- The state at the beginning of each run. -/
   initial : α
-  /-- One pure transition, evaluated only when the session advances. -/
+  /-- Compute the next state from the current one. -/
   step : α → α
 
-/-- Observe the initial state and exactly `count` transitions as a finite trace.
-Zero transitions never call `step`; this does not start a live session. -/
+/-- Record the initial state and `count` steps as a finite sequence.
+With `count = 0`, the result contains only the initial state; `step` is not called. -/
 def Automaton.trace (machine : Automaton α) (count : Nat)
     (label : Nat → String := toString) : Sequence α :=
   Sequence.iterate machine.step machine.initial count label
 
 namespace AutomatonWire
 
-/-- The callback and its model stay in the worker. Only frames are transferred. -/
+/-- A running computation: its first frame and an action that produces the next frame.
+The state and advance action stay in the worker; only frames are sent to the browser. -/
 structure Session where
   initial : ViewWire.Frame
   advance : RuntimeM ViewWire.Frame
 
 end AutomatonWire
 
-/-- An on-demand view. Starting it allocates state owned by one worker. -/
+/-- A live example ready to run. Return this type from your example function. -/
 structure AutomatonView where
+  /-- Create a new run. Document adapters call this when the reader presses Run. -/
   start : RuntimeM AutomatonWire.Session
 
-/-- Observe a live model, including domain-specific labels and failures.
-The iteration index starts at zero; only the current model is retained. -/
+/-- Choose a frame from the step number and current state.
+Step zero shows the initial state; each subsequent frame follows one call to `step`. -/
 def Automaton.observe (machine : Automaton α) (observe : Nat → α → Frame) : AutomatonView :=
   { start := do
       let state ← RuntimeRef.new (machine.initial, 0)
@@ -58,19 +61,19 @@ def Automaton.observe (machine : Automaton α) (observe : Nat → α → Frame) 
           state.set (next, index)
           return (observe index next).toWire } }
 
-/-- Render a live model without changing its transition semantics. -/
+/-- Draw each state as HTML or SVG. The label function receives the step number, starting at zero. -/
 def Automaton.view (machine : Automaton α) (render : α → Verso.Output.Html)
     (label : Nat → String := toString) : AutomatonView :=
   machine.observe fun index state => { label := label index, html := render state }
 
-/-- A text observation using the model's existing `ToString` instance. -/
+/-- Display each state as escaped text using its `ToString` instance. -/
 def Automaton.viewText [ToString α] (machine : Automaton α)
     (label : Nat → String := toString) : AutomatonView :=
   machine.view (fun state => .text true (toString state)) label
 
-/-- Repeat a recorded trace explicitly, retaining its labels and failures.
-This repeats observations rather than reconstructing an underlying transition.
-An error frame still pauses the live player. Run owns a fresh replay cursor. -/
+/-- Replay a recorded sequence continuously, returning to its first step after the last.
+Labels and error messages are preserved, and an error pauses playback.
+Each run starts at the first step; no states are recomputed. -/
 def Sequence.cycleView (sequence : Sequence α) (render : α → Verso.Output.Html) : AutomatonView :=
   let observations := #[sequence.initial] ++ sequence.steps
   have nonempty : 0 < observations.size := by
@@ -84,7 +87,7 @@ def Sequence.cycleView (sequence : Sequence α) (render : α → Verso.Output.Ht
     let observation := observations[index]
     { label := observation.label, html := render observation.state, error := observation.error }
 
-/-- An invalid input has no model to advance. -/
+/-- Display an error message when the input cannot start a simulation. -/
 def AutomatonView.error (message : String) : AutomatonView :=
   let frame := ({ label := "Input", html := .empty, error := some message } : Frame).toWire
   { start := pure { initial := frame, advance := pure frame } }
@@ -92,12 +95,14 @@ def AutomatonView.error (message : String) : AutomatonView :=
 end VersoLeanRun
 
 /-!
-## Choosing a live view
+## Define a simulation
 
-An {name}`VersoLeanRun.Automaton` is a pure model: an initial state and a transition
-{lit}`α → α`. It has no playback timer or browser effects. The same model can be
-recorded as a finite trace with {name}`VersoLeanRun.Automaton.trace`, or advanced
-on demand using {name}`VersoLeanRun.Automaton.view`.
+An {name}`VersoLeanRun.Automaton` contains an initial state and a function
+{lit}`α → α` that computes the next state. For a counter, the state is a number
+and the function adds one. For Game of Life, the state is a board and the
+function computes the next generation.
+
+The same computation can provide a short recorded sequence or a live example:
 
 ```lean
 open VersoLeanRun
@@ -112,11 +117,16 @@ def live (seed : Nat) : AutomatonView :=
   (counter seed).viewText (fun n => s!"Generation {n}")
 ```
 
-## Observations and failures
+{name}`VersoLeanRun.Automaton.trace` records a fixed number of steps for readers
+to explore in either direction. {name}`VersoLeanRun.Automaton.viewText` instead
+displays the current state as text and computes another when the reader advances.
+Use {name}`VersoLeanRun.Automaton.view` with a drawing function for HTML or SVG.
 
-Use {name}`VersoLeanRun.Automaton.observe` when the label, markup, or failure
-depends on both the iteration index and the current state. Index zero observes
-the initial state; each advance applies the transition once before observing.
+## Add labels and error messages
+
+Use {name}`VersoLeanRun.Automaton.observe` to build a frame from both the step
+number and the current state. This example labels each step and reports an error
+once the value exceeds 100:
 
 ```lean
 open VersoLeanRun
@@ -125,23 +135,40 @@ def watched (seed : Nat) : AutomatonView :=
   ({ initial := seed, step := Nat.succ } : Automaton Nat).observe fun index state =>
     { label := s!"Step {index}"
       html := .text true (toString state)
-      error := if state > 100 then some "Observation limit reached" else none }
+      error := if state > 100 then some "Value exceeds 100" else none }
 ```
 
-The live player pauses on a frame with a domain error. Input failures can return
-{name}`VersoLeanRun.AutomatonView.error` before allocating a model. A model that
-never terminates can continue indefinitely while retaining only its current
-state; a retained growing data structure can still consume growing memory.
+Step zero displays the initial state. Each advance computes the next state,
+then builds its frame. A frame with an error pauses playback. To reject invalid
+input before starting a simulation, return {name}`VersoLeanRun.AutomatonView.error`.
 
-## Session lifetime
+## Replay a recorded sequence
 
-Each Run starts a worker-owned session from the model's initial state. Pause
-retains the current state; Stop destroys the session. Play does not start on page
-load or slide entry. Leaving a placement, hiding the page, or disposing the host
-cancels active playback. JavaScript selects observations and schedules advances;
-the transition and rendering stay in Lean.
+{name}`VersoLeanRun.Sequence.cycleView` turns a recorded sequence into a looping
+animation. Supply the sequence and a drawing function; its labels and error
+messages are kept. Playback returns to the first step after the last. It reuses
+the recorded states, so it does not need a function that computes successors.
 
-The {lit}`AutomatonWire` session and {name}`VersoLeanRun.AutomatonView.start`
-implement that execution boundary. Normal document authors return
-{name}`VersoLeanRun.AutomatonView` and let the generated adapter start it.
+## What the playback controls do
+
+Opening a page or entering a slide leaves the example idle. Run displays the
+initial state. Step advances once; Play advances repeatedly. Pause lets a step
+already in progress finish, then keeps the resulting state. Stop cancels active
+work and ends the run.
+
+Input edits do not interrupt a live simulation. Restart applies the edited
+input and begins again at the new initial state. If the simulation was playing,
+Restart resumes playback. Pause, Stop, hiding the tab, or leaving the example
+cancels that automatic resumption. Returning to the tab does not start playback.
+
+Each example has its own state. A live run keeps the current state rather than
+a history of every step, so it can continue indefinitely. If your state itself
+grows with each step, it will still need more memory over time.
+
+## For custom integrations
+
+{name}`VersoLeanRun.AutomatonView.start` creates an {lit}`AutomatonWire.Session`
+in a dedicated worker. Lean computes and draws each new state; the browser
+schedules advances and displays the frames. Document adapters start the session
+for you when your example function returns {name}`VersoLeanRun.AutomatonView`.
 -/

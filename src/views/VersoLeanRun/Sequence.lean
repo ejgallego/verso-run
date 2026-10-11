@@ -10,31 +10,32 @@ public import Init.Data.List.Scan.Basic
 /-!
 # Finite sequences
 
-A sequence records domain states and their labels and failures. Render that
-recorded trace as HTML or text without changing its meaning.
+Record the steps of a computation so readers can inspect them in either
+direction. A sequence is useful for a calculator trace, a worked example, or a
+short simulation with a beginning and an end.
 -/
 public section
 
 namespace VersoLeanRun
 open Verso.Output Lean
 
-/-- One labelled state, optionally reporting a failure at this step. -/
+/-- One recorded state, with a label and an optional error message. -/
 structure SequenceStep (α : Type) where
-  /-- The step's domain label. -/
+  /-- The heading for this step. -/
   label : String
-  /-- The model state at this step. -/
+  /-- The value to display at this step. -/
   state : α
-  /-- An optional failure associated with this state. -/
+  /-- An error in the computation at this step. Defaults to no error. -/
   error : Option String := none
 
-/-- A finite computation or explanation. Its state and meaning stay in Lean. -/
+/-- A recorded sequence of states, starting with an initial state. -/
 structure Sequence (α : Type) where
-  /-- The initial observation; even an empty trace contains this state. -/
+  /-- The first state. A sequence always contains at least this one step. -/
   initial : SequenceStep α
-  /-- Subsequent observations, in execution order. -/
+  /-- The remaining steps, in order. Defaults to an empty array. -/
   steps : Array (SequenceStep α) := #[]
 
-/-- Transform observations while retaining their labels and failures. -/
+/-- Apply `f` to every state, keeping the step labels and error messages. -/
 def Sequence.map (f : α → β) (sequence : Sequence α) : Sequence β :=
   let step := fun (step : SequenceStep α) =>
     { label := step.label, state := f step.state, error := step.error : SequenceStep β }
@@ -56,8 +57,8 @@ instance : LawfulFunctor Sequence where
     cases sequence
     simp [Functor.map, Sequence.map, Array.map_map, Function.comp_def]
 
-/-- Record the initial state and exactly `count` applications of an automaton.
-The transition is pure; labels refer to the iteration index, starting at zero. -/
+/-- Record `initial`, then apply `step` exactly `count` times.
+The result has `count + 1` states. Labels are numbered from zero. -/
 def Sequence.iterate (step : α → α) (initial : α) (count : Nat)
     (label : Nat → String := toString) : Sequence α :=
   let initial : SequenceStep α := { label := label 0, state := initial }
@@ -65,22 +66,24 @@ def Sequence.iterate (step : α → α) (initial : α) (count : Nat)
     { label := label (index + 1), state := step previous.state }) initial
   { initial, steps := frames.tail.toArray }
 
-/-- A concrete presentation selected by the function's result type. -/
+/-- A sequence ready to display. Return this type from your example function. -/
 structure SequenceView where
+  /-- The first frame to display. -/
   initial : Frame
+  /-- The remaining frames, in order. Defaults to an empty array. -/
   steps : Array Frame := #[]
 
-/-- Report a failure before a model state exists. -/
+/-- Display an error message when the input cannot produce a sequence. -/
 def SequenceView.error (message : String) (label : String := "Input") : SequenceView :=
   { initial := { label, html := .empty, error := some message } }
 
-/-- Render each state without changing the sequence's execution semantics. -/
+/-- Draw each recorded state as HTML or SVG, keeping its label and error message. -/
 def Sequence.view (sequence : Sequence α) (render : α → Html) : SequenceView :=
   let frame := fun (step : SequenceStep α) =>
     Frame.mk step.label (render step.state) step.error
   { initial := frame sequence.initial, steps := sequence.steps.map frame }
 
-/-- A text observation using the model's existing `ToString` instance. -/
+/-- Display each state as escaped text using its `ToString` instance. -/
 def Sequence.viewText [ToString α] (sequence : Sequence α) : SequenceView :=
   sequence.view fun state => .text true (toString state)
 
@@ -91,7 +94,7 @@ structure Payload where
   frames : Array ViewWire.Frame
   deriving ToJson, Inhabited
 
-/-- The presenter has a small, bounded synchronous workload. -/
+/-- The maximum number of frames in a displayed sequence, including its initial frame. -/
 def maxFrames : Nat := 128
 
 def validate (payload : Payload) : Except String Payload := do
@@ -102,19 +105,18 @@ def validate (payload : Payload) : Except String Payload := do
 
 end SequenceWire
 
-/-- Generated adapters return typed data; VIR owns its boundary conversion. -/
+/-- Convert a view to the format sent to the browser. Document adapters call this for you. -/
 def SequenceView.toPayload (view : SequenceView) : SequenceWire.Payload :=
   { version := 1, frames := #[view.initial.toWire] ++ view.steps.map Frame.toWire }
 
 end VersoLeanRun
 
 /-!
-## Working with a trace
+## Record and display a sequence
 
-{name}`VersoLeanRun.Sequence` records a nonempty trace: an initial state followed
-by an array of labelled steps. It stores domain states, so rendering remains a
-separate choice. {name}`VersoLeanRun.Sequence.view` produces HTML observations;
-{name}`VersoLeanRun.Sequence.viewText` uses the state's {name}`ToString` instance.
+Use {name}`VersoLeanRun.Sequence.iterate` to record a fixed number of steps.
+This example starts at zero, adds one four times, and displays the five values
+0, 1, 2, 3, and 4:
 
 ```lean
 open VersoLeanRun
@@ -127,25 +129,38 @@ def countingView : SequenceView := counting.viewText
 def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
 ```
 
-{name}`VersoLeanRun.Sequence.map` supplies the standard {name}`Functor` interface
-and preserves step labels and errors. Mapping changes observations, not the
-recorded execution history.
+{name}`VersoLeanRun.Sequence.viewText` displays each state using {name}`ToString`.
+For HTML or SVG, pass your drawing function to {name}`VersoLeanRun.Sequence.view`.
+Return the resulting {name}`VersoLeanRun.SequenceView` from your example function
+so readers can move between its steps.
 
-## Trace size and replay
+You can also construct a {name}`VersoLeanRun.Sequence` directly: supply an
+{lit}`initial` step and an array of {lit}`steps`, each with its own label, state,
+and optional error message. This suits computations whose steps need different
+names, such as “Push 3”, “Push 4”, and “Add”.
 
-{name}`VersoLeanRun.Sequence.iterate` records the initial state and exactly the
-requested number of transitions. A zero-length iteration still has its initial
-observation. The browser accepts at most 128 frames, including that initial
-frame. For longer or unbounded computations, use an on-demand automaton view.
+## Reuse the recorded states
 
-{lit}`Sequence.cycleView` explicitly loops over a recorded trace,
-preserving labels and errors. It repeats observations without inferring a state
-transition. See the live automaton page for that adapter.
+{name}`VersoLeanRun.Sequence.map` applies a function to every recorded state.
+It also supports the standard {name}`Functor` notation {lit}`<$>` used by
+{lit}`doubled` above. The new sequence contains 0, 2, 4, 6, and 8, with the
+original labels and error messages. Mapping does not run the computation again.
 
-## Transport
+To replay the sequence continuously, use {lit}`Sequence.cycleView`, described on
+the Live automata page. It displays the recorded states in order, then returns
+to the first one.
 
-{name}`VersoLeanRun.SequenceView.toPayload` and the {lit}`SequenceWire` namespace
-are used by generated document adapters. Normal author functions return
-{name}`VersoLeanRun.SequenceView`; they do not serialize JSON or construct
-browser call contracts.
+## How many steps?
+
+A sequence always includes its initial state. Asking for zero transitions
+therefore produces one frame. The browser accepts at most 128 frames, so
+{name}`VersoLeanRun.Sequence.iterate` can display at most 127 transitions.
+For a longer simulation, use a live automaton to compute one new state at a time.
+
+## For custom integrations
+
+{name}`VersoLeanRun.SequenceView.toPayload` prepares the frames for sending to
+the browser. The {lit}`SequenceWire` namespace defines that format and checks its
+version and frame count. Document adapters handle this for you; an example
+function returns {name}`VersoLeanRun.SequenceView` directly.
 -/

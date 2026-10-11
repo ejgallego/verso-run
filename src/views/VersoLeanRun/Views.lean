@@ -9,18 +9,24 @@ public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
 
 /-!
-# Lean models, interactive views
+# Interactive Lean examples
 
-Import {lit}`VersoLeanRun.Views` in a normal Lean module. It provides finite sequences,
-pure transition systems, and HTML observations. Your Lean code owns the states,
-transitions, labels, and failures; the browser provides controls and presents
-the observations.
+Use verso-run to let readers explore a computation: step through a calculator,
+watch a Game of Life board evolve, or compare a few successive values. Define
+the computation and its display in Lean; verso-run adds the browser controls.
 
-## Finite or live?
+Import {lit}`VersoLeanRun.Views` in the module containing your computation.
+Start with text output, then add an HTML or SVG drawing when it helps explain
+what is happening.
 
-Use {name (full := VersoLeanRun.Sequence)}`Sequence` for a bounded trace whose states are already recorded.
-Use {name (full := VersoLeanRun.Automaton)}`Automaton` for a pure transition {lit}`α → α`, then choose a finite trace
-or a live view of that same model:
+## Record a few steps or keep running?
+
+Choose a {name (full := VersoLeanRun.Sequence)}`Sequence` when readers should be able to move back and forth through
+a fixed set of states. Choose an {name (full := VersoLeanRun.Automaton)}`Automaton` when each step should compute the next state,
+as in a simulation. An automaton needs an initial value and a function {lit}`α → α`
+that advances it once.
+
+This counter supports both kinds of interaction:
 
 ```lean
 open VersoLeanRun
@@ -35,34 +41,45 @@ def forever (seed : Nat) : AutomatonView :=
   (counter seed).viewText
 ```
 
-The finite trace includes the initial state and four transitions. The live view
-retains one current state and advances on demand. Creating a view does not start
-playback: Run creates a session; Play advances it until Pause, Stop, a reported
-failure, or a visibility change. Reloading the page starts idle.
+With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
+inspect any of those five values. {lit}`forever` starts at 10 and computes another
+value each time they press Step, or repeatedly while Play is active.
 
-## Rendering and domain-specific observations
+## Draw the state
 
-{lit}`viewText` uses an existing {name}`ToString` instance. Use {name (full := VersoLeanRun.Sequence.view)}`Sequence.view` or
-{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` when your state has an HTML or SVG presentation. Both take
-a renderer {lit}`α → Verso.Output.Html`; markup is displayed in an isolated preview.
-For labels and failures that depend on the state, use {name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe`
-and return a {name (full := VersoLeanRun.Frame)}`Frame`.
+{lit}`viewText` displays a value using its {name}`ToString` instance. To draw it,
+pass a function returning {name}`Verso.Output.Html` to
+{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` or {name (full := VersoLeanRun.Automaton.view)}`Automaton.view`.
+Both accept HTML or SVG and display it in an isolated preview.
 
-{name (full := VersoLeanRun.Sequence.map)}`Sequence.map` changes recorded states while preserving labels and failures.
-{name (full := VersoLeanRun.Automaton.trace)}`Automaton.trace` records transitions using the standard library's {name}`List.scanl`.
-{name (full := VersoLeanRun.Sequence.cycleView)}`Sequence.cycleView` repeats recorded observations explicitly; it does not
-recover an underlying transition from a trace.
+```lean
+open VersoLeanRun
 
-## Using a view in a document
+def labelledCounter (seed : Nat) : AutomatonView :=
+  ({ initial := seed, step := Nat.succ } : Automaton Nat).view
+    (fun value => .text true s!"Count: {value}")
+    (fun index => s!"Step {index}")
+```
 
-An author function returning {name (full := VersoLeanRun.SequenceView)}`SequenceView` or {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` can be
-selected by {lit}`entry` in a {lit}`leanRun` or {lit}`leanRun'` block in Manual, Blog, or Slides.
-Keep the model module's import as {lit}`VersoLeanRun.Views`; the document imports its
-genre adapter. See the [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
-for block arguments and the [demo](https://ejgallego.github.io/verso-run/)
-for runnable examples.
+For a display with its own label or error message, return a
+{name (full := VersoLeanRun.Frame)}`Frame` from {name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe`.
+The Frames page explains how to build one. The finite sequence and live automaton
+pages show how to adapt a model, repeat a recorded sequence, and report errors.
 
-The {lit}`ViewWire`, {lit}`SequenceWire`, and {lit}`AutomatonWire` namespaces describe the
-execution boundary. Normal authors return views and let the document adapter
-construct the compiler-checked call contract.
+## Put the example in a document
+
+Return {name (full := VersoLeanRun.SequenceView)}`SequenceView` or {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` from the function you want readers to call.
+Select that function with the {lit}`entry` argument of a {lit}`leanRun` or
+{lit}`leanRun'` block. This works in a Manual, Blog, or Slides document. The
+computation module imports {lit}`VersoLeanRun.Views`; the document imports the
+adapter for its genre.
+
+Follow the [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
+to add a block to your document, or explore the
+[demo](https://ejgallego.github.io/verso-run/) for complete examples.
+
+A live example waits for Run and Play; opening the page does not start it.
+Pause keeps the current state, and Stop ends the run. Editing the input lets
+readers prepare a new seed while the current simulation continues; Restart
+applies those edits. See Live automata for the full playback behavior.
 -/
