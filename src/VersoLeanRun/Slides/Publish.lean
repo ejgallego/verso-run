@@ -29,6 +29,30 @@ private def decodeExperiment (block : BlockExt) : Except String (Option Experime
 def slideExperiments (doc : Part VersoSlides.Slides) : Except String (Array Experiment) :=
   experiments decodeExperiment doc
 
+-- Slides' wrap attributes are native metadata until collection has finished.
+-- Project only that attribute for rendering; stock source/fragment nodes remain
+-- intact. Verso's rewrite covers nested lists, wrappers, and definition lists.
+private def browserBlock (block : Block VersoSlides.Slides) :
+    Except String (Block VersoSlides.Slides) :=
+  block.rewriteOtherM
+    (fun _ inline children => pure (.other inline children))
+    (fun _ recurse container children => do
+      let container ← match container with
+        | .wrap attrs => do
+          let some experiment ← decodeExperiment container | pure container
+          pure <| .wrap <| attrs.map fun attr =>
+            if attr.1 == "data-experiment" then
+              (attr.1, experiment.browserDescription.compress)
+            else attr
+        | other => pure other
+      return .other container (← children.mapM recurse))
+
+private partial def browserDocument (doc : Part VersoSlides.Slides) :
+    Except String (Part VersoSlides.Slides) := do
+  return { doc with
+    content := ← doc.content.mapM browserBlock
+    subParts := ← doc.subParts.mapM browserDocument }
+
 /-- Compose Run resources with the stock formatter inventory and collision plan.
 The embedded stock runtime remains authoritative; a different supplied runtime is
 rejected before generation rather than silently replaced. -/
@@ -48,6 +72,7 @@ def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
     extraHead := config.extraHead ++ #[
       {{ <script type="module" src="lean-run/slides.js"/> }},
       {{ <noscript><style>{{Html.text false (include_str "../../../web/slides-static.css")}}</style></noscript> }}] }
-  VersoSlides.slidesMain config doc
+  let browserDoc ← IO.ofExcept <| browserDocument doc
+  VersoSlides.slidesMain config browserDoc
 
 end VersoLeanRun.Slides

@@ -1,5 +1,9 @@
 import LeanRunGate.Chapter
 import LeanRunGate.Resources
+import LeanRunBlog.Page
+import LeanRunBlog.Index
+import LeanRunBlog.Post
+import VersoLeanRun.Blog.Publish
 import VersoLeanRun.Publish
 import LeanRunSlides.Deck
 import LeanRunSlides.Resources
@@ -28,6 +32,17 @@ private def alternateRuntime (original : Vir.Resources.Bundle) : Vir.Resources.B
 private def check (condition : Bool) (message : String) : IO Unit :=
   unless condition do throw <| IO.userError message
 
+private def checkProvenance (experiments : Array VersoLeanRun.Experiment) : IO Unit := do
+  check (!experiments.isEmpty) "native collector returned no experiments"
+  for experiment in experiments do
+    check (!experiment.producerModule.isEmpty && experiment.sourceLine > 0)
+      "native collector lost producer/source provenance"
+    let decoded ← IO.ofExcept <|
+      (Lean.fromJson? (Lean.toJson experiment) : Except String VersoLeanRun.Experiment)
+    check ((decoded.producerModule, decoded.sourceLine, decoded.sourceColumn) ==
+      (experiment.producerModule, experiment.sourceLine, experiment.sourceColumn))
+      "native metadata round-trip lost publication provenance"
+
 private def samePublication (a b : VersoLeanRun.Publication) : Bool :=
   a.plan == b.plan && (a.files.qsort (·.path < ·.path)).map (fun f => (f.path, f.bytes)) ==
     (b.files.qsort (·.path < ·.path)).map (fun f => (f.path, f.bytes))
@@ -36,7 +51,14 @@ private def identities (programs : Array Vir.Resources.Bundle) : Array (String �
   programs.map fun program => (program.descriptor.logicalId, program.contentId)
 
 def main : IO Unit := do
-  let experiments ← IO.ofExcept rendered
+  let allExperiments ← IO.ofExcept rendered
+  let experiments := allExperiments.filter (fun experiment => experiment.form.presentation == .text)
+  checkProvenance allExperiments
+  checkProvenance (← IO.ofExcept <| VersoLeanRun.Slides.slideExperiments (%doc LeanRunSlides.Deck))
+  checkProvenance (← IO.ofExcept <| VersoLeanRun.Blog.siteExperiments <|
+    .page `LeanRunBlog.Page (%doc LeanRunBlog.Page)
+      #[.blog "notes" `LeanRunBlog.Index (%doc LeanRunBlog.Index)
+        #[{ id := `LeanRunBlog.Post, contents := %doc LeanRunBlog.Post }]])
   let resources := LeanRunGate.resources
   let direct ← IO.ofExcept <| VersoLeanRun.preparePublication experiments resources
   let site ← IO.ofExcept <| resources.forSite "lean-run/resources" |>.mapError reprStr
@@ -63,6 +85,15 @@ def main : IO Unit := do
   match VersoLeanRun.combineResources resources alternate with
   | .ok _ => throw <| IO.userError "different runtime identities were silently combined"
   | .error error => check (error.startsWith "RUNTIME_CONTENT_ID_CONFLICT") error
+  let sequencePublication ← IO.ofExcept <| VersoLeanRun.preparePublication allExperiments resources
+  let presenterFirst := { resources with programs :=
+    VersoLeanRunPresenterResources.resources.programs ++ resources.programs }
+  let reorderedPublication ← IO.ofExcept <| VersoLeanRun.preparePublication allExperiments presenterFirst
+  check (samePublication sequencePublication reorderedPublication)
+    "sequence presenter lookup depends on program position or repeats its assets"
+  match VersoLeanRun.preparePublication allExperiments alternate with
+  | .ok _ => throw <| IO.userError "sequence publication discarded a conflicting presenter runtime"
+  | .error error => check (error.startsWith "RUNTIME_CONTENT_ID_CONFLICT") error
   let corrupt := { resources.runtime with files := resources.runtime.files.push {
     path := "undeclared.txt", bytes := "invalid inventory".toUTF8 } }
   match VersoLeanRun.combineResources resources { resources with runtime := corrupt } with
@@ -82,4 +113,4 @@ def main : IO Unit := do
     check ((error.toString.splitOn "RUNTIME_CONTENT_ID_CONFLICT").length > 1) error.toString
   check ((← IO.FS.readFile marker) == "accepted output") "runtime rejection modified accepted output"
   check (!(← (destination / "index.html").pathExists)) "runtime rejection created a slide site"
-  IO.println "ResourceSet inventory, ordering, explicit runtime, and rejection-before-write checks passed"
+  IO.println "Native genre provenance, ResourceSet inventory, ordering, explicit runtime, and rejection-before-write checks passed"

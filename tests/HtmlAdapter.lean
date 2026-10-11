@@ -2,10 +2,11 @@ module
 public import VersoLeanRun
 open Verso Genre Manual VersoLeanRun
 set_option compiler.postponeCompile false
+public abbrev Card := Verso.Output.Html
 #doc (Manual) "Typed HTML author fixture" =>
 
 ```leanRun (entry := card)
-public def card (name : String) : Verso.Output.Html := .text true name
+public def card (name : String) : Card := .text true name
 ```
 
 ```leanRun (entry := card)

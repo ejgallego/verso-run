@@ -1,4 +1,4 @@
-import { validateInput, scalarKind } from "./contract.js";
+import { validateInput, scalarKind, resultKind } from "./contract.js";
 let publication;
 // Pending acquisition is shared only while a placement still needs it. A stopped
 // placement releases its interest, without aborting another placement's fetch.
@@ -46,16 +46,26 @@ export class ExperimentHost {
     this.disposed = false;
   }
   async invoke(input) {
+    validateInput(scalarKind(this.description.form), input);
+    if (resultKind(this.description.form) === "automaton" && this.worker && !this.pending) this.stop("idle");
+    return this.requestOperation("invoke", input);
+  }
+  advance() {
+    if (resultKind(this.description.form) !== "automaton" || !this.worker) {
+      return Promise.reject(new Error("No automaton session to advance"));
+    }
+    return this.requestOperation("advance");
+  }
+  async requestOperation(operation, input) {
     if (this.disposed) throw new Error("Experiment is disposed");
     if (this.pending) throw new Error("Experiment is already running");
-    validateInput(scalarKind(this.description.form), input);
     const generation = this.generation;
     const requestId = ++this.request;
     let resolve, reject;
     const promise = new Promise((ok, fail) => { resolve = ok; reject = fail; });
     const acquisition = acquirePublication();
-    this.pending = { requestId, resolve, reject, release: acquisition.release };
-    this.onState("loading");
+    this.pending = { requestId, operation, resolve, reject, release: acquisition.release };
+    this.onState(operation === "advance" ? "advancing" : "loading");
     void (async () => {
       try {
         const plan = await acquisition.promise;
@@ -72,7 +82,7 @@ export class ExperimentHost {
           this.worker = worker;
           worker.onmessage = ({ data }) => {
             if (worker !== this.worker || generation !== this.generation || data.requestId !== this.pending?.requestId) return;
-            if (data.state === "running") { this.onState("running"); return; }
+            if (data.state === "running") { this.onState(this.pending.operation === "advance" ? "advancing" : "running"); return; }
             const pending = this.pending;
             this.pending = null;
             if (data.state === "success") {
@@ -91,7 +101,7 @@ export class ExperimentHost {
             this.fail(new Error(event.message || "Lean Run worker failed"));
           };
         }
-        this.worker.postMessage({ operation: "invoke", requestId, description: this.description, publication, input });
+        this.worker.postMessage({ operation, requestId, description: this.description, publication, input });
       } catch (error) {
         if (generation === this.generation && this.pending?.requestId === requestId) this.fail(error);
       } finally {
