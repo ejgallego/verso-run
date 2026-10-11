@@ -26,8 +26,8 @@ block_extension Block.leanRun (experiment : Experiment) where
       | reportError "Invalid Lean Run experiment description" *> pure .empty
     let source ← contents.mapM go
     pure <| renderConsole experiment source (toString id)
-  extraJs := [include_str "../../web/bootstrap.js"]
-  extraCss := [include_str "../../web/lean-run.css"]
+  extraJs := [include_str "../../../web/bootstrap.js"]
+  extraCss := [include_str "../../../web/lean-run.css"]
 
 /-- Elaborate ordinary retained commands, then resolve and classify the selected entry. -/
 @[code_block]
