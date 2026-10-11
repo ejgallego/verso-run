@@ -113,7 +113,12 @@ tree changes. CI runs both before deploying the demo.
 
 | Path | Purpose |
 | --- | --- |
-| `src/` | Lean block elaboration, HTML rendering, and publication |
+| `src/views/` | Pure models, observations, and VIR worker-session adapters |
+| `src/authoring/` | Shared block elaboration and console rendering |
+| `src/manual/`, `src/blog/`, `src/slides/` | Genre adapters and public authoring imports |
+| `src/publication/` | Shared resource planning and Manual publication |
+| `src/presenter/` | VIR DOM rendering and sandbox policy |
+| `src/presenter-resources/` | Native carrier for the prepared browser presenter |
 | `web/` | Input validation, UI state, worker ownership, and asynchronous invocation |
 | `demo/chapters/` | Manual, Blog, and Slides documents and their Lean functions |
 | `demo/generators/` | Native generators for the three demo genres |
@@ -131,8 +136,9 @@ Generated qualification reports and prototype captures belong in `_out/` or CI
 artifacts; their earlier versions remain in Git history at `23f449e`. Keep only
 illustrations used by documentation in `docs/images/`.
 
-Within `src/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
-`Collect`, and `Publication` hold the common machinery. `Manual` and `Publish`
+Within `src/authoring/`, `Model`, `Callable`, `Anchored`, `Inline`, `Render`,
+and `Collect` hold the common authoring machinery. `Publication` in
+`src/publication/` holds the shared resource planner. `Manual` and `Publish`
 adapt it to Manual elaboration, native source blocks, and generator output.
 `VersoLeanRun` remains the Manual authoring facade. `Blog` and `Blog.Publish`
 adapt the same core to Page/Post. `Slides` and `Slides.Publish` retain native code
@@ -145,7 +151,8 @@ presentation through VIR. Its separate resource carrier keeps browser-only
 definitions out of native generator compilation. `web/presenter.js` owns loading,
 cancellation and disposal for Html, sequence and automaton views.
 `VersoLeanRun.Views` is the model/view import for ordinary producers. Its library
-has no document or browser-asset prerequisite. The Lake ownership table and
+has no document or browser-asset prerequisite. Each library owns its source
+directory; public import names remain unchanged. The Lake ownership table and
 upstream import constraints are described in [internals](docs/internals.md#library-boundaries).
 
 ## Changing the code

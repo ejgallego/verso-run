@@ -19,7 +19,7 @@ def record(name):
 command(['lake', 'run', 'check-library-ownership'], 'ownership')
 command(['lake', 'build', '+VersoLeanRun.Views:olean'], 'views-build')
 command(['lake', 'env', 'lean', 'tests/client/ViewsOnly.lean'], 'view-imports')
-record('each source has one Lake owner; Views imports no genre, VIR compiler or DOM modules')
+record('each source lives in its Lake owner directory; Views imports no genre, VIR compiler or DOM modules')
 command(['lake', 'build', '+VersoLeanRunPresenter:olean', 'lean-run-client-check'], 'build')
 command(['lake', 'env', 'lean', 'tests/client/layers.lean'], 'ordinary-imports')
 record('presenter ordinary imports exclude Verso authoring; native carrier excludes VIR compiler and DOM implementation')

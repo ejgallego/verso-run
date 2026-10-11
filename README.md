@@ -103,7 +103,9 @@ and source remains readable without JavaScript. Manual also retains its TeX outp
 
 ## Find your way around
 
-The library lives in `src/`, browser assets in `web/`, and the complete three-genre
+Libraries have separate source directories under `src/`; the
+[library map](docs/internals.md#library-boundaries) lists their owners and imports.
+Browser assets live in `web/`, and the complete three-genre
 demo in `demo/`. The independent author project is in `examples/manual-starter/`;
 acceptance checks and native reference executables live in `tests/`.
 

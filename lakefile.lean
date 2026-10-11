@@ -16,17 +16,17 @@ input_dir leanRunWeb where
   path := "web"
   text := true
 
--- Each module has one owner. Namespace roots would also claim descendants in
--- other libraries, rejoining the client and authoring build boundaries.
+-- Each library owns a source directory. Explicit module globs preserve public
+-- imports without claiming descendants that belong to another library.
 
 lean_lib VersoLeanRunViews where
-  srcDir := "src"
+  srcDir := "src/views"
   roots := #[]
   globs := #[.one `VersoLeanRun.Views, .one `VersoLeanRun.Frame,
     .one `VersoLeanRun.Sequence, .one `VersoLeanRun.Automaton]
 
 lean_lib VersoLeanRunAuthoring where
-  srcDir := "src"
+  srcDir := "src/authoring"
   roots := #[]
   globs := #[.one `VersoLeanRun.Model, .one `VersoLeanRun.Callable,
     .one `VersoLeanRun.Anchored, .one `VersoLeanRun.Inline,
@@ -35,37 +35,37 @@ lean_lib VersoLeanRunAuthoring where
 -- Genre authoring and native publication retain their public imports.
 
 lean_lib VersoLeanRun where
-  srcDir := "src"
+  srcDir := "src/manual"
   roots := #[]
   globs := #[.one `VersoLeanRun, .one `VersoLeanRun.Manual]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunPublish where
-  srcDir := "src"
+  srcDir := "src/publication"
   roots := #[]
   globs := #[.one `VersoLeanRun.Publish, .one `VersoLeanRun.Publication]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunBlog where
-  srcDir := "src"
+  srcDir := "src/blog"
   roots := #[]
   globs := #[.one `VersoLeanRun.Blog, .one `VersoLeanRun.Blog.Publish]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunSlides where
-  srcDir := "src"
+  srcDir := "src/slides"
   roots := #[]
   globs := #[.one `VersoLeanRun.Slides, .one `VersoLeanRun.Slides.Publish]
   needs := #[leanRunWeb]
 
 -- The browser presenter is separate from its native resource carrier.
 lean_lib VersoLeanRunPresenter where
-  srcDir := "src"
+  srcDir := "src/presenter"
   roots := #[]
   globs := #[.one `VersoLeanRunPresenter, .one `VersoLeanRun.Preview]
 
 lean_lib VersoLeanRunPresenterResources where
-  srcDir := "src"
+  srcDir := "src/presenter-resources"
   roots := #[]
   globs := #[.one `VersoLeanRunPresenterResources]
   needs := #[`+VersoLeanRunPresenter:virResourcePack]
@@ -164,14 +164,19 @@ script «check-library-ownership» do
   let source := pkg.dir / "src"
   for path in ← source.walkDir do
     if path.extension == some "lean" then
-      let relative := path.toString.dropPrefix? (source.toString ++ "/")
+      let directories := pkg.leanLibs.filter fun lib =>
+        path.toString.startsWith (lib.srcDir.toString ++ "/")
+      unless directories.size == 1 do
+        throw <| IO.userError s!"{path} needs one source directory owner, found {directories.map (·.name)}"
+      let some lib := directories[0]? | throw <| IO.userError s!"No library for {path}"
+      let relative := path.toString.dropPrefix? (lib.srcDir.toString ++ "/")
       let some relative := relative | throw <| IO.userError s!"Unexpected source path: {path}"
       let name := (System.FilePath.mk relative.toString).withExtension ""
         |>.components.foldl Lean.Name.str Lean.Name.anonymous
       let owners := pkg.leanLibs.filter (·.isBuildableModule name)
-      unless owners.size == 1 do
-        throw <| IO.userError s!"{name} needs one library owner, found {owners.map (·.name)}"
-  IO.println "Every library source module has exactly one Lake owner"
+      unless owners.map (·.name) == #[lib.name] do
+        throw <| IO.userError s!"{name} in {lib.srcDir} must belong to {lib.name}, found {owners.map (·.name)}"
+  IO.println "Every library source module lives in its unique Lake owner's directory"
   return 0
 
 @[default_target]

@@ -8,16 +8,24 @@ modules. Document modules select `VersoLeanRun`, `VersoLeanRun.Blog`, or
 `VersoLeanRun.Slides`; their native generators select the corresponding `Publish`
 module. Existing directive and publication APIs retain their names.
 
-| Library | Owned modules | Role |
+| Library | Source directory | Owned modules |
 | --- | --- | --- |
-| `VersoLeanRunViews` | `Views`, `Frame`, `Sequence`, `Automaton` | Models, observations, typed transport and worker-session adapters |
-| `VersoLeanRunPresenter` | `VersoLeanRunPresenter`, `Preview` | VIR DOM implementation and sandbox document policy |
-| `VersoLeanRunAuthoring` | `Model`, `Callable`, `Anchored`, `Inline`, `Render`, `Collect` | Experiment metadata, command elaboration, adapters and native console rendering |
-| Genre libraries | Manual facade, Blog, Slides | Genre-specific source blocks and publication entry points |
-| `VersoLeanRunPublish` | `Publish`, `Publication` | Manual publication and the shared resource planner |
-| `VersoLeanRunPresenterResources` | Its resource carrier | Prepared presenter bytes and compiler-derived contracts for native generators |
+| `VersoLeanRunViews` | `src/views/` | `Views`, `Frame`, `Sequence`, `Automaton` |
+| `VersoLeanRunAuthoring` | `src/authoring/` | `Model`, `Callable`, `Anchored`, `Inline`, `Render`, `Collect` |
+| `VersoLeanRun` | `src/manual/` | Manual facade and `Manual` |
+| `VersoLeanRunPublish` | `src/publication/` | `Publish`, `Publication` |
+| `VersoLeanRunBlog` | `src/blog/` | `Blog`, `Blog.Publish` |
+| `VersoLeanRunSlides` | `src/slides/` | `Slides`, `Slides.Publish` |
+| `VersoLeanRunPresenter` | `src/presenter/` | `VersoLeanRunPresenter`, `Preview` |
+| `VersoLeanRunPresenterResources` | `src/presenter-resources/` | Native presenter resource carrier |
 
-Explicit module globs give every source one owner. The views library has no
+Each library's `srcDir` is disjoint. Module paths within these directories retain
+their public Lean names, so moving files does not change imports. Explicit module
+globs give every source one owner even where namespaces overlap; namespace-wide
+roots would also claim modules in other libraries. `lake run check-library-ownership`
+checks that every source is registered to the library whose directory contains it.
+
+The views library has no
 browser-asset prerequisite and imports no genre adapter, VIR compiler or DOM
 binding. The presenter depends on view types; authoring depends on views and the
 native compiler APIs. Native publication imports the presenter carrier. That
@@ -33,7 +41,7 @@ ownership explicit and does not claim a compiler-free transitive DOM import or
 a measured build-speed improvement. VIR packages executable declarations through
 their reached IR dependencies.
 
-`tests/client.py` checks one-owner registration and import phases, then runs a
+`tests/client.py` checks source-directory ownership and import phases, then runs a
 plain Lean producer through native and dedicated-worker execution without a
 Verso document, page host or presenter. Compiler expectations are derived
 independently by its native carrier. See [validation](validation.md).
