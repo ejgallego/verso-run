@@ -1,61 +1,48 @@
-# Next steps
+# Future directions
 
-The current extension supports entry-selected pure scalar, typed HTML, finite sequences and live automata
-in Manual, Blog Page/Post, and Slides, with inline definitions or checked source
-anchors. The [internals](docs/internals.md) describe the implementation and exact
-pins; [history](docs/history.md) records how these features arrived.
+Concrete tasks and their status belong in
+[GitHub issues](https://github.com/ejgallego/verso-run/issues). This roadmap records
+possible directions. Current usage, architecture and qualification are described
+in [authoring](docs/authoring.md), [internals](docs/internals.md) and
+[validation](docs/validation.md).
 
-## Author and runtime diagnostics
+## Diagnostics
 
-Improve dependency-closure diagnostics where a supported callable reaches an
+Improve dependency-closure diagnostics when an admitted callable reaches an
 unavailable runtime operation. Preserve VIR's original classifier reason,
-declaration/type context, and actionable wrapper guidance. Keep author errors,
-reader input errors, and resource/worker failures distinct.
+declaration/type context and actionable wrapper guidance. Keep author errors,
+reader input errors and resource/worker failures distinct.
 
-Future interface or runtime changes require a matched source/runtime pair and
-consumer qualification. Retain independent expected signatures, exact integer
-boundaries, explicit retry, independent workers, and real Stop.
-
-## Native build performance
+## Build performance and upstream boundaries
 
 Measure cold/warm builds and author iteration before selecting native
-precompilation. VIR's compiler-library separation is already used, but consumer
-precompilation remains deferred. Preserve ordinary Git acquisition and the
-locked browser runtime. Compiler scheduling is a separate change: retain
-`compiler.postponeCompile false` until it is deliberately reviewed and qualified.
+precompilation or changing compiler scheduling. Retain
+`compiler.postponeCompile false` until a separate review and qualification.
 
-## Verso integration
+Review an upstream split of Verso's Html data/serialization from its quoter, and
+VIR's runtime host types from host-attribute validation. The current view/client
+libraries retain the pinned upstream imports. Review upstreaming Verso's public
+highlighting helper and shared command-elaboration hooks separately.
 
-Review upstream integration of the public Manual highlighting helper and the
-shared command-elaboration hooks used by the genre adapters. Slides updates must
-retain native fragments, source rendering, asset collision checks, and worker
-cancellation on navigation. Keep publication and invocation outside document
-elaboration.
+Dependency updates require a matched public source/runtime pair and consumer
+qualification, preserving independent contracts, exact integers, independent
+workers, explicit retry and real Stop.
 
 ## Browser and accessibility qualification
 
-Qualify Firefox, Safari, physical mobile devices, accessibility, and actual
-browser back-cache restoration separately. Current checks cover Chromium and
-synthetic persisted-page lifecycle events; see [validation](docs/validation.md).
+Qualify Firefox, Safari, physical mobile devices, assistive technologies and real
+back-cache restoration. Wider Illuminate rendering needs the provider work
+recorded in [its evidence](evidence/illuminate-gates.md).
 
-General Illuminate diagrams require the missing float-provider work recorded in
-[evidence/illuminate-gates.md](evidence/illuminate-gates.md). The current demo
-qualifies the drawing-command/SVG path.
+## Interaction models
+
+Explore finite on-demand computation with explicit successful completion. Its
+lifetime differs from an endless automaton and a precomputed trace. Consider
+mixed scalar input/result forms and retaining idle scalar workers across edits
+as separate API choices. Reuse Illuminate animation APIs where they fit after
+qualifying their required runtime path.
 
 ## Source editing
 
-Readers currently edit function inputs. Lean source editing and the broader
-`verso-lab` project remain separate work; they require their own compiler,
-interaction, and lifecycle design.
-
-## Lean-authored observations
-
-Finite traces and live automata expose typed states and ordinary Html observations,
-with a separate Lean/VIR DOM presenter. The stack stepper shares the Lean parser
-and operational step function and has native-oracle coverage. Further animation
-integration should reuse Illuminate's APIs where they fit, after qualifying its
-diagram/hash provider path. Automata retain a warm worker between transitions;
-sequence selection retains its presenter without rerunning the evaluator. Reusing
-idle scalar workers across input edits remains a separate choice. Finite on-demand
-computation with explicit successful completion would give the next API experiment
-a different lifecycle from endless automata and precomputed traces.
+Reader editing of Lean source and the broader `verso-lab` project need their own
+compiler, interaction and lifecycle design.

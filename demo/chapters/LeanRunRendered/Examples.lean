@@ -1,5 +1,5 @@
 module
-public import VersoLeanRun.Automaton
+public import VersoLeanRun.Views
 public section
 namespace LeanRunRendered.Examples
 open VersoLeanRun Verso.Output Verso.Output.Html

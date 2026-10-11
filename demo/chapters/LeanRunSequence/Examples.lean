@@ -1,5 +1,5 @@
 module
-public import VersoLeanRun.Sequence
+public import VersoLeanRun.Views
 public import LeanRunGate.Stack
 public section
 

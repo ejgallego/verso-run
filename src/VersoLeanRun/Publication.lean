@@ -9,7 +9,7 @@ public import Lean.Data.Json.Parser
 public import Std.Data.TreeMap.Basic
 public import Vir.Resources
 public import Vir.Compiler.Interface.Encode
-public import VersoLeanRun.Automaton
+public import VersoLeanRun.Views
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Vir.Compiler.Interface.Encode
 public meta import Lean.Elab.Term

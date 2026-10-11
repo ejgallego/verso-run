@@ -115,8 +115,8 @@ acceptance checks and native reference executables live in `tests/`.
 - [Internals](docs/internals.md): resource ownership, execution, limits, and exact pins.
 - [Contributing](CONTRIBUTING.md): build, test, and repository layout.
 - [Validation](docs/validation.md): qualification scope and retained evidence.
-- [Multiple genres](docs/multi-genre.md): anchor review and shared/adapter design.
-- [Roadmap](ROADMAP.md): upcoming diagnostics, anchors, genres, and integration work.
+- [Multiple genres](docs/multi-genre.md): native source anchors and adapter boundaries.
+- [Roadmap](ROADMAP.md): future directions; concrete work is tracked in issues.
 
-The project grew from a Verso prototype; its [development history](docs/history.md)
-is retained. Licensed under [Apache-2.0](LICENSE).
+The project grew from a Verso prototype; its [origin and design provenance](docs/history.md)
+are retained. PRs and Git record the detailed changes. Licensed under [Apache-2.0](LICENSE).
