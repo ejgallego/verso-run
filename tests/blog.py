@@ -27,7 +27,8 @@ plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunBlog.Page', 'LeanRunBlog.Post'}
 assert set(plan['programs']['LeanRunBlog.Post']) == {
     'LeanRunBlog.Examples.greet', 'LeanRunBlog.Examples.card', 'LeanRunBlog.Examples.count',
-    'LeanRunBlog.Post.Inline.greet', 'LeanRunBlog.Post.Inline.card'}
+    'LeanRunBlog.Post.Inline.greet', 'LeanRunBlog.Post.Inline.card', 'LeanRunSequence.Examples.stackView',
+    'LeanRunRendered.Examples.badge', 'LeanRunRendered.Examples.wordSteps', 'LeanRunSequence.Life.lifeView'}
 record('typed Page/Post AST collection publishes independent canonical signatures')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-blog-demo'), '--output', str(output/'native-only')],
@@ -117,7 +118,8 @@ with serve_directory(served) as base:
             assert first.locator('.lean-run-output b').count() == 0
             assert call(second, 'independent') == oracle('greet', 'independent')
             assert first.locator('.lean-run-output').text_content() == oracle('greet', '世界 🌍 <b>&')
-            assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == 7
+            placements = page.locator('.lean-run').count()
+            assert len(set(page.locator('.lean-run').evaluate_all('(es) => es.map(e => e.dataset.instance)'))) == placements
             record(prefix+': Post Unicode and repeated placements have independent worker state')
             card = form('LeanRunBlog.Examples.card')
             assert call(card, '<b>& Ada') == ''
@@ -153,7 +155,7 @@ with serve_directory(served) as base:
         page.set_viewport_size({'width': 390, 'height': 844})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.screenshot(path=str(output/'post-mobile.png'), full_page=True)
-        record('Blog controls and collapsed source fit a narrow viewport')
+        record('Blog controls and visible checked source fit a narrow viewport')
         plain = browser.new_context(java_script_enabled=False)
         tab = plain.new_page()
         for path, name in [('page/', 'LeanRunGate.Helper.twice'),

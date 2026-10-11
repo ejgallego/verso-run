@@ -1,6 +1,6 @@
 """Landing and Manual/Blog native agreement on an actual HTTP deployment."""
 from contextlib import ExitStack
-from harness import serve_directory
+from harness import show_slide, serve_directory
 import argparse
 import hashlib
 import json
@@ -37,14 +37,14 @@ with ExitStack() as servers:
     shared_hashes = {}
     for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
         shared_hashes[genre] = {}
-        for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js']:
+        for name in ['host.js', 'worker.js', 'contract.js', 'renderer.js', 'presenter.js', 'automaton.js']:
             with urlopen(base + path + 'lean-run/' + name) as response:
                 contents = response.read()
             assert contents == (root / '_out/html-multi' / path / 'lean-run' / name).read_bytes(), (genre, name)
             shared_hashes[genre][name] = hashlib.sha256(contents).hexdigest()
     plan = plans['Manual']
     checks = ['Manual, Blog, and Slides publications match validated local programs and runtime',
-              'all three genres serve the exact accepted host, worker, codec and renderer bytes']
+              'all three genres serve the exact accepted host, worker, codec, renderer and sequence bridge bytes']
 
     def oracle(role, value, genre):
         executable = 'lean-run-blog-oracle' if genre in ['Blog', 'Slides'] else 'lean-run-oracle'
@@ -64,6 +64,9 @@ with ExitStack() as servers:
         response = page.goto(base)
         assert response.status == 200
         for label, path in [
+            ('Explore Game of Life', 'Game-of-Life/'),
+            ('Step through a stack program', 'Stack-stepper/'),
+            ('Build an Illuminate diagram', 'Illuminate-diagrams/'),
             ('Explore the manual', 'Greeting/'),
             ('see its source anchors', 'Anchored-source/'),
             ('Try a runnable page', 'blog/page/'),
@@ -100,17 +103,7 @@ with ExitStack() as servers:
                 page.wait_for_function('globalThis.Reveal?.isReady() && globalThis.versoVirState === "ready"')
                 page.evaluate('document.fonts.ready')
                 page.wait_for_function('!Reveal.getViewportElement().classList.contains("loading-scroll-mode")')
-                index = {'twice': 0, 'greet': 1, 'count': 2, 'card': 3}[role]
-                page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                if page.evaluate('Reveal.isScrollView()'):
-                    # Scroll-mode slide() can stop at the preceding snap boundary.
-                    # Advance with the public navigation API, as a reader would.
-                    for _ in range(6):
-                        page.wait_for_timeout(100)
-                        current = page.evaluate('Reveal.getIndices().h')
-                        if current == index: break
-                        page.evaluate('Reveal.next()' if current < index else 'Reveal.prev()')
-                page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                show_slide(page, page.locator('.lean-run[data-experiment*="' + declaration + '"]').first)
                 if role == 'greet':
                     page.evaluate('Reveal.nextFragment()')
             form = page.locator('.lean-run[data-experiment*="' + declaration + '"]').first
@@ -146,9 +139,7 @@ with ExitStack() as servers:
                 page.wait_for_selector('.lean-run[data-enhanced]')
                 if genre == 'Slides':
                     page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                    index = {'flip': 4, 'increment': 5, 'lines': 6}[role]
-                    page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                    page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                    show_slide(page, page.locator('.lean-run[data-experiment*="LeanRunTyped.Examples.' + role + '"]').first)
                 form = page.locator('.lean-run[data-experiment*="LeanRunTyped.Examples.' + role + '"]').first
                 for value in values:
                     field = form.locator('input, select, textarea')
@@ -171,9 +162,7 @@ with ExitStack() as servers:
                 page.wait_for_selector('.lean-run[data-enhanced]')
                 if role == 'slide':
                     page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                    index = 7 if function == 'greet' else 9
-                    page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                    page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                    show_slide(page, page.locator('.lean-run[data-experiment*="' + owner + '.Inline.' + function + '"]').first)
                     if function == 'greet': page.evaluate('Reveal.nextFragment()')
                 form = page.locator('.lean-run[data-experiment*="' + owner + '.Inline.' + function + '"]').first
                 value = '世界 🌍 <b>&'
@@ -190,6 +179,60 @@ with ExitStack() as servers:
                     assert form.locator('iframe').get_attribute('sandbox') == ''
                     assert form.frame_locator('iframe').locator('b').count() == 0
                 checks.append(path + ': hosted inline ' + function + ' agrees with native Lean')
+        # Selection and view rendering run in the Lean DOM presenter, independently
+        # of the pure worker computation. Compare every displayed frame to Lean.
+        for genre, path in [('Manual', 'Stack-stepper/'), ('Blog', 'blog/page/'),
+                            ('Blog', 'blog/notes/2026-10-8-running-lean-in-a-post/'),
+                            ('Slides', 'slides/')]:
+            page.goto(base + path)
+            page.wait_for_selector('.lean-run[data-enhanced]')
+            if genre == 'Slides':
+                page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
+                show_slide(page, page.locator('.lean-run[data-experiment*="LeanRunSequence.Examples.stackView"]'))
+            form = page.locator('.lean-run[data-experiment*="LeanRunSequence.Examples.stackView"]')
+            value = '9007199254740993 2 *'
+            form.locator('input[type=text]').fill(value)
+            form.locator('[type=submit]').click()
+            page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                                   arg=form.element_handle(), timeout=60000)
+            assert form.get_attribute('data-state') == 'success', form.inner_text()
+            expected = json.loads(oracle('sequence', value, 'Manual'))
+            for index, frame in enumerate(expected['frames']):
+                form.locator(f'[data-step="{index}"]').click()
+                assert frame['html'] in form.locator('iframe').get_attribute('srcdoc')
+                assert form.locator('iframe').get_attribute('sandbox') == ''
+                assert form.locator('.lean-run-sequence-error').text_content() == (frame['error'] or '')
+                assert form.locator('.lean-run-sequence-position').text_content() == (
+                    f"Step {index + 1} of {len(expected['frames'])}: {frame['label']}")
+            checks.append(path + ': Lean DOM selection displays every exact native sequence frame')
+        for genre, path in [('Manual', 'Game-of-Life/'), ('Blog', 'blog/page/'),
+                            ('Blog', 'blog/notes/2026-10-8-running-lean-in-a-post/'),
+                            ('Slides', 'slides/')]:
+            page.goto(base + path)
+            page.wait_for_selector('.lean-run[data-enhanced]')
+            if genre == 'Slides':
+                page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
+            form = page.locator('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]')
+            if genre == 'Slides':
+                form.evaluate('e => {const sections=[...document.querySelectorAll(".reveal .slides > section")];Reveal.slide(sections.indexOf(e.closest(".reveal .slides > section")),0);}')
+                form.wait_for(state='visible')
+            seed = '.#.\n..#\n###'
+            form.locator('textarea').fill(seed)
+            form.locator('[type=submit]').click()
+            page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                                   arg=form.element_handle(), timeout=60000)
+            assert form.get_attribute('data-state') == 'success', form.inner_text()
+            expected = json.loads(oracle('life', seed, 'Manual'))
+            assert len(expected) == 141
+            for index, frame in enumerate(expected[:14]):
+                if index:
+                    form.locator('.lean-run-step').click()
+                    page.wait_for_function("e => ['success', 'failed'].includes(e.dataset.state)",
+                                           arg=form.element_handle(), timeout=60000)
+                    assert form.get_attribute('data-state') == 'success', form.inner_text()
+                assert frame['html'] in form.locator('iframe[data-preview="current"]').get_attribute('srcdoc')
+                assert form.locator('.lean-run-sequence-error').text_content() == ''
+            checks.append(path + ': Life advances beyond its former limit and agrees with native Lean')
         assert not errors, errors
         checks.append('no uncaught browser errors')
         browser.close()

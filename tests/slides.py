@@ -1,5 +1,5 @@
 """Native Slides publication and real Reveal/worker behavior at root and nested URLs."""
-from harness import run_command, inventory, serve_directory
+from harness import run_command, inventory, serve_directory, slide_index, show_slide
 import argparse, functools, json, shutil, subprocess, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -25,10 +25,10 @@ site = output/'site'
 command(['lake', 'exe', 'lean-run-slides-demo', '--output', str(site)], 'generate')
 plan = json.loads((site/'lean-run/publication.json').read_text())
 assert set(plan['programs']) == {'LeanRunSlides.Deck'}
-assert len(plan['programs']['LeanRunSlides.Deck']) == 9
+assert len(plan['programs']['LeanRunSlides.Deck']) == 13
 assert plan['runtimeModule'].startswith('lib/vir/')
 assert len(list(site.rglob('runtime.js'))) == 1
-assert len(list(site.rglob('bundle.json'))) == 3  # runtime, formatter, document-selected callables
+assert len(list(site.rglob('bundle.json'))) == 4  # runtime, formatter, document callables, DOM presenter
 record('typed deck collection composes one runtime with formatter and document-selected callables')
 (output/'lean-toolchain').write_text((ROOT/'lean-toolchain').read_text())
 command([str(ROOT/'.lake/build/bin/lean-run-slides-demo'), '--output', str(output/'native-only')],
@@ -66,16 +66,6 @@ with serve_directory(served) as base:
         def form(name):
             return page.locator('.lean-run[data-experiment*="'+name+'"]').first
 
-        def slide(index):
-            page.evaluate('(n) => Reveal.slide(n, 0)', index)
-            if page.evaluate('Reveal.isScrollView()'):
-                for _ in range(6):
-                    page.wait_for_timeout(100)
-                    current = page.evaluate('Reveal.getIndices().h')
-                    if current == index: break
-                    page.evaluate('Reveal.next()' if current < index else 'Reveal.prev()')
-            page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
-
         def no_workers():
             deadline = time.monotonic() + 5
             while page.workers and time.monotonic() < deadline:
@@ -93,7 +83,7 @@ with serve_directory(served) as base:
 
         for prefix in ['root', 'nested/prefix/slides']:
             page.goto(base+prefix+'/')
-            page.wait_for_selector('.lean-run[data-enhanced]')
+            page.wait_for_selector('.lean-run[data-enhanced]', state='attached')
             page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
             assert len(page.workers) == 0
             selected = form('LeanRunGate.Helper.twice')
@@ -106,7 +96,7 @@ with serve_directory(served) as base:
             assert call(selected, '21', keyboard=True) == oracle('twice', '21')
             assert page.evaluate('Reveal.getIndices().h') == 0
             record(prefix+': native highlighting, lazy Run worker, exact Nat, and keyboard submission')
-            slide(1)
+            show_slide(page, form('LeanRunBlog.Examples.greet'))
             assert selected.get_attribute('data-state') == 'stopped'
             greeting = form('LeanRunBlog.Examples.greet')
             assert greeting.locator('[type=submit]').is_disabled()
@@ -123,28 +113,28 @@ with serve_directory(served) as base:
             page.evaluate('Reveal.nextFragment()')
             assert call(greeting, 'fresh fragment') == oracle('greet', 'fresh fragment')
             record(prefix+': native fragment show/hide stops its worker and supports fresh invocation')
-            slide(2)
+            show_slide(page, form('LeanRunBlog.Examples.count'))
             count = form('LeanRunBlog.Examples.count')
-            assert count.locator('details.lean-run-source').count() == 1
+            assert count.locator('div.lean-run-source').count() == 1
             assert call(count, '10') == oracle('count', '10')
             for stop_by_slide in [False, True]:
                 count.locator('input').fill('1000000000000')
                 count.locator('[type=submit]').click()
                 page.wait_for_function('e => e.dataset.state === "running"', arg=count.element_handle(), timeout=30000)
-                if stop_by_slide: slide(3)
+                if stop_by_slide: show_slide(page, form('LeanRunBlog.Examples.card'))
                 else: count.locator('.lean-run-stop').click()
                 assert count.get_attribute('data-state') == 'stopped'
-                slide(2)
+                show_slide(page, form('LeanRunBlog.Examples.count'))
                 assert call(count, '11') == oracle('count', '11')
             record(prefix+': real synchronous Stop and slide navigation terminate work before fresh rerun')
-            slide(3)
+            show_slide(page, form('LeanRunBlog.Examples.card'))
             card = form('LeanRunBlog.Examples.card')
             assert call(card, '<b>& Ada') == ''
             frame = card.locator('iframe')
             assert oracle('card', '<b>& Ada') in frame.get_attribute('srcdoc')
             assert frame.get_attribute('sandbox') == ''
             assert card.frame_locator('iframe').locator('b').count() == 0
-            slide(0)
+            show_slide(page, form('LeanRunGate.Helper.twice'))
             assert frame.get_attribute('srcdoc') is None
             assert frame.is_hidden()
             no_workers()
@@ -152,9 +142,11 @@ with serve_directory(served) as base:
 
         # Failure and cancellation during acquisition use the shared host guards.
         page.reload()
-        page.wait_for_selector('.lean-run[data-enhanced]')
+        # Reload preserves Reveal's selected slide. Initialization does not
+        # require the first form to be on that slide.
+        page.wait_for_selector('.lean-run[data-enhanced]', state='attached')
         page.wait_for_function('Reveal.isReady()')
-        slide(2)
+        show_slide(page, form('LeanRunBlog.Examples.count'))
         count = form('LeanRunBlog.Examples.count')
         program = plan['programs']['LeanRunSlides.Deck']['LeanRunBlog.Examples.count']['manifest'].replace('bundle.json', 'program.irpkg')
         page.route('**/'+program, lambda route: route.fulfill(status=404, body='missing'))
@@ -173,7 +165,7 @@ with serve_directory(served) as base:
             page.wait_for_timeout(50)
         assert held, 'the worker acquisition request must be held before navigation'
         assert count.get_attribute('data-state') == 'loading'
-        slide(0)
+        show_slide(page, form('LeanRunGate.Helper.twice'))
         assert count.get_attribute('data-state') == 'stopped'
         for route in held:
             route.fulfill(status=404, body='late failure')
@@ -181,10 +173,10 @@ with serve_directory(served) as base:
         page.wait_for_timeout(100)
         assert count.get_attribute('data-state') == 'stopped'
         assert count.locator('.lean-run-output').text_content() == ''
-        slide(2)
+        show_slide(page, form('LeanRunBlog.Examples.count'))
         assert call(count, '13') == oracle('count', '13')
         record('navigation during invocation cannot publish a stale result; return permits a fresh call')
-        slide(0)
+        show_slide(page, form('LeanRunGate.Helper.twice'))
         assert call(form('LeanRunGate.Helper.twice'), '21') == oracle('twice', '21')
         for width in [1280, 390]:
             page.set_viewport_size({'width': width, 'height': 900})
@@ -198,18 +190,18 @@ with serve_directory(served) as base:
         record('Reveal and Run controls fit desktop and narrow viewports')
         page.wait_for_function('Reveal.isScrollView()')
         page.evaluate('document.fonts.ready')
-        slide(2)
+        show_slide(page, form('LeanRunBlog.Examples.count'))
         count = form('LeanRunBlog.Examples.count')
         count.locator('input').fill('1000000000000')
         count.locator('[type=submit]').click()
         page.wait_for_function('e => e.dataset.state === "running"', arg=count.element_handle(), timeout=30000)
         page.mouse.move(200, 700)
         page.mouse.wheel(0, 1500)
-        page.wait_for_function('Reveal.getIndices().h !== 2')
+        page.wait_for_function('(n) => Reveal.getIndices().h !== n', arg=slide_index(count))
         assert count.get_attribute('data-state') == 'stopped'
         no_workers()
         record('mobile scroll navigation stops an actual running worker')
-        slide(2)
+        show_slide(page, form('LeanRunBlog.Examples.count'))
         count.locator('input').fill('1000000000000')
         count.locator('[type=submit]').click()
         page.wait_for_function('e => e.dataset.state === "running"', arg=count.element_handle(), timeout=30000)
@@ -218,7 +210,7 @@ with serve_directory(served) as base:
         page.wait_for_function('!Reveal.isScrollView()')
         page.wait_for_function('(id) => [...document.querySelectorAll(".lean-run")].every(e => e.dataset.enhanced) && !document.querySelector(`[data-instance="${id}"]`)', arg=before)
         no_workers()
-        slide(2)
+        show_slide(page, form('LeanRunBlog.Examples.count'))
         assert call(form('LeanRunBlog.Examples.count'), '14') == oracle('count', '14')
         record('leaving scroll view disposes detached workers and rebinds restored controls')
         plain = browser.new_context(java_script_enabled=False)

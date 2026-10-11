@@ -1,7 +1,8 @@
 """Concrete Bool/UInt64/multiline forms, independently compiled signatures and real workers."""
-from harness import run_command, serve_directory
+from harness import slide_index, show_slide, run_command, serve_directory
 import argparse, functools, json, shutil, subprocess
 from pathlib import Path
+from html.parser import HTMLParser
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -21,6 +22,37 @@ def oracle(role, value):
     return json.loads(subprocess.check_output(
         [str(ROOT/'.lake/build/bin/lean-run-typed-oracle'), role, value], text=True))
 
+class DescriptionParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.descriptions = []
+
+    def handle_starttag(self, tag, attrs):
+        data = dict(attrs).get('data-experiment')
+        if data is not None:
+            self.descriptions.append(json.loads(data))
+
+
+def check_descriptions(root, plan):
+    # Inspect actual native HTML, including entries beyond the visited scalar
+    # fixtures; a whitelist catches future accidental provenance/data leakage.
+    descriptions = []
+    for html in root.rglob('*.html'):
+        parser = DescriptionParser()
+        parser.feed(html.read_text())
+        parser.close()
+        descriptions.extend(parser.descriptions)
+    assert descriptions, root
+    for data in descriptions:
+        assert set(data) == {'program', 'declaration', 'callable', 'form',
+                             'initialInput', 'collapsed'}, (root, data)
+        assert all(isinstance(data[key], str) for key in
+                   ['program', 'declaration', 'callable', 'form', 'initialInput'])
+        assert isinstance(data['collapsed'], bool)
+        assert all(data[key] for key in ['program', 'declaration', 'callable'])
+        assert data['declaration'] in plan['programs'][data['program']], (root, data)
+
+
 command(['node', 'tests/typed-codec.mjs'], 'codec')
 record('shared input/result codec checks exact Bool, UInt64 bounds and untrimmed String')
 site = output/'site'
@@ -33,6 +65,10 @@ for genre, path, owner in [('Manual', site/'manual/html-multi', 'LeanRunGate.Cha
                            ('Slides', site/'slides', 'LeanRunSlides.Deck')]:
     plan = json.loads((path/'lean-run/publication.json').read_text())
     plans[genre] = plan
+    check_descriptions(path, plan)
+    if genre == 'Manual':
+        check_descriptions(site/'manual/html-single', plan)
+    record(genre+': native HTML carries only reader/invocation fields with published bindings')
     for role, name, tag in [('flip', 'Bool', 2), ('increment', 'UInt64', 7), ('lines', 'String', 3)]:
         binding = plan['programs'][owner]['LeanRunTyped.Examples.'+role]
         descriptor = {'type': name, 'interfaceTag': tag}
@@ -78,7 +114,6 @@ with serve_directory(served) as base:
             selected = form(role)
             description = json.loads(selected.get_attribute('data-experiment'))
             assert description['declaration'] == 'LeanRunTyped.Examples.'+role
-            assert description['producerModule'] == description['program']
             assert description['callable'].startswith(description['program']+'.')
             assert description['callable'].endswith('.'+role+'.leanRun')
             assert description['form'] == {'flip': 'bool', 'increment': 'uint64', 'lines': 'multilineString'}[role]
@@ -86,9 +121,7 @@ with serve_directory(served) as base:
             assert '@[vir_export]' not in selected.locator('.lean-run-source').text_content()
             if genre == 'slides':
                 page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                index = {'flip': 4, 'increment': 5, 'lines': 6}[role]
-                page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                show_slide(page, selected)
 
         for prefix in ['root', 'nested/prefix']:
             for genre in ['manual', 'blog', 'slides']:
@@ -117,7 +150,7 @@ with serve_directory(served) as base:
                 textarea.press('Enter')
                 assert textarea.input_value() == 'first\n'
                 assert form('lines').get_attribute('data-state') == 'idle'
-                if genre == 'slides': assert page.evaluate('Reveal.getIndices().h') == 6
+                if genre == 'slides': assert page.evaluate('Reveal.getIndices().h') == slide_index(form('lines'))
                 for value in ['', '\n', '\nα 🌍\n\n<b>&\n', ' a \n b ', 'x'*4096]:
                     assert call('lines', value, shortcut=True) == oracle('lines', value)
                     assert form('lines').locator('.lean-run-output b').count() == 0

@@ -38,11 +38,21 @@ lean_lib VersoLeanRunSlides where
   roots := #[`VersoLeanRun.Slides]
   needs := #[leanRunWeb]
 
+-- The browser presenter is separate from its native resource carrier.
+lean_lib VersoLeanRunPresenter where
+  srcDir := "src"
+  roots := #[`VersoLeanRunPresenter]
+
+lean_lib VersoLeanRunPresenterResources where
+  srcDir := "src"
+  roots := #[`VersoLeanRunPresenterResources]
+  needs := #[`+VersoLeanRunPresenter:virResourcePack]
+
 -- Demo documents and ordinary Lean producers. They never import their carriers.
 
 lean_lib LeanRunGateProgram where
   srcDir := "demo/chapters"
-  roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper]
+  roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper, `LeanRunGate.Stack]
 
 lean_lib LeanRunBlogExamples where
   srcDir := "demo/chapters"
@@ -59,6 +69,14 @@ lean_lib LeanRunSlidesDocuments where
 lean_lib LeanRunTypedExamples where
   srcDir := "demo/chapters"
   roots := #[`LeanRunTyped.Examples]
+
+lean_lib LeanRunSequenceExamples where
+  srcDir := "demo/chapters"
+  roots := #[`LeanRunSequence.Examples, `LeanRunSequence.Life]
+
+lean_lib LeanRunRenderedExamples where
+  srcDir := "demo/chapters"
+  roots := #[`LeanRunRendered.Examples]
 
 -- Prepare module-owned packs before embedding them in disjoint carrier libraries.
 -- Keep the graph acyclic: document → module resource facet → carrier → generator.
@@ -144,7 +162,13 @@ lean_lib LeanRunGateFailures where
 @[test_driver]
 script test (args) do
   let pkg ← getRootPackage
+  -- Keep test caches inside the checkout; callers can still select their own.
+  let uvCache ← IO.getEnv "UV_CACHE_DIR"
+  let pythonCache ← IO.getEnv "UV_PYTHON_INSTALL_DIR"
   let result ← IO.Process.spawn {
+    env := #[
+      ("UV_CACHE_DIR", some (uvCache.getD (pkg.dir / ".cache/uv").toString)),
+      ("UV_PYTHON_INSTALL_DIR", some (pythonCache.getD (pkg.dir / ".cache/uv-python").toString))]
     cwd := some pkg.dir
     cmd := "uv"
     args := #["run", "--with", "playwright", "python", "tests/acceptance.py"] ++ args.toArray

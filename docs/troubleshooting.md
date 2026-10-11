@@ -9,8 +9,8 @@ error in the build log; later errors may be consequences of it.
 VIR supports more interfaces than this extension currently presents. For example,
 an `Int → Int` function is a valid VIR interface, but a Run form accepts only
 pure, monomorphic `String → String`, `Nat → Nat`, `Bool → Bool`,
-`UInt64 → UInt64`, or `String → Html` functions
-with one explicit argument.
+`UInt64 → UInt64` functions, or one of these input types returning `Html` or
+`SequenceView`, with one explicit argument.
 
 The diagnostic names the entry, shows its type, and explains the form restriction:
 
@@ -45,8 +45,8 @@ export marker is not offered as the cure for an unsupported type.
 
 Use an executable public definition instead of a theorem, axiom, private entry,
 or `noncomputable` value. Proofs and noncomputable choices do not supply executable
-IR. Selecting `entry` registers a scalar callable or generates a typed HTML
-serializer automatically. Read the first compilation or VIR dependency error;
+IR. Selecting `entry` registers the callable or generates a typed view adapter
+automatically. Read the first compilation or VIR dependency error;
 adding an export annotation is not a remedy for missing executable IR.
 
 ## The type is supported, but a dependency is unavailable

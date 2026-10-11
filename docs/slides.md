@@ -1,5 +1,16 @@
 # Runnable slide presentations
 
+The demo deck starts with three experiments: exact natural-number arithmetic,
+a stack-machine trace, and Game of Life. Life's model, transition and SVG view
+follow as checked source excerpts. The remaining slides form an appendix for
+HTML, typed inputs, inline authoring and cancellation.
+
+For a short presentation, run one example on each of the first three slides.
+In the stepper, compare `6 7 * 2 +` with `2 +`; in Life, compare the initial
+blinker with two rows of `##`. Show the transition source when explaining why
+one pattern oscillates and the other stays still. Navigation stops each slide's
+workers, so returning to an example starts a fresh session.
+
 Import `VersoLeanRun.Slides` and use the same inline Run block as Manual or Blog:
 
 ````lean
@@ -94,7 +105,7 @@ source and disabled controls. Slides has no TeX backend here.
 The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
 as a textarea. Enter edits without moving Reveal; Ctrl+Enter or ⌘+Enter runs.
-Return `String → Verso.Output.Html` for an automatic document-owned serializer
+Return `Html` from a String, Nat, Bool or UInt64 input for an automatic document-owned serializer
 and isolated preview. String results remain text; no `output` argument or producer
 VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
@@ -115,3 +126,6 @@ This consumer qualification does not establish upstream integration of the Slide
 and links all three genres from the landing page. The deck reuses the existing
 ordinary Helper, Blog and typed source functions for exact numbers, Unicode
 greetings, real Stop and HTML. Its document-owned bundle exports selected wrappers.
+
+Rendered inputs can also return `SequenceView`. The same typed payloads and shared
+Lean/VIR presenter serve every genre; see [authoring](authoring.md#present-a-sequence-of-states).

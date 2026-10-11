@@ -10,6 +10,17 @@ public section
 open Lean Verso.Output Verso.Output.Html
 namespace VersoLeanRun
 
+/-- Reader controls and invocation need only this description. Native AST metadata
+retains producer ownership and source locations for publication diagnostics. -/
+def Experiment.browserDescription (experiment : Experiment) : Json :=
+  Json.mkObj [
+    ("program", toJson experiment.program),
+    ("declaration", toJson experiment.declaration),
+    ("callable", toJson experiment.callable),
+    ("form", toJson experiment.form),
+    ("initialInput", toJson experiment.initialInput),
+    ("collapsed", toJson experiment.collapsed)]
+
 /-- Shared input, state, output, and preview controls. -/
 def renderControls (experiment : Experiment) : Html := Id.run do
   let label := match experiment.form.scalar with
@@ -29,16 +40,28 @@ def renderControls (experiment : Experiment) : Html := Id.run do
       {{ <textarea rows="4" maxlength="4096" placeholder={{placeholder}}>{{"\n" ++ initial}}</textarea> }}
     else {{ <input type="text" value={{initial}} placeholder={{placeholder}} maxlength="4096" autocomplete="off"/> }}
   let preview := if experiment.form.isHtml then
-    {{ <iframe class="lean-run-preview" title="HTML result" sandbox="" referrerpolicy="no-referrer" hidden="hidden"/> }}
+    {{ <iframe class="lean-run-preview" title="HTML result" sandbox="" referrerpolicy="no-referrer" hidden="hidden"> " " </iframe> }}
+    else if experiment.form.isAutomaton then
+      {{ <div class="lean-run-automaton" hidden="hidden"/> }}
+    else if experiment.form.isSequence then
+      {{ <div class="lean-run-sequence" hidden="hidden"/> }}
     else .empty
-  return {{ <div class="lean-run-console">
+  let inputNote := if experiment.form.isAutomaton then
+    {{ <p class="lean-run-input-note" role="status"> "" </p> }} else .empty
+  let editor := {{ <div class="lean-run-editor">
       <form>
         <label> {{label}} {{control}} </label>
         <button type="submit" disabled="disabled"> "Run" </button>
         <button type="button" class="lean-run-stop" disabled="disabled"> "Stop" </button>
       </form>
+      {{inputNote}}
       <p class="lean-run-status" role="status" aria-live="polite"> "Ready" </p>
       <pre class="lean-run-output" aria-label="Result"/>
+    </div> }}
+  let consoleClass := if experiment.form.isAutomaton then
+    "lean-run-console lean-run-console-live" else "lean-run-console"
+  return {{ <div class={{consoleClass}}>
+      {{editor}}
       {{preview}}
       <noscript> "Enable JavaScript to run this compiled Lean example." </noscript>
     </div> }}
@@ -50,7 +73,7 @@ def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : 
   let sourcePanel := if experiment.collapsed then
     {{ <details class="lean-run-source"><summary> "View Lean implementation" </summary> {{source}} </details> }}
     else {{ <div class="lean-run-source"> {{source}} </div> }}
-  let console := {{ <section class="lean-run" data-experiment={{(toJson experiment).compress}} data-instance={{instanceId}}>
+  let console := {{ <section class="lean-run" data-experiment={{experiment.browserDescription.compress}} data-instance={{instanceId}}>
     {{sourcePanel}}
     {{renderControls experiment}}
   </section> }}

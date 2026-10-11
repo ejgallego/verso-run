@@ -1,4 +1,6 @@
 import { ExperimentHost } from "./host.js";
+import { AutomatonPlayer } from "./automaton.js";
+import { ViewHost } from "./presenter.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Set();
 addEventListener("pagehide", event => {
@@ -9,13 +11,10 @@ addEventListener("pagehide", event => {
   }
   if (!event.persisted) owners.clear();
 });
+addEventListener("visibilitychange", () => {
+  if (document.hidden) for (const host of owners) host.player?.pause();
+});
 let instance = 0;
-function htmlDocument(markup) {
-  return '<!doctype html><html><head><meta charset="utf-8">' +
-    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">' +
-    '<style>body{margin:0;font:16px system-ui,sans-serif;color:#1e2936;overflow-wrap:anywhere}</style>' +
-    '</head><body>' + markup + '</body></html>';
-}
 export function enhance(element) {
   if (element.dataset.enhanced) return;
   element.dataset.enhanced = "true";
@@ -29,38 +28,113 @@ export function enhance(element) {
   const status = element.querySelector(".lean-run-status");
   const output = element.querySelector(".lean-run-output");
   const preview = element.querySelector(".lean-run-preview");
-  const clearPreview = () => {
-    if (!preview) return;
-    preview.hidden = true;
-    preview.removeAttribute("srcdoc");
+  const sequenceElement = element.querySelector(".lean-run-sequence");
+  const automatonElement = element.querySelector(".lean-run-automaton");
+  let ready = false;
+  let appliedInput = null;
+  let resumeAfterStart = false;
+  let presenting = Promise.resolve(true);
+  const note = element.querySelector(".lean-run-input-note");
+  const inputState = () => {
+    if (!automatonElement) return;
+    run.textContent = ready ? "Restart" : "Run";
+    note.textContent = ready && input.value !== appliedInput ? "Edits apply on Restart." : "";
+  };
+  let player;
+  const liveControls = () => {
+    if (!automatonElement) return;
+    const play = automatonElement.querySelector(".lean-run-play");
+    const step = automatonElement.querySelector(".lean-run-step");
+    if (!play || !step) return;
+    play.textContent = player.playing ? "Pause" : "Play";
+    play.setAttribute("aria-pressed", String(player.playing));
+    play.disabled = !ready;
+    step.disabled = !ready || player.playing || player.pending;
+    stop.disabled = !ready && !busy;
+    if (ready && !busy) status.textContent = player.playing ? "Playing" : "Paused";
   };
   let busy = false;
-  const host = new ExperimentHost(description, (state, value = "") => {
+  const setState = (state, value = "") => {
     element.dataset.state = state;
-    busy = state === "loading" || state === "running";
-    run.disabled = busy;
-    stop.disabled = !busy;
-    status.textContent = state === "idle" ? "Ready" : state[0].toUpperCase() + state.slice(1);
+    busy = ["loading", "running", "loading view", "advancing"].includes(state);
+    run.disabled = busy && !(automatonElement && ready);
+    stop.disabled = !busy && !(automatonElement && ready);
+    status.textContent = automatonElement && ready && (state === "success" || state === "advancing") ?
+      (player.playing ? "Playing" : state === "advancing" ? "Advancing" : "Paused") :
+      state === "idle" ? "Ready" :
+      state === "success" && sequenceElement ? "Trace ready" :
+      state[0].toUpperCase() + state.slice(1);
     output.textContent = value;
-    clearPreview();
-    if (state === "success" && preview) {
-      output.textContent = "";
-      preview.srcdoc = htmlDocument(value);
-      preview.hidden = false;
+    inputState();
+  };
+  const pane = automatonElement || sequenceElement || preview;
+  const view = pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", error => {
+    if (automatonElement) host.stop();
+    setState("failed", `Could not display the view. Try Run again. ${error.message}`);
+  }) : null;
+  const clearResult = () => view?.clear();
+  const host = new ExperimentHost(description, (state, value = "") => {
+    if (["idle", "stopped", "failed"].includes(state)) resumeAfterStart = false;
+    if (automatonElement && state === "advancing") {
+      setState(state);
+      liveControls();
+      return;
+    }
+    if (automatonElement && state === "success" && view.program) {
+      presenting = view.update(value).then(shown => {
+        if (!shown) return false;
+        if (value.error !== null) { ready = false; player.pause(); }
+        setState("success");
+        liveControls();
+        return true;
+      });
+      return;
+    }
+    if (automatonElement) { ready = false; player.reset(); }
+    clearResult();
+    setState(state, state === "success" && view ? "" : value);
+    if (state === "success" && view) {
+      setState("loading view");
+      void view.show(value).then(shown => {
+        if (!shown) return;
+        setState("success");
+        if (automatonElement) {
+          ready = value.error === null;
+          automatonElement.querySelector(".lean-run-play").addEventListener("click", () => {
+            if (player.playing) player.pause(); else player.play();
+          });
+          automatonElement.querySelector(".lean-run-step").addEventListener("click", () => { void player.step(); });
+          inputState();
+          liveControls();
+          if (ready && resumeAfterStart) player.play();
+          resumeAfterStart = false;
+        }
+      });
     }
   });
+  if (automatonElement) {
+    player = new AutomatonPlayer(async () => {
+      await host.advance();
+      if (!await presenting) throw new DOMException("Presentation stopped", "AbortError");
+    }, liveControls);
+    host.player = player;
+  }
   owners.add(host);
   run.disabled = false;
   form.addEventListener("submit", event => {
     event.preventDefault();
-    if (busy) return;
+    if (busy && !(automatonElement && ready)) return;
     try { validateInput(scalarKind(description.form), input.value); }
     catch (error) {
-      clearPreview();
-      element.dataset.state = "invalid input";
-      status.textContent = "Invalid input";
-      output.textContent = error.message;
+      host.stop("idle");
+      setState("invalid input", error.message);
       return;
+    }
+    if (automatonElement) {
+      const wasPlaying = player.playing;
+      host.stop("idle");
+      resumeAfterStart = wasPlaying;
+      appliedInput = input.value;
     }
     host.invoke(input.value).catch(() => {}); // Host owns all state/error reporting.
   });
@@ -70,7 +144,10 @@ export function enhance(element) {
     host.dispose();
     owners.delete(host);
   });
-  input.addEventListener("input", () => host.stop("idle"));
+  input.addEventListener("input", () => {
+    if (automatonElement) inputState();
+    else host.stop("idle");
+  });
   if (input.tagName === "TEXTAREA") input.addEventListener("keydown", event => {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
