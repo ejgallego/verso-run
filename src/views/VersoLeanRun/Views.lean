@@ -69,8 +69,8 @@ pages show how to adapt a model, repeat a recorded sequence, and report errors.
 ## Put the example in a document
 
 Return {name (full := VersoLeanRun.SequenceView)}`SequenceView` or {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` from the function you want readers to call.
-Select that function with the {lit}`entry` argument of a {lit}`leanRun` or
-{lit}`leanRun'` block. This works in a Manual, Blog, or Slides document. The
+Select that function with the {lit}`entry` argument of a {lit}`leanRun` block.
+This works in a Manual, Blog, or Slides document. The
 computation module imports {lit}`VersoLeanRun.Views`; the document imports the
 adapter for its genre.
 
