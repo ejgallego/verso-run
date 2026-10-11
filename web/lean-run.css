@@ -83,7 +83,11 @@
   background: white;
   color: #1e2936;
 }
-.lean-run textarea { resize: vertical; line-height: 1.5; }
+.lean-run textarea {
+  resize: vertical;
+  line-height: 1.5;
+  font-family: var(--verso-code-font-family, monospace);
+}
 
 .lean-run input::placeholder {
   color: #738191;
@@ -221,11 +225,24 @@
 .lean-run-sequence-frame { width: 100%; height: 240px; border: 0; background: white; }
 .lean-run-sequence-navigation [aria-disabled="true"] { opacity: .5; }
 
-.lean-run-automaton-preview { position: relative; height: 240px; }
+.lean-run-automaton-preview { position: relative; height: 340px; }
 .lean-run-automaton-preview iframe { position: absolute; inset: 0; }
+.lean-run-automaton-preview .lean-run-sequence-frame { height: 100%; }
 .lean-run-automaton-preview [data-preview="next"] { visibility: hidden; pointer-events: none; }
 .lean-run-input-note { margin: .4rem 0; color: #536273; font-size: .9rem; }
 .lean-run-input-note:empty { display: none; }
+
+/* Live examples place the editor beside the result when the document has room. */
+.lean-run-console-live {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.lean-run-console-live .lean-run-editor,
+.lean-run-console-live .lean-run-automaton { min-width: 0; }
+.lean-run-console-live label { flex-basis: 100%; }
+.lean-run-console-live noscript { grid-column: 1 / -1; }
 
 /* Checked source excerpts also appear outside a Run console. Keep their
    original indentation and scroll long lines within the available width. */

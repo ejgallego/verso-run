@@ -1,3 +1,6 @@
+.reveal { font-size: 30px; }
+.reveal .slides > section > h2 { font-size: 48px; }
+.reveal .slides > section > p { font-size: 28px; line-height: 1.4; }
 .reveal .lean-run-slides {
   text-align: left;
   font-size: 22px;
@@ -7,12 +10,13 @@
   max-width: 880px;
 }
 .reveal .lean-run-source .hl.lean.block {
-  font-size: 21px;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.35;
   max-height: 300px;
   overflow-y: auto;
 }
-.reveal .lean-run-console { padding: 18px; }
+.reveal .lean-run-source,
+.reveal .lean-run-console { padding: 12px; }
 .reveal .lean-run label, .reveal .lean-run-status { font-size: 19px; }
 .reveal .lean-run input, .reveal .lean-run select, .reveal .lean-run textarea,
 .reveal .lean-run button { font-size: 22px; }
@@ -30,6 +34,7 @@
 }
 .reveal .lean-run .lean-run-output:empty { display: none; }
 .reveal .lean-run-source summary { font-size: 20px; }
+.reveal .lean-run-sequence-frame { max-width: none; max-height: none; }
 
 /* Reveal scales its fixed canvas; keep the controls readable and tappable. */
 @media (max-width: 540px) {

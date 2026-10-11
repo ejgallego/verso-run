@@ -6,6 +6,7 @@ public section
 namespace LeanRunSequence.Examples
 open VersoLeanRun Verso.Output Verso.Output.Html
 
+-- ANCHOR: stackSequence
 /-- The view uses the ordinary evaluator's instruction snapshots directly. -/
 abbrev Snapshot := LeanRunGate.Stack.TraceStep
 
@@ -15,6 +16,9 @@ def evaluate (program : String) : Sequence Snapshot :=
   { initial := { label := "Start", state := start, error := trace.initialError }
     steps := trace.steps.map fun step => { label := step.label, state := step, error := step.error } }
 
+-- ANCHOR_END: stackSequence
+
+-- ANCHOR: stackRendering
 private def stackCells (values : List Nat) : Html :=
   if values.isEmpty then {{ <p> "Empty stack" </p> }}
   else Html.fromArray <| (values.reverse.map fun n =>
@@ -25,6 +29,8 @@ def renderSnapshot (snapshot : Snapshot) : Html :=
     <section><h3> "Before" </h3>{{stackCells snapshot.before}}</section>
     <section><h3> "After" </h3>{{stackCells snapshot.after}}</section>
   </div> }}
+
+-- ANCHOR_END: stackRendering
 
 -- ANCHOR: stackView
 public def stackView (program : String) : VersoLeanRun.SequenceView :=

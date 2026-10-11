@@ -1,5 +1,16 @@
 # Runnable slide presentations
 
+The demo deck starts with three experiments: exact natural-number arithmetic,
+a stack-machine trace, and Game of Life. Life's model, transition and SVG view
+follow as checked source excerpts. The remaining slides form an appendix for
+HTML, typed inputs, inline authoring and cancellation.
+
+For a short presentation, run one example on each of the first three slides.
+In the stepper, compare `6 7 * 2 +` with `2 +`; in Life, compare the initial
+blinker with two rows of `##`. Show the transition source when explaining why
+one pattern oscillates and the other stays still. Navigation stops each slide's
+workers, so returning to an example starts a fresh session.
+
 Import `VersoLeanRun.Slides` and use the same inline Run block as Manual or Blog:
 
 ````lean

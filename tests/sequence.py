@@ -1,5 +1,5 @@
 """Typed Lean sequences and the Lean/VIR DOM player, with real worker/native agreement."""
-from harness import run_command, serve_directory
+from harness import slide_index, show_slide, run_command, serve_directory
 import argparse, functools, json, shutil, subprocess, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -59,8 +59,7 @@ with serve_directory(served) as base:
             page.wait_for_selector('.lean-run[data-enhanced]')
             if genre == 'slides':
                 page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                page.evaluate('Reveal.slide(10,0)')
-                page.wait_for_function('Reveal.getIndices().h === 10')
+                show_slide(page, form())
         def run(value, selected=None):
             f=form() if selected is None else selected;f.locator('input[type=text]').fill(value);f.locator('[type=submit]').click()
             page.wait_for_function('e => ["success","failed"].includes(e.dataset.state)',arg=f.element_handle(),timeout=30000)
@@ -88,7 +87,7 @@ with serve_directory(served) as base:
                 slider=form().locator('input[type=range]')
                 slider.evaluate('(e) => {e.value="0";e.dispatchEvent(new Event("input",{bubbles:true}));}')
                 assert 'Step 1 of 6' in form().locator('.lean-run-sequence-position').text_content()
-                if genre=='slides': assert page.evaluate('Reveal.getIndices().h')==10
+                if genre=='slides': assert page.evaluate('Reveal.getIndices().h')==slide_index(form())
                 record(prefix+'/'+genre+'/'+path+': Lean controls select every native frame, navigate and scrub without another worker call')
                 for value in ['9007199254740993 2 *','2 +','2 unknown','', ' '.join(['1']*33)]:
                     expected=run(value)
@@ -196,11 +195,11 @@ with serve_directory(served) as base:
         record('independent presenter signature mismatch rejects before mounting; explicit retry recovers')
 
         visit('root','slides','');run('6 7 * 2 +')
-        page.evaluate('globalThis.oldStep=document.querySelector(".lean-run-sequence-next");Reveal.slide(9,0)')
-        page.wait_for_function('Reveal.getIndices().h === 9')
+        page.evaluate('globalThis.oldStep=document.querySelector(".lean-run-sequence-next")')
+        show_slide(page, page.locator('.lean-run[data-experiment*="LeanRunSlides.Deck.Inline.card"]'))
         page.evaluate('oldStep.click()')
         assert form().locator('.lean-run-sequence').is_hidden()
-        page.evaluate('Reveal.slide(10,0)')
+        show_slide(page, form())
         run('5 dup *')
         record('Slides navigation removes DOM listeners and disposes its presentation; returning permits a fresh run')
 

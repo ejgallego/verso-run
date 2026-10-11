@@ -5,6 +5,7 @@ public section
 namespace LeanRunSequence.Life
 open VersoLeanRun Verso.Output Verso.Output.Html
 
+-- ANCHOR: lifeBoard
 def side : Nat := 8
 
 /-- The finite board has dead cells outside its boundary; it does not wrap. -/
@@ -17,6 +18,7 @@ def Board.alive (board : Board) (row col : Nat) : Bool :=
 
 def Board.population (board : Board) : Nat :=
   board.cells.foldl (fun n live => if live then n + 1 else n) 0
+-- ANCHOR_END: lifeBoard
 
 -- ANCHOR: lifeRules
 def Board.neighbours (board : Board) (row col : Nat) : Nat := Id.run do
@@ -83,10 +85,10 @@ private def gridPath : String := Id.run do
 -- ANCHOR: lifeSvg
 def renderState (state : State) : Html :=
   {{ <div style="padding:.5rem">
-    <p style="margin:0 0 .5rem;font-weight:600">{{s!"Generation {state.generation} · {state.board.population} living cells"}}</p>
+    <p style="margin:0 0 .5rem;font-weight:600">{{s!"{state.board.population} living cells"}}</p>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img"
          aria-label={{s!"Game of Life generation {state.generation}, {state.board.population} living cells"}}
-         style="display:block;width:176px;height:176px;max-width:100%;background:#f3f6fa">
+         style="display:block;width:288px;height:auto;max-width:100%;margin:0 auto;background:#f3f6fa">
       <path class="life-cells" d={{livePath state.board}} fill="#285674"> " " </path>
       <path d={{gridPath}} fill="none" stroke="#ccd9e5" stroke-width=".5"> " " </path>
     </svg>

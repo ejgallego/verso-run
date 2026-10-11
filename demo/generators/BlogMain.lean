@@ -7,6 +7,17 @@ import LeanRunBlog.PostResources
 import VersoLeanRun.Blog.Publish
 
 open Verso Genre Blog
+open Verso.Output.Html Verso.Genre.Blog.Template
+
+def homeTemplate : Template := do
+  pure {{ <article class="demo-home">
+    <h1>{{← param "title"}}</h1>
+    {{← param "content"}}
+  </article> }}
+
+def demoTheme : Theme :=
+  { Theme.default with cssFiles := #[("demo.css", include_str "../../web/blog-demo.css")] }
+    |>.override #[] { template := homeTemplate, params := id }
 
 def site : Site := .page `LeanRunBlog.Home (%doc LeanRunBlog.Home) #[
   .page "page" `LeanRunBlog.Page (%doc LeanRunBlog.Page) #[],
@@ -29,4 +40,4 @@ def main (args : List String) : IO UInt32 := do
       let home := { (%doc LeanRunBlog.Home) with content := #[bad] }
       pure <| Site.page `Malformed home #[]
     | _ => throw <| IO.userError s!"Unknown Blog check {mode}"
-  VersoLeanRun.Blog.blogMain Theme.default selected resources destination
+  VersoLeanRun.Blog.blogMain demoTheme selected resources destination

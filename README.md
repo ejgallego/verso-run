@@ -36,7 +36,7 @@ There are a few more examples to explore:
 
 | Example | Try |
 | --- | --- |
-| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then Play continuously or Step once |
+| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Run a blinker, then compare it with a still life; edit while playing and Restart |
 | [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Move through before/after stacks with Lean-authored controls |
 | [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
 | [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |
@@ -45,7 +45,7 @@ There are a few more examples to explore:
 | [Try Stop](http://127.0.0.1:8795/Try-Stop/) | Start a large calculation, then interrupt it |
 | [Blog page](http://127.0.0.1:8795/blog/page/) | Exact natural numbers from an imported source anchor |
 | [Blog post](http://127.0.0.1:8795/blog/notes/2026-10-8-running-lean-in-a-post/) | Greetings, an HTML card, and Stop |
-| [Slides](http://127.0.0.1:8795/slides/) | Run exact numbers and greetings, then navigate away to stop work |
+| [Slides](http://127.0.0.1:8795/slides/) | Present exact numbers, the stack stepper, and Life; smaller API examples follow in an appendix |
 | [Typed inputs](http://127.0.0.1:8795/Typed-inputs/) | Boolean choices and UInt64 maximum/wraparound |
 | [Multiline text](http://127.0.0.1:8795/Multiline-text/) | Keep blank lines and number each line |
 

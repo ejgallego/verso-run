@@ -1,5 +1,5 @@
 """Concrete Bool/UInt64/multiline forms, independently compiled signatures and real workers."""
-from harness import run_command, serve_directory
+from harness import slide_index, show_slide, run_command, serve_directory
 import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from html.parser import HTMLParser
@@ -121,9 +121,7 @@ with serve_directory(served) as base:
             assert '@[vir_export]' not in selected.locator('.lean-run-source').text_content()
             if genre == 'slides':
                 page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                index = {'flip': 4, 'increment': 5, 'lines': 6}[role]
-                page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                show_slide(page, selected)
 
         for prefix in ['root', 'nested/prefix']:
             for genre in ['manual', 'blog', 'slides']:
@@ -152,7 +150,7 @@ with serve_directory(served) as base:
                 textarea.press('Enter')
                 assert textarea.input_value() == 'first\n'
                 assert form('lines').get_attribute('data-state') == 'idle'
-                if genre == 'slides': assert page.evaluate('Reveal.getIndices().h') == 6
+                if genre == 'slides': assert page.evaluate('Reveal.getIndices().h') == slide_index(form('lines'))
                 for value in ['', '\n', '\nα 🌍\n\n<b>&\n', ' a \n b ', 'x'*4096]:
                     assert call('lines', value, shortcut=True) == oracle('lines', value)
                     assert form('lines').locator('.lean-run-output b').count() == 0

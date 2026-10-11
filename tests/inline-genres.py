@@ -1,5 +1,5 @@
 """Inline Page/Post/Slides authoring, native source, independent workers and Html."""
-from harness import run_command, serve_directory
+from harness import show_slide, run_command, serve_directory
 import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -98,11 +98,6 @@ with serve_directory(served) as base:
             assert selected.get_attribute('data-state') == 'success', selected.inner_text()
             return selected.locator('.lean-run-output').text_content()
 
-        def slide(index, fragment=False):
-            page.evaluate('(n) => Reveal.slide(n, 0)', index)
-            page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
-            if fragment: page.evaluate('Reveal.nextFragment()')
-
         for prefix in ['root', 'nested/prefix']:
             for genre, path, owner, role in [
                 ('blog', 'page/', 'LeanRunBlog.Page', 'page'),
@@ -112,7 +107,8 @@ with serve_directory(served) as base:
                 page.wait_for_selector('.lean-run[data-enhanced]')
                 if genre == 'slides':
                     page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                    slide(7, fragment=True)
+                    show_slide(page, form(owner, 'greet'))
+                    page.evaluate('Reveal.nextFragment()')
                 first, second = form(owner, 'greet'), form(owner, 'greet', 1)
                 data = json.loads(first.get_attribute('data-experiment'))
                 assert data['program'] == owner
@@ -132,13 +128,13 @@ with serve_directory(served) as base:
                         if not page.workers: break
                         page.wait_for_timeout(100)
                     assert not page.workers
-                    slide(8)
+                    show_slide(page, second)
                 assert success(second, 'independent') == oracle(role+'InlineGreet', 'independent')
                 assert first.get_attribute('data-instance') != second.get_attribute('data-instance')
                 if genre != 'slides':
                     assert first.locator('.lean-run-output').text_content() == oracle(role+'InlineGreet', value)
                 record(prefix+'/'+role+': native inline execution, namespace reuse and independent placements')
-                if genre == 'slides': slide(9)
+                if genre == 'slides': show_slide(page, form(owner, 'card'))
                 card = form(owner, 'card')
                 data = json.loads(card.get_attribute('data-experiment'))
                 assert data['declaration'] == owner+'.Inline.card'

@@ -84,7 +84,15 @@ with serve_directory(served) as base:
                 visit(prefix,genre,path)
                 expected=run('.#.\n..#\n###')
                 assert len(expected)==141 and all(f['error'] is None for f in expected)
-                assert 'Generation 12 · 5 living cells' in expected[12]['html']
+                assert '5 living cells' in expected[12]['html']
+                if genre == 'slides':
+                    # Reveal's media limits must not crop the board or put the
+                    # live example beyond the presentation canvas.
+                    board = form().frame_locator('iframe[data-preview="current"]').locator('svg').bounding_box()
+                    preview = form().locator('iframe[data-preview="current"]').bounding_box()
+                    assert board['y'] + board['height'] <= preview['y'] + preview['height']
+                    assert form().bounding_box()['y'] >= 0
+                    assert form().bounding_box()['y'] + form().bounding_box()['height'] <= page.viewport_size['height']
                 record(prefix+'/'+genre+'/'+path+': editable glider and every Lean generation agree with native execution')
         visit('root','manual','Game-of-Life/')
         for seed in ['.##.\n.##.','...\n###\n...','#', '\n'.join(['########']*8)]:
@@ -223,7 +231,7 @@ with serve_directory(served) as base:
             page.set_viewport_size({'width':width,'height':1000})
             run('.#.\n..#\n###')
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-            assert form().frame_locator('iframe[data-preview="current"]').locator('svg').bounding_box()['width']<=176
+            assert 240 <= form().frame_locator('iframe[data-preview="current"]').locator('svg').bounding_box()['width'] <= 288
             page.screenshot(path=str(output/f'life-{width}.png'),full_page=True)
         record('desktop/mobile seed and controls fit, with the full SVG board visible')
         context=browser.new_context(java_script_enabled=False);plain=context.new_page()

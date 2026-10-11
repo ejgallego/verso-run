@@ -1,6 +1,6 @@
 """Landing and Manual/Blog native agreement on an actual HTTP deployment."""
 from contextlib import ExitStack
-from harness import serve_directory
+from harness import show_slide, serve_directory
 import argparse
 import hashlib
 import json
@@ -64,6 +64,9 @@ with ExitStack() as servers:
         response = page.goto(base)
         assert response.status == 200
         for label, path in [
+            ('Explore Game of Life', 'Game-of-Life/'),
+            ('Step through a stack program', 'Stack-stepper/'),
+            ('Build an Illuminate diagram', 'Illuminate-diagrams/'),
             ('Explore the manual', 'Greeting/'),
             ('see its source anchors', 'Anchored-source/'),
             ('Try a runnable page', 'blog/page/'),
@@ -100,17 +103,7 @@ with ExitStack() as servers:
                 page.wait_for_function('globalThis.Reveal?.isReady() && globalThis.versoVirState === "ready"')
                 page.evaluate('document.fonts.ready')
                 page.wait_for_function('!Reveal.getViewportElement().classList.contains("loading-scroll-mode")')
-                index = {'twice': 0, 'greet': 1, 'count': 2, 'card': 3}[role]
-                page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                if page.evaluate('Reveal.isScrollView()'):
-                    # Scroll-mode slide() can stop at the preceding snap boundary.
-                    # Advance with the public navigation API, as a reader would.
-                    for _ in range(6):
-                        page.wait_for_timeout(100)
-                        current = page.evaluate('Reveal.getIndices().h')
-                        if current == index: break
-                        page.evaluate('Reveal.next()' if current < index else 'Reveal.prev()')
-                page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                show_slide(page, page.locator('.lean-run[data-experiment*="' + declaration + '"]').first)
                 if role == 'greet':
                     page.evaluate('Reveal.nextFragment()')
             form = page.locator('.lean-run[data-experiment*="' + declaration + '"]').first
@@ -146,9 +139,7 @@ with ExitStack() as servers:
                 page.wait_for_selector('.lean-run[data-enhanced]')
                 if genre == 'Slides':
                     page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                    index = {'flip': 4, 'increment': 5, 'lines': 6}[role]
-                    page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                    page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                    show_slide(page, page.locator('.lean-run[data-experiment*="LeanRunTyped.Examples.' + role + '"]').first)
                 form = page.locator('.lean-run[data-experiment*="LeanRunTyped.Examples.' + role + '"]').first
                 for value in values:
                     field = form.locator('input, select, textarea')
@@ -171,9 +162,7 @@ with ExitStack() as servers:
                 page.wait_for_selector('.lean-run[data-enhanced]')
                 if role == 'slide':
                     page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                    index = 7 if function == 'greet' else 9
-                    page.evaluate('(n) => Reveal.slide(n, 0)', index)
-                    page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+                    show_slide(page, page.locator('.lean-run[data-experiment*="' + owner + '.Inline.' + function + '"]').first)
                     if function == 'greet': page.evaluate('Reveal.nextFragment()')
                 form = page.locator('.lean-run[data-experiment*="' + owner + '.Inline.' + function + '"]').first
                 value = '世界 🌍 <b>&'
@@ -199,8 +188,7 @@ with ExitStack() as servers:
             page.wait_for_selector('.lean-run[data-enhanced]')
             if genre == 'Slides':
                 page.wait_for_function('Reveal.isReady() && globalThis.versoVirState === "ready"')
-                page.evaluate('Reveal.slide(10, 0)')
-                page.wait_for_function('Reveal.getIndices().h === 10')
+                show_slide(page, page.locator('.lean-run[data-experiment*="LeanRunSequence.Examples.stackView"]'))
             form = page.locator('.lean-run[data-experiment*="LeanRunSequence.Examples.stackView"]')
             value = '9007199254740993 2 *'
             form.locator('input[type=text]').fill(value)

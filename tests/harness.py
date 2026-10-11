@@ -27,6 +27,29 @@ def inventory(path):
             for file in path.rglob('*') if file.is_file()}
 
 
+def slide_index(selected):
+    """Locate a fixture by its containing slide, independent of deck order."""
+    return selected.evaluate('''e => {
+        const slide = Reveal.getSlides().find(slide => slide.contains(e));
+        return slide ? Reveal.getIndices(slide).h : -1;
+    }''')
+
+
+def show_slide(page, selected):
+    """Navigate to a fixture through Reveal, including its mobile scroll view."""
+    index = slide_index(selected)
+    assert index >= 0, 'the selected fixture must belong to a slide'
+    page.evaluate('(n) => Reveal.slide(n, 0)', index)
+    for _ in range(8):
+        page.wait_for_timeout(100)
+        current = page.evaluate('Reveal.getIndices().h')
+        if current == index:
+            break
+        page.evaluate('Reveal.next()' if current < index else 'Reveal.prev()')
+    page.wait_for_function('(n) => Reveal.getIndices().h === n', arg=index)
+    return index
+
+
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *_):
         pass

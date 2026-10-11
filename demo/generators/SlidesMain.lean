@@ -22,7 +22,7 @@ def main (args : List String) : IO UInt32 := do
   let extraCss := if mode == "collision" then
     #[({ filename := "lean-run/renderer.js", contents := ⟨"wrong bytes"⟩ } : CssFile)] else #[]
   let config : VersoSlides.Config := {
-    outputDir := destination, theme := "white", center := false,
+    outputDir := destination, theme := "white", center := false, height := 900,
     transition := "none", slideNumber := true, extraCss
   }
   VersoLeanRun.Slides.slidesMain config doc resources

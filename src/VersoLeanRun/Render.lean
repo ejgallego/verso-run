@@ -48,7 +48,7 @@ def renderControls (experiment : Experiment) : Html := Id.run do
     else .empty
   let inputNote := if experiment.form.isAutomaton then
     {{ <p class="lean-run-input-note" role="status"> "" </p> }} else .empty
-  return {{ <div class="lean-run-console">
+  let editor := {{ <div class="lean-run-editor">
       <form>
         <label> {{label}} {{control}} </label>
         <button type="submit" disabled="disabled"> "Run" </button>
@@ -57,6 +57,11 @@ def renderControls (experiment : Experiment) : Html := Id.run do
       {{inputNote}}
       <p class="lean-run-status" role="status" aria-live="polite"> "Ready" </p>
       <pre class="lean-run-output" aria-label="Result"/>
+    </div> }}
+  let consoleClass := if experiment.form.isAutomaton then
+    "lean-run-console lean-run-console-live" else "lean-run-console"
+  return {{ <div class={{consoleClass}}>
+      {{editor}}
       {{preview}}
       <noscript> "Enable JavaScript to run this compiled Lean example." </noscript>
     </div> }}
