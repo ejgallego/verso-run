@@ -20,7 +20,9 @@ are described in [internals](internals.md#library-boundaries).
 HTML pipeline. It checks navigation and declaration anchors, actual search,
 root/nested URLs, desktop/mobile layouts, and readable examples without JavaScript.
 The mutation gate edits and restores module prose, checking that HTML refreshes
-even when the public olean hash is unchanged. The packaged reference is checked
+even when the public olean hash is unchanged. It also checks stylesheet loading
+and distinct code/link styling in light and dark themes, including a
+stylesheet-only edit/restoration. The packaged reference is checked
 again before Pages upload. Build and preview commands are in
 [Contributing](../CONTRIBUTING.md#generated-library-reference).
 

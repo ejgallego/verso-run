@@ -79,6 +79,18 @@ if args.mutations:
         command(['python3', 'scripts/build-api-reference.py'], 'doc-restore')
     assert marker not in ''.join(Page(site / 'index.html').text)
     record('documentation-only edits refresh HTML even with unchanged public olean; restoration refreshes it again')
+    stylesheet = ROOT / 'docs/api-reference.css'
+    original_css = stylesheet.read_text()
+    css_marker = '/* Reference asset refresh probe. */'
+    try:
+        stylesheet.write_text(original_css + '\n' + css_marker + '\n')
+        command(['python3', 'scripts/build-api-reference.py'], 'css-edit')
+        assert css_marker in (site / stylesheet.name).read_text()
+    finally:
+        stylesheet.write_text(original_css)
+        command(['python3', 'scripts/build-api-reference.py'], 'css-restore')
+    assert (site / stylesheet.name).read_text() == original_css
+    record('stylesheet-only edits refresh the copied asset and restoration removes the probe')
 
 parsed = {path: Page(path) for path in pages}
 for path, page in parsed.items():
@@ -103,11 +115,34 @@ with serve_directory(served) as base, sync_playwright() as playwright:
     browser = playwright.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
     page = browser.new_page()
     errors = []
+    failed_styles = []
     page.on('pageerror', lambda error: errors.append(str(error)))
+    page.on('response', lambda response: failed_styles.append(response.url)
+            if response.request.resource_type == 'stylesheet' and
+            (response.status not in [200, 304] or (response.status == 200 and
+             'text/css' not in response.headers.get('content-type', ''))) else None)
     for prefix in ['root/api', 'nested/docs/api']:
         reference = base + prefix + '/'
         assert page.goto(reference).status == 200
         assert page.get_by_role('heading', name='Lean models, interactive views', exact=True).count() == 1
+        for theme in ['light', 'dark']:
+            page.emulate_media(color_scheme=theme, reduced_motion='reduce')
+            styles = page.locator('.code-content > .mod-doc .hl.lean.block').first.evaluate('''block => {
+                const s = getComputedStyle(block);
+                const inline = document.querySelector('.hl.lean.inline');
+                const link = inline.querySelector('a .const');
+                return {
+                    scrollable: s.overflowX === 'auto',
+                    padding: parseFloat(s.paddingLeft) > parseFloat(getComputedStyle(inline).paddingLeft),
+                    border: s.borderStyle === 'solid' && parseFloat(s.borderWidth) > 0,
+                    keyword: getComputedStyle(block.querySelector('.keyword')).color !== s.color,
+                    link: getComputedStyle(link).color !== getComputedStyle(document.body).color
+                };
+            }''')
+            assert all(styles.values()), (prefix, theme, styles)
+            page.screenshot(path=str(output / f'{prefix.replace("/", "-")}-{theme}.png'), full_page=True,
+                            animations='disabled')
+        page.emulate_media(color_scheme='light')
         for width in [1280, 390]:
             page.set_viewport_size({'width': width, 'height': 900})
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (prefix, width)
@@ -128,7 +163,8 @@ with serve_directory(served) as base, sync_playwright() as playwright:
     assert static.get_by_role('heading', name='Finite or live?', exact=True).count() == 1
     assert 'def firstFive' in static.locator('main').inner_text()
     assert not errors, errors
+    assert not failed_styles, failed_styles
     browser.close()
-record('checked examples remain readable without JavaScript; no uncaught browser errors')
+record('checked examples remain readable without JavaScript; styles load with correct MIME and code stays distinct in light/dark themes')
 (output / 'results.json').write_text(json.dumps({'checks': checks}, indent=2) + '\n')
 print(f'{len(checks)} API reference checks passed; evidence: {output}', flush=True)

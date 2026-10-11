@@ -1,0 +1,25 @@
+/* Checked examples use block code elements rather than Markdown pre elements. */
+.code-content .mod-doc .hl.lean.block {
+    margin: 0.85rem 0 1rem;
+    padding: 1rem 1.15rem;
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--verso-code-box-border-color);
+    border-radius: 0.5rem;
+    background: var(--verso-code-box-background-color);
+    line-height: 1.6;
+}
+
+/* Keep declaration links visible within highlighted code and prose. */
+.code-content .hl.lean a {
+    --verso-code-const-color: var(--verso-link-color);
+    color: var(--verso-link-color);
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-underline-offset: 0.18em;
+}
+
+.code-content .hl.lean a:visited {
+    --verso-code-const-color: var(--verso-link-visited-color);
+    color: var(--verso-link-visited-color);
+}

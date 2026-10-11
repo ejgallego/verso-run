@@ -135,7 +135,8 @@ landing page; module prose and Lean-checked examples live with the library sourc
 Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.
 The helper invokes Verso's `lake build :literateHtml` facet and supplies the source
 dependency missing from the pinned facet: documentation-only edits must refresh
-HTML even when the public olean stays unchanged.
+HTML even when the public olean stays unchanged. It also tracks the configured
+extra stylesheets so style edits refresh the generated site.
 `scripts/build-demo-site.py` includes the reference at `/api/` in the demo and
 Pages artifact. Generated HTML stays out of Git.
 
