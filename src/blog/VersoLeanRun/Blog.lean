@@ -16,8 +16,8 @@ namespace VersoLeanRun.Blog
 
 /-- Page and Post share one component, preserving native source children. -/
 block_component leanRun (experiment : Experiment) where
-  jsFiles := #[("verso-lean-run-bootstrap.js", include_str "../../web/bootstrap.js")]
-  cssFiles := #[("verso-lean-run.css", include_str "../../web/lean-run.css")]
+  jsFiles := #[("verso-lean-run-bootstrap.js", include_str "../../../web/bootstrap.js")]
+  cssFiles := #[("verso-lean-run.css", include_str "../../../web/lean-run.css")]
   toHtml := fun id _ _ go contents => do
     let source ← contents.mapM go
     let path := (← HtmlT.context).path

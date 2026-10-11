@@ -9,7 +9,7 @@ public import Lean.Data.Json.Parser
 public import Std.Data.TreeMap.Basic
 public import Vir.Resources
 public import Vir.Compiler.Interface.Encode
-public import VersoLeanRun.Automaton
+public import VersoLeanRun.Views
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Vir.Compiler.Interface.Encode
 public meta import Lean.Elab.Term
@@ -159,11 +159,11 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     fields := fields ++ [("presenters", Lean.Json.mkObj presenters)]
   let plan := Lean.Json.mkObj fields
   let mut files := site.files.push { path := "lean-run/publication.json", bytes := plan.compress.toUTF8 }
-  for (name, contents) in [("renderer.js", include_str "../../web/renderer.js"),
-      ("host.js", include_str "../../web/host.js"), ("worker.js", include_str "../../web/worker.js"),
-      ("contract.js", include_str "../../web/contract.js"),
-      ("presenter.js", include_str "../../web/presenter.js"),
-      ("automaton.js", include_str "../../web/automaton.js")] do
+  for (name, contents) in [("renderer.js", include_str "../../../web/renderer.js"),
+      ("host.js", include_str "../../../web/host.js"), ("worker.js", include_str "../../../web/worker.js"),
+      ("contract.js", include_str "../../../web/contract.js"),
+      ("presenter.js", include_str "../../../web/presenter.js"),
+      ("automaton.js", include_str "../../../web/automaton.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }
   return { files, plan }
 

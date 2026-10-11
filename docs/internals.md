@@ -1,5 +1,51 @@
 # How verso-run fits together
 
+## Library boundaries
+
+The package has separate Lake owners for model/view code, browser presentation,
+and document authoring. Import `VersoLeanRun.Views` in ordinary Lean producer
+modules. Document modules select `VersoLeanRun`, `VersoLeanRun.Blog`, or
+`VersoLeanRun.Slides`; their native generators select the corresponding `Publish`
+module. Existing directive and publication APIs retain their names.
+
+| Library | Source directory | Owned modules |
+| --- | --- | --- |
+| `VersoLeanRunViews` | `src/views/` | `Views`, `Frame`, `Sequence`, `Automaton` |
+| `VersoLeanRunAuthoring` | `src/authoring/` | `Model`, `Callable`, `Anchored`, `Inline`, `Render`, `Collect` |
+| `VersoLeanRun` | `src/manual/` | Manual facade and `Manual` |
+| `VersoLeanRunPublish` | `src/publication/` | `Publish`, `Publication` |
+| `VersoLeanRunBlog` | `src/blog/` | `Blog`, `Blog.Publish` |
+| `VersoLeanRunSlides` | `src/slides/` | `Slides`, `Slides.Publish` |
+| `VersoLeanRunPresenter` | `src/presenter/` | `VersoLeanRunPresenter`, `Preview` |
+| `VersoLeanRunPresenterResources` | `src/presenter-resources/` | Native presenter resource carrier |
+
+Each library's `srcDir` is disjoint. Module paths within these directories retain
+their public Lean names, so moving files does not change imports. Explicit module
+globs give every source one owner even where namespaces overlap; namespace-wide
+roots would also claim modules in other libraries. `lake run check-library-ownership`
+checks that every source is registered to the library whose directory contains it.
+
+The views library has no
+browser-asset prerequisite and imports no genre adapter, VIR compiler or DOM
+binding. The presenter depends on view types; authoring depends on views and the
+native compiler APIs. Native publication imports the presenter carrier. That
+carrier classifies the prepared program in an elaboration-time environment and
+embeds its resources, keeping the DOM implementation out of ordinary native
+imports.
+
+The pinned `Verso.Output.Html` also imports its Lean quoter machinery. VIR's DOM
+bindings import host validation through `Vir.Host`, including VIR classifier
+modules. These upstream imports remain intact. Separating their syntax and
+runtime data would require an upstream change; this split makes verso-run's
+ownership explicit and does not claim a compiler-free transitive DOM import or
+a measured build-speed improvement. VIR packages executable declarations through
+their reached IR dependencies.
+
+`tests/client.py` checks source-directory ownership and import phases, then runs a
+plain Lean producer through native and dedicated-worker execution without a
+Verso document, page host or presenter. Compiler expectations are derived
+independently by its native carrier. See [validation](validation.md).
+
 ## Common machinery and Manual integration
 
 The portable model, callable classifier, anchor loader, console, AST collector
@@ -19,7 +65,7 @@ the selected HTML layout. Public imports remain `VersoLeanRun` and
 `VersoLeanRun.Publish`. Blog adapters collect typed Page/Post sites. Slides adapters
 retain native source wrappers and compose Run resources with the stock formatter
 asset plan. Both reuse the same model, source loader, console, and worker.
-The [genre review](multi-genre.md) describes those boundaries.
+The [genre design](multi-genre.md) describes those boundaries.
 
 ## Resource ownership and site integration
 

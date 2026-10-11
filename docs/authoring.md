@@ -155,6 +155,11 @@ ResourceSet publication APIs. Migrate callers when updating the prototype. See
 
 ## Present a sequence of states
 
+For a model in an ordinary Lean source module, import `VersoLeanRun.Views`.
+It provides `Frame`, `Sequence`, `Automaton` and their view helpers. The document
+imports its own genre adapter to select the function with `leanRun`; producer
+modules need no document directives or publication setup.
+
 Return `VersoLeanRun.SequenceView` to get previous/next, step selection and a
 scrubber. The same entry works in Manual, Blog Page/Post and Slides. Define your
 model with `Sequence α`, label each `SequenceStep α`, then supply a view using

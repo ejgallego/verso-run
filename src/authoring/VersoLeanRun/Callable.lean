@@ -9,7 +9,7 @@ public meta import VersoLeanRun.Model
 public import Verso.Doc.Elab
 meta import Verso.Instances.Deriving
 public import Verso.Output.Html
-public import VersoLeanRun.Automaton
+public import VersoLeanRun.Views
 public meta import Vir.Attributes
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Lean.ToExpr

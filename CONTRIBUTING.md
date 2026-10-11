@@ -106,14 +106,35 @@ uv run --with playwright python tests/starter.py
 
 It copies the starter outside the repository, builds its pinned published
 dependency, and runs its text and HTML examples at root and nested URLs. It
-qualifies that published revision; the main acceptance suite checks your working
-tree changes. CI runs both before deploying the demo.
+qualifies that published revision; it does not select the current PR candidate.
+
+Check downstream consumption of your committed candidate separately:
+
+```sh
+UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
+  uv run --with playwright python tests/candidate-consumer.py --candidate HEAD --revision-kind pr-head
+```
+
+This gate bundles the exact checked-out commit and builds a fresh consumer outside
+the workspace. The consumer owns its model, Manual, resource carrier, publisher,
+and build outputs. Its scalar, finite, and live examples run from copied sites at
+root and nested URLs, with native reference results and independent live sessions.
+The report records the requested revision, resolved dependency, and dependency
+checkout. It identifies local bundle acquisition separately from the starter's
+public Git acquisition. CI tests its actual checkout, including synthetic PR
+merge commits, and requires both gates before deploying Pages. Keep the starter's
+public pin until a new baseline has landed and its acquisition is qualified.
 
 ## Repository layout
 
 | Path | Purpose |
 | --- | --- |
-| `src/` | Lean block elaboration, HTML rendering, and publication |
+| `src/views/` | Pure models, observations, and VIR worker-session adapters |
+| `src/authoring/` | Shared block elaboration and console rendering |
+| `src/manual/`, `src/blog/`, `src/slides/` | Genre adapters and public authoring imports |
+| `src/publication/` | Shared resource planning and Manual publication |
+| `src/presenter/` | VIR DOM rendering and sandbox policy |
+| `src/presenter-resources/` | Native carrier for the prepared browser presenter |
 | `web/` | Input validation, UI state, worker ownership, and asynchronous invocation |
 | `demo/chapters/` | Manual, Blog, and Slides documents and their Lean functions |
 | `demo/generators/` | Native generators for the three demo genres |
@@ -131,10 +152,11 @@ Generated qualification reports and prototype captures belong in `_out/` or CI
 artifacts; their earlier versions remain in Git history at `23f449e`. Keep only
 illustrations used by documentation in `docs/images/`.
 
-Within `src/VersoLeanRun/`, `Model`, `Callable`, `Anchored`, `Render`,
-`Collect`, and `Publication` hold the common machinery. `Manual` and `Publish`
+Within `src/authoring/`, `Model`, `Callable`, `Anchored`, `Inline`, `Render`,
+and `Collect` hold the common authoring machinery. `Publication` in
+`src/publication/` holds the shared resource planner. `Manual` and `Publish`
 adapt it to Manual elaboration, native source blocks, and generator output.
-`VersoLeanRun` remains the compatibility facade. `Blog` and `Blog.Publish`
+`VersoLeanRun` remains the Manual authoring facade. `Blog` and `Blog.Publish`
 adapt the same core to Page/Post. `Slides` and `Slides.Publish` retain native code
 and compose with the stock Slides asset plan. See the [genre review](docs/multi-genre.md).
 
@@ -143,7 +165,11 @@ and worker sessions. `Frame` supplies their shared observations and typed
 transport. `Preview` owns the sandbox document policy. `VersoLeanRunPresenter` implements browser DOM
 presentation through VIR. Its separate resource carrier keeps browser-only
 definitions out of native generator compilation. `web/presenter.js` owns loading,
-cancellation and disposal for both Html and sequence views.
+cancellation and disposal for Html, sequence and automaton views.
+`VersoLeanRun.Views` is the model/view import for ordinary producers. Its library
+has no document or browser-asset prerequisite. Each library owns its source
+directory; public import names remain unchanged. The Lake ownership table and
+upstream import constraints are described in [internals](docs/internals.md#library-boundaries).
 
 ## Changing the code
 

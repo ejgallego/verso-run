@@ -1,0 +1,27 @@
+import Lake
+open Lake DSL
+
+require verso_run from git {{source}} @ {{revision}}
+
+package candidate_consumer
+
+lean_lib ConsumerModel where
+  srcDir := "models"
+  roots := #[`Consumer.Model]
+
+lean_lib ConsumerChapter where
+  srcDir := "chapters"
+  roots := #[`Consumer.Chapter]
+
+lean_lib ConsumerResources where
+  srcDir := "resources"
+  roots := #[`Consumer.Resources]
+  needs := #[`+Consumer.Chapter:virResourcePack]
+
+@[default_target]
+lean_exe «consumer-manual» where
+  root := `Main
+
+@[default_target]
+lean_exe «consumer-oracle» where
+  root := `Oracle

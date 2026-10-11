@@ -123,7 +123,7 @@ with serve_directory(served) as base:
         finally:
             browser.close()
 
-(output / "results.json").write_text(json.dumps({"checks": checks, "publication": plan,
+(output / "results.json").write_text(json.dumps({"suite": "published-starter-acquisition", "checks": checks, "publication": plan,
     "project": str(project), "dependencyRevision": extension["rev"], "virRevision": vir["rev"],
     "runtimePackSha256": hashlib.sha256(runtime_pack.read_bytes()).hexdigest(),
     "gitManifest": manifest, "cold": True, "lakeArtifactCache": False}, indent=2) + "\n")

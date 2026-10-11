@@ -66,9 +66,9 @@ common console. The generic block-tree walk can be shared, while walking an
 entire Blog site or preparing slide output belongs to its adapter. Malformed
 metadata must fail publication, rather than being treated as an unrelated block.
 
-Before extraction, the [Run module](../src/VersoLeanRun.lean) mixed the portable
+Before extraction, the [Run module](../src/manual/VersoLeanRun.lean) mixed the portable
 `Experiment` and console with Manual's `block_extension`, inline elaborator, and
-scope handling. The [publisher](../src/VersoLeanRun/Publish.lean) mixed
+scope handling. The [publisher](../src/publication/VersoLeanRun/Publish.lean) mixed
 contract validation/resource planning with Manual AST decoding and `ExtraStep`
 output selection. These boundaries now correspond to `Model`, `Callable`,
 `Render`, `Collect`, and `Publication`, with `Anchored` supplying shared source

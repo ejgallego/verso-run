@@ -65,13 +65,13 @@ def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
     ({ filename := file.path, contents := file.bytes } : ThemeAsset)
   let config := { config with
     extraAssets := config.extraAssets ++ assets ++ #[
-      ⟨"lean-run/slides.js", (include_str "../../../web/slides.js").toUTF8⟩],
+      ⟨"lean-run/slides.js", (include_str "../../../../web/slides.js").toUTF8⟩],
     extraCss := config.extraCss ++ #[
-      { filename := "lean-run/console.css", contents := ⟨include_str "../../../web/lean-run.css"⟩ },
-      { filename := "lean-run/slides.css", contents := ⟨include_str "../../../web/slides.css"⟩ }],
+      { filename := "lean-run/console.css", contents := ⟨include_str "../../../../web/lean-run.css"⟩ },
+      { filename := "lean-run/slides.css", contents := ⟨include_str "../../../../web/slides.css"⟩ }],
     extraHead := config.extraHead ++ #[
       {{ <script type="module" src="lean-run/slides.js"/> }},
-      {{ <noscript><style>{{Html.text false (include_str "../../../web/slides-static.css")}}</style></noscript> }}] }
+      {{ <noscript><style>{{Html.text false (include_str "../../../../web/slides-static.css")}}</style></noscript> }}] }
   let browserDoc ← IO.ofExcept <| browserDocument doc
   VersoSlides.slidesMain config browserDoc
 

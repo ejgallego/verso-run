@@ -26,7 +26,7 @@ jobs:
         run: lake build
       - name: Native and browser acceptance
         run: lake test -- --mutations --output _out/acceptance
-      - name: Independent author starter
+      - name: Published starter acquisition
         run: uv run --with playwright python tests/starter.py --output _out/starter-acceptance
       - name: Package demo
         run: |
@@ -45,8 +45,43 @@ jobs:
         with:
           path: _out/html-multi
 
+  candidate-consumer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
+      UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/.cache/uv-python
+      CANDIDATE_REVISION: ${{ github.sha }}
+      CANDIDATE_KIND: ${{ github.event_name == 'pull_request' && 'synthetic-merge' || 'commit' }}
+      PR_HEAD_REVISION: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # Bundle the exact candidate, including a PR's synthetic merge.
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '24'
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Chromium
+        run: uv run --with playwright playwright install --with-deps chromium
+      - name: Candidate downstream integration
+        run: |
+          uv run --with playwright python tests/candidate-consumer.py \
+            --candidate "$CANDIDATE_REVISION" --revision-kind "$CANDIDATE_KIND" \
+            --pr-head "$PR_HEAD_REVISION" --output _out/candidate-consumer
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: candidate-consumer
+          path: _out/candidate-consumer/
+          if-no-files-found: warn
+
   pages:
-    needs: acceptance
+    needs: [acceptance, candidate-consumer]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     permissions:

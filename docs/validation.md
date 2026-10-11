@@ -4,6 +4,16 @@ The main acceptance suite exercises the real native generator and the real
 Chromium worker. It compares edited-input results with a native Lean oracle,
 rather than treating successful loading as proof that an example works.
 
+## Client library boundary
+
+`tests/client.py` checks that each module lives in its unique Lake owner's source
+directory and checks imports, then builds a
+plain Lean producer and native resource carrier in the root Lake workspace. The standalone binary publishes
+without a Verso document or project marker. Direct VIR workers compare finite
+traces, live UInt64 wraparound and independent sessions with native output at
+root and nested URLs. The upstream Html quoter and host-validation import limits
+are described in [internals](internals.md#library-boundaries).
+
 ## What the suite checks
 
 - Closed form metadata round-trips and rejection of unsupported combinations;

@@ -16,36 +16,58 @@ input_dir leanRunWeb where
   path := "web"
   text := true
 
--- Public libraries: shared machinery, Manual publication, and genre adapters.
+-- Each library owns a source directory. Explicit module globs preserve public
+-- imports without claiming descendants that belong to another library.
+
+lean_lib VersoLeanRunViews where
+  srcDir := "src/views"
+  roots := #[]
+  globs := #[.one `VersoLeanRun.Views, .one `VersoLeanRun.Frame,
+    .one `VersoLeanRun.Sequence, .one `VersoLeanRun.Automaton]
+
+lean_lib VersoLeanRunAuthoring where
+  srcDir := "src/authoring"
+  roots := #[]
+  globs := #[.one `VersoLeanRun.Model, .one `VersoLeanRun.Callable,
+    .one `VersoLeanRun.Anchored, .one `VersoLeanRun.Inline,
+    .one `VersoLeanRun.Render, .one `VersoLeanRun.Collect]
+
+-- Genre authoring and native publication retain their public imports.
 
 lean_lib VersoLeanRun where
-  srcDir := "src"
-  roots := #[`VersoLeanRun]
+  srcDir := "src/manual"
+  roots := #[]
+  globs := #[.one `VersoLeanRun, .one `VersoLeanRun.Manual]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunPublish where
-  srcDir := "src"
-  roots := #[`VersoLeanRun.Publish]
+  srcDir := "src/publication"
+  roots := #[]
+  globs := #[.one `VersoLeanRun.Publish, .one `VersoLeanRun.Publication]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunBlog where
-  srcDir := "src"
-  roots := #[`VersoLeanRun.Blog]
+  srcDir := "src/blog"
+  roots := #[]
+  globs := #[.one `VersoLeanRun.Blog, .one `VersoLeanRun.Blog.Publish]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunSlides where
-  srcDir := "src"
-  roots := #[`VersoLeanRun.Slides]
+  srcDir := "src/slides"
+  roots := #[]
+  globs := #[.one `VersoLeanRun.Slides, .one `VersoLeanRun.Slides.Publish]
   needs := #[leanRunWeb]
 
 -- The browser presenter is separate from its native resource carrier.
 lean_lib VersoLeanRunPresenter where
-  srcDir := "src"
-  roots := #[`VersoLeanRunPresenter]
+  srcDir := "src/presenter"
+  roots := #[]
+  globs := #[.one `VersoLeanRunPresenter, .one `VersoLeanRun.Preview]
 
 lean_lib VersoLeanRunPresenterResources where
-  srcDir := "src"
-  roots := #[`VersoLeanRunPresenterResources]
+  srcDir := "src/presenter-resources"
+  roots := #[]
+  globs := #[.one `VersoLeanRunPresenterResources]
   needs := #[`+VersoLeanRunPresenter:virResourcePack]
 
 -- Demo documents and ordinary Lean producers. They never import their carriers.
@@ -122,6 +144,40 @@ lean_exe «lean-run-slides-demo» where
   needs := #[leanRunWeb]
 
 -- Native references and qualification tools; oracles retain their default targets.
+
+-- A plain Lean client, with no Verso document or authoring adapter.
+lean_lib LeanRunClientFixture where
+  srcDir := "tests/client"
+  roots := #[`ClientFixture]
+
+lean_lib LeanRunClientResources where
+  srcDir := "tests/client"
+  roots := #[`ClientResources]
+  needs := #[`+ClientFixture:virResourcePack]
+
+lean_exe «lean-run-client-check» where
+  srcDir := "tests/client"
+  root := `ClientMain
+
+script «check-library-ownership» do
+  let pkg ← getRootPackage
+  let source := pkg.dir / "src"
+  for path in ← source.walkDir do
+    if path.extension == some "lean" then
+      let directories := pkg.leanLibs.filter fun lib =>
+        path.toString.startsWith (lib.srcDir.toString ++ "/")
+      unless directories.size == 1 do
+        throw <| IO.userError s!"{path} needs one source directory owner, found {directories.map (·.name)}"
+      let some lib := directories[0]? | throw <| IO.userError s!"No library for {path}"
+      let relative := path.toString.dropPrefix? (lib.srcDir.toString ++ "/")
+      let some relative := relative | throw <| IO.userError s!"Unexpected source path: {path}"
+      let name := (System.FilePath.mk relative.toString).withExtension ""
+        |>.components.foldl Lean.Name.str Lean.Name.anonymous
+      let owners := pkg.leanLibs.filter (·.isBuildableModule name)
+      unless owners.map (·.name) == #[lib.name] do
+        throw <| IO.userError s!"{name} in {lib.srcDir} must belong to {lib.name}, found {owners.map (·.name)}"
+  IO.println "Every library source module lives in its unique Lake owner's directory"
+  return 0
 
 @[default_target]
 lean_exe «lean-run-oracle» where
