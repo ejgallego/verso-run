@@ -106,8 +106,24 @@ uv run --with playwright python tests/starter.py
 
 It copies the starter outside the repository, builds its pinned published
 dependency, and runs its text and HTML examples at root and nested URLs. It
-qualifies that published revision; the main acceptance suite checks your working
-tree changes. CI runs both before deploying the demo.
+qualifies that published revision; it does not select the current PR candidate.
+
+Check downstream consumption of your committed candidate separately:
+
+```sh
+UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
+  uv run --with playwright python tests/candidate-consumer.py --candidate HEAD --revision-kind pr-head
+```
+
+This gate bundles the exact checked-out commit and builds a fresh consumer outside
+the workspace. The consumer owns its model, Manual, resource carrier, publisher,
+and build outputs. Its scalar, finite, and live examples run from copied sites at
+root and nested URLs, with native reference results and independent live sessions.
+The report records the requested revision, resolved dependency, and dependency
+checkout. It identifies local bundle acquisition separately from the starter's
+public Git acquisition. CI tests its actual checkout, including synthetic PR
+merge commits, and requires both gates before deploying Pages. Keep the starter's
+public pin until a new baseline has landed and its acquisition is qualified.
 
 ## Repository layout
 
