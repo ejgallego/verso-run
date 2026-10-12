@@ -5,7 +5,7 @@ set_option compiler.postponeCompile false
 
 public abbrev Words := Sequence String
 public abbrev Markup := Verso.Output.Html
-structure Hidden where
+public structure Hidden where
   value : Nat
 
 #doc (Manual) "Default model displays" =>

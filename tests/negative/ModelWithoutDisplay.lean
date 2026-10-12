@@ -2,7 +2,7 @@ module
 public import VersoLeanRun
 open Verso Genre Manual VersoLeanRun
 set_option compiler.postponeCompile false
-structure Hidden where
+public structure Hidden where
   value : Nat
 #doc (Manual) "Missing default display" =>
 ```leanRun (entry := model)
