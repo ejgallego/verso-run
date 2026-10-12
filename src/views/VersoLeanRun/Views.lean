@@ -32,11 +32,28 @@ public def greeting (name : String) : Html :=
   .tag "p" #[] (Html.ofString s!"Hello, {name}!")
 ```
 
-{lit}`leanRun` blocks combine Lean code with controls for calling a function.
-The {lit}`entry` argument names that function, while its Lean type determines the input
-control and result display. The
-[authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md#the-result-type-chooses-the-display)
-lists the supported function types and shows how to add a block to a document.
+## Runnable document blocks
+
+In a Verso document, put the definition inside a code fence labelled {lit}`leanRun`:
+
+````
+```leanRun (entry := greeting) (input := "Ada")
+open Verso.Output
+
+public def greeting (name : String) : Html :=
+  .tag "p" #[] (Html.ofString s!"Hello, {name}!")
+```
+````
+
+This fence adds an input field, Run and Stop buttons, and a result display alongside
+the source. The {lit}`entry` argument names the function; {lit}`input` provides its
+initial input without running it. The function's Lean type determines the input
+control and result display. Ordinary {lit}`lean` fences display code
+without Run controls.
+
+Run blocks work in Manual, Blog, and Slides, each with its own adapter import. The
+[authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
+shows the imports and publication setup, and lists the supported function types.
 
 ## Recorded and live views
 
@@ -98,9 +115,8 @@ recorded frames; {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` adds
 live playback. Run blocks work in Manual, Blog, and Slides documents, each with
 its own adapter import.
 
-Follow the [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
-to add a block to your document, or explore the
-[demo](https://ejgallego.github.io/verso-run/) for complete examples.
+The [demo](https://ejgallego.github.io/verso-run/) includes complete examples in
+all three genres.
 
 Opening a page leaves live examples idle. Run displays the initial state; Play
 advances it continuously. Pause keeps the current state, and Stop ends the run.
