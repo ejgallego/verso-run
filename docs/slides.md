@@ -1,7 +1,8 @@
 # Runnable slide presentations
 
 Run blocks work in Slides with the `VersoLeanRun.Slides` adapter. The syntax is
-the same as in Manual and Blog:
+the same as in Manual and Blog. A simple example defines its function inside
+`leanRun`:
 
 ````lean
 module
@@ -28,10 +29,15 @@ Run blocks keep Slides' native code formatting. In presentation mode, long slide
 scroll within the slide area so their source, controls, and results remain
 accessible. Reveal's scroll view retains its usual navigation.
 
+Shared functions can be imported and selected with `leanRun`, displaying a
+reference such as `#check MyExamples.greet`. See
+[reusing an imported function](authoring.md#reuse-a-function-from-an-imported-module)
+for a complete example and publication setup.
+
 ## Optional shared source anchors
 
-Import a source module and use `leanRunAnchor` when the same code should
-be displayed in several documents:
+`leanRunAnchor` displays a checked quotation of an imported implementation. This
+is useful when a slide explains the function's body:
 
 ````lean
 ```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
@@ -42,8 +48,8 @@ public def MyExamples.greet (name : String) : String :=
 
 `MyExamples` must contain that region between `-- ANCHOR: greeting` and
 `-- ANCHOR_END: greeting`. The function named by `entry` must be defined within
-that region. Verso checks the displayed source and suggests replacements when it
-does not match. Anchored proof states can be hidden with
+that region. Verso checks that the displayed code matches the source and suggests
+a replacement when it does not. Anchored proof states can be hidden with
 `-showProofStates`; definition links follow native Slides policy. See
 [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
