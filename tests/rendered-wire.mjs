@@ -26,6 +26,19 @@ assert.throws(() => formatPublishedResult("automaton", {...limit, error:"x"}), /
 assert.throws(() => formatPublishedResult("automaton", {...limit, label:"x"}), /exceeds/);
 // Bounds apply to the complete value, independently of constructor encodings.
 assert.throws(() => formatPublishedResult("html", {values:Array(MAX_VALUE_NODES).fill(null)}), /structured-value limit/);
+const fullBudget = Array(MAX_VALUE_NODES - 1).fill(null);
+assert.equal(formatPublishedResult("html", fullBudget), fullBudget);
+// A deep branch must not keep expanding while broad sibling lists wait.
+// The inner getter would run if the walker ignored those queued siblings.
+let reachedInner = false;
+let broadAndDeep = {get value() { reachedInner = true; return null; }};
+for (let i = 0; i < 10; ++i) broadAndDeep = [...Array(3000).fill(null), broadAndDeep];
+assert.throws(() => formatPublishedResult("html", broadAndDeep), /structured-value limit/);
+assert.equal(reachedInner, false);
+// Reject an oversized array before reading its elements.
+const oversized = Array(MAX_VALUE_NODES).fill(null);
+Object.defineProperty(oversized, 0, {enumerable: true, get() { throw new Error("Array elements were read before checking its size"); }});
+assert.throws(() => formatPublishedResult("html", oversized), /structured-value limit/);
 let deep = {};
 for (let i=0; i<MAX_VALUE_DEPTH+1; ++i) deep={child:deep};
 assert.throws(() => formatPublishedResult("html",deep), /structured-value limit/);

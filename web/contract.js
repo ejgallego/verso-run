@@ -45,8 +45,10 @@ function validateValueBudget(value) {
     if (++nodes > MAX_VALUE_NODES || depth > MAX_VALUE_DEPTH) throw new Error("Result exceeds its structured-value limit");
     if (typeof value === "string") size += value.length;
     else if (value !== null && typeof value === "object") {
-      const children = Object.values(value);
-      if (children.length > MAX_VALUE_NODES - nodes) throw new Error("Result exceeds its structured-value limit");
+      const children = Array.isArray(value) ? value : Object.values(value);
+      // Every queued value must still be visited. Reserve its place before
+      // adding children, and check arrays without copying their contents.
+      if (children.length > MAX_VALUE_NODES - nodes - pending.length) throw new Error("Result exceeds its structured-value limit");
       for (const child of children) pending.push([child, depth + 1]);
     } else if (value !== null && !["boolean", "number", "bigint"].includes(typeof value)) {
       throw new Error("Lean returned an invalid structured value");
