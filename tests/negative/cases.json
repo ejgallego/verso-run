@@ -160,5 +160,23 @@
       "document's own project",
       "external-project execution is not yet qualified"
     ]
+  },
+  "ModelWithoutDisplay": {
+    "contains": [
+      "cannot display model type",
+      "Hidden",
+      "ToString",
+      ".view render"
+    ]
+  },
+  "DependentModel": {
+    "contains": [
+      "automatic display needs a fixed model type"
+    ]
+  },
+  "ModelCollision": {
+    "contains": [
+      "already in use"
+    ]
   }
 }

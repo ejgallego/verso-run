@@ -23,11 +23,11 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-The function must be public, executable, and monomorphic. Scalar, HTML, and
-sequence entries must be pure; live views return an `AutomatonView` action. No
-`@[vir_export]` attribute is required: the build registers the function named by
-`entry` and checks it with VIR. It also compiles and checks any helper functions
-that the entry calls. Existing explicit export attributes remain supported.
+The function must be public, executable, and monomorphic. Scalar and HTML
+entries, as well as sequence and automaton model functions, must be pure;
+custom live views return an `AutomatonView` action. No `@[vir_export]` attribute
+is required: the build handles VIR registration and checks the entry and any
+helper functions it calls. Existing explicit export attributes remain supported.
 
 Definitions, namespaces, and open declarations remain available in later Run
 blocks. Several blocks can use the same entry; a later block might display just
@@ -64,8 +64,13 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | --- | --- |
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
 | `String`, `Nat`, `Bool`, or `UInt64` → `Verso.Output.Html` | An isolated HTML preview |
-| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
-| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Sequence α` or `SequenceView` | Labelled states with selection and scrubbing |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Automaton α` or `AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
+
+For a plain `Sequence α` or `Automaton α`, HTML states keep their markup;
+other states need a `ToString` instance and appear as escaped text. The model type
+must be fixed, rather than depend on the input value. Use `.view render` for a
+custom HTML or SVG display, including model types without `ToString`.
 
 Text results are limited to 65,536 UTF-16 code units. In HTML and frame results,
 the strings share that limit, including labels, content, and errors.
@@ -166,17 +171,15 @@ or publication setup.
 The generated [View API reference](https://ejgallego.github.io/verso-run/api/)
 explains these types and helpers with Lean-checked examples and linked source.
 
-A function returning `VersoLeanRun.SequenceView` gets controls for browsing its
-frames, including step selection and a scrubber. It works in all three genres.
+A function returning `VersoLeanRun.Sequence α` or `SequenceView` gets controls
+for browsing its frames, including step selection and a scrubber. It works in all three genres.
 `Sequence α` records model values, while `SequenceView` contains HTML ready to
 display. For text values, the default renderer is enough:
 
 ```lean
-public def Demo.greetingSteps (name : String) : VersoLeanRun.SequenceView :=
-  let sequence : VersoLeanRun.Sequence String := {
-    initial := { label := "Start", content := name }
+public def Demo.greetingSteps (name : String) : VersoLeanRun.Sequence String :=
+  { initial := { label := "Start", content := name }
     steps := #[{ label := "Greeting", content := "Hello, " ++ name }] }
-  sequence.view
 ```
 
 The block `leanRun (entry := Demo.greetingSteps)` displays this sequence.
@@ -195,8 +198,8 @@ still give one state. The optional fourth argument labels the steps, starting
 at zero:
 
 ```lean
-def counter (seed : Nat) : SequenceView :=
-  (Sequence.iterate (· + 1) seed 5 (fun i => s!"Iteration {i}")).view
+def counter (seed : Nat) : Sequence Nat :=
+  Sequence.iterate (· + 1) seed 5 (fun i => s!"Iteration {i}")
 ```
 
 Every `Sequence` contains an initial frame and an optional array of later steps.
@@ -265,14 +268,15 @@ labels the steps. The default renderer preserves HTML and displays other values
 as escaped text using `ToString`:
 
 ```lean
-public def counter (seed : Nat) : VersoLeanRun.AutomatonView :=
-  let machine : VersoLeanRun.Automaton Nat := {
-    initial := seed, step := (· + 1) }
-  machine.view (label := fun i => s!"Iteration {i}")
+public def counter (seed : Nat) : VersoLeanRun.Automaton Nat :=
+  { initial := seed, step := (· + 1) }
 ```
 
-The block `leanRun (entry := counter)` provides playback controls. Opening the
-page leaves the example idle:
+The block `leanRun (entry := counter)` provides playback controls without a call
+to `.view`. For custom labels, return `(counter seed).view (label := ...)` from a
+separate entry. Ordinary Lean code still uses `.view` explicitly to start a
+session; `leanRun` generates that adapter when compiling the document.
+Opening the page leaves the example idle:
 
 | Action | Model and playback |
 | --- | --- |

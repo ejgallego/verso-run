@@ -174,16 +174,22 @@ there is no embedded-interface parser or reopening of producer files here.
 
 VIR's `analyzeExportInterface` independently classifies the callable. Plain-text
 calls use pure, homogeneous String/Nat/Bool/UInt64 signatures. Any of these
-inputs may instead return `Html`, `SequenceView`, or `AutomatonView`. Scalar,
-HTML, and sequence functions are pure; automaton start actions use the runtime
+inputs may instead return `Html`, `Sequence α`, `Automaton α`, or their rendered
+views. Model functions are pure; automaton start adapters use the runtime
 effect. `Experiment.form : FormKind`
 contains an `InputKind` and `PresentationKind`; multiline mode exists only inside
 `InputKind.string`. Unknown tags and unsupported object encodings fail metadata
 decoding. The twenty form tags are checked against the shared browser codec.
 
 Rendered entries preserve their actual Lean types: `Html`, `Sequence Html`, or
-`RuntimeM AutomatonSession`. Local entries are exported directly; an imported
-entry gets one document-owned forwarding export with the same signature.
+`RuntimeM AutomatonSession`. Plain `Sequence α` and `Automaton α` entries get a
+document-owned display adapter for escaped text through `ToString` or live HTML
+states. A `Sequence Html` already has the rendered type and needs no conversion. The source
+function keeps its model type. The compiler classifies the generated callable:
+sequences return `Sequence Html`; automata return `RuntimeM AutomatonSession`.
+Local scalar and explicitly rendered entries are exported directly; imported
+entries get a document-owned forwarding export. Adapter names are checked for
+collisions, and repeated placements reuse the same export.
 VIR transfers structured values through its compiler-derived codec. Sequences
 cross the worker message boundary as recorded frame data; automata send one frame
 at a time while their live callbacks remain in the worker.
@@ -333,8 +339,8 @@ states; an ordinary live model keeps only its current state.
 
 ### Rendering and transport
 
-For richer displays, functions return `Html`, `SequenceView`, or `AutomatonView`
-instead of scalar results. HTML generation, including SVG,
+For richer displays, functions return `Html`, `Sequence α`, `Automaton α`, or
+explicitly rendered views instead of scalar results. HTML generation, including SVG,
 runs in compiled Lean in the worker. The sequence controls and frame selection
 also run in compiled Lean, in the separate browser presenter. JavaScript owns
 asynchronous loading, worker messages and cancellation; it does not evaluate the

@@ -97,16 +97,16 @@ open VersoLeanRun
 def counting : Sequence Nat :=
   Sequence.iterate Nat.succ 0 4 (fun n => s!"Step {n}")
 
-def countingView : SequenceView := counting.view
-
 def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
 ```
 
 {name (full := VersoLeanRun.Sequence.view)}`Sequence.view` renders the recorded
 values. Its default renderer preserves HTML and converts other values to escaped
 text using {name}`ToString`. A custom renderer can produce an HTML or SVG display.
-The resulting {name (full := VersoLeanRun.SequenceView)}`SequenceView` displays
-the recorded frames with navigation controls.
+A {lit}`leanRun` entry can return {lit}`Sequence α` directly for this default
+display. Use {lit}`sequence.view render` when the values need a custom HTML or SVG
+renderer. Its result, {name (full := VersoLeanRun.SequenceView)}`SequenceView`, uses
+the same navigation controls.
 
 A {name (full := VersoLeanRun.Sequence)}`Sequence` can also be constructed directly
 from an {lit}`initial` frame and an array of {lit}`steps`. Each frame has its own

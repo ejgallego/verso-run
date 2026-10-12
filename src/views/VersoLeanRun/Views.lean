@@ -64,6 +64,8 @@ changing state. A {name (full := VersoLeanRun.Sequence)}`Sequence` contains
 recorded, labelled frames that readers can browse. An
 {name (full := VersoLeanRun.Automaton)}`Automaton` contains an initial state and a
 transition function {lit}`α → α`; its live view provides playback controls.
+A {lit}`leanRun` entry can return either model directly: HTML states retain their
+markup, and other states use their {name}`ToString` instance for escaped text.
 Their {lit}`view` helpers support custom HTML or SVG rendering.
 
 Import {lit}`VersoLeanRun.Views` to use these helpers in an ordinary Lean module.
@@ -73,19 +75,18 @@ For example, this counter can provide either a recording or a live view:
 ```lean
 open VersoLeanRun
 
-def counter (seed : Nat) : Automaton Nat :=
+public def counter (seed : Nat) : Automaton Nat :=
   { initial := seed, step := Nat.succ }
 
-def firstFive (seed : Nat) : SequenceView :=
-  ((counter seed).trace 4).view
-
-def forever (seed : Nat) : AutomatonView :=
-  (counter seed).view
+public def firstFive (seed : Nat) : Sequence Nat :=
+  (counter seed).trace 4
 ```
 
 With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
-inspect any of those five values. {lit}`forever` starts at 10 and computes another
-value each time they press Step, or repeatedly while Play is active.
+inspect any of those five values. A block with
+{lit}`leanRun (entry := counter) (input := "10")` starts at 10 and computes
+another value each time they press Step, or repeatedly while Play is active.
+No call to {lit}`view` is needed for this default display.
 
 ## Rendering model states
 
@@ -98,8 +99,8 @@ an HTML or SVG display:
 ```lean
 open VersoLeanRun Verso.Output.Html
 
-def labelledCounter (seed : Nat) : AutomatonView :=
-  ({ initial := seed, step := Nat.succ } : Automaton Nat).view
+public def labelledCounter (seed : Nat) : AutomatonView :=
+  (counter seed).view
     (fun value => {{ <p> "Count: " {{toString value}} </p> }})
     (fun index => s!"Step {index}")
 ```
@@ -112,10 +113,12 @@ explains this record; the other pages cover recorded sequences and live playback
 ## Document integration
 
 The function's result type determines how a {lit}`leanRun` block displays it.
-{name (full := VersoLeanRun.SequenceView)}`SequenceView` adds controls for browsing
-recorded frames; {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` adds
-live playback. Run blocks work in Manual, Blog, and Slides documents, each with
-its own adapter import.
+{lit}`Sequence α` adds controls for browsing recorded frames; {lit}`Automaton α`
+adds live playback. For custom displays, the view helpers return
+{name (full := VersoLeanRun.SequenceView)}`SequenceView` or
+{name (full := VersoLeanRun.AutomatonView)}`AutomatonView`, which use the same
+controls. Run blocks work in Manual, Blog, and Slides documents, each with its
+own adapter import.
 
 The [demo](https://ejgallego.github.io/verso-run/) includes complete examples in
 all three genres.

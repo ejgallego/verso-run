@@ -98,18 +98,20 @@ The same automaton can provide a recorded sequence or a live view:
 ```lean
 open VersoLeanRun
 
-def counter (seed : Nat) : Automaton Nat :=
+public def counter (seed : Nat) : Automaton Nat :=
   { initial := seed, step := Nat.succ }
 
-def recorded (seed : Nat) : SequenceView :=
-  ((counter seed).trace 4).view
+public def recorded (seed : Nat) : Sequence Nat :=
+  (counter seed).trace 4
 
-def live (seed : Nat) : AutomatonView :=
+public def live (seed : Nat) : AutomatonView :=
   (counter seed).view (label := fun n => s!"Generation {n}")
 ```
 
 {name (full := VersoLeanRun.Automaton.trace)}`Automaton.trace` records a fixed number
-of steps that readers can browse in either direction.
+of steps that readers can browse in either direction. A {lit}`leanRun` entry can
+use {lit}`counter` or {lit}`recorded` directly; their numeric states use the
+default text display. The {lit}`live` example customizes the step labels.
 {name (full := VersoLeanRun.Automaton.view)}`Automaton.view` displays the current
 state and computes the next one when the reader advances. Its default renderer
 preserves HTML and converts other values to escaped text using {name}`ToString`.
@@ -124,8 +126,8 @@ once the value exceeds 100:
 ```lean
 open VersoLeanRun Verso.Output.Html
 
-def watched (seed : Nat) : AutomatonView :=
-  ({ initial := seed, step := Nat.succ } : Automaton Nat).observe fun index state =>
+public def watched (seed : Nat) : AutomatonView :=
+  (counter seed).observe fun index state =>
     { label := s!"Step {index}"
       content := {{ <p> {{toString state}} </p> }}
       error := if state > 100 then some "Value exceeds 100" else none }
