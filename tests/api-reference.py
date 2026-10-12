@@ -157,7 +157,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
         result.wait_for()
         result.click()
         assert page.url.startswith(reference + 'VersoLeanRun/Automaton/#')
-        assert page.evaluate('document.getElementById(decodeURIComponent(location.hash.slice(1))) !== null')
+        page.wait_for_function('document.getElementById(decodeURIComponent(location.hash.slice(1))) !== null')
         record(prefix + ': reference navigation, declaration search, and desktop/mobile layouts work')
         for module, fields in {
             'Frame': ['Frame.label', 'Frame.html', 'Frame.error'],
