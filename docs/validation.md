@@ -29,7 +29,7 @@ again before Pages upload. Build and preview commands are in
 ## What the suite checks
 
 - Closed form metadata round-trips and rejection of unsupported combinations;
-  native wire tags checked against browser codecs and the generated HTML serializer.
+  native wire tags checked against browser controls and the actual structured result contracts.
 - Idempotent, document-scoped publication bindings with deterministic output;
   conflicting signatures, manifests, and callables reject in either order with
   both source locations, before publication writes.
@@ -61,7 +61,7 @@ again before Pages upload. Build and preview commands are in
 - Slides typed collection, one formatter/Run runtime inventory, asset collisions
   before output, native fragments, visibility cancellation, keyboard submission,
   pending-load guards, and readable static source.
-- Typed sequences, automatic scalar adapters, independently classified DOM
+- Typed frames and sequences, imported forwarding exports, independently classified DOM
   presenters, every native frame, exact stacks and errors, previous/next and
   scrubbing, independent placements, stale listeners, and presenter-load Stop.
 - Game of Life rules and parsing, exact native generations, SVG views, edited seeds,

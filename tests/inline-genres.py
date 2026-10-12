@@ -142,7 +142,7 @@ with serve_directory(served) as base:
                 card = form(owner, 'card')
                 data = json.loads(card.get_attribute('data-experiment'))
                 assert data['declaration'] == owner+'.Inline.card'
-                assert data['callable'] == owner+'.Inline.card.leanRunHtml'
+                assert data['callable'] == owner+'.Inline.card'
                 assert data['form'] == 'html'
                 assert success(card, '<b>& 🌍') == ''
                 iframe = card.locator('iframe')

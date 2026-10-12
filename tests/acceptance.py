@@ -59,8 +59,8 @@ assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.j
 assert inventory(site/'html-multi/lean-run') == inventory(OUTPUT/'native-only/html-multi/lean-run')
 published = plan['programs']['LeanRunGate.Chapter']
 for declaration, input_type, result_type in [('greet', 'String', 'String'),
-        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'String'),
-        ('diagram', 'Nat', 'String'), ('double', 'Nat', 'Nat'),
+        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'Verso.Output.Html'),
+        ('diagram', 'Nat', 'Verso.Output.Html'), ('double', 'Nat', 'Nat'),
         ('Helper.twice', 'Nat', 'Nat'), ('spin', 'Nat', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert set(contract) == {'args', 'result', 'effect'}

@@ -5,7 +5,6 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import Verso.Output.Html
-public import Lean.Data.Json.FromToJson
 
 /-!
 # Frames
@@ -19,29 +18,35 @@ public section
 namespace VersoLeanRun
 open Verso.Output
 
-/-- One displayed step, with a label, HTML content, and an optional error message. -/
-structure Frame where
+/-- One labelled value, with an optional error message. HTML frames describe a displayed step. -/
+structure Frame (α : Type := Html) where
   /-- The heading for this step, such as “Generation 3” or “Add”. -/
   label : String
-  /-- The HTML or SVG to display in the isolated preview. -/
-  html : Html
-  /-- An error in the computation, such as stack underflow. Defaults to no error. -/
+  /-- The value at this step. Displayed frames contain HTML or SVG. -/
+  content : α
+  /-- An error in the computation. Defaults to no error. -/
   error : Option String := none
+  deriving Inhabited
 
-namespace ViewWire
+/-- Transform the value, preserving its label and error message. -/
+@[expose] def Frame.map (f : α → β) (frame : Frame α) : Frame β :=
+  { label := frame.label, content := f frame.content, error := frame.error }
 
-/-- The `ViewWire.Frame` format sent to the browser, with HTML rendered to a string. -/
-structure Frame where
-  label : String
-  html : String
-  error : Option String
-  deriving Lean.ToJson, Inhabited
+instance : Functor (fun α => Frame α) where
+  map := Frame.map
 
-end ViewWire
+instance : LawfulFunctor (fun α => Frame α) where
+  map_const := rfl
+  id_map := by intro α frame; cases frame; rfl
+  comp_map := by intro α β γ f g frame; rfl
 
-/-- Convert a frame to the format sent to the browser. Document adapters call this for you. -/
-def Frame.toWire (frame : Frame) : ViewWire.Frame :=
-  { label := frame.label, html := frame.html.asString, error := frame.error }
+@[simp] theorem Frame.map_comp (f : α → β) (g : β → γ) :
+    Frame.map (g ∘ f) = Frame.map g ∘ Frame.map f := rfl
+
+@[simp] theorem Frame.map_id : Frame.map (@id α) = id := by
+  funext frame
+  cases frame
+  rfl
 
 end VersoLeanRun
 
@@ -57,10 +62,10 @@ open VersoLeanRun Verso.Output
 
 def snapshot (generation : Nat) (value : Nat) : Frame :=
   { label := s!"Generation {generation}"
-    html := .text true s!"Value: {value}" }
+    content := .text true s!"Value: {value}" }
 ```
 
-The {lit}`html` field accepts {name}`Verso.Output.Html`, including SVG elements.
+The {lit}`content` field accepts {name}`Verso.Output.Html`, including SVG elements.
 Use {name}`Verso.Output.Html.text` with {lit}`true`, as above, to escape text
 rather than treat it as markup. This is especially useful for displaying reader input.
 
@@ -74,9 +79,11 @@ If the input is invalid and there is no state to display, return
 {lit}`SequenceView.error` or {lit}`AutomatonView.error`. Problems loading or
 running the compiled program are reported separately by verso-run.
 
-## For custom integrations
+## From computation to display
 
-{name}`VersoLeanRun.Frame.toWire` converts the HTML to a string in
-{name}`VersoLeanRun.ViewWire.Frame` for sending to the browser. Document adapters
-handle this conversion; use {name}`VersoLeanRun.Frame` when writing a display.
+A {name}`VersoLeanRun.Frame` can hold any value. Its default content type is
+{name}`Verso.Output.Html`, used for displayed steps. {name}`VersoLeanRun.Frame.map`
+changes the content while keeping the label and error. HTML remains structured
+through the worker and presenter; it is rendered to markup when the sandbox
+preview is created.
 -/

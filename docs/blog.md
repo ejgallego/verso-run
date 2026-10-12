@@ -90,9 +90,8 @@ The shared scalar boundary admits pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` chooses a textarea
 for String inputs without changing the callable signature. Enter preserves line
 breaks; Ctrl+Enter or ⌘+Enter runs the example.
-Return `Html` from a String, Nat, Bool or UInt64 input for an HTML preview. `entry` creates a
-document-owned scalar serializer automatically; a String result always displays
-plain text. There is no `output` argument and no producer VIR annotation.
+Return `Html` from a String, Nat, Bool or UInt64 input for an HTML preview. HTML stays typed through the worker and is rendered by the Lean presenter; a
+String result always displays plain text. There is no `output` argument and no producer VIR annotation.
 The [demo producer](../demo/chapters/LeanRunBlog/Examples.lean) shows this arrangement.
 
 Input, `+collapsed`, exact Nat transport, isolated HTML previews, independent

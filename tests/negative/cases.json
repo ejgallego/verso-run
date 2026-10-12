@@ -26,7 +26,7 @@
   "BoolPreset": "Boolean preset must be 'true' or 'false'",
   "MultilineNat": "multiline input requires a String argument",
   "PrivateHtml": "private",
-  "HtmlCollision": "already in use",
+  "ImportedCollision": "already in use",
   "NonExecutableHtml": "non-executable",
   "IlluminateHashing": "Float.toBits",
   "IlluminateCompile": "Float.atan",

@@ -19,27 +19,20 @@ public section
 namespace VersoLeanRun
 open Verso.Output Lean
 
-/-- One recorded state, with a label and an optional error message. -/
-structure SequenceStep (α : Type) where
-  /-- The heading for this step. -/
-  label : String
-  /-- The value to display at this step. -/
-  state : α
-  /-- An error in the computation at this step. Defaults to no error. -/
-  error : Option String := none
-
 /-- A recorded sequence of states, starting with an initial state. -/
 structure Sequence (α : Type) where
   /-- The first state. A sequence always contains at least this one step. -/
-  initial : SequenceStep α
+  initial : Frame α
   /-- The remaining steps, in order. Defaults to an empty array. -/
-  steps : Array (SequenceStep α) := #[]
+  steps : Array (Frame α) := #[]
+
+/-- All recorded frames, including the initial frame. -/
+@[expose] def Sequence.frames (sequence : Sequence α) : Array (Frame α) :=
+  #[sequence.initial] ++ sequence.steps
 
 /-- Apply `f` to every state, keeping the step labels and error messages. -/
 def Sequence.map (f : α → β) (sequence : Sequence α) : Sequence β :=
-  let step := fun (step : SequenceStep α) =>
-    { label := step.label, state := f step.state, error := step.error : SequenceStep β }
-  { initial := step sequence.initial, steps := sequence.steps.map step }
+  { initial := sequence.initial.map f, steps := sequence.steps.map (Frame.map f) }
 
 instance : Functor Sequence where
   map := Sequence.map
@@ -55,59 +48,39 @@ instance : LawfulFunctor Sequence where
   comp_map := by
     intro α β γ f g sequence
     cases sequence
-    simp [Functor.map, Sequence.map, Array.map_map, Function.comp_def]
+    simp [Functor.map, Sequence.map, Frame.map, Array.map_map, Function.comp_def]
 
 /-- Record `initial`, then apply `step` exactly `count` times.
 The result has `count + 1` states. Labels are numbered from zero. -/
 def Sequence.iterate (step : α → α) (initial : α) (count : Nat)
     (label : Nat → String := toString) : Sequence α :=
-  let initial : SequenceStep α := { label := label 0, state := initial }
+  let initial : Frame α := { label := label 0, content := initial }
   let frames := (List.range count).scanl (fun previous index =>
-    { label := label (index + 1), state := step previous.state }) initial
+    { label := label (index + 1), content := step previous.content }) initial
   { initial, steps := frames.tail.toArray }
 
-/-- A sequence ready to display. Return this type from your example function. -/
-structure SequenceView where
-  /-- The first frame to display. -/
-  initial : Frame
-  /-- The remaining frames, in order. Defaults to an empty array. -/
-  steps : Array Frame := #[]
+/-- A sequence of HTML frames, ready to display. -/
+abbrev SequenceView := Sequence Html
 
 /-- Display an error message when the input cannot produce a sequence. -/
 def SequenceView.error (message : String) (label : String := "Input") : SequenceView :=
-  { initial := { label, html := .empty, error := some message } }
+  { initial := { label, content := .empty, error := some message } }
 
-/-- Draw each recorded state as HTML or SVG, keeping its label and error message. -/
-def Sequence.view (sequence : Sequence α) (render : α → Html) : SequenceView :=
-  let frame := fun (step : SequenceStep α) =>
-    Frame.mk step.label (render step.state) step.error
-  { initial := frame sequence.initial, steps := sequence.steps.map frame }
+/-- Draw each recorded value, preserving its label and error.
+Without a renderer, keep HTML or display other values as escaped text using `ToString`. -/
+def Sequence.view (sequence : Sequence α)
+    (render : α → Html := by
+      first | exact id | exact fun value => Verso.Output.Html.ofString (toString value)) : SequenceView :=
+  sequence.map render
 
-/-- Display each state as escaped text using its `ToString` instance. -/
-def Sequence.viewText [ToString α] (sequence : Sequence α) : SequenceView :=
-  sequence.view fun state => .text true (toString state)
+/-- The maximum number of displayed frames, including the initial frame. -/
+def SequenceView.maxFrames : Nat := 128
 
-namespace SequenceWire
-
-structure Payload where
-  version : Nat
-  frames : Array ViewWire.Frame
-  deriving ToJson, Inhabited
-
-/-- The maximum number of frames in a displayed sequence, including its initial frame. -/
-def maxFrames : Nat := 128
-
-def validate (payload : Payload) : Except String Payload := do
-  unless payload.version == 1 do throw "Unsupported sequence presentation version"
-  unless !payload.frames.isEmpty && payload.frames.size ≤ maxFrames do
+/-- Check the size of a displayed sequence. Its initial frame is always present. -/
+def SequenceView.validate (view : SequenceView) : Except String SequenceView := do
+  unless view.steps.size < maxFrames do
     throw "A sequence presentation needs between 1 and 128 frames"
-  return payload
-
-end SequenceWire
-
-/-- Convert a view to the format sent to the browser. Document adapters call this for you. -/
-def SequenceView.toPayload (view : SequenceView) : SequenceWire.Payload :=
-  { version := 1, frames := #[view.initial.toWire] ++ view.steps.map Frame.toWire }
+  return view
 
 end VersoLeanRun
 
@@ -124,18 +97,18 @@ open VersoLeanRun
 def counting : Sequence Nat :=
   Sequence.iterate Nat.succ 0 4 (fun n => s!"Step {n}")
 
-def countingView : SequenceView := counting.viewText
+def countingView : SequenceView := counting.view
 
 def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
 ```
 
-{name}`VersoLeanRun.Sequence.viewText` displays each state using {name}`ToString`.
+{name}`VersoLeanRun.Sequence.view` displays each state using {name}`ToString`.
 For HTML or SVG, pass your drawing function to {name}`VersoLeanRun.Sequence.view`.
 Return the resulting {name}`VersoLeanRun.SequenceView` from your example function
 so readers can move between its steps.
 
 You can also construct a {name}`VersoLeanRun.Sequence` directly: supply an
-{lit}`initial` step and an array of {lit}`steps`, each with its own label, state,
+{lit}`initial` frame and an array of {lit}`steps`, each with its own label, content,
 and optional error message. This suits computations whose steps need different
 names, such as “Push 3”, “Push 4”, and “Add”.
 
@@ -157,10 +130,9 @@ therefore produces one frame. The browser accepts at most 128 frames, so
 {name}`VersoLeanRun.Sequence.iterate` can display at most 127 transitions.
 For a longer simulation, use a live automaton to compute one new state at a time.
 
-## For custom integrations
+## From values to HTML
 
-{name}`VersoLeanRun.SequenceView.toPayload` prepares the frames for sending to
-the browser. The {lit}`SequenceWire` namespace defines that format and checks its
-version and frame count. Document adapters handle this for you; an example
-function returns {name}`VersoLeanRun.SequenceView` directly.
+{name}`VersoLeanRun.SequenceView` is a {lit}`Sequence Html`. It uses the same
+frames and mapping operation as a sequence of model states. The worker sends
+that sequence directly to the presenter; no second payload is constructed.
 -/

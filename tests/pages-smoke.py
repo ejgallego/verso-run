@@ -82,8 +82,8 @@ with ExitStack() as servers:
         for path, declaration, role, value, genre in [
             ('Greeting/', 'LeanRunGate.greet', 'greet', '世界 🌍', 'Manual'),
             ('Exact-natural-numbers/', 'LeanRunGate.double', 'double', '9007199254740993', 'Manual'),
-            ('HTML-greeting/', 'LeanRunGate.htmlGreeting.leanRunHtml', 'htmlGreeting', '<b>& Ada', 'Manual'),
-            ('Illuminate-diagrams/', 'LeanRunGate.diagram.leanRunHtml', 'diagram', '6', 'Manual'),
+            ('HTML-greeting/', 'LeanRunGate.htmlGreeting', 'htmlGreeting', '<b>& Ada', 'Manual'),
+            ('Illuminate-diagrams/', 'LeanRunGate.diagram', 'diagram', '6', 'Manual'),
             ('blog/page/', 'LeanRunGate.Helper.twice', 'twice', '9007199254740993', 'Blog'),
             ('blog/notes/2026-10-8-running-lean-in-a-post/', 'LeanRunBlog.Examples.greet', 'greet', '世界 🌍', 'Blog'),
             ('blog/notes/2026-10-8-running-lean-in-a-post/', 'LeanRunBlog.Examples.card', 'card', '<b>& Ada', 'Blog'),

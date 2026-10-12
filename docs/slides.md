@@ -94,8 +94,8 @@ source and disabled controls. Slides has no TeX backend here.
 The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
 `Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
 as a textarea. Enter edits without moving Reveal; Ctrl+Enter or ⌘+Enter runs.
-Return `Html` from a String, Nat, Bool or UInt64 input for an automatic document-owned serializer
-and isolated preview. String results remain text; no `output` argument or producer
+Return `Html` from a String, Nat, Bool or UInt64 input for an isolated preview. HTML stays typed through the worker and is rendered
+by the Lean presenter. String results remain text; no `output` argument or producer
 VIR annotation is needed. Both inline and anchored blocks share these behaviors.
 
 ## Compatibility and demo

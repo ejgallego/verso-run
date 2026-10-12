@@ -21,4 +21,5 @@ def resources : Vir.Resources.ResourceSet :=
 
 def expectedTrace : String := clientSignature% ClientFixture.trace
 def expectedStart : String := clientSignature% ClientFixture.start
+def expectedRender : String := clientSignature% ClientFixture.render
 end ClientResources

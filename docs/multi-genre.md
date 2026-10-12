@@ -98,10 +98,10 @@ public-pair migration adds `producerModule` from Lean's actual declaration
 ownership, which selects the generated module bundle independently of that key.
 
 The initial anchored implementation required producer-owned scalar exports.
-The current entry-selected API creates document-owned callable adapters for both
-imported scalars and typed HTML. The original producer remains ordinary Lean;
+The current entry-selected API creates document-owned forwarding exports for
+imported functions, retaining their scalar or rendered result types. The original producer remains ordinary Lean;
 its IR is included as a dependency of the document bundle. This qualifies the
-previously deferred anchored Html path without changing VIR's scalar boundary.
+anchored Html path through VIR's structured codec.
 
 ## Adapter findings
 

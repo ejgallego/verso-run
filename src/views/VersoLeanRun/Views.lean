@@ -35,10 +35,10 @@ def counter (seed : Nat) : Automaton Nat :=
   { initial := seed, step := Nat.succ }
 
 def firstFive (seed : Nat) : SequenceView :=
-  ((counter seed).trace 4).viewText
+  ((counter seed).trace 4).view
 
 def forever (seed : Nat) : AutomatonView :=
-  (counter seed).viewText
+  (counter seed).view
 ```
 
 With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
@@ -47,7 +47,7 @@ value each time they press Step, or repeatedly while Play is active.
 
 ## Draw the state
 
-{lit}`viewText` displays a value using its {name}`ToString` instance. To draw it,
+{lit}`view` displays a value using its {name}`ToString` instance. To draw it,
 pass a function returning {name}`Verso.Output.Html` to
 {name (full := VersoLeanRun.Sequence.view)}`Sequence.view` or {name (full := VersoLeanRun.Automaton.view)}`Automaton.view`.
 Both accept HTML or SVG and display it in an isolated preview.

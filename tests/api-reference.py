@@ -160,9 +160,9 @@ with serve_directory(served) as base, sync_playwright() as playwright:
         page.wait_for_function('document.getElementById(decodeURIComponent(location.hash.slice(1))) !== null')
         record(prefix + ': reference navigation, declaration search, and desktop/mobile layouts work')
         for module, fields in {
-            'Frame': ['Frame.label', 'Frame.html', 'Frame.error'],
-            'Sequence': ['Sequence.initial', 'Sequence.steps', 'SequenceView.initial', 'SequenceView.steps'],
-            'Automaton': ['Automaton.initial', 'Automaton.step', 'AutomatonView.start'],
+            'Frame': ['Frame.label', 'Frame.content', 'Frame.error'],
+            'Sequence': ['Sequence.initial', 'Sequence.steps'],
+            'Automaton': ['Automaton.initial', 'Automaton.step', 'AutomatonSession.initial', 'AutomatonSession.advance'],
         }.items():
             page.goto(reference + f'VersoLeanRun/{module}/')
             for theme in ['light', 'dark']:

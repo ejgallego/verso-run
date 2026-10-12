@@ -32,52 +32,45 @@ def Automaton.trace (machine : Automaton α) (count : Nat)
     (label : Nat → String := toString) : Sequence α :=
   Sequence.iterate machine.step machine.initial count label
 
-namespace AutomatonWire
-
 /-- A running computation: its first frame and an action that produces the next frame.
 The state and advance action stay in the worker; only frames are sent to the browser. -/
-structure Session where
-  initial : ViewWire.Frame
-  advance : RuntimeM ViewWire.Frame
+structure AutomatonSession where
+  initial : Frame
+  advance : RuntimeM Frame
 
-end AutomatonWire
-
-/-- A live example ready to run. Return this type from your example function. -/
-structure AutomatonView where
-  /-- Create a new run. Document adapters call this when the reader presses Run. -/
-  start : RuntimeM AutomatonWire.Session
+/-- An action that starts an independent live run in its worker. -/
+abbrev AutomatonView := RuntimeM AutomatonSession
 
 /-- Choose a frame from the step number and current state.
 Step zero shows the initial state; each subsequent frame follows one call to `step`. -/
 def Automaton.observe (machine : Automaton α) (observe : Nat → α → Frame) : AutomatonView :=
-  { start := do
-      let state ← RuntimeRef.new (machine.initial, 0)
-      return {
-        initial := (observe 0 machine.initial).toWire
-        advance := do
-          let (current, index) ← state.get
-          let next := machine.step current
-          let index := index + 1
-          state.set (next, index)
-          return (observe index next).toWire } }
+  do
+    let state ← RuntimeRef.new (machine.initial, 0)
+    return {
+      initial := observe 0 machine.initial
+      advance := do
+        let (current, index) ← state.get
+        let next := machine.step current
+        let index := index + 1
+        state.set (next, index)
+        return observe index next }
 
 /-- Draw each state as HTML or SVG. The label function receives the step number, starting at zero. -/
-def Automaton.view (machine : Automaton α) (render : α → Verso.Output.Html)
+def Automaton.view (machine : Automaton α)
+    (render : α → Verso.Output.Html := by
+      first | exact id | exact fun value => Verso.Output.Html.ofString (toString value))
     (label : Nat → String := toString) : AutomatonView :=
-  machine.observe fun index state => { label := label index, html := render state }
-
-/-- Display each state as escaped text using its `ToString` instance. -/
-def Automaton.viewText [ToString α] (machine : Automaton α)
-    (label : Nat → String := toString) : AutomatonView :=
-  machine.view (fun state => .text true (toString state)) label
+  machine.observe fun index state => { label := label index, content := render state }
 
 /-- Replay a recorded sequence continuously, returning to its first step after the last.
 Labels and error messages are preserved, and an error pauses playback.
 Each run starts at the first step; no states are recomputed. -/
-def Sequence.cycleView (sequence : Sequence α) (render : α → Verso.Output.Html) : AutomatonView :=
-  let observations := #[sequence.initial] ++ sequence.steps
+def Sequence.cycleView (sequence : Sequence α)
+    (render : α → Verso.Output.Html := by
+      first | exact id | exact fun value => Verso.Output.Html.ofString (toString value)) : AutomatonView :=
+  let observations := sequence.frames
   have nonempty : 0 < observations.size := by
-    simp only [observations, Array.size_append, Array.size_singleton]
+    simp only [observations, Sequence.frames, Array.size_append, Array.size_singleton]
     exact Nat.add_pos_left (Nat.zero_lt_succ 0) sequence.steps.size
   let cursor : Automaton (Fin observations.size) := {
     initial := ⟨0, nonempty⟩
@@ -85,12 +78,12 @@ def Sequence.cycleView (sequence : Sequence α) (render : α → Verso.Output.Ht
       Nat.mod_lt _ nonempty⟩ }
   cursor.observe fun _ index =>
     let observation := observations[index]
-    { label := observation.label, html := render observation.state, error := observation.error }
+    { label := observation.label, content := render observation.content, error := observation.error }
 
 /-- Display an error message when the input cannot start a simulation. -/
 def AutomatonView.error (message : String) : AutomatonView :=
-  let frame := ({ label := "Input", html := .empty, error := some message } : Frame).toWire
-  { start := pure { initial := frame, advance := pure frame } }
+  let frame : Frame := { label := "Input", content := .empty, error := some message }
+  pure { initial := frame, advance := pure frame }
 
 end VersoLeanRun
 
@@ -111,14 +104,14 @@ def counter (seed : Nat) : Automaton Nat :=
   { initial := seed, step := Nat.succ }
 
 def recorded (seed : Nat) : SequenceView :=
-  ((counter seed).trace 4).viewText
+  ((counter seed).trace 4).view
 
 def live (seed : Nat) : AutomatonView :=
-  (counter seed).viewText (fun n => s!"Generation {n}")
+  (counter seed).view (label := fun n => s!"Generation {n}")
 ```
 
 {name}`VersoLeanRun.Automaton.trace` records a fixed number of steps for readers
-to explore in either direction. {name}`VersoLeanRun.Automaton.viewText` instead
+to explore in either direction. {name}`VersoLeanRun.Automaton.view` instead
 displays the current state as text and computes another when the reader advances.
 Use {name}`VersoLeanRun.Automaton.view` with a drawing function for HTML or SVG.
 
@@ -134,7 +127,7 @@ open VersoLeanRun
 def watched (seed : Nat) : AutomatonView :=
   ({ initial := seed, step := Nat.succ } : Automaton Nat).observe fun index state =>
     { label := s!"Step {index}"
-      html := .text true (toString state)
+      content := .text true (toString state)
       error := if state > 100 then some "Value exceeds 100" else none }
 ```
 
@@ -165,10 +158,10 @@ Each example has its own state. A live run keeps the current state rather than
 a history of every step, so it can continue indefinitely. If your state itself
 grows with each step, it will still need more memory over time.
 
-## For custom integrations
+## Independent runs
 
-{name}`VersoLeanRun.AutomatonView.start` creates an {lit}`AutomatonWire.Session`
-in a dedicated worker. Lean computes and draws each new state; the browser
-schedules advances and displays the frames. Document adapters start the session
-for you when your example function returns {name}`VersoLeanRun.AutomatonView`.
+An {name}`VersoLeanRun.AutomatonView` is an action that creates an
+{name}`VersoLeanRun.AutomatonSession` in a dedicated worker. Its first frame
+and advance action use the same frame type as recorded sequences. Each Run
+executes the action again and allocates independent state.
 -/

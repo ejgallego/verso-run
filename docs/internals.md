@@ -79,8 +79,8 @@ Follow VIR's stock resource workflow, demonstrated by the
 [lakefile](../lakefile.lean) and [carrier](../demo/resources/LeanRunGate/Resources.lean):
 
 1. Register the document as a program library. `entry` validates and registers
-   local scalar entries; imported functions and typed HTML get document-owned
-   callable adapters. Imports supply their compiled dependency closure. Ordinary
+   local entries with their actual types; imported functions get a document-owned
+   forwarding export. Imports supply their compiled dependency closure. Ordinary
    producer modules need no VIR annotations or separate root resource bundles.
 2. Register a disjoint resource carrier library with the explicit module resource facet
    in `needs`:
@@ -139,8 +139,8 @@ Verso's standard external-code path prepares cached highlighting separately.
 `sourceColumn` locate the block for diagnostics. `declaration` is the author-selected
 Lean entry. `callable` is the full
 compiled VIR export name.
-`producerModule` identifies the callable's owning module. Generated scalar/Html
-adapters for imported entries belong to the document, leaving producer modules
+`producerModule` identifies the callable's owning module. Forwarding exports
+for imported entries belong to the document, leaving producer modules
 unchanged. Source anchor names and callable export names remain separate.
 The native block metadata retains these identities and source locations for
 collection and publication diagnostics. At HTML rendering, `data-experiment`
@@ -182,12 +182,14 @@ contains an `InputKind` and `PresentationKind`; multiline mode exists only insid
 `InputKind.string`. Unknown tags and unsupported object encodings fail metadata
 decoding. The fifteen wire names are checked against the shared browser codec.
 
-Html adapters retain the actual input type and return markup Strings. Sequence
-adapters return `SequenceWire.Payload` with arrays, labels, markup and optional
-errors. VIR's native structure codec converts these values; worker messages use
-structured clone, including exact BigInt fields. Publication constructs primitive
-contracts through VIR's canonical encoder and derives structured contracts from
-the actual compiled payload type. Both are independent of downloaded executables.
+Rendered entries preserve their actual Lean types: `Html`, `Sequence Html`, or
+`RuntimeM AutomatonSession`. Local entries are exported directly; an imported
+entry gets one document-owned forwarding export with the same signature.
+VIR transfers structured values through its compiler-derived codec. Only frames
+cross the worker message boundary; a live callback remains in its worker.
+Publication derives the independent expected contract from those actual types.
+The JavaScript bridge bounds the transferred value's string content, node count,
+and depth without interpreting HTML. Rendering and escaping remain in Lean.
 
 Shape, display mode, and multiline controls are derived from this form. A second
 signature or JSON encoded inside a String is no longer carried in every experiment.
@@ -222,7 +224,8 @@ Natural inputs use validated decimal text. VIR returns nonnegative JavaScript
 `BigInt` values; the worker formats exact decimal display text before posting the
 result. No conversion to JavaScript `Number` occurs. Reject negatives, whitespace, decimals, exponent notation,
 and non-digits before invoking. Limits are 4,096 UTF-16 code units for a String input, 256
-digits for a Nat input, and 65,536 UTF-16 code units for displayed output. These are
+digits for a Nat input, and 65,536 UTF-16 code units in output strings. Structured results also have
+limits of 16,384 value nodes and 128 levels of nesting. These are
 input/output bounds, not a Wasm heap budget. Stop provides actual interruption; execution
 of trusted compiled code can allocate memory before an output limit is checked. Arbitrary
 Lean evaluation, custom foreign-function providers, author-selected browser IO/DOM/React
@@ -260,16 +263,15 @@ Slides uses its module-owned-assets review snapshot. Illuminate retains its pin;
 
 ## Sequence presentation boundary
 
-`Sequence α` and `SequenceStep α` hold the author's model. Its lawful `Functor`
+`Sequence α` and `Frame α` hold the author's model. Its lawful `Functor`
 instance maps observations while retaining labels and errors. `List.scanl` records
 exactly the requested transitions. `.view` uses an
-`α → Html` function and produces a concrete `SequenceView`. Both sequences and
+`α → Html` function and maps the content to `Sequence Html`, also called `SequenceView`. Both sequences and
 views require an initial record, making their nonempty invariant structural.
 `Sequence.iterate` traces a pure `α → α` automaton for an explicit transition count;
 `SequenceView.error` reports an input failure without inventing a model state.
 Entry elaboration reduces the result type to recognize aliases before choosing
-a document-owned typed payload adapter and independently classifies its
-actual export signature. Publication adds the separate presenter program and its
+the presentation and independently classifies its actual export signature. Publication adds the separate presenter program and its
 compiler-derived DOM contracts whenever rendered views are present. The
 presenter carrier retains its complete `ResourceSet`; `combineResources` checks
 its runtime identity against the supplied set before publication. Its manifest
@@ -293,21 +295,23 @@ existing placement and navigation lifecycle.
 ### On-demand automata
 
 `Automaton α` retains the pure initial/transition interface. `Automaton.view`
-returns an `AutomatonView` whose start action allocates a worker-owned
-`RuntimeRef (α × Nat)`. The document adapter runs that action and returns an
-`AutomatonWire.Session`: an initial frame and a zero-argument, runtime-effect
-advance callback. Publication independently classifies that exact nested
-contract through VIR. This effect belongs to the generated session adapter;
-ordinary scalar exports retain their pure interface.
+returns a start action, `RuntimeM AutomatonSession` (also called `AutomatonView`).
+Executing it in the worker allocates an independent `RuntimeRef (α × Nat)` and
+returns the initial frame plus a zero-argument advance callback. There is no
+wrapper around the action and no conversion of its frames. Publication
+independently classifies that exact nested contract through VIR. Ordinary scalar
+exports retain their pure interface.
 
-`Frame` and `ViewWire.Frame` are shared observations; `Frame.toWire` is the one
-Html-to-markup conversion. `Automaton.observe` permits domain-specific labels and
+`Frame α` is the shared labelled observation. Model and HTML sequences use the
+same record, and mapping changes only its content. HTML remains structured
+through worker transfer and the compiled presenter. The presenter renders it
+when constructing the sandbox document. `Automaton.observe` permits domain-specific labels and
 errors. `Automaton.trace` creates a finite observation without starting a session;
 `Sequence.cycleView` explicitly replays stored observations with a bounded `Fin`
 cursor. Replay is not reconstruction of a transition function.
 
 The worker retains the callback and current model. Advance messages call it and
-transfer one validated `ViewWire.Frame`; neither the callback nor a DOM handle
+transfer one typed HTML frame; neither the callback nor a DOM handle
 crosses `postMessage`. Reinitialisation creates a fresh worker so old session
 handles cannot accumulate. The presenter stages the next sandbox document in a
 second iframe, then commits
@@ -330,7 +334,7 @@ states; an ordinary live model keeps only its current state.
 
 ### Rendering and transport
 
-Authors return typed `Html`, `SequenceView`, or `AutomatonView`. Html generation, including SVG,
+Authors return typed `Html`, `SequenceView`, or `AutomatonView`. HTML generation, including SVG,
 runs in compiled Lean in the worker. The sequence controls and frame selection
 also run in compiled Lean, in the separate browser presenter. JavaScript owns
 asynchronous loading, worker messages and cancellation; it does not evaluate the

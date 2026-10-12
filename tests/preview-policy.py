@@ -49,10 +49,11 @@ with serve_directory(Path(args.site).resolve()) as base, sync_playwright() as p:
             if (kind === 'html') { root.setAttribute('sandbox', ''); root.referrerPolicy = 'no-referrer'; }
             document.body.append(root);
             globalThis.policyView = new ViewHost(root, kind, error => { throw error; });
-            const frame = {label: '<img src=x onerror=alert(1)>', html: markup,
+            const html = {kind:'text', fields:{escape:false, string:markup}};
+            const frame = {label: '<img src=x onerror=alert(1)>', content: html,
                     error: '<script>alert(1)</script>'};
-            return await policyView.show(kind === 'html' ? markup : kind === 'automaton' ? frame : {
-                version: 1n, frames: [frame]});
+            return await policyView.show(kind === 'html' ? html : kind === 'automaton' ? frame : {
+                initial: frame, steps: []});
         }''', {'kind': kind, 'markup': markup})
         assert await_result is True
         selector = '#policy-preview' if kind == 'html' else '#policy-preview iframe' + ('[data-preview="current"]' if kind == 'automaton' else '')

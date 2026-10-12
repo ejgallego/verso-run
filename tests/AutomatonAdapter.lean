@@ -10,21 +10,21 @@ public abbrev LiveView := AutomatonView
 ```leanRun (entry := counter) (input := "9007199254740993")
 public def counter (seed : Nat) : LiveView :=
   let machine : Automaton Nat := { initial := seed, step := (· + 1) }
-  machine.viewText
+  machine.view
 ```
 
 ```leanRun (entry := toggle) (input := "true")
 public def toggle (seed : Bool) : AutomatonView :=
   let machine : Automaton Bool := { initial := seed, step := Bool.not }
-  machine.viewText
+  machine.view
 ```
 
 ```leanRun (entry := word) (input := "18446744073709551615")
 public def word (seed : UInt64) : AutomatonView :=
   let machine : Automaton UInt64 := { initial := seed, step := (· + 1) }
-  machine.viewText
+  machine.view
 ```
 
 ```leanRun (entry := toggle)
-#check (toggle.leanRunAutomaton : Bool → Lean.Vir.RuntimeM AutomatonWire.Session)
+#check (toggle : Bool → Lean.Vir.RuntimeM AutomatonSession)
 ```
