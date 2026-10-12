@@ -2,11 +2,14 @@
 
 **Runnable Lean examples for Verso documents.**
 
-verso-run runs compiled Lean functions in Verso documents, with text, HTML, and
-SVG output. Functions can be defined in the document or imported from a Lean
-module. Readers provide inputs through the page and run examples without a Lean
-installation. Execution uses [VIR](https://github.com/ejgallego/lean-vir) in a
-dedicated browser worker; **Stop** interrupts a running example.
+verso-run runs selected Lean functions interactively from compiled Verso documents.
+Functions can return primitive values, HTML (including SVG), or richer animated
+views. Its experimental compiled renderer can also manipulate the document's
+DOM; see [rendering and transport](docs/internals.md#rendering-and-transport).
+
+Functions can be defined in the document or imported from a Lean module. Readers
+need no Lean installation. Execution uses [VIR](https://github.com/ejgallego/lean-vir)
+in a dedicated browser worker; **Stop** interrupts a running example.
 
 [![Build and test](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml/badge.svg)](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml)
 
