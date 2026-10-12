@@ -8,6 +8,7 @@ module
 public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
 
+open scoped Verso.Output.Html
 /-!
 # Interactive Lean examples
 
@@ -23,13 +24,14 @@ describe this layer.
 ## Function results
 
 A function can return {lit}`Html` directly. For example, this one produces a
-paragraph containing a greeting:
+paragraph containing a greeting. Opening {lit}`Verso.Output.Html` enables the
+HTML quotation syntax; interpolated strings are escaped:
 
 ```lean
-open Verso.Output
+open Verso.Output Verso.Output.Html
 
 public def greeting (name : String) : Html :=
-  .tag "p" #[] (Html.ofString s!"Hello, {name}!")
+  {{ <p> "Hello, " {{name}} "!" </p> }}
 ```
 
 ## Runnable document blocks
@@ -38,10 +40,10 @@ In a Verso document, put the definition inside a code fence labelled {lit}`leanR
 
 ````
 ```leanRun (entry := greeting) (input := "Ada")
-open Verso.Output
+open Verso.Output Verso.Output.Html
 
 public def greeting (name : String) : Html :=
-  .tag "p" #[] (Html.ofString s!"Hello, {name}!")
+  {{ <p> "Hello, " {{name}} "!" </p> }}
 ```
 ````
 
@@ -94,11 +96,11 @@ text using {name}`ToString`. A custom renderer of type {lit}`α → Html` can pr
 an HTML or SVG display:
 
 ```lean
-open VersoLeanRun
+open VersoLeanRun Verso.Output.Html
 
 def labelledCounter (seed : Nat) : AutomatonView :=
   ({ initial := seed, step := Nat.succ } : Automaton Nat).view
-    (fun value => Verso.Output.Html.ofString s!"Count: {value}")
+    (fun value => {{ <p> "Count: " {{toString value}} </p> }})
     (fun index => s!"Step {index}")
 ```
 

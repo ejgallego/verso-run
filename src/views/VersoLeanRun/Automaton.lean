@@ -86,6 +86,7 @@ def AutomatonView.error (message : String) : AutomatonView :=
 
 end VersoLeanRun
 
+open scoped Verso.Output.Html
 /-!
 ## States and transitions
 
@@ -121,12 +122,12 @@ number and the current state. This example labels each step and reports an error
 once the value exceeds 100:
 
 ```lean
-open VersoLeanRun
+open VersoLeanRun Verso.Output.Html
 
 def watched (seed : Nat) : AutomatonView :=
   ({ initial := seed, step := Nat.succ } : Automaton Nat).observe fun index state =>
     { label := s!"Step {index}"
-      content := Verso.Output.Html.ofString (toString state)
+      content := {{ <p> {{toString state}} </p> }}
       error := if state > 100 then some "Value exceeds 100" else none }
 ```
 

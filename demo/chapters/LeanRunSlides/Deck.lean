@@ -114,8 +114,10 @@ The namespace and definition remain available in later blocks.
 # Inline typed HTML
 
 ```leanRun (entry := LeanRunSlides.Deck.Inline.card) (input := "Ada")
+open Verso.Output.Html
+
 public def card (name : String) : Verso.Output.Html :=
-  .text true name
+  {{ <p> {{name}} </p> }}
 end LeanRunSlides.Deck.Inline
 ```
 

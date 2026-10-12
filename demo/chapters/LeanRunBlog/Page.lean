@@ -69,8 +69,10 @@ A function can return Verso's `Html` type. This small example displays the name
 as escaped text in an isolated preview.
 
 ```leanRun (entry := LeanRunBlog.Page.Inline.card) (input := "Ada")
+open Verso.Output.Html
+
 public def card (name : String) : Verso.Output.Html :=
-  .text true name
+  {{ <p> {{name}} </p> }}
 end LeanRunBlog.Page.Inline
 ```
 

@@ -154,8 +154,10 @@ renderer capabilities do not imply an arbitrary author-facing DOM interface.
 Show enough Lean code to make an example understandable. Keep examples beside
 their explanations. Adapt explanations to each format; slides should leave room
 for visible code and controls. Implementation details and proofs can remain available in
-the reference without preceding the guide. Prefer one canonical explanation
-with links to it over repeated paragraphs that drift apart.
+the reference without preceding the guide. Use Verso's HTML quotation for
+examples that build markup; keep constructor calls when explaining escaping or
+programmatic HTML construction. Prefer one canonical explanation with links to
+it over repeated paragraphs that drift apart.
 
 Match the content to its purpose:
 
@@ -215,6 +217,10 @@ this section. Keep it as the canonical guidance, with a short pointer in
 Run `python3 scripts/build-api-reference.py` to generate the public view library's reference in
 `.lake/build/literate-html/`. `literate.toml` selects `VersoLeanRunViews` and its
 landing page; module prose and Lean-checked examples live with the library source.
+For HTML quotation in checked examples, put `open scoped Verso.Output.Html`
+before the module prose. Keep the `/-! ... -/` comment as a standalone command
+so the pinned reference generator includes it. The copyable examples should
+also show the namespace open they need when used in a document or Lean module.
 Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.
 The helper invokes Verso's `lake build :literateHtml` facet and supplies the source
 dependency missing from the pinned facet: documentation-only edits must refresh
