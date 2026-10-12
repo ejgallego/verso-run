@@ -5,7 +5,8 @@ control and result display. The document build handles VIR registration.
 
 ## A basic block
 
-The same `leanRun` block works in Manual, Blog Page/Post and Slides. Select the
+Start with a function defined inside a `leanRun` block for a small, self-contained
+example. The same block works in Manual, Blog Page/Post and Slides. Select the
 genre adapter import, open its namespace, and keep compilation enabled. For a
 Manual chapter:
 
@@ -34,6 +35,18 @@ example scopes. Repeated blocks can select the same function, for example with
 `#check Demo.greet` as displayed code. Each placement has its own worker.
 Ordinary `lean` blocks keep their existing behavior. `-keep`, `+error` and unknown
 Run arguments are rejected.
+
+## Choose where the code lives
+
+| Goal | Authoring choice |
+| --- | --- |
+| Write a self-contained example | Define the function inside `leanRun`. |
+| Reuse a function from a Lean module | Import the module and select the function with `leanRun`; display a reference such as `#check`. |
+| Explain an existing library implementation | Use `leanRunAnchor` to display a checked quotation of its source region. |
+
+Both Run block forms use the same execution and publication workflow. Anchors
+add source-display checks; use them when the implementation itself belongs in
+the explanation.
 
 ## Arguments and defaults
 
@@ -85,10 +98,49 @@ The extension generates a typed transport adapter for VIR. Authors select the or
 Html function. Repeated placements reuse the serializer; a conflicting declaration
 at its generated name causes an author error.
 
+## Reuse a function from an imported module
+
+Keep shared functions in ordinary Lean modules. For example,
+`Examples/Arithmetic.lean` can contain:
+
+```lean
+module
+public def Examples.twice (n : Nat) : Nat := n + n
+```
+
+Import the module into your document and select its function with `leanRun`:
+
+````lean
+module
+public import VersoLeanRun
+import Examples.Arithmetic
+open Verso Genre Manual VersoLeanRun
+set_option compiler.postponeCompile false
+
+#doc (Manual) "Shared arithmetic" =>
+
+```leanRun (entry := Examples.twice) (input := "21")
+#check Examples.twice
+```
+````
+
+The form runs the imported function; its source panel shows the `#check`
+reference. The same approach works with the Blog and Slides adapter imports.
+Several documents can reuse one implementation without adding source markers or
+quoting its body.
+
+The document creates a callable adapter around the imported function and includes
+its compiled dependencies. Register and publish the **document module's** resource
+bundle, as for inline definitions. The producer needs no VIR export marker or
+separate root bundle. Supported scalar and rendered result types use the same
+controls and views as inline definitions.
+
 ## Run an anchored example from an imported module
 
-`leanRunAnchor` displays a standard Verso source anchor and selects a function
-from an imported module. The producer is ordinary Lean, without VIR annotations:
+Use `leanRunAnchor` for a walkthrough that should display the imported
+implementation itself. It checks that the selected function is defined in the
+quoted region and that the quotation matches the producer's source. Add standard
+Verso source markers around the region in `Examples/Arithmetic.lean`:
 
 ```lean
 module
@@ -115,12 +167,15 @@ available. The entry must be defined in the selected anchor, public and executab
 The body must match the source region; stale or empty bodies get Verso's normal
 replacement/fill-in suggestions. Anchor comments are omitted from the display.
 
-The document creates a callable wrapper around the imported function. Its bundle
-owns that wrapper and includes the producer's compiled dependencies. Register and
-publish the **document module's** resource bundle, just as for inline examples;
-the producer needs no separate export marker or root bundle. Imported `String →
-Html` functions use the same automatic serialization and preview as inline ones.
-Only same-project execution is qualified.
+Keep the quoted body in the document. When the implementation changes, a stale
+quotation fails the build until you update it; the replacement suggestion supplies
+the current source. This checks documentation drift while keeping the example
+readable in the document's own source file. A region can contain several
+declarations, and `entry` selects the one to run.
+
+Anchored calls use the same imported-function adapters and document-owned resource
+bundles described above. Checked runnable anchors currently require the producer
+to belong to the document's own project.
 
 Input, `+multiline` and `+collapsed` work across Manual, Blog and Slides. Standard
 source options such as `-showProofStates` and `-defSite` remain available. Open
@@ -130,7 +185,7 @@ An ordinary `anchor` can show the same source without a Run form.
 
 `leanRun` defines or reuses a function directly in any of the three genres.
 Namespace, open declarations and definitions remain available in later Run blocks.
-`leanRunAnchor` is optional when several documents share an imported source region.
+`leanRunAnchor` is optional when the document needs a checked source quotation.
 Each genre retains native source styling and links. See
 [Blog authoring](blog.md) and [Slides authoring](slides.md).
 

@@ -1,6 +1,7 @@
 # Runnable slide presentations
 
-Import `VersoLeanRun.Slides` and use the same inline Run block as Manual or Blog:
+Import `VersoLeanRun.Slides` and start with a function defined in an inline Run
+block, as in Manual or Blog:
 
 ````lean
 module
@@ -29,10 +30,15 @@ its existing marked wrapper with native source children and shared controls.
 It adds no constructor to Slides' closed block enum. Run source boxes have no side
 panel or stretch, leaving room for controls.
 
+To reuse a function from a Lean module, import that module and select the function
+with `leanRun`, displaying a reference such as `#check MyExamples.greet`. See
+[reusing an imported function](authoring.md#reuse-a-function-from-an-imported-module)
+for the common authoring and resource workflow.
+
 ## Optional shared source anchors
 
-Import an ordinary producer and use `leanRunAnchor` when the same source should
-be displayed in several documents:
+Use `leanRunAnchor` when the slide explains the imported implementation and should
+show a checked quotation of its source:
 
 ````lean
 ```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
@@ -46,6 +52,8 @@ public def MyExamples.greet (name : String) : String :=
 membership remain authoritative. Anchored proof states can be hidden with
 `-showProofStates`; definition links follow native Slides policy. See
 [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
+When the producer changes, update the quotation using Verso's replacement
+suggestion. The selected entry must be defined in the quoted region.
 
 ## Publish a deck
 
