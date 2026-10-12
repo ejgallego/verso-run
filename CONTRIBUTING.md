@@ -179,6 +179,31 @@ agent can fill either role. Both should ask:
 - Does the rendered page read naturally, with working links and without
   unexplained internal names or implementation details?
 
+### Applying the principles
+
+Before writing an overview, check the full capability of the library. A guide
+to one helper should not become the description of the whole project. The
+[README introduction](README.md#verso-run) is a worked example: it covers
+primitive results, HTML, animated views, and experimental DOM rendering, with
+the rendering boundary made explicit. Check these claims against the code as
+the APIs evolve.
+
+Two examples capture recurring editing decisions:
+
+- “You select the function; readers supply an input” narrates setup in an
+  introduction. Explain the capability there; describe `entry` when introducing
+  the block's arguments. Direct instructions are useful in the setup procedure.
+- “Record a few steps or keep running?” makes a heading sound like a prescribed
+  workflow. A heading such as “Recorded and live views” names the concepts the
+  section explains.
+
+For documentation PRs, include links to the affected pages or preview commands
+so the reviewer can read the output. Review meaning and English together;
+automated checks cover examples, links, and rendering, rather than prescribing
+particular wording. When a review reveals a recurring writing problem, update
+this section. Keep it as the canonical guidance, with a short pointer in
+`AGENTS.md`, rather than duplicating rules in agent prompts or other guides.
+
 ## Repository layout
 
 ### Generated library reference
