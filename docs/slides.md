@@ -1,6 +1,7 @@
 # Runnable slide presentations
 
-Import `VersoLeanRun.Slides` and use the same inline Run block as Manual or Blog:
+Run blocks work in Slides with the `VersoLeanRun.Slides` adapter. The syntax is
+the same as in Manual and Blog:
 
 ````lean
 module
@@ -18,20 +19,17 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-Definitions, namespaces and open declarations remain available in later Run
-blocks. A later placement can show `#check Demo.greet` and select the same entry.
-The document owns its selected callables and resource bundle. No VIR annotation
-or source anchor is needed for an inline definition.
+Definitions, namespaces, and open declarations remain available in later Run
+blocks. A later block can show `#check Demo.greet` and use the same entry.
+The document registers the functions named by its Run blocks. Inline definitions
+need no VIR annotation or source anchor.
 
-The adapter uses Slides' formatting-aware command elaborator, fragmentization
-and native code renderers. Source remains in the typed document tree; Run uses
-its existing marked wrapper with native source children and shared controls.
-It adds no constructor to Slides' closed block enum. Run source boxes have no side
-panel or stretch, leaving room for controls.
+Run blocks keep Slides' native code formatting and fit their source and controls
+within the slide layout.
 
 ## Optional shared source anchors
 
-Import an ordinary producer and use `leanRunAnchor` when the same source should
+Import a source module and use `leanRunAnchor` when the same code should
 be displayed in several documents:
 
 ````lean
@@ -42,8 +40,9 @@ public def MyExamples.greet (name : String) : String :=
 ````
 
 `MyExamples` must contain that region between `-- ANCHOR: greeting` and
-`-- ANCHOR_END: greeting`. Verso's source matching, suggestions and semantic entry
-membership remain authoritative. Anchored proof states can be hidden with
+`-- ANCHOR_END: greeting`. The function named by `entry` must be defined within
+that region. Verso checks the displayed source and suggests replacements when it
+does not match. Anchored proof states can be hidden with
 `-showProofStates`; definition links follow native Slides policy. See
 [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
@@ -61,42 +60,36 @@ def main := VersoLeanRun.Slides.slidesMain
   (%doc MyDeck) MyDeck.resources
 ```
 
-The wrapper collects marked metadata from the typed deck, then prepares one
-resource set containing the native Slides formatter and document-selected Run
-callables. The incoming set must use the same runtime content identity as the stock
-formatter; mismatches are rejected before generation rather than silently
-replaced. The complete inventory uses `lib/vir/`. The shared Run host and
-binding plan live under `lean-run/`.
+`slidesMain` combines the document's programs with the assets required by the
+Slides formatter. The supplied resource set must use the same VIR runtime as the
+formatter; a mismatch is rejected before generation. Execution assets use
+`lib/vir/`, with Run's shared scripts and publication plan under `lean-run/`.
 
-The complete inventory enters Slides' asset planner through `Config.extraAssets`.
-Its collision checks run before any output writes. Custom themes retain their
-styles and assets. Slides owns built-in theme CSS and fonts at their original
-paths, without conversion to custom themes. Existing extra
-CSS, JS, and head elements are preserved. No generated HTML scraping or producer
-file lookup participates in publication.
+Slides' asset planner checks for collisions before writing output. Built-in and
+custom themes retain their CSS, fonts, and other assets. Extra CSS, JavaScript,
+and head elements are also preserved.
 
 ## Reveal and workers
 
-Only Run creates its dedicated worker on invocation. The native Slides formatter
-keeps its existing initialization behavior. A slide change or hidden fragment
-terminates affected Run workers, cancels pending acquisition, clears outputs and
-HTML previews, and rejects stale completion. Returning to the slide or revealing
-the fragment permits a fresh invocation. Hidden forms cannot submit.
-Mobile scroll navigation follows the same cancellation rules. When resizing out
-of scroll view makes Reveal restore its saved HTML, detached workers are disposed
-and the new controls are attached to fresh hosts.
+A Run block starts its worker when the reader runs the example. Leaving a slide
+or hiding a fragment stops affected examples, cancels pending loads, and clears
+their results and previews. Returning to the slide or revealing the fragment allows a fresh
+run; hidden examples cannot run. The same rules apply to mobile scroll navigation.
+If leaving scroll view makes Reveal restore saved slide HTML, the old workers are
+disposed and the restored controls start fresh examples.
 
-Inputs own Enter, arrows, and Space while focused, so typing and submitting do
-not navigate Reveal. `+collapsed` uses a source disclosure after enhancement.
+Focused inputs handle Enter, arrows, and Space, so typing and submitting do not
+navigate the slides. After JavaScript loads, `+collapsed` places the source in a
+disclosure panel.
 Without JavaScript, the deck becomes a readable static document with visible
 source and disabled controls. Slides has no TeX backend here.
 
-The scalar boundary is shared: pure `String → String`, `Nat → Nat`,
-`Bool → Bool`, and `UInt64 → UInt64` exports. `+multiline` renders String inputs
-as a textarea. Enter edits without moving Reveal; Ctrl+Enter or ⌘+Enter runs.
-Return `Html` from a String, Nat, Bool or UInt64 input for an isolated preview. HTML stays typed through the worker and is rendered
-by the Lean presenter. String results remain text; no `output` argument or producer
-VIR annotation is needed. Both inline and anchored blocks share these behaviors.
+Slides supports the same [function types and controls](authoring.md#the-result-type-chooses-the-display)
+as Manual. `+multiline` gives String inputs a textarea; Enter adds a newline
+without changing slides, and Ctrl+Enter or ⌘+Enter runs the example. `Html` results
+appear in an isolated preview; String results remain text. No `output` argument
+or VIR annotation is required. These behaviors apply to both inline and anchored
+blocks.
 
 ## Compatibility and demo
 
@@ -112,9 +105,9 @@ This consumer qualification does not establish upstream integration of the Slide
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined
 `python3 scripts/build-demo-site.py` puts the deck under `_out/html-multi/slides`
-and links all three genres from the landing page. The deck reuses the existing
-ordinary Helper, Blog and typed source functions for exact numbers, Unicode
-greetings, real Stop and HTML. Its document-owned bundle exports selected wrappers.
+and links all three genres from the landing page. The demo uses shared functions
+to show exact numbers, Unicode greetings, HTML results, and Stop behavior.
 
-Rendered inputs can also return `SequenceView`. The same typed payloads and shared
-Lean/VIR presenter serve every genre; see [authoring](authoring.md#present-a-sequence-of-states).
+Run functions can also return recorded or live views; see
+[sequences](authoring.md#present-a-sequence-of-states) and
+[automata](authoring.md#run-an-automaton-continuously).

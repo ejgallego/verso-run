@@ -27,8 +27,8 @@ public def greeting (name : String) : Html :=
   .tag "p" #[] (Html.ofString s!"Hello, {name}!")
 ```
 
-{lit}`leanRun` blocks connect these functions to a document. The {lit}`entry`
-argument names the function to run, while its Lean type determines the input
+{lit}`leanRun` blocks combine Lean code with controls for calling a function.
+The {lit}`entry` argument names that function, while its Lean type determines the input
 control and result display. The
 [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md#the-result-type-chooses-the-display)
 lists the supported function types and shows how to add a block to a document.
@@ -40,7 +40,7 @@ changing state. A {name (full := VersoLeanRun.Sequence)}`Sequence` contains
 recorded, labelled frames that readers can browse. An
 {name (full := VersoLeanRun.Automaton)}`Automaton` contains an initial state and a
 transition function {lit}`α → α`; its live view provides playback controls.
-Both support custom HTML or SVG rendering.
+Their {lit}`view` helpers support custom HTML or SVG rendering.
 
 Import {lit}`VersoLeanRun.Views` to use these helpers in an ordinary Lean module.
 
@@ -65,11 +65,11 @@ value each time they press Step, or repeatedly while Play is active.
 
 ## Rendering model states
 
-{lit}`view` keeps HTML values and displays other values as escaped text using
-their {name}`ToString` instance. To draw a state,
-pass a function returning {name}`Verso.Output.Html` to
-{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` or {name (full := VersoLeanRun.Automaton.view)}`Automaton.view`.
-Both accept HTML or SVG and display it in an isolated preview.
+{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` and
+{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` render model states.
+The default renderer preserves HTML values and converts other values to escaped
+text using {name}`ToString`. A custom renderer of type {lit}`α → Html` can produce
+an HTML or SVG display:
 
 ```lean
 open VersoLeanRun
@@ -80,26 +80,25 @@ def labelledCounter (seed : Nat) : AutomatonView :=
     (fun index => s!"Step {index}")
 ```
 
-For a display with its own label or error message, return a
-{name (full := VersoLeanRun.Frame)}`Frame` from {name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe`.
-The Frames page explains how to build one. The finite sequence and live automaton
-pages show how to adapt a model, repeat a recorded sequence, and report errors.
+{name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe` accepts a
+function that builds a {name (full := VersoLeanRun.Frame)}`Frame` from the step
+number and model state, with a label and optional error message. The Frames page
+explains this record; the other pages cover recorded sequences and live playback.
 
 ## Document integration
 
-To display a single result, a recorded sequence, or a live view, select its
-function with the {lit}`entry` argument of a {lit}`leanRun` block. Return
-{name (full := VersoLeanRun.SequenceView)}`SequenceView` for sequence controls or
-{name (full := VersoLeanRun.AutomatonView)}`AutomatonView` for live playback.
-The block works in Manual, Blog, and Slides documents; each document imports
-the adapter for its genre.
+The function's result type determines how a {lit}`leanRun` block displays it.
+{name (full := VersoLeanRun.SequenceView)}`SequenceView` adds controls for browsing
+recorded frames; {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` adds
+live playback. Run blocks work in Manual, Blog, and Slides documents, each with
+its own adapter import.
 
 Follow the [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
 to add a block to your document, or explore the
 [demo](https://ejgallego.github.io/verso-run/) for complete examples.
 
-A live example waits for Run and Play; opening the page does not start it.
-Pause keeps the current state, and Stop ends the run. Editing the input lets
-readers prepare a new seed while the current simulation continues; Restart
-applies those edits. See Live automata for the full playback behavior.
+Opening a page leaves live examples idle. Run displays the initial state; Play
+advances it continuously. Pause keeps the current state, and Stop ends the run.
+Input edits remain a draft while the current computation continues; Restart
+applies them. The Live automata page describes the playback controls in detail.
 -/

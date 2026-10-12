@@ -10,9 +10,9 @@ public import Vir.Runtime
 /-!
 # Live automata
 
-Let readers advance a computation one step at a time, or play it continuously.
-Define the initial state and a Lean function that computes the next state;
-verso-run provides Step, Play, Pause, and Stop controls.
+An automaton describes an initial state and a function that computes the next
+state. Its live view provides Step, Play, Pause, and Stop controls for advancing
+the computation one step at a time or playing it continuously.
 -/
 public section
 
@@ -32,13 +32,12 @@ def Automaton.trace (machine : Automaton α) (count : Nat)
     (label : Nat → String := toString) : Sequence α :=
   Sequence.iterate machine.step machine.initial count label
 
-/-- A running computation: its first frame and an action that produces the next frame.
-The state and advance action stay in the worker; only frames are sent to the browser. -/
+/-- A running computation, with its initial frame and an action that produces the next frame. -/
 structure AutomatonSession where
   initial : Frame
   advance : RuntimeM Frame
 
-/-- An action that starts an independent live run in its worker. -/
+/-- An action that starts a live run. -/
 abbrev AutomatonView := RuntimeM AutomatonSession
 
 /-- Choose a frame from the step number and current state.
@@ -90,12 +89,10 @@ end VersoLeanRun
 /-!
 ## States and transitions
 
-An automaton contains an initial state and a function
-{lit}`α → α` that computes the next state. For a counter, the state is a number
-and the function adds one. For Game of Life, the state is a board and the
-function computes the next generation.
+For a counter, the state is a number and each transition adds one. For Game of
+Life, the state is a board and each transition computes the next generation.
 
-The same computation can provide a short recorded sequence or a live example:
+The same automaton can provide a recorded sequence or a live view:
 
 ```lean
 open VersoLeanRun
@@ -111,11 +108,11 @@ def live (seed : Nat) : AutomatonView :=
 ```
 
 {name (full := VersoLeanRun.Automaton.trace)}`Automaton.trace` records a fixed number
-of steps for readers to explore in either direction.
-{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` instead displays the
-current state and computes another when the reader advances. Without a drawing
-function, it keeps HTML values and displays other values as escaped text using
-{name}`ToString`. Pass a drawing function for a richer HTML or SVG display.
+of steps that readers can browse in either direction.
+{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` displays the current
+state and computes the next one when the reader advances. Its default renderer
+preserves HTML and converts other values to escaped text using {name}`ToString`.
+A custom renderer can produce HTML or SVG.
 
 ## Labels and errors
 
@@ -135,17 +132,17 @@ def watched (seed : Nat) : AutomatonView :=
 
 Step zero displays the initial state. Each advance computes the next state,
 then builds its frame. An error frame displays the failure and disables Play
-and Step; the reader can start a fresh run. To reject invalid input before
-starting a simulation, return
-{name (full := VersoLeanRun.AutomatonView.error)}`AutomatonView.error`.
+and Step; the reader can start a fresh run. For invalid input,
+{name (full := VersoLeanRun.AutomatonView.error)}`AutomatonView.error` provides an
+error view with playback disabled.
 
 ## Replaying a sequence
 
 {name (full := VersoLeanRun.Sequence.cycleView)}`Sequence.cycleView` turns a recorded
-sequence into a looping animation. It accepts the same optional drawing function
+sequence into a looping view. It accepts the same optional drawing function
 as {lit}`view` and keeps the labels and errors. Playback returns to the first
 step after the last, unless an error prevents further advancement. It reuses
-the recorded states, so it does not need a function that computes successors.
+the recorded frames, so it does not need a transition function.
 
 ## Playback and input edits
 
@@ -159,13 +156,12 @@ input and begins again at the new initial state. If the simulation was playing,
 Restart resumes playback. Pause, Stop, hiding the tab, or leaving the example
 cancels that automatic resumption. Returning to the tab does not start playback.
 
-Each example has its own state. A live run keeps the current state rather than
-a history of every step, so it can continue indefinitely. If your state itself
-grows with each step, it will still need more memory over time.
+Each example has its own state. A live run keeps only the current state and has
+no fixed step limit. A model whose state grows with each step will still need
+more memory over time.
 
 ## Independent runs
 
-Each placement has its own simulation. Running the same example twice creates
-two independent states, even if both start from the same input. Restart replaces
-only that placement's state.
+Two embedded copies of an example have independent state, even if both start
+from the same input. Restart resets only the selected copy.
 -/

@@ -18,17 +18,17 @@ public section
 namespace VersoLeanRun
 open Verso.Output
 
-/-- One labelled value, with an optional error message. HTML frames describe a displayed step. -/
+/-- A labelled value with an optional error message. A rendered frame contains HTML. -/
 structure Frame (α : Type := Html) where
   /-- The heading for this step, such as “Generation 3” or “Add”. -/
   label : String
   /-- The value at this step. Displayed frames contain HTML or SVG. -/
   content : α
-  /-- An error in the computation. Defaults to no error. -/
+  /-- An optional message describing a problem at this step. -/
   error : Option String := none
   deriving Inhabited
 
-/-- Transform the value, preserving its label and error message. -/
+/-- Applies `f` to the value, preserving its label and error message. -/
 @[expose] def Frame.map (f : α → β) (frame : Frame α) : Frame β :=
   { label := frame.label, content := f frame.content, error := frame.error }
 
@@ -71,19 +71,19 @@ If you omit the type argument, {lit}`Frame` means {lit}`Frame Html`.
 
 ## Errors
 
-Set {lit}`error` to {lit}`some message` to explain a problem in the computation,
+The {lit}`error` field can describe a problem in the computation,
 such as a calculator instruction that needs more values on the stack. A live
 simulation displays the error and disables Play and Step. The reader can start
 a fresh run or use Stop to clear the view.
 
-If the input is invalid and there is no state to display, return
-{lit}`SequenceView.error` or {lit}`AutomatonView.error`. Problems loading or
+{lit}`SequenceView.error` and {lit}`AutomatonView.error` report invalid input when
+there is no model state to display. Problems loading or
 running the compiled program are reported separately by verso-run.
 
 ## Mapping values
 
 {name (full := VersoLeanRun.Frame.map)}`Frame.map` changes the value while keeping
-the label and error message. For example, render the number above as text:
+the label and error message. Here the number becomes displayed text:
 
 ```lean
 def displayedSnapshot (generation value : Nat) : Frame :=
@@ -91,6 +91,7 @@ def displayedSnapshot (generation value : Nat) : Frame :=
 ```
 
 {name (full := Verso.Output.Html.ofString)}`Html.ofString` escapes text, including
-reader input. Use Verso's HTML constructors or syntax when you want markup.
+reader input. Verso's HTML constructors and syntax provide elements and attributes
+for richer displays.
 Sequences and automata provide {lit}`view` helpers to render all their states.
 -/

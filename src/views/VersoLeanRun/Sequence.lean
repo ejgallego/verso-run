@@ -10,9 +10,9 @@ public import Init.Data.List.Scan.Basic
 /-!
 # Finite sequences
 
-Record the steps of a computation so readers can inspect them in either
-direction. A sequence is useful for a calculator trace, a worked example, or a
-short simulation with a beginning and an end.
+A sequence stores labelled values in order. Its view lets readers move back and
+forth through the recorded frames. A sequence can show a calculation trace,
+for example, or a series of related illustrations.
 -/
 public section
 
@@ -102,36 +102,35 @@ def countingView : SequenceView := counting.view
 def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
 ```
 
-{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` displays these numbers
-as escaped text using {name}`ToString`. Values that are already HTML stay HTML.
-For another kind of state, pass a drawing function returning HTML or SVG.
-Return the resulting {name (full := VersoLeanRun.SequenceView)}`SequenceView` from your example function
-so readers can move between its steps.
+{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` renders the recorded
+values. Its default renderer preserves HTML and converts other values to escaped
+text using {name}`ToString`. A custom renderer can produce an HTML or SVG display.
+The resulting {name (full := VersoLeanRun.SequenceView)}`SequenceView` displays
+the recorded frames with navigation controls.
 
-You can also construct a {name (full := VersoLeanRun.Sequence)}`Sequence` directly: supply an
-{lit}`initial` frame and an array of {lit}`steps`, each with its own label, content,
-and optional error message. This suits computations whose steps need different
-names, such as “Push 3”, “Push 4”, and “Add”.
+A {name (full := VersoLeanRun.Sequence)}`Sequence` can also be constructed directly
+from an {lit}`initial` frame and an array of {lit}`steps`. Each frame has its own
+label, content, and optional error message. The labels can describe individual
+operations, such as “Push 3”, “Push 4”, and “Add”.
 
 ## Mapping and replay
 
 {name (full := VersoLeanRun.Sequence.map)}`Sequence.map` applies a function to every recorded state.
-It also supports the standard {name}`Functor` notation {lit}`<$>` used by
+Sequences also support the standard {name}`Functor` notation {lit}`<$>` used by
 {lit}`doubled` above. The new sequence contains 0, 2, 4, 6, and 8, with the
 original labels and error messages. Mapping does not run the computation again.
 
-To replay the sequence continuously, use {lit}`Sequence.cycleView`, described on
-the Live automata page. It displays the recorded states in order, then returns
-to the first one.
+{lit}`Sequence.cycleView` replays the recorded frames continuously, returning
+to the first after the last. The Live automata page describes this helper.
 
 ## Sequence length
 
-A sequence always includes its initial state. Asking for zero transitions
-therefore produces one frame. The browser accepts at most 128 frames, so
-an example built with {name (full := VersoLeanRun.Sequence.iterate)}`Sequence.iterate`
-can display at most 127 transitions. The recording itself has no such limit;
-larger results are rejected when displayed, rather than silently shortened.
-For a longer simulation, use a live automaton to compute one new state at a time.
+A sequence always includes its initial state, so zero transitions still produce
+one frame. The browser displays at most 128 frames, including that initial frame.
+An example built with {name (full := VersoLeanRun.Sequence.iterate)}`Sequence.iterate`
+can therefore display at most 127 transitions. This limit applies to the display;
+the model has no fixed length limit. Oversized results are rejected rather than
+shortened. Live views compute new states on demand without storing a full history.
 
 ## Rendering
 
