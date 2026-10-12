@@ -69,8 +69,10 @@ descriptor = {'type': 'String', 'interfaceTag': 3}
 for genre, owner in [('blog', 'LeanRunBlog.Page'), ('blog', 'LeanRunBlog.Post'), ('slides', 'LeanRunSlides.Deck')]:
     for role in ['greet', 'card']:
         assert plans[genre]['programs'][owner][owner+'.Inline.'+role]['expectedExport'] == {
-            'args': [descriptor], 'result': descriptor, 'effect': 'pure'}
-record('independent canonical String signatures for inline scalar and Html callables')
+            'args': [descriptor],
+            'result': descriptor if role == 'greet' else plans[genre]['presenters']['html']['expectedExport']['args'][1],
+            'effect': 'pure'}
+record('inline exports preserve scalar/Html types and agree with the separate presenter contract')
 
 
 served = output/'served'
