@@ -11,14 +11,13 @@ public import VersoLeanRun.Automaton
 /-!
 # Interactive Lean examples
 
-verso-run makes compiled Lean functions runnable in Verso documents. You select
-the function; readers supply an input and see its result. A function can return
-a supported scalar value for text output or Verso's
-{name (full := Verso.Output.Html)}`Html` for an HTML or SVG display.
+verso-run runs compiled Lean functions in Verso documents and displays their
+results as text or HTML. HTML results use Verso's
+{name (full := Verso.Output.Html)}`Html` type and can include SVG.
 
 ## Function results
 
-For a single result, return its value directly. This function produces an HTML
+A function can return {lit}`Html` directly. For example, this one produces a
 paragraph containing a greeting:
 
 ```lean
@@ -28,8 +27,9 @@ public def greeting (name : String) : Html :=
   .tag "p" #[] (Html.ofString s!"Hello, {name}!")
 ```
 
-Select {lit}`greeting` directly with {lit}`entry` in a {lit}`leanRun` block. Its Lean type
-determines the input control and result display. The
+{lit}`leanRun` blocks connect these functions to a document. The {lit}`entry`
+argument names the function to run, while its Lean type determines the input
+control and result display. The
 [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md#the-result-type-chooses-the-display)
 lists the supported function types and shows how to add a block to a document.
 

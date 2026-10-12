@@ -140,6 +140,10 @@ Keep authors and readers distinct: authors define functions and their displays;
 readers supply inputs and use the published controls.
 
 Use plain sentences, concrete subjects, and headings that name the topic.
+Explanatory prose describes concepts and their relationships. Save direct
+instructions such as “select the function” for a task where that action makes
+sense. Keep author and reader roles clear without narrating every action or
+repeatedly addressing the author as “you”.
 Explain necessary technical terms where they first matter. State behavior and
 constraints when they affect a choice, or link to the relevant reference. Avoid
 both unqualified promises and an introductory catalogue of restrictions.
