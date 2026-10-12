@@ -47,7 +47,8 @@ value each time they press Step, or repeatedly while Play is active.
 
 ## Draw the state
 
-{lit}`view` displays a value using its {name}`ToString` instance. To draw it,
+{lit}`view` keeps HTML values and displays other values as escaped text using
+their {name}`ToString` instance. To draw a state,
 pass a function returning {name}`Verso.Output.Html` to
 {name (full := VersoLeanRun.Sequence.view)}`Sequence.view` or {name (full := VersoLeanRun.Automaton.view)}`Automaton.view`.
 Both accept HTML or SVG and display it in an isolated preview.
@@ -57,7 +58,7 @@ open VersoLeanRun
 
 def labelledCounter (seed : Nat) : AutomatonView :=
   ({ initial := seed, step := Nat.succ } : Automaton Nat).view
-    (fun value => .text true s!"Count: {value}")
+    (fun value => Verso.Output.Html.ofString s!"Count: {value}")
     (fun index => s!"Step {index}")
 ```
 

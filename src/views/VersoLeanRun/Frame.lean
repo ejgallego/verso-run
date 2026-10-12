@@ -9,9 +9,9 @@ public import Verso.Output.Html
 /-!
 # Frames
 
-A frame is what the reader sees at one step: a label, some HTML or SVG, and an
-optional error message. Recorded sequences and live simulations use the same
-frame type.
+A frame pairs a value with a label and an optional error message. Recorded
+sequences and live simulations both use frames. The value can be a model state,
+such as a number or a board, or HTML ready to display.
 -/
 public section
 
@@ -51,39 +51,46 @@ instance : LawfulFunctor (fun α => Frame α) where
 end VersoLeanRun
 
 /-!
-## Describe a step
+## Labels and content
 
-Build a {name}`VersoLeanRun.Frame` when you want to choose the heading, display,
-and error message together. For example, a simulation might show a generation
-number above a drawing of its board. This smaller example displays a number:
+A {name (full := VersoLeanRun.Frame)}`Frame` keeps a value together with its
+heading. For example, a simulation can label its board with a generation number.
+Here the value is simply a number:
 
 ```lean
 open VersoLeanRun Verso.Output
 
-def snapshot (generation : Nat) (value : Nat) : Frame :=
+def snapshot (generation : Nat) (value : Nat) : Frame Nat :=
   { label := s!"Generation {generation}"
-    content := .text true s!"Value: {value}" }
+    content := value }
 ```
 
-The {lit}`content` field accepts {name}`Verso.Output.Html`, including SVG elements.
-Use {name}`Verso.Output.Html.text` with {lit}`true`, as above, to escape text
-rather than treat it as markup. This is especially useful for displaying reader input.
+The {lit}`content` field has the type you choose: {lit}`Nat` in this example.
+A displayed frame has type {lit}`Frame Html`; its content can include SVG elements.
+If you omit the type argument, {lit}`Frame` means {lit}`Frame Html`.
 
-## Explain an error
+## Errors
 
 Set {lit}`error` to {lit}`some message` to explain a problem in the computation,
 such as a calculator instruction that needs more values on the stack. A live
-simulation pauses when it reaches a frame with an error.
+simulation displays the error and disables Play and Step. The reader can start
+a fresh run or use Stop to clear the view.
 
 If the input is invalid and there is no state to display, return
 {lit}`SequenceView.error` or {lit}`AutomatonView.error`. Problems loading or
 running the compiled program are reported separately by verso-run.
 
-## From computation to display
+## Mapping values
 
-A {name}`VersoLeanRun.Frame` can hold any value. Its default content type is
-{name}`Verso.Output.Html`, used for displayed steps. {name}`VersoLeanRun.Frame.map`
-changes the content while keeping the label and error. HTML remains structured
-through the worker and presenter; it is rendered to markup when the sandbox
-preview is created.
+{name (full := VersoLeanRun.Frame.map)}`Frame.map` changes the value while keeping
+the label and error message. For example, render the number above as text:
+
+```lean
+def displayedSnapshot (generation value : Nat) : Frame :=
+  (snapshot generation value).map fun n => Html.ofString s!"Value: {n}"
+```
+
+{name (full := Verso.Output.Html.ofString)}`Html.ofString` escapes text, including
+reader input. Use Verso's HTML constructors or syntax when you want markup.
+Sequences and automata provide {lit}`view` helpers to render all their states.
 -/

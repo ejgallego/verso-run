@@ -137,6 +137,10 @@ The helper invokes Verso's `lake build :literateHtml` facet and supplies the sou
 dependency missing from the pinned facet: documentation-only edits must refresh
 HTML even when the public olean stays unchanged. It also tracks the configured
 extra stylesheets so style edits refresh the generated site.
+The configured CSS and JavaScript put checked examples before the expandable
+declaration reference. Declaration links open the reference at their target.
+Without JavaScript, the declarations remain visible below the guide. Keep all
+generated declaration anchors intact when changing this presentation.
 `scripts/build-demo-site.py` includes the reference at `/api/` in the demo and
 Pages artifact. Generated HTML stays out of Git.
 

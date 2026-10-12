@@ -63,6 +63,7 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
 | `String`, `Nat`, `Bool`, or `UInt64` → `Verso.Output.Html` | An isolated HTML preview |
 | `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
 
 A String containing markup is still plain text. There is no `output` block
 argument. Return `Html` when the result is intended to be rendered as HTML:
@@ -171,7 +172,7 @@ public def Demo.greetingSteps (name : String) : VersoLeanRun.SequenceView :=
   let sequence : VersoLeanRun.Sequence String := {
     initial := { label := "Start", content := name }
     steps := #[{ label := "Greeting", content := "Hello, " ++ name }] }
-  sequence.view (Verso.Output.Html.text true)
+  sequence.view
 ```
 
 Select it with `leanRun (entry := Demo.greetingSteps)`. No JSON, export marker or
@@ -192,12 +193,11 @@ indices, starting at zero:
 ```lean
 def counter (seed : Nat) : SequenceView :=
   (Sequence.iterate (· + 1) seed 5 (fun i => s!"Iteration {i}")).view
-    (fun n => Verso.Output.Html.text true (toString n))
 ```
 
-Both `Sequence` requires an initial frame; `SequenceView` is `Sequence Html` and have an
-optional array of later steps. A view cannot be empty. Report a failure before a
-model state exists with `SequenceView.error`, rather than constructing a dummy
+Every `Sequence` contains an initial frame and an optional array of later steps.
+`SequenceView` is `Sequence Html`, so a displayed sequence cannot be empty.
+Report a failure before a model state exists with `SequenceView.error`, rather than constructing a dummy
 state:
 
 ```lean
@@ -208,21 +208,20 @@ Result-type abbreviations for `Html` and `SequenceView` work like the underlying
 types. The presentation limits still apply to the resulting view; iteration does
 not truncate a trace to fit them.
 
-The worker computes states and renders their Html. Sequence frames cross the worker
-boundary as typed VIR data, without a JSON envelope. Labels, markup and errors have
-a combined budget of 65,536 UTF-16 code units in their strings. A separate Lean/VIR DOM
-presenter owns Html documents, selection and event callbacks. Selecting a frame uses the computed
-presentation and does not rerun the evaluator. Each placement owns both runtimes;
-input edits, Stop and genre navigation cancel acquisition and dispose the view.
-State Html uses the same script-disabled sandbox as an ordinary Html result.
-Labels and failures are text, and exact natural numbers are rendered by Lean.
+Selecting a frame displays a recorded result; it does not rerun the computation.
+Each example is independent. Input edits, Stop, and leaving the example clear its
+view. Frame content uses the same script-disabled preview as an ordinary HTML
+result; labels and errors are displayed as text.
 
-Presentations contain 1–128 frames and share the 65,536 UTF-16 limit on the transferred value’s strings. Large rendered sequences may exceed that limit even when their computation
-is otherwise valid. Computation remains interruptible by terminating its worker.
-The DOM presenter is a bounded experimental library, not a claim of general VIR
-DOM qualification. Only its exercised bindings are covered here. Illuminate's
-full animation compiler remains unqualified on the current runtime; its existing
-qualified drawing-command/SVG output can be used inside a state Html view.
+A displayed sequence contains 1–128 frames. Its strings, including labels,
+content, and errors, share a limit of 65,536 UTF-16 code units. A large drawing
+can exceed this limit even in a short sequence. Oversized results are rejected,
+rather than silently shortened. Stop interrupts a computation that has not
+finished.
+
+Illuminate's drawing-command/SVG output can provide a frame's content. Its full
+animation compiler is not qualified on the current runtime; see the
+[Illuminate support limits](../evidence/illuminate-gates.md).
 
 ## Map and replay observations
 
@@ -236,17 +235,19 @@ let finite : SequenceView := (machine.trace 5).view
 let live : AutomatonView := machine.view
 ```
 
-`trace 0` observes the initial state without calling the transition. Trace
-construction uses Lean's standard `List.scanl`. `Sequence.map` and the lawful
-`Functor` instance (`f <$> trace`) transform states while preserving labels and
-errors. `view` uses `ToString` and escapes the resulting text. Rich views can
-still supply an explicit `α → Html` renderer.
+`trace 0` observes the initial state without calling the transition.
+`Sequence.map` and the standard `Functor` notation (`f <$> trace`) transform
+states while preserving labels and errors. `view` keeps HTML values and displays
+other values as escaped text using
+`ToString`. Rich views can supply an explicit `α → Html` renderer.
 
-To repeat a finite recording, use `trace.cycleView render`. It returns an
+To repeat a finite recording, use `trace.cycleView`, with an optional drawing
+function just as for `view`. It returns an
 `AutomatonView`, replaying the initial observation and all later observations
 before wrapping to the start. Duplicate states retain their distinct positions
-and labels. Errors remain errors and pause playback. This is an explicit replay
-policy; a recorded trace does not determine the transition that produced it.
+and labels. An error displays the failure and disables Play and Step until a
+fresh run. This is an explicit replay policy; a recorded trace does not determine
+the transition that produced it.
 The [exact-word example](../demo/chapters/LeanRunRendered/Examples.lean) shows a
 finite trace and a cyclic replay of the same states.
 

@@ -63,7 +63,7 @@ def Automaton.view (machine : Automaton α)
   machine.observe fun index state => { label := label index, content := render state }
 
 /-- Replay a recorded sequence continuously, returning to its first step after the last.
-Labels and error messages are preserved, and an error pauses playback.
+Labels and error messages are preserved; an error disables further playback.
 Each run starts at the first step; no states are recomputed. -/
 def Sequence.cycleView (sequence : Sequence α)
     (render : α → Verso.Output.Html := by
@@ -88,9 +88,9 @@ def AutomatonView.error (message : String) : AutomatonView :=
 end VersoLeanRun
 
 /-!
-## Define a simulation
+## States and transitions
 
-An {name}`VersoLeanRun.Automaton` contains an initial state and a function
+An automaton contains an initial state and a function
 {lit}`α → α` that computes the next state. For a counter, the state is a number
 and the function adds one. For Game of Life, the state is a board and the
 function computes the next generation.
@@ -110,14 +110,16 @@ def live (seed : Nat) : AutomatonView :=
   (counter seed).view (label := fun n => s!"Generation {n}")
 ```
 
-{name}`VersoLeanRun.Automaton.trace` records a fixed number of steps for readers
-to explore in either direction. {name}`VersoLeanRun.Automaton.view` instead
-displays the current state as text and computes another when the reader advances.
-Use {name}`VersoLeanRun.Automaton.view` with a drawing function for HTML or SVG.
+{name (full := VersoLeanRun.Automaton.trace)}`Automaton.trace` records a fixed number
+of steps for readers to explore in either direction.
+{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` instead displays the
+current state and computes another when the reader advances. Without a drawing
+function, it keeps HTML values and displays other values as escaped text using
+{name}`ToString`. Pass a drawing function for a richer HTML or SVG display.
 
-## Add labels and error messages
+## Labels and errors
 
-Use {name}`VersoLeanRun.Automaton.observe` to build a frame from both the step
+{name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe` builds a frame from both the step
 number and the current state. This example labels each step and reports an error
 once the value exceeds 100:
 
@@ -127,22 +129,25 @@ open VersoLeanRun
 def watched (seed : Nat) : AutomatonView :=
   ({ initial := seed, step := Nat.succ } : Automaton Nat).observe fun index state =>
     { label := s!"Step {index}"
-      content := .text true (toString state)
+      content := Verso.Output.Html.ofString (toString state)
       error := if state > 100 then some "Value exceeds 100" else none }
 ```
 
 Step zero displays the initial state. Each advance computes the next state,
-then builds its frame. A frame with an error pauses playback. To reject invalid
-input before starting a simulation, return {name}`VersoLeanRun.AutomatonView.error`.
+then builds its frame. An error frame displays the failure and disables Play
+and Step; the reader can start a fresh run. To reject invalid input before
+starting a simulation, return
+{name (full := VersoLeanRun.AutomatonView.error)}`AutomatonView.error`.
 
-## Replay a recorded sequence
+## Replaying a sequence
 
-{name}`VersoLeanRun.Sequence.cycleView` turns a recorded sequence into a looping
-animation. Supply the sequence and a drawing function; its labels and error
-messages are kept. Playback returns to the first step after the last. It reuses
+{name (full := VersoLeanRun.Sequence.cycleView)}`Sequence.cycleView` turns a recorded
+sequence into a looping animation. It accepts the same optional drawing function
+as {lit}`view` and keeps the labels and errors. Playback returns to the first
+step after the last, unless an error prevents further advancement. It reuses
 the recorded states, so it does not need a function that computes successors.
 
-## What the playback controls do
+## Playback and input edits
 
 Opening a page or entering a slide leaves the example idle. Run displays the
 initial state. Step advances once; Play advances repeatedly. Pause lets a step
@@ -160,8 +165,7 @@ grows with each step, it will still need more memory over time.
 
 ## Independent runs
 
-An {name}`VersoLeanRun.AutomatonView` is an action that creates an
-{name}`VersoLeanRun.AutomatonSession` in a dedicated worker. Its first frame
-and advance action use the same frame type as recorded sequences. Each Run
-executes the action again and allocates independent state.
+Each placement has its own simulation. Running the same example twice creates
+two independent states, even if both start from the same input. Restart replaces
+only that placement's state.
 -/

@@ -85,9 +85,9 @@ def SequenceView.validate (view : SequenceView) : Except String SequenceView := 
 end VersoLeanRun
 
 /-!
-## Record and display a sequence
+## Recorded states
 
-Use {name}`VersoLeanRun.Sequence.iterate` to record a fixed number of steps.
+{name (full := VersoLeanRun.Sequence.iterate)}`Sequence.iterate` records a fixed number of steps.
 This example starts at zero, adds one four times, and displays the five values
 0, 1, 2, 3, and 4:
 
@@ -102,19 +102,20 @@ def countingView : SequenceView := counting.view
 def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
 ```
 
-{name}`VersoLeanRun.Sequence.view` displays each state using {name}`ToString`.
-For HTML or SVG, pass your drawing function to {name}`VersoLeanRun.Sequence.view`.
-Return the resulting {name}`VersoLeanRun.SequenceView` from your example function
+{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` displays these numbers
+as escaped text using {name}`ToString`. Values that are already HTML stay HTML.
+For another kind of state, pass a drawing function returning HTML or SVG.
+Return the resulting {name (full := VersoLeanRun.SequenceView)}`SequenceView` from your example function
 so readers can move between its steps.
 
-You can also construct a {name}`VersoLeanRun.Sequence` directly: supply an
+You can also construct a {name (full := VersoLeanRun.Sequence)}`Sequence` directly: supply an
 {lit}`initial` frame and an array of {lit}`steps`, each with its own label, content,
 and optional error message. This suits computations whose steps need different
 names, such as “Push 3”, “Push 4”, and “Add”.
 
-## Reuse the recorded states
+## Mapping and replay
 
-{name}`VersoLeanRun.Sequence.map` applies a function to every recorded state.
+{name (full := VersoLeanRun.Sequence.map)}`Sequence.map` applies a function to every recorded state.
 It also supports the standard {name}`Functor` notation {lit}`<$>` used by
 {lit}`doubled` above. The new sequence contains 0, 2, 4, 6, and 8, with the
 original labels and error messages. Mapping does not run the computation again.
@@ -123,16 +124,19 @@ To replay the sequence continuously, use {lit}`Sequence.cycleView`, described on
 the Live automata page. It displays the recorded states in order, then returns
 to the first one.
 
-## How many steps?
+## Sequence length
 
 A sequence always includes its initial state. Asking for zero transitions
 therefore produces one frame. The browser accepts at most 128 frames, so
-{name}`VersoLeanRun.Sequence.iterate` can display at most 127 transitions.
+an example built with {name (full := VersoLeanRun.Sequence.iterate)}`Sequence.iterate`
+can display at most 127 transitions. The recording itself has no such limit;
+larger results are rejected when displayed, rather than silently shortened.
 For a longer simulation, use a live automaton to compute one new state at a time.
 
-## From values to HTML
+## Rendering
 
-{name}`VersoLeanRun.SequenceView` is a {lit}`Sequence Html`. It uses the same
-frames and mapping operation as a sequence of model states. The worker sends
-that sequence directly to the presenter; no second payload is constructed.
+{name (full := VersoLeanRun.SequenceView)}`SequenceView` is a {lit}`Sequence Html`.
+Rendering changes the content of its frames while preserving their labels and
+error messages. Selecting a frame displays a recorded result; it does not run
+the computation again.
 -/
