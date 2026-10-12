@@ -5,6 +5,7 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import VersoSlides
+public import VersoLeanRun.Views
 public import VersoLeanRun.Render
 public import Verso.Code.External
 public meta import VersoLeanRun.Anchored
