@@ -11,22 +11,40 @@ public import VersoLeanRun.Automaton
 /-!
 # Interactive Lean examples
 
-Use verso-run to let readers explore a computation: step through a calculator,
-watch a Game of Life board evolve, or compare a few successive values. Define
-the computation and its display in Lean; verso-run adds the browser controls.
+verso-run makes compiled Lean functions runnable in Verso documents. You select
+the function; readers supply an input and see its result. A function can return
+a supported scalar value for text output or Verso's
+{name (full := Verso.Output.Html)}`Html` for an HTML or SVG display.
 
-Import {lit}`VersoLeanRun.Views` in the module containing your computation.
-Start with text output, then add an HTML or SVG drawing when it helps explain
-what is happening.
+## Function results
 
-## Record a few steps or keep running?
+For a single result, return its value directly. This function produces an HTML
+paragraph containing a greeting:
 
-Choose a {name (full := VersoLeanRun.Sequence)}`Sequence` when readers should be able to move back and forth through
-a fixed set of states. Choose an {name (full := VersoLeanRun.Automaton)}`Automaton` when each step should compute the next state,
-as in a simulation. An automaton needs an initial value and a function {lit}`α → α`
-that advances it once.
+```lean
+open Verso.Output
 
-This counter supports both kinds of interaction:
+public def greeting (name : String) : Html :=
+  .tag "p" #[] (Html.ofString s!"Hello, {name}!")
+```
+
+Select {lit}`greeting` directly with {lit}`entry` in a {lit}`leanRun` block. Its Lean type
+determines the input control and result display. The
+[authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md#the-result-type-chooses-the-display)
+lists the supported function types and shows how to add a block to a document.
+
+## Recorded and live views
+
+The views library also provides helpers for presenting several frames or a
+changing state. A {name (full := VersoLeanRun.Sequence)}`Sequence` contains
+recorded, labelled frames that readers can browse. An
+{name (full := VersoLeanRun.Automaton)}`Automaton` contains an initial state and a
+transition function {lit}`α → α`; its live view provides playback controls.
+Both support custom HTML or SVG rendering.
+
+Import {lit}`VersoLeanRun.Views` to use these helpers in an ordinary Lean module.
+
+For example, this counter can provide either a recording or a live view:
 
 ```lean
 open VersoLeanRun
@@ -45,7 +63,7 @@ With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
 inspect any of those five values. {lit}`forever` starts at 10 and computes another
 value each time they press Step, or repeatedly while Play is active.
 
-## Draw the state
+## Rendering model states
 
 {lit}`view` keeps HTML values and displays other values as escaped text using
 their {name}`ToString` instance. To draw a state,
@@ -67,13 +85,14 @@ For a display with its own label or error message, return a
 The Frames page explains how to build one. The finite sequence and live automaton
 pages show how to adapt a model, repeat a recorded sequence, and report errors.
 
-## Put the example in a document
+## Document integration
 
-Return {name (full := VersoLeanRun.SequenceView)}`SequenceView` or {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` from the function you want readers to call.
-Select that function with the {lit}`entry` argument of a {lit}`leanRun` block.
-This works in a Manual, Blog, or Slides document. The
-computation module imports {lit}`VersoLeanRun.Views`; the document imports the
-adapter for its genre.
+To display a single result, a recorded sequence, or a live view, select its
+function with the {lit}`entry` argument of a {lit}`leanRun` block. Return
+{name (full := VersoLeanRun.SequenceView)}`SequenceView` for sequence controls or
+{name (full := VersoLeanRun.AutomatonView)}`AutomatonView` for live playback.
+The block works in Manual, Blog, and Slides documents; each document imports
+the adapter for its genre.
 
 Follow the [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
 to add a block to your document, or explore the

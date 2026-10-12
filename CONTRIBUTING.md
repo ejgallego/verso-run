@@ -125,6 +125,56 @@ public Git acquisition. CI tests its actual checkout, including synthetic PR
 merge commits, and requires both gates before deploying Pages. Keep the starter's
 public pin until a new baseline has landed and its acquisition is qualified.
 
+## Writing documentation
+
+Write for a Lean programmer who has not read the project history. Start with
+what an author can build and what readers can do with it. A useful default is to
+introduce the capability, show a small example, explain the relevant API, and
+then cover details. Choose the order that makes the explanation easiest to follow.
+
+Describe supported capabilities broadly and accurately. Examples illustrate
+possibilities; the current demos do not define the library's scope. For example,
+introduce runnable functions and HTML results before explaining the optional
+sequence and automaton helpers. Explain each concept before relying on its name.
+Keep authors and readers distinct: authors define functions and their displays;
+readers supply inputs and use the published controls.
+
+Use plain sentences, concrete subjects, and headings that name the topic.
+Explain necessary technical terms where they first matter. State behavior and
+constraints when they affect a choice, or link to the relevant reference. Avoid
+both unqualified promises and an introductory catalogue of restrictions.
+
+Show enough Lean code to make an example understandable. Keep examples beside
+their explanations. Implementation details and proofs can remain available in
+the reference without preceding the guide. Prefer one canonical explanation
+with links to it over repeated paragraphs that drift apart.
+
+Match the content to its purpose:
+
+- **Guides** explain a capability and help authors use it, with working examples
+  and the choices needed for a real task.
+- **API reference** explains types and functions, their arguments and results,
+  relevant behavior and limits, and examples. Linked source supplements that
+  explanation.
+- **Architecture notes** explain implementation boundaries, dependencies, and
+  design decisions. Keep project history and plans in their own documents.
+- **PR descriptions** lead with the resulting behavior or concrete problem
+  fixed. Include the design and validation needed for review, with material
+  limits. Development chronology and internal coordination do not belong here.
+
+For substantial prose changes, separate writing from review. The writer drafts
+the explanation; the reviewer checks its claims against the code and reads the
+rendered page, rather than just suggesting different wording. A human or an
+agent can fill either role. Both should ask:
+
+- Can a new author tell what they can build, beyond the examples shown?
+- Are author actions, reader actions, and optional helpers clear?
+- Are API terms explained, and capability claims accurate with useful links to
+  their constraints?
+- Do the headings and reading order help, with enough visible example code?
+- Does the rendered page read naturally, with working links and without
+  unexplained internal names or implementation details?
+
 ## Repository layout
 
 ### Generated library reference

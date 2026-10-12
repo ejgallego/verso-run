@@ -130,7 +130,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
             styles = page.locator('.code-content > .mod-doc .hl.lean.block').first.evaluate('''block => {
                 const s = getComputedStyle(block);
                 const inline = document.querySelector('.hl.lean.inline');
-                const link = inline.querySelector('a .const');
+                const link = document.querySelector('.hl.lean.inline a .const');
                 return {
                     scrollable: s.overflowX === 'auto',
                     padding: parseFloat(s.paddingLeft) > parseFloat(getComputedStyle(inline).paddingLeft),
@@ -206,7 +206,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
         record(prefix + ': guides precede expandable declarations; search reveals the target declaration')
     static = browser.new_context(java_script_enabled=False).new_page()
     static.goto(base + 'root/api/')
-    assert static.get_by_role('heading', name='Record a few steps or keep running?', exact=True).count() == 1
+    assert static.get_by_role('heading', name='Recorded and live views', exact=True).count() == 1
     assert 'def firstFive' in static.locator('main').inner_text()
     static.goto(base + 'root/api/VersoLeanRun/Frame/')
     assert static.get_by_role('heading', name='Labels and content', exact=True).is_visible()
