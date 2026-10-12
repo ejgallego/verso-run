@@ -183,8 +183,9 @@ decoding. The twenty form tags are checked against the shared browser codec.
 
 Rendered entries preserve their actual Lean types: `Html`, `Sequence Html`, or
 `RuntimeM AutomatonSession`. Plain `Sequence α` and `Automaton α` entries get a
-document-owned display adapter for escaped text through `ToString` or live HTML
-states. A `Sequence Html` already has the rendered type and needs no conversion. The source
+document-owned adapter that renders non-HTML states as escaped `ToString` text
+and preserves HTML states. A `Sequence Html` already has the rendered type and
+needs no conversion. The source
 function keeps its model type. The compiler classifies the generated callable:
 sequences return `Sequence Html`; automata return `RuntimeM AutomatonSession`.
 Local scalar and explicitly rendered entries are exported directly; imported

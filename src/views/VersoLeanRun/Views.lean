@@ -84,8 +84,9 @@ public def firstFive (seed : Nat) : Sequence Nat :=
 
 With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
 inspect any of those five values. A block with
-{lit}`leanRun (entry := counter) (input := "10")` starts at 10 and computes
-another value each time they press Step, or repeatedly while Play is active.
+{lit}`leanRun (entry := counter) (input := "10")` provides the live display.
+After the reader presses Run, the automaton starts at 10. Step computes the next
+value; Play advances it repeatedly.
 No call to {lit}`view` is needed for this default display.
 
 ## Rendering model states
