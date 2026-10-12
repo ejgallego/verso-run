@@ -10,6 +10,8 @@ html, body, .reveal {
   transform: none !important;
 }
 .reveal .slides section {
+  max-height: none !important;
+  overflow: visible !important;
   display: block !important;
   position: static !important;
   width: auto !important;

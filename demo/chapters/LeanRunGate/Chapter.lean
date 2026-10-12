@@ -128,11 +128,13 @@ The demo accepts at most 32 instructions, 16 stack values, and 80 decimal digits
 
 # Stack stepper
 
-Run the same program, then move through its states. Lean computes the instructions,
-before/after stacks and failures using the calculator’s shared evaluator. The player
-is also written in Lean. The stepper can inspect a program that leaves several values;
-the calculator additionally requires exactly one final result. Open the calculator’s
-implementation above to read the evaluator and its trace data.
+The stepper presents the calculator's execution trace as a sequence of views.
+Run a program, then choose a step to inspect the instruction, stacks before and
+after execution, and any error. Lean computes the trace and renders each view;
+verso-run supplies the navigation controls.
+
+Unlike the calculator, the stepper accepts programs that leave several values on
+the stack. The calculator's implementation above contains their shared evaluator.
 
 ```leanRunAnchor stackView (module := LeanRunSequence.Examples) (entry := LeanRunSequence.Examples.stackView) (input := "6 7 * 2 +")
 public def stackView (program : String) : VersoLeanRun.SequenceView :=
@@ -142,8 +144,8 @@ public def stackView (program : String) : VersoLeanRun.SequenceView :=
 # HTML greeting
 
 Lean can also return HTML. Change the name and run this example to build a small greeting card.
-The function returns Verso's `Html` type. The form serializes it for the HTML preview,
-and interpolated text is escaped automatically.
+The function returns Verso's `Html` type, which the preview renders.
+HTML interpolation escapes the name, so reader input appears as text.
 
 ```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada")
 open Verso.Output.Html
@@ -157,8 +159,8 @@ public def LeanRunGate.htmlGreeting (name : String) : Verso.Output.Html :=
   </section> }}
 ```
 
-The same typed HTML function also accepts multiline text. Line breaks and reader
-markup remain text inside the isolated preview.
+The same function can use a multiline input field. Reader input is still treated
+as text, even if it contains HTML tags.
 
 ```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada\nGrace") +multiline
 #check LeanRunGate.htmlGreeting
@@ -217,6 +219,9 @@ Open the implementation to see the library calls. Values outside 1–8 produce a
 
 # Exact natural numbers
 
+Lean's `Nat` arithmetic stays exact, including values beyond JavaScript's safe
+integer range. Try `9007199254740993` to see its double.
+
 ```leanRun (entry := LeanRunGate.double)
 public def LeanRunGate.double (n : Nat) : Nat :=
   LeanRunGate.Helper.twice n
@@ -224,15 +229,19 @@ public def LeanRunGate.double (n : Nat) : Nat :=
 
 ## Another independent greeting
 
+The same function can appear more than once. Each example has its own input
+and result.
+
 ```leanRun (entry := LeanRunGate.greet)
 #check LeanRunGate.greet
 ```
 
 # Anchored source
 
-This example displays an anchor from the imported helper module. The displayed
-definition and the compiled callable are selected separately, so the same source
-region can be reused in another document without redeclaring the function.
+Functions defined in another Lean module can appear with their source and Run
+controls. Here, `twice` names a source region in the helper module, while `entry`
+identifies the function to run. Both refer to the same definition in this example;
+the source can be reused across documents.
 
 ```leanRunAnchor twice (module := LeanRunGate.Helper) (entry := LeanRunGate.Helper.twice) (input := "21")
 public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
@@ -244,12 +253,13 @@ An ordinary anchored block can display that same source without a Run form:
 public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
 ```
 
-The {name}`LeanRunGate.Helper.twice` reference uses the native source block's definition target.
+The {name}`LeanRunGate.Helper.twice` link leads to the displayed definition.
 
 # Typed inputs
 
-Boolean choices and unsigned integers use the same worker lifecycle as text.
-UInt64 arithmetic wraps after its maximum value, `18446744073709551615`.
+The input control follows the function's argument type: a choice for `Bool`,
+a decimal field for `UInt64`. Unsigned 64-bit arithmetic wraps after its maximum
+value, `18446744073709551615`; incrementing that value gives zero.
 
 ```leanRunAnchor flip (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.flip)
 public def LeanRunTyped.Examples.flip (value : Bool) : Bool := !value
@@ -261,7 +271,7 @@ public def LeanRunTyped.Examples.increment (value : UInt64) : UInt64 := value + 
 
 # Multiline text
 
-Enter preserves line breaks. Ctrl+Enter or ⌘+Enter runs the example.
+Enter adds a line break. Ctrl+Enter or ⌘+Enter runs the example.
 
 ```leanRunAnchor lines (module := LeanRunTyped.Examples) (entry := LeanRunTyped.Examples.lines) (input := "Hello\nLean") +multiline
 public def LeanRunTyped.Examples.lines (text : String) : String :=
@@ -271,6 +281,8 @@ public def LeanRunTyped.Examples.lines (text : String) : String :=
 ```
 
 # Ordinary Lean
+
+Ordinary Lean blocks keep their usual highlighting, without Run controls.
 
 ```lean
 #check Nat.add
@@ -293,7 +305,8 @@ public def LeanRunGate.spin (n : Nat) : Nat :=
 
 # Typed rendering
 
-The input type selects its control; the result type selects its view.
+A Boolean input gets a true/false choice. Returning `Html` displays the result
+in a preview.
 
 ```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true")
 public def badge (enabled : Bool) : Html :=
@@ -325,7 +338,8 @@ Edit a rectangular seed: `#` is a live cell and `.` is a dead cell. The seed is
 centred on an 8×8 board; cells outside the edge stay dead. Lean computes each
 generation on demand. Choose Play to keep running, Pause to inspect the board,
 or Step to advance once. Edit a new seed while it runs, then choose Restart
-to apply it. Stop releases the worker.
+to apply it. Stop ends the run.
+
 Try `###` on one line for a blinker, or `##` on each of two lines for a still life.
 
 ```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := "...\n###\n...") +multiline
@@ -340,8 +354,8 @@ public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
 
 **The transition**
 
-Every new cell reads the old board: birth with three neighbours, survival with
-two or three. This pure function contains the complete Life rule.
+A dead cell becomes alive with exactly three live neighbours; a live cell survives with
+two or three. Each update reads the old board, so all cells change simultaneously.
 
 ```anchor lifeRules (module := LeanRunSequence.Life)
 def Board.neighbours (board : Board) (row col : Nat) : Nat := Id.run do
@@ -365,8 +379,8 @@ def Board.step (board : Board) : Board :=
 
 **The model**
 
-The model adds a generation counter to the board. The player calls this transition
-without interpreting the board in JavaScript.
+The state pairs the board with a generation counter. Each step advances the
+board using the rule above and increments the counter.
 
 ```anchor lifeState (module := LeanRunSequence.Life)
 structure State where
@@ -379,7 +393,8 @@ def State.step (state : State) : State :=
 
 **The view**
 
-Lean renders the board as ordinary SVG inside Verso Html.
+The display function returns SVG inside Verso's `Html` type, with a label showing
+the generation and number of live cells.
 
 ```anchor lifeSvg (module := LeanRunSequence.Life)
 def renderState (state : State) : Html :=

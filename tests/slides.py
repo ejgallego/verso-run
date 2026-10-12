@@ -151,6 +151,29 @@ with serve_directory(served) as base:
             no_workers()
             record(prefix+': escaped isolated HTML preview and all workers are cleared on navigation')
 
+            life = form('LeanRunSequence.Life.lifeView')
+            life_index = life.evaluate('e => Reveal.getSlides().indexOf(e.closest(".slides > section"))')
+            slide(life_index)
+            assert life.locator('div.lean-run-source').count() == 1
+            run_box = life.locator('[type=submit]').bounding_box()
+            assert run_box['y'] >= 0 and run_box['y'] + run_box['height'] <= 900
+            life.locator('[type=submit]').click()
+            page.wait_for_function('e => e.dataset.state === "success"',
+                                   arg=life.element_handle(), timeout=30000)
+            life.frame_locator('iframe[data-preview="current"]').locator('svg').wait_for()
+            preview = life.locator('.lean-run-automaton-preview')
+            preview.scroll_into_view_if_needed()
+            box = preview.bounding_box()
+            assert box['y'] >= 0 and box['y'] + box['height'] <= 900
+            # The slide scrolls; Reveal's fixed viewport must not move to reveal overflow.
+            assert life.evaluate('e => e.closest(".slides > section").scrollTop') > 0
+            assert page.evaluate('window.scrollY') == 0
+            page.screenshot(path=str(output/f"life-{prefix.replace('/', '-')}.png"))
+            slide(0)
+            assert life.get_attribute('data-state') == 'stopped'
+            no_workers()
+            record(prefix+': expanded Life source and Run fit; the full live board is reachable by slide scrolling')
+
         # Failure and cancellation during acquisition use the shared host guards.
         page.reload()
         # Reload preserves Reveal's selected slide. Initialization does not

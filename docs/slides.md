@@ -24,8 +24,9 @@ blocks. A later block can show `#check Demo.greet` and use the same entry.
 The document registers the functions named by its Run blocks. Inline definitions
 need no VIR annotation or source anchor.
 
-Run blocks keep Slides' native code formatting and fit their source and controls
-within the slide layout.
+Run blocks keep Slides' native code formatting. In presentation mode, long slides
+scroll within the slide area so their source, controls, and results remain
+accessible. Reveal's scroll view retains its usual navigation.
 
 ## Optional shared source anchors
 

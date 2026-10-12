@@ -2,11 +2,11 @@
 
 ## Library boundaries
 
-The package has separate Lake owners for model/view code, browser presentation,
+Separate Lake libraries own the model/view code, browser presentation,
 and document authoring. Import `VersoLeanRun.Views` in ordinary Lean producer
 modules. Document modules select `VersoLeanRun`, `VersoLeanRun.Blog`, or
 `VersoLeanRun.Slides`; their native generators select the corresponding `Publish`
-module. Existing directive and publication APIs retain their names.
+module.
 
 | Library | Source directory | Owned modules |
 | --- | --- | --- |
@@ -25,9 +25,8 @@ globs give every source one owner even where namespaces overlap; namespace-wide
 roots would also claim modules in other libraries. `lake run check-library-ownership`
 checks that every source is registered to the library whose directory contains it.
 
-The views library has no
-browser-asset prerequisite and imports no genre adapter, VIR compiler or DOM
-binding. The presenter depends on view types; authoring depends on views and the
+The views library needs no browser assets and directly imports no genre adapter,
+VIR compiler or DOM binding. The presenter depends on view types; authoring depends on views and the
 native compiler APIs. Native publication imports the presenter carrier. That
 carrier classifies the prepared program in an elaboration-time environment and
 embeds its resources, keeping the DOM implementation out of ordinary native
@@ -37,9 +36,9 @@ The pinned `Verso.Output.Html` also imports its Lean quoter machinery. VIR's DOM
 bindings import host validation through `Vir.Host`, including VIR classifier
 modules. These upstream imports remain intact. Separating their syntax and
 runtime data would require an upstream change; this split makes verso-run's
-ownership explicit and does not claim a compiler-free transitive DOM import or
-a measured build-speed improvement. VIR packages executable declarations through
-their reached IR dependencies.
+ownership explicit. It does not remove those transitive imports, and its effect
+on build time has not been measured. VIR packages executable declarations
+together with their reachable IR dependencies.
 
 `tests/client.py` checks source-directory ownership and import phases, then runs a
 plain Lean producer through native and dedicated-worker execution without a
@@ -54,12 +53,12 @@ the source freshness helper and preview commands are described in
 
 ## Common machinery and Manual integration
 
-The portable model, callable classifier, anchor loader, console, AST collector
-and publication planner have no dependency on `VersoManual`: `Model` retains portable
-experiment data, `Callable` selects/registers entries and builds expected contracts,
-`Anchored` reuses standard checked source anchors, `Render` builds the console,
-`Collect` walks a genre's AST with its extension decoder, and `Publication`
-prepares the complete validated file inventory without writing it.
+The shared authoring and publication modules have no dependency on `VersoManual`.
+`Model` holds each block's experiment description; `Callable` checks and registers
+its entry function; `Anchored` loads checked source regions; `Render` builds the
+input and result controls. `Collect` finds Run blocks in a genre's document tree,
+using that genre's extension decoder. `Publication` constructs the validated
+output-file inventory without writing it.
 
 `Inline` shares entry selection and retained command scopes after elaboration.
 It reuses Verso's generic command engine, currently located in the Manual library;
@@ -107,8 +106,7 @@ Follow VIR's stock resource workflow, demonstrated by the
    ```
 
    The include names the program module and returns a `ResourceSet` containing
-   the locked runtime and prepared programs. Pass this value directly; no singleton
-   extraction or reconstruction of runtime ownership is needed.
+   the locked runtime and prepared programs. Pass this complete value to the publisher.
    Module resource facets support custom source/build directories.
 4. Import the chapter, carrier, and `VersoLeanRun.Publish` in the native generator:
 
@@ -127,9 +125,8 @@ Follow VIR's stock resource workflow, demonstrated by the
 
 `preparePublication` is the common pure planner; its optional `resourcePrefix`
 controls inventory paths. Manual uses `publish`, Blog uses `blogMain`, and Slides
-uses `slidesMain`. Each accepts a complete `ResourceSet`. This prototype has no
-backward compatibility policy: Bundle-array adapters and serialized metadata
-fallbacks have been removed. Migrate callers when updating the pin.
+uses `slidesMain`. Each accepts a complete `ResourceSet`. These experimental APIs
+may change; check the publication API when updating the dependency.
 
 The graph remains support → producer → document → program preparation → carrier →
 native generator. No per-block packaging or second execution compiler is added.
@@ -165,7 +162,7 @@ share one manifest and expected signature while retaining independent controls,
 inputs, and workers. Changing the callable, manifest, or scalar expectation for
 that same key fails with `PUBLICATION_BINDING_CONFLICT`, reporting both source
 locations before any publication writes. Input presets, collapsed state, and
-String input mode does not change the callable contract. Result presentation can
+String input mode do not change the callable contract. Result presentation can
 change its transport type. Different
 documents have independent binding namespaces. Ordered binding maps produce the
 same publication bytes regardless of placement order.
@@ -176,23 +173,25 @@ signatures before runtime instantiation. `forSite` does not check callable types
 there is no embedded-interface parser or reopening of producer files here.
 
 VIR's `analyzeExportInterface` independently classifies the callable. Plain-text
-calls retain pure, homogeneous String/Nat/Bool/UInt64 signatures. Any of these
-inputs may instead return `Html` or `SequenceView`. `Experiment.form : FormKind`
+calls use pure, homogeneous String/Nat/Bool/UInt64 signatures. Any of these
+inputs may instead return `Html`, `SequenceView`, or `AutomatonView`. Scalar,
+HTML, and sequence functions are pure; automaton start actions use the runtime
+effect. `Experiment.form : FormKind`
 contains an `InputKind` and `PresentationKind`; multiline mode exists only inside
 `InputKind.string`. Unknown tags and unsupported object encodings fail metadata
-decoding. The fifteen wire names are checked against the shared browser codec.
+decoding. The twenty form tags are checked against the shared browser codec.
 
 Rendered entries preserve their actual Lean types: `Html`, `Sequence Html`, or
 `RuntimeM AutomatonSession`. Local entries are exported directly; an imported
 entry gets one document-owned forwarding export with the same signature.
-VIR transfers structured values through its compiler-derived codec. Only frames
-cross the worker message boundary; a live callback remains in its worker.
+VIR transfers structured values through its compiler-derived codec. Sequences
+cross the worker message boundary as recorded frame data; automata send one frame
+at a time while their live callbacks remain in the worker.
 Publication derives the independent expected contract from those actual types.
 The JavaScript bridge bounds the transferred value's string content, node count,
 and depth without interpreting HTML. Rendering and escaping remain in Lean.
 
-Shape, display mode, and multiline controls are derived from this form. A second
-signature or JSON encoded inside a String is no longer carried in every experiment.
+The form determines the input control, presentation, and multiline mode.
 Publication encodes the retained type through VIR's `ClassifiedSignature` encoder
 as `{args, result, effect}` in `expectedExport`. The worker uses the full Lean
 `callable` declaration as both expectation key and call name. A missing expectation
@@ -227,10 +226,10 @@ and non-digits before invoking. Limits are 4,096 UTF-16 code units for a String 
 digits for a Nat input, and 65,536 UTF-16 code units in output strings. Structured results also have
 limits of 16,384 value nodes and 128 levels of nesting. These are
 input/output bounds, not a Wasm heap budget. Stop provides actual interruption; execution
-of trusted compiled code can allocate memory before an output limit is checked. Arbitrary
-Lean evaluation, custom foreign-function providers, author-selected browser IO/DOM/React
-exports, tactics, and general dependent interfaces are outside this milestone. The
-internal sequence presenter separately qualifies its exercised DOM bindings.
+of trusted compiled code can allocate memory before an output limit is checked. Browser Lean elaboration, custom foreign-function providers, author-selected
+browser IO/DOM/React exports, tactics, and general dependent interfaces are not
+supported by Run forms. The internal compiled presenter uses DOM bindings to
+manage controls and previews; its exercised bindings are qualified separately.
 
 Forms group the highlighted source above a quiet input/result area, with aligned controls,
 visible keyboard focus, and wrapping on narrow screens. They have labels, keyboard
@@ -263,8 +262,9 @@ Slides uses its module-owned-assets review snapshot. Illuminate retains its pin;
 
 ## Sequence presentation boundary
 
-`Sequence α` and `Frame α` hold the author's model. Its lawful `Functor`
-instance maps observations while retaining labels and errors. `List.scanl` records
+`Frame α` pairs a value with a label and an optional error; `Sequence α` stores
+an initial frame and the frames that follow it. Their lawful `Functor`
+instances map values while retaining labels and errors. `List.scanl` records
 exactly the requested transitions. `.view` uses an
 `α → Html` function and maps the content to `Sequence Html`, also called `SequenceView`. Both sequences and
 views require an initial record, making their nonempty invariant structural.
@@ -297,8 +297,7 @@ existing placement and navigation lifecycle.
 `Automaton α` retains the pure initial/transition interface. `Automaton.view`
 returns a start action, `RuntimeM AutomatonSession` (also called `AutomatonView`).
 Executing it in the worker allocates an independent `RuntimeRef (α × Nat)` and
-returns the initial frame plus a zero-argument advance callback. There is no
-wrapper around the action and no conversion of its frames. Publication
+returns the initial frame plus a zero-argument advance callback. Publication
 independently classifies that exact nested contract through VIR. Ordinary scalar
 exports retain their pure interface.
 
@@ -334,7 +333,8 @@ states; an ordinary live model keeps only its current state.
 
 ### Rendering and transport
 
-Authors return typed `Html`, `SequenceView`, or `AutomatonView`. HTML generation, including SVG,
+For richer displays, functions return `Html`, `SequenceView`, or `AutomatonView`
+instead of scalar results. HTML generation, including SVG,
 runs in compiled Lean in the worker. The sequence controls and frame selection
 also run in compiled Lean, in the separate browser presenter. JavaScript owns
 asynchronous loading, worker messages and cancellation; it does not evaluate the

@@ -1,3 +1,8 @@
+.reveal-viewport:not(.reveal-scroll) .slides > section {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
 .reveal .lean-run-slides {
   text-align: left;
   font-size: 22px;

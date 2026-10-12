@@ -147,9 +147,13 @@ repeatedly addressing the author as “you”.
 Explain necessary technical terms where they first matter. State behavior and
 constraints when they affect a choice, or link to the relevant reference. Avoid
 both unqualified promises and an introductory catalogue of restrictions.
+Attribute behavior to the layer that provides it. For example, the compiled
+presenter uses DOM APIs, while entry functions execute in a worker; internal
+renderer capabilities do not imply an arbitrary author-facing DOM interface.
 
 Show enough Lean code to make an example understandable. Keep examples beside
-their explanations. Implementation details and proofs can remain available in
+their explanations. Adapt explanations to each format; slides should leave room
+for visible code and controls. Implementation details and proofs can remain available in
 the reference without preceding the guide. Prefer one canonical explanation
 with links to it over repeated paragraphs that drift apart.
 

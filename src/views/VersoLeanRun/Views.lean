@@ -12,10 +12,12 @@ public import VersoLeanRun.Automaton
 # Interactive Lean examples
 
 verso-run runs selected Lean functions interactively from compiled Verso documents.
-Functions can return primitive values, HTML, or richer animated views. HTML
-results use Verso's {name (full := Verso.Output.Html)}`Html` type and can include SVG.
-An experimental compiled renderer can also manipulate the document's DOM;
-the [rendering notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#rendering-and-transport)
+Functions can return primitive values, HTML, or richer interactive views,
+including animations. HTML results use Verso's
+{name (full := Verso.Output.Html)}`Html` type and can include SVG.
+The experimental presenter is also written in Lean and uses DOM APIs to manage
+its controls and previews; the
+[rendering notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#rendering-and-transport)
 describe this layer.
 
 ## Function results

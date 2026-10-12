@@ -3,9 +3,10 @@
 **Runnable Lean examples for Verso documents.**
 
 verso-run runs selected Lean functions interactively from compiled Verso documents.
-Functions can return primitive values, HTML (including SVG), or richer animated
-views. Its experimental compiled renderer can also manipulate the document's
-DOM; see [rendering and transport](docs/internals.md#rendering-and-transport).
+Functions can return primitive values, HTML (including SVG), or richer interactive
+views, including animations. The experimental presenter is also written in Lean
+and uses DOM APIs to manage its controls and previews; see
+[rendering and transport](docs/internals.md#rendering-and-transport).
 
 Functions can be defined in the document or imported from a Lean module. Readers
 need no Lean installation. Execution uses [VIR](https://github.com/ejgallego/lean-vir)
