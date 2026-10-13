@@ -27,7 +27,7 @@ public def LeanRunGate.Helper.twice (n : Nat) : Nat := n + n
 
 # A greeting, on reveal
 
-Advance once to reveal the example. Its worker stops when the fragment is hidden.
+Advance once to reveal the example. Hiding it again stops the run.
 
 :::fragment
 ```leanRunAnchor greeting (module := LeanRunBlog.Examples) (entry := LeanRunBlog.Examples.greet) (input := "Ada")
@@ -92,7 +92,8 @@ public def LeanRunTyped.Examples.lines (text : String) : String :=
 
 # Define a runnable function here
 
-The same inline Run syntax works in a deck. Its source uses native Slides rendering.
+Run blocks can define functions directly in the deck. Their source uses the
+same highlighting and fragments as ordinary Slides code blocks.
 
 :::fragment
 ```leanRun (entry := LeanRunSlides.Deck.Inline.greet) (input := "Ada")
@@ -113,8 +114,10 @@ The namespace and definition remain available in later blocks.
 # Inline typed HTML
 
 ```leanRun (entry := LeanRunSlides.Deck.Inline.card) (input := "Ada")
+open Verso.Output.Html
+
 public def card (name : String) : Verso.Output.Html :=
-  .text true name
+  {{ <p> {{name}} </p> }}
 end LeanRunSlides.Deck.Inline
 ```
 
@@ -129,7 +132,8 @@ public def stackView (program : String) : VersoLeanRun.SequenceView :=
 
 # Typed rendering
 
-The input type selects its control; the result type selects its view.
+A Boolean input gets a true/false choice. Returning `Html` displays the result
+in a preview.
 
 ```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true")
 public def badge (enabled : Bool) : Html :=
@@ -137,6 +141,9 @@ public def badge (enabled : Bool) : Html :=
 ```
 
 # Exact word states
+
+This recorded sequence has two frames: the input and its successor.
+Run, then move from Start to Increment to see the maximum `UInt64` wrap to zero.
 
 ```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615")
 public def wordSteps (seed : UInt64) : SequenceView :=
@@ -147,12 +154,7 @@ public def wordSteps (seed : UInt64) : SequenceView :=
 
 # Game of Life
 
-Edit a rectangular seed: `#` is a live cell and `.` is a dead cell. The seed is
-centred on an 8×8 board; cells outside the edge stay dead. Lean computes each
-generation on demand. Choose Play to keep running, Pause to inspect the board,
-or Step to advance once. Edit a new seed while it runs, then choose Restart
-to apply it. Stop releases the worker.
-Try `###` on one line for a blinker, or `##` on each of two lines for a still life.
+Run, then Play or Step. Restart applies an edited seed.
 
 ```leanRunAnchor lifeView (module := LeanRunSequence.Life) (entry := LeanRunSequence.Life.lifeView) (input := "...\n###\n...") +multiline
 public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
@@ -166,8 +168,8 @@ public def lifeView (seed : String) : VersoLeanRun.AutomatonView :=
 
 # The transition
 
-Every new cell reads the old board: birth with three neighbours, survival with
-two or three. This pure function contains the complete Life rule.
+A dead cell becomes alive with exactly three live neighbours; a live cell survives with
+two or three. Each update reads the old board, so all cells change simultaneously.
 
 ```anchor lifeRules (module := LeanRunSequence.Life)
 def Board.neighbours (board : Board) (row col : Nat) : Nat := Id.run do
@@ -191,8 +193,8 @@ def Board.step (board : Board) : Board :=
 
 # The model
 
-The model adds a generation counter to the board. The player calls this transition
-without interpreting the board in JavaScript.
+The state pairs the board with a generation counter. Each step advances the
+board using the rule above and increments the counter.
 
 ```anchor lifeState (module := LeanRunSequence.Life)
 structure State where
@@ -205,7 +207,8 @@ def State.step (state : State) : State :=
 
 # The view
 
-Lean renders the board as ordinary SVG inside Verso Html.
+The display function returns SVG inside Verso's `Html` type, with a label showing
+the generation and number of live cells.
 
 ```anchor lifeSvg (module := LeanRunSequence.Life)
 def renderState (state : State) : Html :=

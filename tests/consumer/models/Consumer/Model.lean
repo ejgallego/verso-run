@@ -9,11 +9,11 @@ open VersoLeanRun
 def counter (seed : UInt64) : Automaton UInt64 :=
   { initial := seed, step := (· + 1) }
 
-def finite (seed : UInt64) : SequenceView :=
-  ((counter seed).trace 3).viewText
+def finite (seed : UInt64) : Sequence UInt64 :=
+  (counter seed).trace 3
 
-def live (seed : UInt64) : AutomatonView :=
-  (counter seed).viewText
+def live (seed : UInt64) : Automaton UInt64 :=
+  counter seed
 
 def increment (seed : UInt64) : UInt64 := seed + 1
 

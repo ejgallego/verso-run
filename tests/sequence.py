@@ -22,7 +22,7 @@ def oracle(value):
         [str(ROOT/'.lake/build/bin/lean-run-oracle'), 'sequence', value], text=True)))
 
 command(['lake','env','lean','tests/SequenceAdapter.lean'],'generic-author')
-record('generic author adapter, known shared stack traces and empty/version/frame-count validation')
+record('shared frame/sequence types, known stack traces and structural initial/frame-count validation')
 site = output/'site'
 command(['lake','exe','lean-run-demo','--output',str(site/'manual'),'--with-tex'], 'manual')
 command(['lake','exe','lean-run-blog-demo','--output',str(site/'blog')], 'blog')
@@ -35,7 +35,7 @@ for genre, path in [('manual',site/'manual/html-multi'),('blog',site/'blog'),('s
     assert presenter['expectedExport']['args'][0]['name'] == 'Lean.Vir.Browser.Element'
     payload_type = presenter['expectedExport']['args'][1]
     assert payload_type['kind'] == 'structure'
-    assert payload_type['name'] == 'VersoLeanRun.SequenceWire.Payload'
+    assert payload_type['name'] == 'VersoLeanRun.Sequence'
     for owner, bindings in plan['programs'].items():
         if 'LeanRunSequence.Examples.stackView' in bindings:
             assert bindings['LeanRunSequence.Examples.stackView']['expectedExport'] == {

@@ -59,8 +59,8 @@ assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.j
 assert inventory(site/'html-multi/lean-run') == inventory(OUTPUT/'native-only/html-multi/lean-run')
 published = plan['programs']['LeanRunGate.Chapter']
 for declaration, input_type, result_type in [('greet', 'String', 'String'),
-        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'String'),
-        ('diagram', 'Nat', 'String'), ('double', 'Nat', 'Nat'),
+        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'Verso.Output.Html'),
+        ('diagram', 'Nat', 'Verso.Output.Html'), ('double', 'Nat', 'Nat'),
         ('Helper.twice', 'Nat', 'Nat'), ('spin', 'Nat', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert set(contract) == {'args', 'result', 'effect'}
@@ -98,6 +98,8 @@ record('missing program registration reports declaration and source provenance')
 command(['lake', 'env', 'lean', 'tests/HtmlAdapter.lean'], 'html-adapter')
 command(['lake', 'env', 'lean', 'tests/EntryRegistration.lean'], 'entry-registration')
 command(['lake', 'env', 'lean', 'tests/AutomatonAdapter.lean'], 'automaton-adapter')
+command(['lake', 'env', 'lean', 'tests/DefaultDisplay.lean'], 'default-display')
+record('plain model entries preserve their source types; default displays escape text, retain HTML, and isolate live sessions')
 record('entry registers unannotated scalar functions and typed Html without an output option')
 record('typed HTML adapter serializes escaped text and reuses repeated entry placements')
 for name, expected in json.loads((ROOT/'tests/negative/cases.json').read_text()).items():

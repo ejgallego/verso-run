@@ -163,6 +163,7 @@ try:
                     assert scalar.locator('.lean-run-output').text_content() == case['scalar']
                     page.goto(base + prefix + '/Finite/')
                     page.wait_for_selector('.lean-run[data-enhanced]')
+                    assert json.loads(finite.get_attribute('data-experiment'))['callable'] == 'Consumer.Chapter.Consumer.finite.leanRun'
                     run(finite, case['seed'])
                     for index, expected in enumerate(case['finite']['frames']):
                         finite.locator(f'[data-step="{index}"]').click()
@@ -173,6 +174,7 @@ try:
                     page.goto(base + prefix + '/Live/')
                     page.wait_for_selector('.lean-run[data-enhanced]')
                     assert live.count() == 2
+                    assert json.loads(live.nth(0).get_attribute('data-experiment'))['callable'] == 'Consumer.Chapter.Consumer.live.leanRun'
                     run(live.nth(0), case['seed'])
                     live_frame(live.nth(0), case['live'][0])
                     for expected in case['live'][1:]:

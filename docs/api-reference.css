@@ -1,6 +1,27 @@
 /* Unclassified code tokens follow the page theme, including dark mode. */
 .code-content {
     --verso-code-color: var(--verso-text-color);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Guide first even without JavaScript; declarations remain fully readable. */
+.code-content > :is(.code-box, .api-declarations) { order: 1; }
+.code-content > .imports-list { order: 2; }
+.code-content > * { min-width: 0; }
+
+.api-declarations {
+    margin-top: 1.5rem;
+    min-width: 0;
+}
+
+.api-declarations > summary {
+    cursor: pointer;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--verso-code-box-border-color);
+    border-radius: 0.5rem;
+    background: var(--verso-code-box-background-color);
+    font-weight: 600;
 }
 
 /* Checked examples use block code elements rather than Markdown pre elements. */

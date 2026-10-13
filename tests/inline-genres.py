@@ -46,11 +46,22 @@ public def word (input : UInt64) : UInt64 := input + 1
 public def html (input : String) : Verso.Output.Html := .text true input
 end InlineTest
 ```
+```leanRun (entry := plainTrace)
+public def plainTrace (input : String) : VersoLeanRun.Sequence String :=
+  VersoLeanRun.Sequence.iterate (· ++ "!") input 2
+```
+```leanRun (entry := plainMachine)
+public def plainMachine (input : Bool) : VersoLeanRun.Automaton Bool :=
+  { initial := input, step := Bool.not }
+```
+```leanRun (entry := plainMachine)
+#check plainMachine
+```
 '''
     file = fixtures/(genre+'.lean')
     file.write_text(header+body)
     command(['lake', 'env', 'lean', str(file)], genre+'-author')
-    record(genre+': annotation-free scalar/Html definitions, retained namespace and repeated selection')
+    record(genre+': annotation-free scalar/Html definitions, plain sequences/automata, retained namespace and repeated selection')
     for role, block, reason in [
         ('unsupported', '```leanRun (entry := signed)\npublic def signed (n : Int) : Int := n\n```', 'supported by VIR, but not by this Run form'),
         ('output', '```leanRun (entry := text) (output := "html")\npublic def text (s : String) : String := s\n```', 'Unexpected argument (output :=')]:
@@ -69,8 +80,10 @@ descriptor = {'type': 'String', 'interfaceTag': 3}
 for genre, owner in [('blog', 'LeanRunBlog.Page'), ('blog', 'LeanRunBlog.Post'), ('slides', 'LeanRunSlides.Deck')]:
     for role in ['greet', 'card']:
         assert plans[genre]['programs'][owner][owner+'.Inline.'+role]['expectedExport'] == {
-            'args': [descriptor], 'result': descriptor, 'effect': 'pure'}
-record('independent canonical String signatures for inline scalar and Html callables')
+            'args': [descriptor],
+            'result': descriptor if role == 'greet' else plans[genre]['presenters']['html']['expectedExport']['args'][1],
+            'effect': 'pure'}
+record('inline exports preserve scalar/Html types and agree with the separate presenter contract')
 
 
 served = output/'served'
@@ -142,7 +155,7 @@ with serve_directory(served) as base:
                 card = form(owner, 'card')
                 data = json.loads(card.get_attribute('data-experiment'))
                 assert data['declaration'] == owner+'.Inline.card'
-                assert data['callable'] == owner+'.Inline.card.leanRunHtml'
+                assert data['callable'] == owner+'.Inline.card'
                 assert data['form'] == 'html'
                 assert success(card, '<b>& 🌍') == ''
                 iframe = card.locator('iframe')

@@ -81,7 +81,7 @@ export class ViewHost {
     if (!next) throw new Error("Missing staged automaton preview");
     await waitForPreview(next, signal);
     if (generation !== this.generation) return false;
-    const result = this.program.call(this.commit, this.element, frame);
+    const result = this.program.call(this.commit, this.element, frame.label, frame.error);
     if (result !== undefined) throw new Error("Automaton commit returned an invalid Unit");
     return true;
   }

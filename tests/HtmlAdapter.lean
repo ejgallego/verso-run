@@ -13,8 +13,8 @@ public def card (name : String) : Card := .text true name
 #check card
 ```
 
-#check (card.leanRunHtml : String → String)
-#guard card.leanRunHtml "<b>&" == "&lt;b&gt;&amp;"
+#check (card : String → Verso.Output.Html)
+#guard (card "<b>&").asString == "&lt;b&gt;&amp;"
 
 ```leanRun (entry := markup)
 public def markup (text : String) : String := text

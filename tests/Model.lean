@@ -36,18 +36,18 @@ def text (input : String) : String := input
 def natural (input : Nat) : Nat := input
 def boolean (input : Bool) : Bool := input
 def unsigned (input : UInt64) : UInt64 := input
-def sequence (input : String) : SequenceWire.Payload :=
-  { version := 1, frames := #[{ label := input, html := "", error := none }] }
-def booleanHtml (input : Bool) : String := toString input
-def unsignedHtml (input : UInt64) : String := toString input
-def naturalSequence (input : Nat) : SequenceWire.Payload := { version := input, frames := #[] }
-def booleanSequence (input : Bool) : SequenceWire.Payload := { version := if input then 1 else 0, frames := #[] }
-def unsignedSequence (input : UInt64) : SequenceWire.Payload := { version := input.toNat, frames := #[] }
-def live (input : String) : Lean.Vir.RuntimeM AutomatonWire.Session :=
-  (AutomatonView.error input).start
-def naturalLive (input : Nat) : Lean.Vir.RuntimeM AutomatonWire.Session := live (toString input)
-def booleanLive (input : Bool) : Lean.Vir.RuntimeM AutomatonWire.Session := live (toString input)
-def unsignedLive (input : UInt64) : Lean.Vir.RuntimeM AutomatonWire.Session := live (toString input)
+def sequence (input : String) : SequenceView :=
+  { initial := { label := input, content := .empty } }
+def booleanHtml (input : Bool) : Verso.Output.Html := .text true (toString input)
+def unsignedHtml (input : UInt64) : Verso.Output.Html := .text true (toString input)
+def naturalSequence (input : Nat) : SequenceView := SequenceView.error (toString input)
+def booleanSequence (input : Bool) : SequenceView := SequenceView.error (toString input)
+def unsignedSequence (input : UInt64) : SequenceView := SequenceView.error (toString input)
+def live (input : String) : Lean.Vir.RuntimeM AutomatonSession :=
+  AutomatonView.error input
+def naturalLive (input : Nat) : Lean.Vir.RuntimeM AutomatonSession := live (toString input)
+def booleanLive (input : Bool) : Lean.Vir.RuntimeM AutomatonSession := live (toString input)
+def unsignedLive (input : UInt64) : Lean.Vir.RuntimeM AutomatonSession := live (toString input)
 end ContractFixtures
 
 -- Every admitted input/presentation pair matches independent compiler classification.
@@ -55,14 +55,14 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   let cases : Array (Name × FormKind) := #[
     (`ContractFixtures.text, ⟨.string .line, .text⟩),
     (`ContractFixtures.text, ⟨.string .multiline, .text⟩),
-    (`LeanRunGate.htmlGreeting.leanRunHtml, ⟨.string .line, .html⟩),
-    (`LeanRunGate.htmlGreeting.leanRunHtml, ⟨.string .multiline, .html⟩),
+    (`LeanRunGate.htmlGreeting, ⟨.string .line, .html⟩),
+    (`LeanRunGate.htmlGreeting, ⟨.string .multiline, .html⟩),
     (`ContractFixtures.sequence, ⟨.string .line, .sequence⟩),
     (`ContractFixtures.sequence, ⟨.string .multiline, .sequence⟩),
     (`ContractFixtures.natural, ⟨.nat, .text⟩),
     (`ContractFixtures.boolean, ⟨.bool, .text⟩),
     (`ContractFixtures.unsigned, ⟨.uint64, .text⟩),
-    (`LeanRunGate.diagram.leanRunHtml, ⟨.nat, .html⟩),
+    (`LeanRunGate.diagram, ⟨.nat, .html⟩),
     (`ContractFixtures.booleanHtml, ⟨.bool, .html⟩),
     (`ContractFixtures.unsignedHtml, ⟨.uint64, .html⟩),
     (`ContractFixtures.naturalSequence, ⟨.nat, .sequence⟩),
