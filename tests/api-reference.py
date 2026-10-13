@@ -8,7 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 from harness import run_command, serve_directory
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -124,7 +124,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
     for prefix in ['root/api', 'nested/docs/api']:
         reference = base + prefix + '/'
         assert page.goto(reference).status == 200
-        assert page.get_by_role('heading', name='Interactive Lean examples', exact=True).count() == 1
+        expect(page.get_by_role('heading', name='Interactive Lean examples', exact=True)).to_be_visible()
         for theme in ['light', 'dark']:
             page.emulate_media(color_scheme=theme, reduced_motion='reduce')
             styles = page.locator('.code-content > .mod-doc .hl.lean.block').first.evaluate('''block => {
@@ -150,13 +150,13 @@ with serve_directory(served) as base, sync_playwright() as playwright:
             page.screenshot(path=str(output / f'{prefix.replace("/", "-")}-{width}.png'), full_page=True)
         page.set_viewport_size({'width': 1280, 'height': 900})
         page.get_by_role('link', name='Finite sequences', exact=True).click()
+        expect(page.get_by_role('heading', name='Recorded states', exact=True)).to_be_visible()
         assert page.url.startswith(reference + 'VersoLeanRun/Sequence/')
-        assert page.get_by_role('heading', name='Recorded states', exact=True).count() == 1
         page.goto(reference + 'search/?q=Automaton.observe')
         result = page.locator('#search-page-results a').filter(has_text='Automaton.observe').first
         result.wait_for()
         result.click()
-        assert page.url.startswith(reference + 'VersoLeanRun/Automaton/#')
+        page.wait_for_url(reference + 'VersoLeanRun/Automaton/#*')
         page.wait_for_function('document.getElementById(decodeURIComponent(location.hash.slice(1))) !== null')
         assert page.locator('.api-declarations').evaluate('details => details.open')
         assert page.locator('[id="VersoLeanRun___Automaton___observe"]').is_visible()
