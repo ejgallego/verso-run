@@ -59,7 +59,8 @@ The [Manual starter](examples/manual-starter/README.md) is a small independent
 project with everything wired together: a text function, a typed HTML card,
 resource preparation, and a site generator. Copy it and edit its chapter.
 
-The same runnable block syntax works in Manual, Blog Page/Post, and Slides:
+Start with a function defined inside `leanRun`. The same runnable block syntax
+works in Manual, Blog Page/Post, and Slides:
 
 ````lean
 ```leanRun (entry := Demo.greet) (input := "Ada")
@@ -68,7 +69,11 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-The authoring guide explains [imports, block options, HTML, and registration](docs/authoring.md).
+To share an implementation, [import its module and select the function with
+`leanRun`](docs/authoring.md#reuse-a-function-from-an-imported-module).
+Use [optional checked source anchors](docs/authoring.md#run-an-anchored-example-from-an-imported-module)
+when a walkthrough should show that implementation and detect stale quotations.
+The authoring guide also explains [block options, HTML, and registration](docs/authoring.md).
 
 ## What works today
 
@@ -92,10 +97,9 @@ String inputs can use `+multiline`: Enter adds a line break, and Ctrl+Enter or
 ⌘+Enter runs the example. All three genres share these controls and codecs.
 
 This experimental release supports **Verso Manual**, **Blog Page/Post**, and **Slides**.
-Manual examples can use inline definitions or
-[checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module).
-All three genres support inline definitions and optional checked anchors, including
-automatic typed HTML adaptation; see [Blog authoring](docs/blog.md) and
+All three genres support inline definitions, imported functions, and optional
+checked source quotations, including automatic typed HTML adaptation;
+see [Blog authoring](docs/blog.md) and
 [Slides authoring](docs/slides.md).
 Readers edit function inputs; source editing
 belongs to the future editor work. Ordinary highlighted Lean blocks keep working,

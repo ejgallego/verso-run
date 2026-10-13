@@ -1,7 +1,7 @@
 # Runnable Blog pages and posts
 
 Import `VersoLeanRun.Blog` in a `Page` or `Post`, and open its namespace alongside
-`Verso.Genre.Blog`. Use the same inline Run block as a Manual chapter:
+`Verso.Genre.Blog`. Start with a function defined in a `leanRun` block:
 
 ````lean
 module
@@ -27,10 +27,16 @@ Run definitions use the document environment. Blog's ordinary `leanInit`/`lean`
 blocks keep their existing named example contexts; those isolated contexts are
 not imported into the runnable document environment.
 
+To share a function between documents, import its module and select it with
+`leanRun`, displaying a reference such as `#check MyExamples.greet`. See
+[reusing an imported function](authoring.md#reuse-a-function-from-an-imported-module)
+for a complete example and its resource wiring.
+
 ## Optional shared source anchors
 
-Use `leanRunAnchor` when an ordinary imported producer is shared among several
-documents. It adds Verso's checked source-region matching to the same Run behavior:
+Use `leanRunAnchor` when a walkthrough should show the imported implementation.
+It checks that the quoted source matches the producer and contains the selected
+entry:
 
 ````lean
 ```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
@@ -42,6 +48,8 @@ public def MyExamples.greet (name : String) : String :=
 Import `MyExamples` into the document. Its source region must be between
 `-- ANCHOR: greeting` and `-- ANCHOR_END: greeting`, and the displayed body must
 match. Standard highlighting, proof states and hover assets remain native.
+Update the quotation when the producer changes; Verso reports stale text and
+suggests the current source.
 Selection uses compiled declarations and semantic anchor membership, never source
 text inference. See [anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
