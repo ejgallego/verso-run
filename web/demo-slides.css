@@ -1,0 +1,55 @@
+/* Presentation styling belongs to this demo, rather than the genre adapter. */
+.reveal {
+  --r-heading-text-transform: none;
+  --r-heading1-size: 1.4em;
+  --r-heading2-size: 1.4em;
+  --r-heading-color: #1e2936;
+  color: #1e2936;
+  font-size: 30px;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal .slides section > p {
+  max-width: 880px;
+  margin: 0 auto 24px;
+  text-align: left;
+}
+
+.reveal h1, .reveal h2 { line-height: 1.2; }
+.reveal .slides section > p { line-height: 1.45; }
+
+.reveal .hl.lean {
+  --verso-code-color: #1e2936;
+  --verso-code-keyword-color: #8839a0;
+  --verso-code-const-color: #1a5fb4;
+  --verso-code-var-color: #1a7a6a;
+  --verso-code-comment-color: #7a7d85;
+}
+
+.reveal code.hl.lean.block {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #dce3e9;
+  border-radius: 8px;
+  background: #f7f9fb;
+  box-shadow: none;
+  font-size: 21px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.reveal .lean-run code.hl.lean.block {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+@media (max-width: 540px) {
+  .reveal { font-size: 44px; }
+  .reveal code.hl.lean.block { font-size: 42px; }
+}

@@ -19,7 +19,9 @@ def main (args : List String) : IO UInt32 := do
         ("data-verso-lean-run", "1"), ("data-experiment", "null")]) #[]
       pure { (%doc LeanRunSlides.Deck) with content := #[bad], subParts := #[] }
     | _ => throw <| IO.userError s!"Unknown Slides check {mode}"
-  let extraCss := if mode == "collision" then
+  let demoCss : CssFile := {
+    filename := "demo-slides.css", contents := ⟨include_str "../../web/demo-slides.css"⟩ }
+  let extraCss := #[demoCss] ++ if mode == "collision" then
     #[({ filename := "lean-run/renderer.js", contents := ⟨"wrong bytes"⟩ } : CssFile)] else #[]
   let config : VersoSlides.Config := {
     outputDir := destination, theme := "white", center := false,
