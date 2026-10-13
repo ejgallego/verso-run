@@ -27,7 +27,9 @@
   --verso-code-comment-color: #7a7d85;
 }
 
-.reveal code.hl.lean.block {
+/* Stock highlighting loads after extra stylesheets; scope these rules to the
+   slide canvas so the demo's panels take precedence. */
+.reveal .slides code.hl.lean.block {
   box-sizing: border-box;
   width: 100%;
   max-width: 880px;
@@ -42,7 +44,7 @@
   text-align: left;
 }
 
-.reveal .lean-run code.hl.lean.block {
+.reveal .slides .lean-run code.hl.lean.block {
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -51,5 +53,5 @@
 
 @media (max-width: 540px) {
   .reveal { font-size: 44px; }
-  .reveal code.hl.lean.block { font-size: 42px; }
+  .reveal .slides code.hl.lean.block { font-size: 42px; }
 }
