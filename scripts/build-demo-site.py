@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import re
+import shutil
 import subprocess
 
 root = Path(__file__).resolve().parent.parent
@@ -18,6 +19,11 @@ home = (site / "blog/index.html").read_text()
 assert len(re.findall(r'<base href="[^"]*">', home)) == 1
 (site / "index.html").write_text(re.sub(r'<base href="[^"]*">',
     '<base href="blog/">', home, count=1))
+subprocess.run(["python3", "scripts/build-api-reference.py"], cwd=root, check=True)
+reference = site / "api"
+if reference.exists():
+    shutil.rmtree(reference)
+shutil.copytree(root / ".lake/build/literate-html", reference)
 manifest = json.loads((root / "lake-manifest.json").read_text())
 identity = {
     "source": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),

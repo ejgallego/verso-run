@@ -1,0 +1,38 @@
+landing_page = "VersoLeanRun.Views"
+order = ["VersoLeanRun.Views", "VersoLeanRun.Frame", "VersoLeanRun.Sequence", "VersoLeanRun.Automaton"]
+docstrings_as_text = false
+extra_css = ["docs/api-reference.css"]
+hide_commands = ["module", "public section", "namespace", "end", "open"]
+
+[[targets]]
+library = "VersoLeanRunViews"
+
+[metadata]
+title = "verso-run · View API"
+description = "Build interactive Lean examples with recorded steps, live simulations, and HTML or SVG displays."
+
+[modules."VersoLeanRun"]
+title = "View API"
+url = ""
+
+[modules."VersoLeanRun.Views"]
+title = "Start here"
+
+[modules."VersoLeanRun.Frame"]
+title = "Frames"
+
+[modules."VersoLeanRun.Sequence"]
+title = "Finite sequences"
+
+[modules."VersoLeanRun.Automaton"]
+title = "Live automata"
+
+[theme]
+code_keyword_color = "#79358c"
+code_const_color = "#294d70"
+code_var_color = "#77501b"
+
+[theme.dark]
+code_keyword_color = "#d3a7e8"
+code_const_color = "#c3d8ec"
+code_var_color = "#e2bc89"

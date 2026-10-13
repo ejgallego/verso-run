@@ -14,6 +14,18 @@ traces, live UInt64 wraparound and independent sessions with native output at
 root and nested URLs. The upstream Html quoter and host-validation import limits
 are described in [internals](internals.md#library-boundaries).
 
+## Generated View API reference
+
+`tests/api-reference.py` builds the selected view modules with Verso's literate
+HTML pipeline. It checks navigation and declaration anchors, actual search,
+root/nested URLs, desktop/mobile layouts, and readable examples without JavaScript.
+The mutation gate edits and restores module prose, checking that HTML refreshes
+even when the public olean hash is unchanged. It also checks stylesheet loading
+and distinct code/link styling in light and dark themes, including a
+stylesheet-only edit/restoration. The packaged reference is checked
+again before Pages upload. Build and preview commands are in
+[Contributing](../CONTRIBUTING.md#generated-library-reference).
+
 ## What the suite checks
 
 - Closed form metadata round-trips and rejection of unsupported combinations;

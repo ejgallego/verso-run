@@ -46,6 +46,12 @@ plain Lean producer through native and dedicated-worker execution without a
 Verso document, page host or presenter. Compiler expectations are derived
 independently by its native carrier. See [validation](validation.md).
 
+The public view modules use Verso module prose and checked examples. Reference
+generation is an explicit documentation step, without adding a prerequisite to
+the view library. `literate.toml` selects that library for Verso's HTML pipeline;
+the source freshness helper and preview commands are described in
+[Contributing](../CONTRIBUTING.md#generated-library-reference).
+
 ## Common machinery and Manual integration
 
 The portable model, callable classifier, anchor loader, console, AST collector

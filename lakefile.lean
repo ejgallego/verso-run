@@ -21,6 +21,7 @@ input_dir leanRunWeb where
 
 lean_lib VersoLeanRunViews where
   srcDir := "src/views"
+  leanOptions := #[⟨`doc.verso.module, true⟩]
   roots := #[]
   globs := #[.one `VersoLeanRun.Views, .one `VersoLeanRun.Frame,
     .one `VersoLeanRun.Sequence, .one `VersoLeanRun.Automaton]

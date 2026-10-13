@@ -69,6 +69,7 @@ with ExitStack() as servers:
             ('Try a runnable page', 'blog/page/'),
             ('read the runnable post', 'blog/notes/2026-10-8-running-lean-in-a-post/'),
             ('Try the runnable slides', 'slides/'),
+            ('View API reference', 'api/'),
         ]:
             link = page.get_by_role('link', name=label, exact=True)
             assert link.evaluate('(e) => e.href') == base + path
