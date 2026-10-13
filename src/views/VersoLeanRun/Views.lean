@@ -118,8 +118,7 @@ The function's result type determines how a {lit}`leanRun` block displays it.
 adds live playback. For custom displays, the view helpers return
 {name (full := VersoLeanRun.SequenceView)}`SequenceView` or
 {name (full := VersoLeanRun.AutomatonView)}`AutomatonView`, which use the same
-controls. Run blocks work in Manual, Blog, and Slides documents, each with its
-own adapter import.
+controls.
 
 The [demo](https://ejgallego.github.io/verso-run/) includes complete examples in
 all three genres.

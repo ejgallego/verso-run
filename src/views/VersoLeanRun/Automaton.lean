@@ -76,8 +76,7 @@ def Sequence.cycleView (sequence : Sequence α)
     step := fun index => ⟨(index.val + 1) % observations.size,
       Nat.mod_lt _ nonempty⟩ }
   cursor.observe fun _ index =>
-    let observation := observations[index]
-    { label := observation.label, content := render observation.content, error := observation.error }
+    observations[index].map render
 
 /-- Display an error message when the input cannot start a simulation. -/
 def AutomatonView.error (message : String) : AutomatonView :=
