@@ -4,6 +4,65 @@ Start with the [README](README.md) to run the demo and the
 [author starter](examples/manual-starter/README.md) to build a document of your own.
 Repository-specific constraints are in [AGENTS.md](AGENTS.md).
 
+## Development lanes
+
+Group work by its main purpose. A lane helps people find related tasks and agree
+on dependencies. Tasks have short-lived branches, and lanes can touch shared files.
+
+| Lane | Work |
+| --- | --- |
+| Library and runtime | Lean APIs, elaboration, genre adapters, publication, worker and presenter lifetimes, dependency integration |
+| Authoring and documentation | Setup guides, API explanations, checked examples, reference presentation, contributor instructions |
+| Examples and presentation | Demo computations, gallery, walkthroughs, slide composition, and visual design |
+
+Each task includes its own relevant tests and documentation, with validation
+completed before handoff.
+For a batch of related work, name one integration owner to keep the landing order,
+reviewed revisions, preview, and publication status clear. That person can also
+implement a task; merges still require maintainer approval and current CI.
+
+### Starting and handing over a task
+
+Use an issue or a draft PR to record the intended change, its lane and writer,
+the branch/worktree, any prerequisite PR, and how completion will be checked.
+A small task can use its PR alone. Keep concrete task status in GitHub; do not
+maintain a second status board in the roadmap or user guides.
+
+Keep one active implementation per lane as the default. Start another when its
+scope and dependencies are independent. One writer owns each task. When work
+overlaps a file or API, agree which writer makes that change before editing;
+different worktrees do not resolve conflicting ownership. This matters especially
+for library source that contains both implementation and API documentation.
+Reviewers can work alongside the writer without changing the same files.
+
+Start from current `origin/main`, or from an agreed prerequisite PR when a stack
+is needed. Record that dependency and keep the new patch separate. Do not begin
+new implementation in an old checkout with preserved WIP. The worktree rules
+below cover isolation and generated outputs.
+
+On handoff, give the actual commit, worktree, validation result, unresolved issue,
+and next action. Link the PR or retained evidence rather than copying the work
+history into messages or guides. Mark unfinished work as a draft.
+
+### Landing and retirement
+
+Keep one landing order for changes that depend on each other. Independent tasks
+can proceed in parallel; downstream work should consume the selected API rather
+than rebuilding it on another branch. After a prerequisite is squash-merged,
+move only the dependent task's own changes onto the landed baseline and check
+the resulting diff and validation again.
+
+The integration owner identifies the revision served by a preview and reports
+the merge and Pages deployment separately. A preview from a PR is useful, but it
+must be distinguishable from the published `main` site.
+
+Once a task lands, apply the cleanup procedure below. Closed or superseded PRs
+need an extra check: identify the commits and evidence that preserve their work
+before retiring a checkout. A closed PR alone is not proof that every local
+change was incorporated. Keep dirty or unaccounted-for worktrees until their
+contents have been reviewed. A preserved checkout is archival work, not an
+active lane or the integration baseline.
+
 ## Worktrees and pull requests
 
 Use one task branch and one worktree under `.worktree/` for new code work. From the

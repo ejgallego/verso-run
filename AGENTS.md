@@ -23,6 +23,10 @@ separation between elaboration, invocation, resource publication, and rendering.
 
 ## Development workflow
 
+- Follow [the development lanes](CONTRIBUTING.md#development-lanes): record a
+  task's writer, dependencies, and completion checks in its issue or PR, and
+  agree ownership before editing overlapping files. Keep one integration owner
+  for a batch of dependent PRs.
 - Start new code work on a task branch in `.worktree/<task>/`, with one worktree
   per task. Keep the main checkout for integration and the local demo. Preserve
   existing working changes and legacy `.worktrees/` checkouts; do not relocate or
