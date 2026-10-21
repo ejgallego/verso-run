@@ -38,8 +38,8 @@ def boolean (input : Bool) : Bool := input
 def unsigned (input : UInt64) : UInt64 := input
 def sequence (input : String) : SequenceView :=
   { initial := { label := input, content := .empty } }
-def booleanHtml (input : Bool) : Verso.Output.Html := .text true (toString input)
-def unsignedHtml (input : UInt64) : Verso.Output.Html := .text true (toString input)
+def booleanHtml (input : Bool) : Verso.Output.Html := .text (toString input)
+def unsignedHtml (input : UInt64) : Verso.Output.Html := .text (toString input)
 def naturalSequence (input : Nat) : SequenceView := SequenceView.error (toString input)
 def booleanSequence (input : Bool) : SequenceView := SequenceView.error (toString input)
 def unsignedSequence (input : UInt64) : SequenceView := SequenceView.error (toString input)

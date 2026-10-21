@@ -54,7 +54,7 @@ def leanRun (experiment : Experiment) (source : Array (Block VersoSlides.Slides)
       .other (.ofHtml (renderControls experiment)) #[]]
 
 private meta def inlineSource (shouldShow : Bool) (hls : Highlighted)
-    (str : StrLit) : DocElabM Term := do
+    (str : Lean.Doc.VersoCodeBlock) : DocElabM Term := do
   if !shouldShow then return ← ``(Verso.Doc.Block.concat #[])
   let col? := (← getRef).getPos? |>.map (← getFileMap).utf8PosToLspPos |>.map (·.character)
   let hls := match col? with
@@ -63,7 +63,7 @@ private meta def inlineSource (shouldShow : Bool) (hls : Highlighted)
   match fragmentize hls.trim with
   | .ok code =>
     ``(Verso.Doc.Block.other (VersoSlides.BlockExt.slideCode $(quote (scToExport code)) false false)
-      #[Verso.Doc.Block.code $(quote str.getString)])
+      #[Verso.Doc.Block.code $(quote str.getVersoCodeBlock)])
   | .error message => throwErrorAt str message
 
 /-- Inline Run retains Slides' native formatting and fragment data. -/

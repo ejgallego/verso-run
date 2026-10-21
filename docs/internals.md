@@ -249,23 +249,29 @@ highlighted source without interactive controls.
 
 | Component | Pinned revision |
 | --- | --- |
-| Lean | 4.35.0-rc4 (required by VIR PR #229) |
-| Verso | `aff0fc92d7b9e56a3b309d409b7ef69629af3770` |
-| VIR | `957854b9df1202d4fadbd00ac5fa34e5adf278cc` (PR #229 head) |
-| Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Slides | `6e514cd443a51a39d92534b5a2ef08a5e47ed262` (public review snapshot) |
-| Runtime | `6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20` |
+| Lean | `4.36.0-rc1` (prerelease) |
+| Verso | `d0a5f92ee585a92d2cd4c4904469c123f5ae5f10` |
+| VIR | `5a5614b802e1eb15607b885f84d11cbd8cd4fd21` (`v4.36.0-rc1`) |
+| Illuminate | `d22e76ef3d2a925132315af902ea432233b4a44a` |
+| Slides | `ca3cfb845151ce56097cf0366b898c1c507506e7` (4.36 migration base; binary-assets prerequisite pending) |
+| Runtime | `8f643abe3e11eabf3d659bdd1a25e716e9f8726bdec6ed32759702cd0d9cb93d` |
 
-The minimal Verso fork is based on release `cad4b633` and exposes the existing
-`toHighlightedLeanBlock` helper; it contains no demo code. The runtime uses VIR
-compatibility version 3 (resource descriptor version 2). Lake acquires and verifies VIR's locked runtime, so
-authors do not need a separate SDK installation or Wasm build.
+Lake acquires and verifies VIR's locked runtime; authors do not need a separate
+SDK installation or Wasm build. The runtime uses compatibility version 7,
+resource descriptor version 2, and manifest version 13. Its pack SHA256 is
+`c99c29421c846d034e533ef68a5759e07895a87ea140d9f5e156d6248ddbf6e0`.
 
+Verso now uses Lean's `Html` type and `html%{…}` syntax. Manual and Blog render
+retained commands through the public `ExternalCode.leanBlock` API. The Verso
+revision also includes the module-system import fix needed by the literate API
+reference generator.
 
-The VIR pin is the exact source head selected from PR #229. Its Lean toolchain
-and runtime lock must be qualified together. Verso adds the upstream base-85 digit proof and deprecation-check adjustment needed by Lean 4.35, while
-Slides uses its module-owned-assets review snapshot. Illuminate retains its pin; consumer acceptance is recorded separately in
-[validation](validation.md).
+The 4.36 migration is not yet qualified for landing: the Slides base needs the
+`Config.extraAssets` patch from its earlier review snapshot, and the Illuminate
+SVG example reaches `Float.maximum`, which this VIR runtime does not provide.
+The independently pinned starter remains on its published 4.35 baseline until a
+new consumer revision lands. See [validation](validation.md) for the gates.
+
 
 ## Sequence presentation boundary
 

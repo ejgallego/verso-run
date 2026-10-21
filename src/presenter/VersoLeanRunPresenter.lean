@@ -26,7 +26,7 @@ private def attr (element : Js Element) (name value : String) : DomM Unit := do
 /-- Html and sequence frames share one compiled sandbox-document policy. -/
 @[vir_export]
 def mountHtml (frame : Js Element) (html : Html) : DomM Unit :=
-  attr frame "srcdoc" (Preview.document html.asString)
+  attr frame "srcdoc" (Preview.document html.render)
 
 private def child (root : Js Element) (selector : String) : DomM (Js Element) := do
   let found ← Element.querySelector root (← JsValue.ofString selector)
@@ -36,7 +36,7 @@ private def child (root : Js Element) (selector : String) : DomM (Js Element) :=
 
 -- Explicit bodies keep empty non-void tags closed in the pinned Html serializer.
 private def controls (frames : Array Frame) : Html := Id.run do
-  let labels := Html.fromArray <| frames.mapIdx fun i frame =>
+  let labels := Lean.Html.ofArray <| frames.mapIdx fun i frame =>
     {{ <button type="button" class="lean-run-sequence-step" data-step={{toString i}}>{{frame.label}}</button> }}
   return {{ <div class="lean-run-sequence-controls">
     <div class="lean-run-sequence-strip" aria-label="Sequence steps">{{labels}}</div>
@@ -68,8 +68,8 @@ def stageAutomaton (root : Js Element) (frame : Frame) : DomM Unit := do
         <iframe class="lean-run-sequence-frame" data-preview="next" aria-hidden="true" title="Next automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
       </div>
     </div> }}
-    Element.setInnerHTML root (← JsValue.ofString markup.asString)
-  attr (← child root "[data-preview='next']") "srcdoc" (Preview.document frame.content.asString)
+    Element.setInnerHTML root (← JsValue.ofString markup.render)
+  attr (← child root "[data-preview='next']") "srcdoc" (Preview.document frame.content.render)
 
 /-- Commit only after the staged sandbox document has loaded. Keep both frames
 allocated so presentation never navigates the currently visible document. -/
@@ -93,7 +93,7 @@ def mount (root : Js Element) (data : SequenceView) : DomM (Js.Function0 Unit) :
     | .ok payload => pure payload
     | .error message => failure message
   let frames := payload.frames
-  Element.setInnerHTML root (← JsValue.ofString (controls frames).asString)
+  Element.setInnerHTML root (← JsValue.ofString (controls frames).render)
   let previous ← child root ".lean-run-sequence-prev"
   let next ← child root ".lean-run-sequence-next"
   let range ← child root ".lean-run-sequence-range"
@@ -111,7 +111,7 @@ def mount (root : Js Element) (data : SequenceView) : DomM (Js.Function0 Unit) :
     let frame := frames[index]!
     text position s!"Step {index + 1} of {frames.size}: {frame.label}"
     text error (frame.error.getD "")
-    attr preview "srcdoc" (Preview.document frame.content.asString)
+    attr preview "srcdoc" (Preview.document frame.content.render)
     attr previous "aria-disabled" (if index == 0 then "true" else "false")
     attr next "aria-disabled" (if index + 1 == frames.size then "true" else "false")
     if let some input ← HTMLInputElement.fromElement range then

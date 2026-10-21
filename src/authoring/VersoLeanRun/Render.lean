@@ -64,7 +64,7 @@ def renderControls (experiment : Experiment) : Html := Id.run do
 /-- Shared console markup around source already rendered by its native genre. -/
 def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : String)
     (rendererUrl : Option String := none) : Html := Id.run do
-  let source := Html.fromArray source
+  let source := Lean.Html.ofArray source
   let sourcePanel := if experiment.collapsed then
     {{ <details class="lean-run-source"><summary> "View Lean implementation" </summary> {{source}} </details> }}
     else {{ <div class="lean-run-source"> {{source}} </div> }}
@@ -72,9 +72,8 @@ def renderConsole (experiment : Experiment) (source : Array Html) (instanceId : 
     {{sourcePanel}}
     {{renderControls experiment}}
   </section> }}
-  return match rendererUrl, console with
-    | some url, .tag tagName attrs contents =>
-      .tag tagName (attrs.push ("data-lean-run-renderer", url)) contents
-    | _, _ => console
+  return match rendererUrl with
+    | some url => console.setAttribute "data-lean-run-renderer" url
+    | none => console
 
 end VersoLeanRun

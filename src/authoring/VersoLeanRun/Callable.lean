@@ -87,7 +87,7 @@ private meta def defaultRenderer (entry : Ident) (type : Expr) : DocElabM Expr :
           catch _ => throwErrorAt entry
             "Lean Run cannot display model type {type} automatically. \
               Provide a ToString instance or return a custom view with '.view render'."
-        Lean.Meta.mkAppM ``Verso.Output.Html.ofString #[text]
+        Lean.Meta.mkAppM ``Lean.Html.text #[text]
     Lean.Meta.mkLambdaFVars #[value] html
 
 /-- Choose the presentation before export classification. Models stay pure until
@@ -123,7 +123,7 @@ private meta def describePresentation (entry : Ident) (name : Name) (info : Cons
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
 Default model displays and imported entries receive a document-owned export. -/
-meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM Experiment := do
+meta def describeEntry (config : Config) (name : Name) (source : Syntax) : DocElabM Experiment := do
   if isPrivateName name then
     throwErrorAt config.entry "Lean Run entry '{name}' is private. \
       Export a public wrapper or remove 'private'."
@@ -170,7 +170,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
   let name ← callableAdapter config.entry name value
   registerEntry config.entry name
   let env ← getEnv
-  let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
+  let pos := (← getFileMap).toPosition <| source.getPos?.getD 0
   let experiment : Experiment := {
     program := env.mainModule.toString, declaration := sourceName.toString, callable := name.toString, form,
     producerModule := match env.getModuleIdxFor? name with

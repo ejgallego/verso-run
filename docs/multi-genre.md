@@ -149,13 +149,12 @@ do not navigate Reveal. Source fragments remain native.
 Scroll navigation also cancels work. Restoring Reveal's saved HTML when leaving
 scroll view disposes detached workers and reattaches the restored forms.
 
-The selected Slides revision uses module-owned VIR assets on Lean 4.35.0-rc4.
 The root package locks VIR and Verso explicitly, overriding Slides' dependency
-selections. Verso retains the Manual highlighting hook and adds the upstream
-base-85 proof and deprecation-check adjustments required by Lean 4.35.
-Illuminate retains its original revision. See the [dependency table](internals.md#pinned-dependencies)
-for the exact source/runtime pair. The Slides pin is a review snapshot; upstream
-integration remains separate from this consumer's qualification.
+selections. The [dependency table](internals.md#pinned-dependencies) records the
+exact source/runtime pair and the remaining 4.36 migration prerequisites.
+Manual and Blog use public highlighted-code rendering rather than a fork-only
+Manual helper. The Slides binary-assets extension remains a separate upstream
+patch.
 
 Only Manual's TeX fallback is established. Blog retains native source without
 JavaScript; this adapter does not add a Blog TeX backend. Slides retains readable HTML source without JavaScript.
@@ -181,9 +180,9 @@ forwarding-export checks, including typed HTML, when changing the callable bound
 current campaign and limitations. Dependency updates still require a matched
 source/runtime pair and consumer qualification.
 
-[external]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso/Verso/Code/External.lean
-[manual]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso-manual/VersoManual/ExternalLean.lean
-[blog]: https://github.com/ejgallego/verso/blob/aff0fc92d7b9e56a3b309d409b7ef69629af3770/src/verso-blog/VersoBlog.lean
-[subverso]: https://github.com/leanprover/subverso/blob/9b90b7f938d6169246325df002351014f49945ef/src/SubVerso/Highlighting/Anchors/Basic.lean
+[external]: https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso/Verso/Code/External.lean
+[manual]: https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-manual/VersoManual/ExternalLean.lean
+[blog]: https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-blog/VersoBlog.lean
+[subverso]: https://github.com/leanprover/subverso/blob/892d6dc520270b5fb8c1291dd1b131e8c16255ed/src/SubVerso/Highlighting/Anchors/Basic.lean
 [slides-basic]: https://github.com/ejgallego/verso-slides/blob/6e514cd443a51a39d92534b5a2ef08a5e47ed262/VersoSlides/Basic.lean
 [slides-assets]: https://github.com/ejgallego/verso-slides/blob/6e514cd443a51a39d92534b5a2ef08a5e47ed262/VersoSlides/Render.lean

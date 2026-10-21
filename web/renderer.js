@@ -85,7 +85,7 @@ export function enhance(element) {
     if (automatonElement && state === "success" && view.program) {
       presenting = view.update(value).then(shown => {
         if (!shown) return false;
-        if (value.error !== null) { ready = false; player.pause(); }
+        if (value.error.kind === "some") { ready = false; player.pause(); }
         setState("success");
         liveControls();
         return true;
@@ -101,7 +101,7 @@ export function enhance(element) {
         if (!shown) return;
         setState("success");
         if (automatonElement) {
-          ready = value.error === null;
+          ready = value.error.kind === "none";
           const generation = view.generation;
           const active = () => ready && generation === view.generation && !document.hidden;
           automatonElement.querySelector(".lean-run-play").addEventListener("click", () => {

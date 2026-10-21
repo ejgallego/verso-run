@@ -9,7 +9,7 @@ open Lean VersoLeanRun
 -- the structured VIR transport. This is test output, not an executable ABI.
 def referenceFrame (frame : VersoLeanRun.Frame) : Lean.Json :=
   Lean.Json.mkObj [("label", Lean.toJson frame.label),
-    ("html", Lean.toJson frame.content.asString), ("error", Lean.toJson frame.error)]
+    ("html", Lean.toJson frame.content.render), ("error", Lean.toJson frame.error)]
 
 def referenceSequence (view : VersoLeanRun.SequenceView) : Lean.Json :=
   Lean.Json.mkObj [("frames", Lean.toJson (view.frames.map referenceFrame))]

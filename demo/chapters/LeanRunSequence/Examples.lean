@@ -17,7 +17,7 @@ def evaluate (program : String) : Sequence Snapshot :=
 
 private def stackCells (values : List Nat) : Html :=
   if values.isEmpty then {{ <p> "Empty stack" </p> }}
-  else Html.fromArray <| (values.reverse.map fun n =>
+  else Lean.Html.ofArray <| (values.reverse.map fun n =>
     {{ <span style="display:inline-block;padding:.5rem .75rem;margin:.2rem;border:1px solid #cbd8e6;border-radius:5px;background:#edf5ff">{{toString n}}</span> }}).toArray
 
 def renderSnapshot (snapshot : Snapshot) : Html :=

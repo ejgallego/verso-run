@@ -77,10 +77,14 @@ test isolation. CI also cold-builds the independently pinned
 reuse and runs its 11 checks. The starter acquires public extension `f2a1491` and
 the selected runtime through its complete Git manifest, without local seeds.
 
-The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `6e514cd4`,
-with VIR's locked runtime `6cddc4b8…`. Resource dependencies and includes now name
-program modules explicitly. The independently pinned starter tests the same Lean 4.35.0-rc4 and
-module-owned-assets API from the published extension revision.
+The 4.36 migration selects public VIR `5a5614b8` and runtime `8f643abe…`.
+Its full acceptance remains pending the Slides binary-assets prerequisite and
+VIR support for the `Float.maximum` operation reached by Illuminate SVG output.
+Partial build or client results do not establish full demo acceptance. The
+independently pinned starter still qualifies public extension `f2a1491` on
+Lean 4.35.0-rc4; it does not qualify this candidate. Exact revisions are listed
+in the [dependency table](internals.md#pinned-dependencies).
+
 Publication loading cancellation is qualified before any response, with fresh-fetch
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.

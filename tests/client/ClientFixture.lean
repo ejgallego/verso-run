@@ -17,6 +17,6 @@ def start (seed : UInt64) : Lean.Vir.RuntimeM AutomatonSession :=
   (machine seed).view
 
 @[vir_export]
-def render (frame : Frame) : String := frame.content.asString
+def render (frame : Frame) : String := frame.content.render
 
 end ClientFixture

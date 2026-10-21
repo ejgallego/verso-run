@@ -6,7 +6,7 @@ public abbrev Card := Verso.Output.Html
 #doc (Manual) "Typed HTML author fixture" =>
 
 ```leanRun (entry := card)
-public def card (name : String) : Card := .text true name
+public def card (name : String) : Card := .text name
 ```
 
 ```leanRun (entry := card)
@@ -14,7 +14,7 @@ public def card (name : String) : Card := .text true name
 ```
 
 #check (card : String → Verso.Output.Html)
-#guard (card "<b>&").asString == "&lt;b&gt;&amp;"
+#guard (card "<b>&").render == "&lt;b&gt;&amp;"
 
 ```leanRun (entry := markup)
 public def markup (text : String) : String := text

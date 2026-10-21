@@ -29,7 +29,7 @@ def corners := board "#......#\n........\n........\n........\n........\n........
 #eval show IO Unit from do
   for seed in #["bad", "#########", "#\n..", ""] do
     let session ← Lean.Vir.RuntimeM.run (lifeView seed)
-    unless session.initial.error.isSome && session.initial.content.asString.isEmpty do
+    unless session.initial.error.isSome && session.initial.content.render.isEmpty do
       throw <| IO.userError "invalid seed created a model"
   let a ← Lean.Vir.RuntimeM.run (lifeView "...\n###\n...")
   let b ← Lean.Vir.RuntimeM.run (lifeView ".##.\n.##.")
@@ -37,32 +37,32 @@ def corners := board "#......#\n........\n........\n........\n........\n........
   for i in [:140] do
     expected := expected.step
     let frame ← Lean.Vir.RuntimeM.run a.advance
-    unless frame.content.asString == (renderState expected).asString && frame.label == s!"Generation {i + 1}" do
+    unless frame.content.render == (renderState expected).render && frame.label == s!"Generation {i + 1}" do
       throw <| IO.userError "automaton frame differs from pure transition"
-    unless frame.content.asString.utf8ByteSize < 65536 do throw <| IO.userError "frame budget exceeded"
+    unless frame.content.render.utf8ByteSize < 65536 do throw <| IO.userError "frame budget exceeded"
   let still ← Lean.Vir.RuntimeM.run b.advance
-  unless still.content.asString == (renderState { generation := 1, board := board ".##.\n.##." }).asString do
+  unless still.content.render == (renderState { generation := 1, board := board ".##.\n.##." }).render do
     throw <| IO.userError "independent session changed"
   let boolean : VersoLeanRun.Automaton Bool := { initial := true, step := Bool.not }
-  let session ← Lean.Vir.RuntimeM.run (boolean.view fun b => .text true (toString b))
-  unless session.initial.content.asString == "true" do throw <| IO.userError "wrong initial Bool state"
-  unless (← Lean.Vir.RuntimeM.run session.advance).content.asString == "false" do
+  let session ← Lean.Vir.RuntimeM.run (boolean.view fun b => .text (toString b))
+  unless session.initial.content.render == "true" do throw <| IO.userError "wrong initial Bool state"
+  unless (← Lean.Vir.RuntimeM.run session.advance).content.render == "false" do
     throw <| IO.userError "wrong next Bool state"
   let counter : VersoLeanRun.Automaton Nat := { initial := 10, step := (· + 1) }
   let live ← Lean.Vir.RuntimeM.run counter.view
-  unless live.initial.content.asString == "10" && live.initial.label == "0" do
+  unless live.initial.content.render == "10" && live.initial.label == "0" do
     throw <| IO.userError "wrong initial text observation"
   for frame in (counter.trace 4).view.frames do
     -- The trace labels and text observations agree with the live session.
     if frame.label != "0" then
       let next ← Lean.Vir.RuntimeM.run live.advance
-      unless next.label == frame.label && next.content.asString == frame.content.asString do
+      unless next.label == frame.label && next.content.render == frame.content.render do
         throw <| IO.userError "trace and live observations disagree"
   let recorded : VersoLeanRun.Sequence Nat := {
     initial := { label := "A", content := 1 }
     steps := #[{ label := "B", content := 1, error := some "note" }, { label := "C", content := 2 }] }
-  let replay ← Lean.Vir.RuntimeM.run (recorded.cycleView fun n => .text true (toString n))
-  let independent ← Lean.Vir.RuntimeM.run (recorded.cycleView fun n => .text true (toString n))
+  let replay ← Lean.Vir.RuntimeM.run (recorded.cycleView fun n => .text (toString n))
+  let independent ← Lean.Vir.RuntimeM.run (recorded.cycleView fun n => .text (toString n))
   unless replay.initial.label == "A" do throw <| IO.userError "wrong replay initial"
   for label in #["B", "C", "A", "B", "C", "A"] do
     let next ← Lean.Vir.RuntimeM.run replay.advance

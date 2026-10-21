@@ -208,7 +208,7 @@ public def LeanRunGate.diagram (count : Nat) : Verso.Output.Html :=
         {{s!"{count} nodes, {count - 1} links"}}
       </p>
       <div style={{width}}>
-        {{Verso.Output.Html.text false svg}}
+        {{Lean.Html.raw svg}}
       </div>
     </section> }}
 ```

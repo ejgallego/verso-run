@@ -57,7 +57,7 @@ def Automaton.observe (machine : Automaton α) (observe : Nat → α → Frame) 
 /-- Draw each state as HTML or SVG. The label function receives the step number, starting at zero. -/
 def Automaton.view (machine : Automaton α)
     (render : α → Verso.Output.Html := by
-      first | exact id | exact fun value => Verso.Output.Html.ofString (toString value))
+      first | exact id | exact fun value => Lean.Html.text (toString value))
     (label : Nat → String := toString) : AutomatonView :=
   machine.observe fun index state => { label := label index, content := render state }
 
@@ -66,7 +66,7 @@ Labels and error messages are preserved; an error disables further playback.
 Each run starts at the first step; no states are recomputed. -/
 def Sequence.cycleView (sequence : Sequence α)
     (render : α → Verso.Output.Html := by
-      first | exact id | exact fun value => Verso.Output.Html.ofString (toString value)) : AutomatonView :=
+      first | exact id | exact fun value => Lean.Html.text (toString value)) : AutomatonView :=
   let observations := sequence.frames
   have nonempty : 0 < observations.size := by
     simp only [observations, Sequence.frames, Array.size_append, Array.size_singleton]
@@ -128,7 +128,7 @@ open VersoLeanRun Verso.Output.Html
 public def watched (seed : Nat) : AutomatonView :=
   (counter seed).observe fun index state =>
     { label := s!"Step {index}"
-      content := {{ <p> {{toString state}} </p> }}
+      content := html%{<p>{toString state}</p>}
       error := if state > 100 then some "Value exceeds 100" else none }
 ```
 

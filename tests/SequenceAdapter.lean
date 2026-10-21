@@ -10,8 +10,8 @@ def rejected (value : Except String α) : Bool :=
   match value with | .ok _ => false | .error _ => true
 
 def viewWithFrames (count : Nat) : SequenceView :=
-  { initial := { label := "Frame", content := .text true "State" }
-    steps := Array.replicate count { label := "Frame", content := .text true "State" } }
+  { initial := { label := "Frame", content := .text "State" }
+    steps := Array.replicate count { label := "Frame", content := .text "State" } }
 
 #guard !rejected (SequenceView.validate (viewWithFrames 127))
 #guard rejected (SequenceView.validate (viewWithFrames 128))
@@ -28,7 +28,7 @@ def successors := Sequence.iterate (· + 2) (3 : Nat) 3 (fun i => s!"State {i}")
 #guard (Sequence.iterate Bool.not true 3).steps.map (·.content) == #[false, true, false]
 #guard (Sequence.iterate Bool.not true 0 |>.view fun _ => .empty).frames.size == 1
 #guard (SequenceView.error "No initial model").frames.size == 1
-#guard (SequenceView.error "No initial model").initial.content.asString == ""
+#guard (SequenceView.error "No initial model").initial.content.render == ""
 #guard (SequenceView.error "No initial model").initial.error == some "No initial model"
 
 def failingBoundary : Automaton Nat := {
@@ -46,19 +46,19 @@ def marked : Sequence Nat := {
 #guard ((toString <$> marked).steps[0]?.bind (·.error)) ==
   (marked.steps[0]?.bind (·.error))
 #guard (marked.map (· + 1)).steps.map (·.content) == #[3]
-#guard ((Sequence.iterate id "<b>&" 0).view).initial.content.asString == "&lt;b&gt;&amp;"
+#guard ((Sequence.iterate id "<b>&" 0).view).initial.content.render == "&lt;b&gt;&amp;"
 
 -- Already-rendered values remain HTML; custom renderers need no ToString instance.
 def markup : SequenceView := {
-  initial := { label := "Markup", content := .text false "<b>Kept</b>" } }
-#guard markup.view.initial.content.asString == "<b>Kept</b>"
+  initial := { label := "Markup", content := .raw "<b>Kept</b>" } }
+#guard markup.view.initial.content.render == "<b>Kept</b>"
 
 structure CustomState where
   value : Nat
 
 def customSequence : Sequence CustomState := {
   initial := { label := "Custom", content := ⟨3⟩ } }
-#guard (customSequence.view fun state => .text true (toString state.value)).initial.content.asString == "3"
+#guard (customSequence.view fun state => .text (toString state.value)).initial.content.render == "3"
 #guard ((fun n => n + 1) <$> (Frame.mk "Label" (2 : Nat) (some "note"))).error == some "note"
 
 public abbrev TraceView := SequenceView
@@ -84,7 +84,7 @@ public def greetingSteps (name : String) : TraceView :=
   let sequence : Sequence String := {
     initial := { label := "Start", content := name }
     steps := #[{ label := "Greeting", content := "Hello, " ++ name }] }
-  sequence.view (Verso.Output.Html.text true)
+  sequence.view (Lean.Html.text)
 ```
 
 ```leanRun (entry := greetingSteps)

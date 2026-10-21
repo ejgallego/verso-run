@@ -1,5 +1,6 @@
 """Typed Lean sequences and the Lean/VIR DOM player, with real worker/native agreement."""
 from harness import run_command, serve_directory
+from signatures import scalar_descriptor, type_name
 import argparse, functools, json, shutil, subprocess, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -32,14 +33,14 @@ for genre, path in [('manual',site/'manual/html-multi'),('blog',site/'blog'),('s
     plan = plans[genre] = json.loads((path/'lean-run/publication.json').read_text())
     presenter = plan['presenters']['sequence']
     assert presenter['expectedExport']['effect'] == 'dom'
-    assert presenter['expectedExport']['args'][0]['name'] == 'Lean.Vir.Browser.Element'
+    assert type_name(presenter['expectedExport']['args'][0]) == 'Lean.Vir.Browser.Element'
     payload_type = presenter['expectedExport']['args'][1]
-    assert payload_type['kind'] == 'structure'
-    assert payload_type['name'] == 'VersoLeanRun.Sequence'
+    assert payload_type['value']['tag'] == 'record'
+    assert type_name(payload_type) == 'VersoLeanRun.Sequence'
     for owner, bindings in plan['programs'].items():
         if 'LeanRunSequence.Examples.stackView' in bindings:
             assert bindings['LeanRunSequence.Examples.stackView']['expectedExport'] == {
-                'args':[{'type':'String','interfaceTag':3}],
+                'args':[scalar_descriptor('String')],
                 'result':payload_type,'effect':'pure'}
 record('all genres independently classify typed payload producers and the separate DOM presenter')
 
@@ -184,7 +185,7 @@ with serve_directory(served) as base:
 
         visit('root','manual','Stack-stepper/')
         bad=json.loads(json.dumps(plans['manual']))
-        bad['presenters']['sequence']['expectedExport']['result']={'type':'String','interfaceTag':3}
+        bad['presenters']['sequence']['expectedExport']['result']=scalar_descriptor('String')
         page.route('**/lean-run/publication.json',lambda route:route.fulfill(content_type='application/json',body=json.dumps(bad)))
         form().locator('[type=submit]').click()
         page.wait_for_function('e => e.dataset.state === "failed"',arg=form().element_handle(),timeout=30000)

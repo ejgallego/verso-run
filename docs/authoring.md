@@ -84,7 +84,7 @@ argument. Return `Html` when the result is intended to be rendered as HTML:
 ```leanRun (entry := Demo.card) (input := "Ada")
 open Verso.Output.Html
 public def Demo.card (name : String) : Verso.Output.Html :=
-  {{ <h2> "Hello, " {{name}} "!" </h2> }}
+  html%{<h2>Hello, {name}!</h2>}
 ```
 ````
 

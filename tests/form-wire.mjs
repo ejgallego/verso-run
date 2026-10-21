@@ -18,27 +18,30 @@ for (const { form, expectedExport } of forms) {
   assert.equal(typeof form, "string");
   assert.equal(expectedExport.effect, resultKind(form) === "automaton" ? "runtime" : "pure");
   assert.equal(expectedExport.args.length, 1);
-  const type = expectedExport.args[0].type;
+  const descriptor = expectedExport.args[0];
+  const type = descriptor.native.metadata?.declaration ??
+    ({string:"String", nat:"Nat", unsigned:"UInt64"}[descriptor.native.type.tag]);
   assert.ok(Object.hasOwn(scalars, type), `unsupported input ABI: ${type}`);
   const { kind, input, decoded, result } = scalars[type];
   assert.equal(scalarKind(form), kind, `input wire projection for ${form}`);
   assert.equal(decodeInput(scalarKind(form), input), decoded);
   if (resultKind(form) === "automaton") {
-    assert.equal(expectedExport.result.kind, "structure");
-    assert.equal(expectedExport.result.name, "VersoLeanRun.AutomatonSession");
-    const frame = { label: "Generation 129", content: {kind:"text", fields:{escape:false, string:"<p>Frame</p>"}}, error: null };
+    assert.equal(expectedExport.result.value.tag, "record");
+    assert.equal(expectedExport.result.native.metadata.declaration, "VersoLeanRun.AutomatonSession");
+    const frame = { label: "Generation 129", content: {kind:"raw", value:"<p>Frame</p>"}, error: {kind:"none"} };
     assert.equal(formatPublishedResult(form, frame), frame);
   } else if (resultKind(form) === "sequence") {
-    assert.equal(expectedExport.result.kind, "structure");
-    assert.equal(expectedExport.result.name, "VersoLeanRun.Sequence");
-    const payload = {initial: { label: input, content: {kind:"text", fields:{escape:false, string:"<p>Frame</p>"}}, error:null}, steps: []};
+    assert.equal(expectedExport.result.value.tag, "record");
+    assert.equal(expectedExport.result.native.metadata.declaration, "VersoLeanRun.Sequence");
+    const payload = {initial: { label: input, content: {kind:"raw", value:"<p>Frame</p>"}, error:{kind:"none"}}, steps: []};
     assert.equal(formatPublishedResult(form, payload), payload);
   } else if (resultKind(form) === "html") {
-    assert.equal(expectedExport.result.name, "Verso.Output.Html");
-    const html = {kind:"text", fields:{escape:true, string:input}};
+    assert.equal(expectedExport.result.native.metadata.declaration, "Lean.Html");
+    const html = {kind:"text", value:input};
     assert.equal(formatPublishedResult(form, html), html);
   } else {
-    const output = scalars[expectedExport.result.type];
+    assert.deepEqual(expectedExport.result, descriptor);
+    const output = scalars[type];
     assert.ok(output, `unsupported result ABI for ${form}`);
     assert.equal(resultKind(form), output.kind);
     assert.equal(formatPublishedResult(form, output.result), output.input);
