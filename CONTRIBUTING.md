@@ -21,6 +21,21 @@ For a batch of related work, name one integration owner to keep the landing orde
 reviewed revisions, preview, and publication status clear. That person can also
 implement a task; merges still require maintainer approval and current CI.
 
+### Thread titles
+
+Name each development thread after its lane and the open PRs it owns:
+`<lane> · verso-run · #<PR>, #<PR>`.
+Use `Coordinator` for the thread responsible for integration and the landing queue.
+For example, `Authoring/docs · verso-run · #16, #14` identifies a lane and its work
+at a glance. Before a PR exists, use a short task name in its place.
+
+Set the title when taking ownership and update it when PRs open, land, close, or
+move to another writer. Include only owned work; record dependencies in GitHub.
+The coordinator keeps the list of PRs still under its ownership as lanes take
+over individual tasks. In Codex CLI,
+[`/rename <title>`](https://learn.chatgpt.com/docs/developer-commands?surface=cli#rename-the-current-chat-with-rename)
+updates the saved thread name. The title supplements the issue or PR's task record.
+
 ### Starting and handing over a task
 
 Use an issue or a draft PR to record the intended change, its lane and writer,

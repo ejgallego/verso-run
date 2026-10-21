@@ -27,6 +27,8 @@ separation between elaboration, invocation, resource publication, and rendering.
   task's writer, dependencies, and completion checks in its issue or PR, and
   agree ownership before editing overlapping files. Keep one integration owner
   for a batch of dependent PRs.
+- Keep the CLI thread title current using the lane and owned open PRs, as in
+  `Authoring/docs · verso-run · #16, #14`. Use `Coordinator` for integration.
 - Start new code work on a task branch in `.worktree/<task>/`, with one worktree
   per task. Keep the main checkout for integration and the local demo. Preserve
   existing working changes and legacy `.worktrees/` checkouts; do not relocate or
