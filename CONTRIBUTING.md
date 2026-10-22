@@ -15,8 +15,9 @@ on dependencies. Tasks have short-lived branches, and lanes can touch shared fil
 | Authoring and documentation | Setup guides, API explanations, checked examples, reference presentation, contributor instructions |
 | Examples and presentation | Demo computations, gallery, walkthroughs, slide composition, and visual design |
 
-Each task includes its own relevant tests and documentation, with validation
-completed before handoff.
+Each task includes its own relevant tests and documentation. Complete the required
+checks before marking it ready for review.
+
 For a batch of related work, name one integration owner to keep the landing order,
 reviewed revisions, preview, and publication status clear. That person can also
 implement a task; merges still require maintainer approval and current CI.
@@ -55,17 +56,19 @@ is needed. Record that dependency and keep the new patch separate. Do not begin
 new implementation in an old checkout with preserved WIP. The worktree rules
 below cover isolation and generated outputs.
 
-On handoff, give the actual commit, worktree, validation result, unresolved issue,
-and next action. Link the PR or retained evidence rather than copying the work
-history into messages or guides. Mark unfinished work as a draft.
+On handoff, give the commit hash, worktree, completed and pending checks, any
+blocker, and the next action. A blocked or unfinished task can be handed over;
+keep any unfinished PR as a draft. Link the PR or retained evidence rather than copying the
+work history into messages or guides.
 
 ### Landing and retirement
 
 Keep one landing order for changes that depend on each other. Independent tasks
 can proceed in parallel; downstream work should consume the selected API rather
 than rebuilding it on another branch. After a prerequisite is squash-merged,
-move only the dependent task's own changes onto the landed baseline and check
-the resulting diff and validation again.
+move only the dependent task's own changes onto the landed baseline and retarget
+its PR to that branch (usually `main`). Check the resulting diff and validation
+again before landing.
 
 The integration owner identifies the revision served by a preview and reports
 the merge and Pages deployment separately. A preview from a PR is useful, but it
@@ -97,7 +100,9 @@ Keep a PR focused on one change. Before submission, inspect the diff and working
 tree, run the validation below sequentially for code changes, and use conventional
 commit subjects. Documentation-only changes need a diff and link review.
 
-Push the task branch and open a PR against `main`:
+Ordinary PRs target `main`. For an agreed stack, target the prerequisite branch
+and link its PR so the review shows only the dependent task's changes. The example
+below targets `main`:
 
 ```sh
 git push -u origin feat/example
@@ -123,8 +128,10 @@ merging. Do not bypass checks. Merging to `main` triggers the demo's Pages workf
 report the merge and deployment status separately.
 
 After GitHub confirms the PR is merged, retain any evidence referenced by the PR
-outside disposable worktree outputs. From the main checkout, inspect and remove
-only that task's clean worktree:
+outside disposable worktree outputs. Before deleting its branch, rebase and
+retarget any open PRs that use it as their base, as described above. Keep the base
+branch until their new bases and diffs have been checked. From the main checkout,
+inspect and remove only that task's clean worktree:
 
 ```sh
 git -C .worktree/example status --short
