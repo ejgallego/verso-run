@@ -575,10 +575,10 @@ with serve_directory(server_root) as base:
                 # last accepted publication. Keep the prior valid site available.
                 published_before=(site/'html-multi/lean-run/publication.json').read_bytes()
                 chapter.write_text(originals[chapter].replace('"Hello, " ++ name',
-                    'name ++ toString (Float.atan 0)'))
+                    '(Lean.Expr.const (Lean.Name.mkSimple name) []).dbgToString'))
                 rejected=command(['lake','exe','lean-run-demo','--output',str(site),
                     '--with-html-single'],'unsupported-rebuild',expected=1)
-                assert 'LeanRunGate.greet' in rejected and 'Float.atan' in rejected, rejected
+                assert 'LeanRunGate.greet' in rejected and 'Lean.Expr.dbgToString' in rejected, rejected
                 assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
                 chapter.write_text(originals[chapter])
                 record('unsupported replacement fails before publishing over the last accepted site')

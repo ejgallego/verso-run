@@ -58,9 +58,9 @@ runtime. VIR checks the entry and the helper functions it calls.
 Its errors identify the exported declaration and blocked dependency. Replace that
 operation, choose a supported path, or wait for a compatible VIR provider update.
 
-For example, general Illuminate diagram rendering reaches `Float.toBits`,
-`Float.atan`, or `Float.asin` on the pinned runtime. The demo uses the tested
-drawing-command/SVG path. See [the support limits](../evidence/illuminate-gates.md).
+For example, `Lean.Expr.dbgToString` is unavailable in the pinned runtime.
+VIR rejects its compiled dependency closure during entry registration or
+resource packaging. Check the complete resource build as well as Lean elaboration.
 
 A failed rebuild must exit unsuccessfully and leave the previous accepted
 publication intact. Its retained output represents the earlier successful build,

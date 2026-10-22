@@ -208,7 +208,7 @@ lean_exe «lean-run-resource-set-check» where
   srcDir := "tests/native"
   root := `ResourceSetMain
 
--- This fixture elaborates, but packaging must reject its unavailable native provider.
+-- Requesting this program must reject its unavailable native provider.
 
 lean_lib LeanRunGateFailures where
   srcDir := "tests/negative"
