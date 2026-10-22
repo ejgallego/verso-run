@@ -251,15 +251,15 @@ highlighted source without interactive controls.
 | --- | --- |
 | Lean | `4.36.0-rc1` (prerelease) |
 | Verso | `d0a5f92ee585a92d2cd4c4904469c123f5ae5f10` |
-| VIR | `5a5614b802e1eb15607b885f84d11cbd8cd4fd21` (`v4.36.0-rc1`) |
+| VIR | `bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668` |
 | Illuminate | `d22e76ef3d2a925132315af902ea432233b4a44a` |
 | Slides | `e7705d546f7432bd8a32adda035310376db79839` (binary-assets review snapshot on 4.36) |
-| Runtime | `8f643abe3e11eabf3d659bdd1a25e716e9f8726bdec6ed32759702cd0d9cb93d` |
+| Runtime | `0d7d7edd3dde264439803e247dab0376116d5527d280359a67f80980e715bea6` |
 
 Lake acquires and verifies VIR's locked runtime; authors do not need a separate
 SDK installation or Wasm build. The runtime uses compatibility version 7,
 resource descriptor version 2, and manifest version 13. Its pack SHA256 is
-`c99c29421c846d034e533ef68a5759e07895a87ea140d9f5e156d6248ddbf6e0`.
+`cc3c4694a9e7106f9d5c45bfd6f56b8ac2d8c4a1372473af0f9d4ebbb4845cbe`.
 
 Verso now uses Lean's `Html` type and `html%{…}` syntax. Manual and Blog render
 retained commands through the public `ExternalCode.leanBlock` API. The Verso
