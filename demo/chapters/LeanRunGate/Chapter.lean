@@ -144,19 +144,18 @@ public def stackView (program : String) : VersoLeanRun.SequenceView :=
 # HTML greeting
 
 Lean can also return HTML. Change the name and run this example to build a small greeting card.
-The function returns Verso's `Html` type, which the preview renders.
+The function returns Lean's `Html` type, which the preview renders.
 HTML interpolation escapes the name, so reader input appears as text.
 
 ```leanRun (entry := LeanRunGate.htmlGreeting) (input := "Ada")
-open Verso.Output.Html
 
 public def LeanRunGate.htmlGreeting (name : String) : Verso.Output.Html :=
   let name := if name.isEmpty then "friend" else name
-  {{ <section style="padding:1.25rem;background:#edf5ff;border-radius:8px">
-    <p style="margin:0 0 .5rem;color:#536273;font-size:.8rem"> "A greeting from Lean" </p>
-    <h2 style="margin:0;color:#285575"> "Hello, " {{name}} "!" </h2>
-    <p style="margin:.75rem 0 0"> "Welcome to the demo." </p>
-  </section> }}
+  html%{<section style="padding:1.25rem;background:#edf5ff;border-radius:8px">
+    <p style="margin:0 0 .5rem;color:#536273;font-size:.8rem">A greeting from Lean</p>
+    <h2 style="margin:0;color:#285575">Hello, {name}!</h2>
+    <p style="margin:.75rem 0 0">Welcome to the demo.</p>
+  </section>}
 ```
 
 The same function can use a multiline input field. Reader input is still treated
@@ -172,12 +171,12 @@ Choose a number from 1 to 8, then Run to build a chain of numbered nodes.
 Try `1`, `4`, and `8`: the labels, links, and layout are computed by Lean in your browser.
 
 ```leanRun (entry := LeanRunGate.diagram) (input := "4")
-open Illuminate Verso.Output.Html
+open Illuminate
 
 public def LeanRunGate.diagram (count : Nat) : Verso.Output.Html :=
   let message := "Choose a whole number of nodes from 1 to 8."
   if count < 1 || count > 8 then
-    {{ <p role="alert"> {{message}} </p> }}
+    html%{<p role="alert">{message}</p>}
   else
     let ink := Color.rgb 40 85 117
     let stroke : Stroke := {color := ink, width := 2}
@@ -203,14 +202,14 @@ public def LeanRunGate.diagram (count : Nat) : Verso.Output.Html :=
       height := 58
     } "chain_"
     let width := s!"width:100%;max-width:{count * 64 + 16}px;margin:1rem auto"
-    {{ <section style="padding:1rem;background:#f5f8fc">
+    html%{<section style="padding:1rem;background:#f5f8fc">
       <p style="margin:0;color:#536273">
-        {{s!"{count} nodes, {count - 1} links"}}
+        {s!"{count} nodes, {count - 1} links"}
       </p>
-      <div style={{width}}>
-        {{Lean.Html.raw svg}}
+      <div style={width}>
+        {Lean.Html.raw svg}
       </div>
-    </section> }}
+    </section>}
 ```
 
 Lean positions the circles, labels, and links using Illuminate drawing commands.
@@ -310,14 +309,14 @@ in a preview.
 
 ```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true")
 public def badge (enabled : Bool) : Html :=
-  {{ <p><strong>{{if enabled then "Enabled" else "Disabled"}}</strong></p> }}
+  html%{<p><strong>{if enabled then "Enabled" else "Disabled"}</strong></p>}
 ```
 
 ```leanRunAnchor wordSteps (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.wordSteps) (input := "18446744073709551615")
 public def wordSteps (seed : UInt64) : SequenceView :=
   let machine : Automaton UInt64 := { initial := seed, step := (· + 1) }
   (machine.trace 1 (fun i => if i == 0 then "Start" else "Increment")).view
-    fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
+    fun word => html%{<p>Exact word: {toString word}</p>}
 ```
 
 The same finite trace can be replayed as a live view. Run, then Play or Step;
@@ -328,7 +327,7 @@ than continuing to increment the word.
 public def wordCycle (seed : UInt64) : AutomatonView :=
   let machine : Automaton UInt64 := { initial := seed, step := (· + 1) }
   (machine.trace 1 (fun i => if i == 0 then "Start" else "Increment")).cycleView
-    fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
+    fun word => html%{<p>Exact word: {toString word}</p>}
 ```
 
 
@@ -398,13 +397,13 @@ the generation and number of live cells.
 
 ```anchor lifeSvg (module := LeanRunSequence.Life)
 def renderState (state : State) : Html :=
-  {{ <div style="padding:.5rem">
-    <p style="margin:0 0 .5rem;font-weight:600">{{s!"Generation {state.generation} · {state.board.population} living cells"}}</p>
+  html%{<div style="padding:.5rem">
+    <p style="margin:0 0 .5rem;font-weight:600">{s!"Generation {state.generation} · {state.board.population} living cells"}</p>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img"
-         aria-label={{s!"Game of Life generation {state.generation}, {state.board.population} living cells"}}
+         aria-label={s!"Game of Life generation {state.generation}, {state.board.population} living cells"}
          style="display:block;width:176px;height:176px;max-width:100%;background:#f3f6fa">
-      <path class="life-cells" d={{livePath state.board}} fill="#285674"> " " </path>
-      <path d={{gridPath}} fill="none" stroke="#ccd9e5" stroke-width=".5"> " " </path>
+      <path class="life-cells" d={livePath state.board} fill="#285674"></path>
+      <path d={gridPath} fill="none" stroke="#ccd9e5" stroke-width=".5"></path>
     </svg>
-  </div> }}
+  </div>}
 ```

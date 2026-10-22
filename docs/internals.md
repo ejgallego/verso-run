@@ -266,10 +266,8 @@ retained commands through the public `ExternalCode.leanBlock` API. The Verso
 revision also includes the module-system import fix needed by the literate API
 reference generator.
 
-The 4.36 migration is not yet qualified for landing: the Illuminate SVG example
-reaches `Float.maximum`, which this VIR runtime does not provide.
-The independently pinned starter remains on its published 4.35 baseline until a
-new consumer revision lands. See [validation](validation.md) for the gates.
+The independently pinned starter qualifies its own published baseline.
+[Validation](validation.md) describes the separate starter and candidate-consumer gates.
 
 
 ## Sequence presentation boundary
@@ -367,7 +365,6 @@ Stop and the loading deadline settle the module-import wait. They do not cancel
 ECMAScript import or its possible later evaluation. Late rejection stays observed,
 and generation checks prevent an abandoned wait from creating a presenter.
 
-The current Verso Html string serializer can omit closing tags for empty non-void
-elements. Presenter control paragraphs and the iframe have explicit bodies so
-fragment parsing preserves their sibling relationship. This belongs with the
-later Verso upstreaming review; the dependency pin is unchanged.
+Lean's HTML serializer emits closing tags for non-void elements, including empty
+paragraphs and iframes. Presenter controls therefore need no placeholder text to
+preserve their sibling structure.

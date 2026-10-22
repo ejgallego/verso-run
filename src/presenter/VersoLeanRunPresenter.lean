@@ -11,7 +11,7 @@ public meta import Vir.Attributes
 public section
 
 namespace VersoLeanRun.Presenter
-open Lean.Vir Lean.Vir.Browser Verso.Output Verso.Output.Html
+open Lean.Vir Lean.Vir.Browser Verso.Output
 
 private def failure {α : Type} (message : String) : DomM α := by
   unfold DomM RuntimeM
@@ -34,21 +34,20 @@ private def child (root : Js Element) (selector : String) : DomM (Js Element) :=
     | failure s!"Missing sequence control: {selector}"
   return element
 
--- Explicit bodies keep empty non-void tags closed in the pinned Html serializer.
 private def controls (frames : Array Frame) : Html := Id.run do
   let labels := Lean.Html.ofArray <| frames.mapIdx fun i frame =>
-    {{ <button type="button" class="lean-run-sequence-step" data-step={{toString i}}>{{frame.label}}</button> }}
-  return {{ <div class="lean-run-sequence-controls">
-    <div class="lean-run-sequence-strip" aria-label="Sequence steps">{{labels}}</div>
+    html%{<button type="button" class="lean-run-sequence-step" data-step={toString i}>{frame.label}</button>}
+  return html%{<div class="lean-run-sequence-controls">
+    <div class="lean-run-sequence-strip" aria-label="Sequence steps">{labels}</div>
     <div class="lean-run-sequence-navigation">
-      <button type="button" class="lean-run-sequence-prev" aria-label="Previous step"> "Previous" </button>
-      <label> "Step" <input type="range" class="lean-run-sequence-range" min="0" max={{toString (frames.size - 1)}} value="0"/> </label>
-      <button type="button" class="lean-run-sequence-next" aria-label="Next step"> "Next" </button>
+      <button type="button" class="lean-run-sequence-prev" aria-label="Previous step">Previous</button>
+      <label>Step<input type="range" class="lean-run-sequence-range" min="0" max={toString (frames.size - 1)} value="0"/></label>
+      <button type="button" class="lean-run-sequence-next" aria-label="Next step">Next</button>
     </div>
-    <p class="lean-run-sequence-position" role="status" aria-live="polite"> " " </p>
-    <p class="lean-run-sequence-error" role="alert"> " " </p>
-    <iframe class="lean-run-sequence-frame" title="Sequence state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
-  </div> }}
+    <p class="lean-run-sequence-position" role="status" aria-live="polite"></p>
+    <p class="lean-run-sequence-error" role="alert"></p>
+    <iframe class="lean-run-sequence-frame" title="Sequence state" sandbox="" referrerpolicy="no-referrer"></iframe>
+  </div>}
 
 /-- Live controls persist while each new Lean frame replaces the previous one.
 The asynchronous worker bridge owns Play/Pause scheduling and backpressure. -/
@@ -56,18 +55,18 @@ The asynchronous worker bridge owns Play/Pause scheduling and backpressure. -/
 def stageAutomaton (root : Js Element) (frame : Frame) : DomM Unit := do
   let controls ← Element.querySelector root (← JsValue.ofString ".lean-run-automaton-controls")
   if (← Js.Nullable.toOption controls).isNone then
-    let markup := {{ <div class="lean-run-automaton-controls">
+    let markup := html%{<div class="lean-run-automaton-controls">
       <div class="lean-run-sequence-navigation">
-        <button type="button" class="lean-run-play"> "Play" </button>
-        <button type="button" class="lean-run-step"> "Step" </button>
+        <button type="button" class="lean-run-play">Play</button>
+        <button type="button" class="lean-run-step">Step</button>
       </div>
-      <p class="lean-run-sequence-position" role="status"> " " </p>
-      <p class="lean-run-sequence-error" role="alert"> " " </p>
+      <p class="lean-run-sequence-position" role="status"></p>
+      <p class="lean-run-sequence-error" role="alert"></p>
       <div class="lean-run-automaton-preview">
-        <iframe class="lean-run-sequence-frame" data-preview="current" aria-hidden="false" title="Automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
-        <iframe class="lean-run-sequence-frame" data-preview="next" aria-hidden="true" title="Next automaton state" sandbox="" referrerpolicy="no-referrer"> " " </iframe>
+        <iframe class="lean-run-sequence-frame" data-preview="current" aria-hidden="false" title="Automaton state" sandbox="" referrerpolicy="no-referrer"></iframe>
+        <iframe class="lean-run-sequence-frame" data-preview="next" aria-hidden="true" title="Next automaton state" sandbox="" referrerpolicy="no-referrer"></iframe>
       </div>
-    </div> }}
+    </div>}
     Element.setInnerHTML root (← JsValue.ofString markup.render)
   attr (← child root "[data-preview='next']") "srcdoc" (Preview.document frame.content.render)
 

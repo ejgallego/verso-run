@@ -82,7 +82,6 @@ argument. Return `Html` when the result is intended to be rendered as HTML:
 
 ````lean
 ```leanRun (entry := Demo.card) (input := "Ada")
-open Verso.Output.Html
 public def Demo.card (name : String) : Verso.Output.Html :=
   html%{<h2>Hello, {name}!</h2>}
 ```

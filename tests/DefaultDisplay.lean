@@ -1,6 +1,6 @@
 module
 public import VersoLeanRun
-open Verso Genre Manual VersoLeanRun Verso.Output.Html
+open Verso Genre Manual VersoLeanRun
 set_option compiler.postponeCompile false
 
 public abbrev Words := Sequence String
@@ -27,12 +27,12 @@ public def words (input : String) : Words :=
 
 ```leanRun (entry := htmlTrace)
 public def htmlTrace (input : String) : Sequence Markup :=
-  { initial := { label := "Markup", content := {{ <b> {{input}} </b> }} } }
+  { initial := { label := "Markup", content := html%{<b>{input}</b>} } }
 ```
 
 ```leanRun (entry := htmlMachine)
 public def htmlMachine (input : String) : Automaton Markup :=
-  { initial := {{ <b> {{input}} </b> }}, step := id }
+  { initial := html%{<b>{input}</b>}, step := id }
 ```
 
 ```leanRun (entry := wordMachine)
@@ -43,7 +43,7 @@ public def wordMachine (seed : UInt64) : Automaton UInt64 :=
 ```leanRun (entry := custom)
 public def custom (seed : Nat) : AutomatonView :=
   ({ initial := Hidden.mk seed, step := id } : Automaton Hidden).view
-    (fun state => {{ <p> {{toString state.value}} </p> }})
+    (fun state => html%{<p>{toString state.value}</p>})
 ```
 
 ```leanRun (entry := wordMachine)

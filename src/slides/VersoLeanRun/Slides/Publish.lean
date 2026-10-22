@@ -9,7 +9,7 @@ public import VersoLeanRun.Collect
 public import VersoLeanRun.Publication
 
 public section
-open Verso Doc Output Html VersoSlides
+open Verso Doc Output VersoSlides
 
 namespace VersoLeanRun.Slides
 
@@ -70,8 +70,8 @@ def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
       { filename := "lean-run/console.css", contents := ⟨include_str "../../../../web/lean-run.css"⟩ },
       { filename := "lean-run/slides.css", contents := ⟨include_str "../../../../web/slides.css"⟩ }],
     extraHead := config.extraHead ++ #[
-      {{ <script type="module" src="lean-run/slides.js"/> }},
-      {{ <noscript><style>{{Lean.Html.raw (include_str "../../../../web/slides-static.css")}}</style></noscript> }}] }
+      html%{<script type="module" src="lean-run/slides.js"/>},
+      html%{<noscript><style>{Lean.Html.raw (include_str "../../../../web/slides-static.css")}</style></noscript>}] }
   let browserDoc ← IO.ofExcept <| browserDocument doc
   VersoSlides.slidesMain config browserDoc
 

@@ -37,10 +37,10 @@ public def LeanRunBlog.Examples.greet (name : String) : String :=
 
 ```leanRunAnchor card (module := LeanRunBlog.Examples) (entry := LeanRunBlog.Examples.card) (input := "Ada")
 public def LeanRunBlog.Examples.card (name : String) : Verso.Output.Html :=
-  {{ <section style="padding:1rem;background:#edf5ff;border-radius:8px">
-    <h2> "Hello, " {{name}} "!" </h2>
-    <p> "This card was computed by Lean." </p>
-  </section> }}
+  html%{<section style="padding:1rem;background:#edf5ff;border-radius:8px">
+    <h2>Hello, {name}!</h2>
+    <p>This card was computed by Lean.</p>
+  </section>}
 ```
 
 HTML interpolation escapes the name, so reader input appears as text rather
@@ -79,10 +79,9 @@ A function can return Verso's `Html` type. This small example displays the name
 as escaped text in an isolated preview.
 
 ```leanRun (entry := LeanRunBlog.Post.Inline.card) (input := "Ada")
-open Verso.Output.Html
 
 public def card (name : String) : Verso.Output.Html :=
-  {{ <p> {{name}} </p> }}
+  html%{<p>{name}</p>}
 end LeanRunBlog.Post.Inline
 ```
 
@@ -102,7 +101,7 @@ in a preview.
 
 ```leanRunAnchor badge (module := LeanRunRendered.Examples) (entry := LeanRunRendered.Examples.badge) (input := "true")
 public def badge (enabled : Bool) : Html :=
-  {{ <p><strong>{{if enabled then "Enabled" else "Disabled"}}</strong></p> }}
+  html%{<p><strong>{if enabled then "Enabled" else "Disabled"}</strong></p>}
 ```
 
 A sequence adds navigation between recorded results. This one shows an exact
@@ -112,7 +111,7 @@ unsigned integer and its successor; incrementing the maximum wraps to zero.
 public def wordSteps (seed : UInt64) : SequenceView :=
   let machine : Automaton UInt64 := { initial := seed, step := (· + 1) }
   (machine.trace 1 (fun i => if i == 0 then "Start" else "Increment")).view
-    fun word => {{ <p> "Exact word: " {{toString word}}</p> }}
+    fun word => html%{<p>Exact word: {toString word}</p>}
 ```
 
 # Game of Life
@@ -181,13 +180,13 @@ the generation and number of live cells.
 
 ```anchor lifeSvg (module := LeanRunSequence.Life)
 def renderState (state : State) : Html :=
-  {{ <div style="padding:.5rem">
-    <p style="margin:0 0 .5rem;font-weight:600">{{s!"Generation {state.generation} · {state.board.population} living cells"}}</p>
+  html%{<div style="padding:.5rem">
+    <p style="margin:0 0 .5rem;font-weight:600">{s!"Generation {state.generation} · {state.board.population} living cells"}</p>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img"
-         aria-label={{s!"Game of Life generation {state.generation}, {state.board.population} living cells"}}
+         aria-label={s!"Game of Life generation {state.generation}, {state.board.population} living cells"}
          style="display:block;width:176px;height:176px;max-width:100%;background:#f3f6fa">
-      <path class="life-cells" d={{livePath state.board}} fill="#285674"> " " </path>
-      <path d={{gridPath}} fill="none" stroke="#ccd9e5" stroke-width=".5"> " " </path>
+      <path class="life-cells" d={livePath state.board} fill="#285674"></path>
+      <path d={gridPath} fill="none" stroke="#ccd9e5" stroke-width=".5"></path>
     </svg>
-  </div> }}
+  </div>}
 ```

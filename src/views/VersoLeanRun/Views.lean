@@ -8,7 +8,6 @@ module
 public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
 
-open scoped Verso.Output.Html
 /-!
 # Interactive Lean examples
 
@@ -28,7 +27,7 @@ paragraph containing a greeting. The {lit}`html%{…}` syntax builds HTML;
 interpolated strings are escaped:
 
 ```lean
-open Verso.Output Verso.Output.Html
+open Verso.Output
 
 public def greeting (name : String) : Html :=
   html%{<p>Hello, {name}!</p>}
@@ -40,7 +39,7 @@ In a Verso document, put the definition inside a code fence labelled {lit}`leanR
 
 ````
 ```leanRun (entry := greeting) (input := "Ada")
-open Verso.Output Verso.Output.Html
+open Verso.Output
 
 public def greeting (name : String) : Html :=
   html%{<p>Hello, {name}!</p>}
@@ -98,7 +97,7 @@ text using {name}`ToString`. A custom renderer of type {lit}`α → Html` can pr
 an HTML or SVG display:
 
 ```lean
-open VersoLeanRun Verso.Output.Html
+open VersoLeanRun
 
 public def labelledCounter (seed : Nat) : AutomatonView :=
   (counter seed).view
