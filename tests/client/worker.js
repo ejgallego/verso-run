@@ -10,13 +10,13 @@ onmessage = async ({ data: { base, plan, seed } }) => {
       expectedExports: plan.expectedExports,
     });
     const trace = program.call("ClientFixture.trace", BigInt(seed));
-    if (trace.version !== 1n) throw new Error("Unexpected typed trace version");
+    const render = frame => ({label:frame.label, html:program.call("ClientFixture.render", frame), error:frame.error});
     const session = program.call("ClientFixture.start", BigInt(seed));
     const other = program.call("ClientFixture.start", BigInt(seed));
     const frames = [session.initial];
     for (let i = 0; i < 5; ++i) frames.push(session.advance());
-    postMessage({ seed, trace: { version: 1, frames: trace.frames },
-      frames, independent: other.advance() });
+    postMessage({ seed, trace: { frames: [trace.initial, ...trace.steps].map(render) },
+      frames: frames.map(render), independent: render(other.advance()) });
   } catch (error) {
     postMessage({ error: String(error.stack ?? error) });
   } finally { program?.dispose(); }

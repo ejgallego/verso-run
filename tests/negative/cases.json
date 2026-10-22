@@ -26,7 +26,7 @@
   "BoolPreset": "Boolean preset must be 'true' or 'false'",
   "MultilineNat": "multiline input requires a String argument",
   "PrivateHtml": "private",
-  "HtmlCollision": "already in use",
+  "ImportedCollision": "already in use",
   "NonExecutableHtml": "non-executable",
   "IlluminateHashing": "Float.toBits",
   "IlluminateCompile": "Float.atan",
@@ -159,6 +159,24 @@
     "contains": [
       "document's own project",
       "external-project execution is not yet qualified"
+    ]
+  },
+  "ModelWithoutDisplay": {
+    "contains": [
+      "cannot display model type",
+      "Hidden",
+      "ToString",
+      ".view render"
+    ]
+  },
+  "DependentModel": {
+    "contains": [
+      "automatic display needs a fixed model type"
+    ]
+  },
+  "ModelCollision": {
+    "contains": [
+      "already in use"
     ]
   }
 }

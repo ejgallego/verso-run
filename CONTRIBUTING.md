@@ -206,6 +206,91 @@ public Git acquisition. CI tests its actual checkout, including synthetic PR
 merge commits, and requires both gates before deploying Pages. Keep the starter's
 public pin until a new baseline has landed and its acquisition is qualified.
 
+## Writing documentation
+
+Write for a Lean programmer who has not read the project history. Start with
+what an author can build and what readers can do with it. A useful default is to
+introduce the capability, show a small example, explain the relevant API, and
+then cover details. Choose the order that makes the explanation easiest to follow.
+
+Describe supported capabilities broadly and accurately. Examples illustrate
+possibilities; the current demos do not define the library's scope. For example,
+introduce runnable functions and HTML results before explaining the optional
+sequence and automaton helpers. Explain each concept before relying on its name.
+Keep authors and readers distinct: authors define functions and their displays;
+readers supply inputs and use the published controls.
+
+Use plain sentences, concrete subjects, and headings that name the topic.
+Explanatory prose describes concepts and their relationships. Save direct
+instructions such as “select the function” for a task where that action makes
+sense. Keep author and reader roles clear without narrating every action or
+repeatedly addressing the author as “you”.
+Explain necessary technical terms where they first matter. State behavior and
+constraints when they affect a choice, or link to the relevant reference. Avoid
+both unqualified promises and an introductory catalogue of restrictions.
+Attribute behavior to the layer that provides it. For example, the compiled
+presenter uses DOM APIs, while entry functions execute in a worker; internal
+renderer capabilities do not imply an arbitrary author-facing DOM interface.
+
+Show enough Lean code to make an example understandable. Keep examples beside
+their explanations. Adapt explanations to each format; slides should leave room
+for visible code and controls. Implementation details and proofs can remain available in
+the reference without preceding the guide. Use Verso's HTML quotation for
+examples that build markup; keep constructor calls when explaining escaping or
+programmatic HTML construction. Prefer one canonical explanation with links to
+it over repeated paragraphs that drift apart.
+
+Match the content to its purpose:
+
+- **Guides** explain a capability and help authors use it, with working examples
+  and the choices needed for a real task.
+- **API reference** explains types and functions, their arguments and results,
+  relevant behavior and limits, and examples. Linked source supplements that
+  explanation.
+- **Architecture notes** explain implementation boundaries, dependencies, and
+  design decisions. Keep project history and plans in their own documents.
+- **PR descriptions** lead with the resulting behavior or concrete problem
+  fixed. Include the design and validation needed for review, with material
+  limits. Development chronology and internal coordination do not belong here.
+
+For substantial prose changes, separate writing from review. The writer drafts
+the explanation; the reviewer checks its claims against the code and reads the
+rendered page, rather than just suggesting different wording. A human or an
+agent can fill either role. Both should ask:
+
+- Can a new author tell what they can build, beyond the examples shown?
+- Are author actions, reader actions, and optional helpers clear?
+- Are API terms explained, and capability claims accurate with useful links to
+  their constraints?
+- Do the headings and reading order help, with enough visible example code?
+- Does the rendered page read naturally, with working links and without
+  unexplained internal names or implementation details?
+
+### Applying the principles
+
+Before writing an overview, check the full capability of the library. A guide
+to one helper should not become the description of the whole project. The
+[README introduction](README.md#verso-run) is a worked example: it covers
+primitive results, HTML, animated views, and experimental DOM rendering, with
+the rendering boundary made explicit. Check these claims against the code as
+the APIs evolve.
+
+Two examples capture recurring editing decisions:
+
+- “You select the function; readers supply an input” narrates setup in an
+  introduction. Explain the capability there; describe `entry` when introducing
+  the block's arguments. Direct instructions are useful in the setup procedure.
+- “Record a few steps or keep running?” makes a heading sound like a prescribed
+  workflow. A heading such as “Recorded and live views” names the concepts the
+  section explains.
+
+For documentation PRs, include links to the affected pages or preview commands
+so the reviewer can read the output. Review meaning and English together;
+automated checks cover examples, links, and rendering, rather than prescribing
+particular wording. When a review reveals a recurring writing problem, update
+this section. Keep it as the canonical guidance, with a short pointer in
+`AGENTS.md`, rather than duplicating rules in agent prompts or other guides.
+
 ## Repository layout
 
 ### Generated library reference
@@ -213,11 +298,19 @@ public pin until a new baseline has landed and its acquisition is qualified.
 Run `python3 scripts/build-api-reference.py` to generate the public view library's reference in
 `.lake/build/literate-html/`. `literate.toml` selects `VersoLeanRunViews` and its
 landing page; module prose and Lean-checked examples live with the library source.
+For HTML quotation in checked examples, put `open scoped Verso.Output.Html`
+before the module prose. Keep the `/-! ... -/` comment as a standalone command
+so the pinned reference generator includes it. The copyable examples should
+also show the namespace open they need when used in a document or Lean module.
 Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.
 The helper invokes Verso's `lake build :literateHtml` facet and supplies the source
 dependency missing from the pinned facet: documentation-only edits must refresh
 HTML even when the public olean stays unchanged. It also tracks the configured
 extra stylesheets so style edits refresh the generated site.
+The configured CSS and JavaScript put checked examples before the expandable
+declaration reference. Declaration links open the reference at their target.
+Without JavaScript, the declarations remain visible below the guide. Keep all
+generated declaration anchors intact when changing this presentation.
 `scripts/build-demo-site.py` includes the reference at `/api/` in the demo and
 Pages artifact. Generated HTML stays out of Git.
 

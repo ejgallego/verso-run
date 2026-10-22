@@ -5,78 +5,93 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import Verso.Output.Html
-public import Lean.Data.Json.FromToJson
 
 /-!
 # Frames
 
-A frame is what the reader sees at one step: a label, some HTML or SVG, and an
-optional error message. Recorded sequences and live simulations use the same
-frame type.
+A frame pairs a value with a label and an optional error message. Recorded
+sequences and live simulations both use frames. The value can be a model state,
+such as a number or a board, or HTML ready to display.
 -/
 public section
 
 namespace VersoLeanRun
 open Verso.Output
 
-/-- One displayed step, with a label, HTML content, and an optional error message. -/
-structure Frame where
+/-- A labelled value with an optional error message. A rendered frame contains HTML. -/
+structure Frame (α : Type := Html) where
   /-- The heading for this step, such as “Generation 3” or “Add”. -/
   label : String
-  /-- The HTML or SVG to display in the isolated preview. -/
-  html : Html
-  /-- An error in the computation, such as stack underflow. Defaults to no error. -/
+  /-- The value at this step. Displayed frames contain HTML or SVG. -/
+  content : α
+  /-- An optional message describing a problem at this step. -/
   error : Option String := none
+  deriving Inhabited
 
-namespace ViewWire
+/-- Applies `f` to the value, preserving its label and error message. -/
+@[expose] def Frame.map (f : α → β) (frame : Frame α) : Frame β :=
+  { label := frame.label, content := f frame.content, error := frame.error }
 
-/-- The `ViewWire.Frame` format sent to the browser, with HTML rendered to a string. -/
-structure Frame where
-  label : String
-  html : String
-  error : Option String
-  deriving Lean.ToJson, Inhabited
+instance : Functor (fun α => Frame α) where
+  map := Frame.map
 
-end ViewWire
+instance : LawfulFunctor (fun α => Frame α) where
+  map_const := rfl
+  id_map := by intro α frame; cases frame; rfl
+  comp_map := by intro α β γ f g frame; rfl
 
-/-- Convert a frame to the format sent to the browser. Document adapters call this for you. -/
-def Frame.toWire (frame : Frame) : ViewWire.Frame :=
-  { label := frame.label, html := frame.html.asString, error := frame.error }
+@[simp] theorem Frame.map_comp (f : α → β) (g : β → γ) :
+    Frame.map (g ∘ f) = Frame.map g ∘ Frame.map f := rfl
+
+@[simp] theorem Frame.map_id : Frame.map (@id α) = id := by
+  funext frame
+  cases frame
+  rfl
 
 end VersoLeanRun
 
 /-!
-## Describe a step
+## Labels and content
 
-Build a {name}`VersoLeanRun.Frame` when you want to choose the heading, display,
-and error message together. For example, a simulation might show a generation
-number above a drawing of its board. This smaller example displays a number:
+A {name (full := VersoLeanRun.Frame)}`Frame` keeps a value together with its
+heading. For example, a simulation can label its board with a generation number.
+Here the value is simply a number:
 
 ```lean
 open VersoLeanRun Verso.Output
 
-def snapshot (generation : Nat) (value : Nat) : Frame :=
+def snapshot (generation : Nat) (value : Nat) : Frame Nat :=
   { label := s!"Generation {generation}"
-    html := .text true s!"Value: {value}" }
+    content := value }
 ```
 
-The {lit}`html` field accepts {name}`Verso.Output.Html`, including SVG elements.
-Use {name}`Verso.Output.Html.text` with {lit}`true`, as above, to escape text
-rather than treat it as markup. This is especially useful for displaying reader input.
+The {lit}`content` field has the type you choose: {lit}`Nat` in this example.
+A displayed frame has type {lit}`Frame Html`; its content can include SVG elements.
+If you omit the type argument, {lit}`Frame` means {lit}`Frame Html`.
 
-## Explain an error
+## Errors
 
-Set {lit}`error` to {lit}`some message` to explain a problem in the computation,
+The {lit}`error` field can describe a problem in the computation,
 such as a calculator instruction that needs more values on the stack. A live
-simulation pauses when it reaches a frame with an error.
+simulation displays the error and disables Play and Step. The reader can start
+a fresh run or use Stop to clear the view.
 
-If the input is invalid and there is no state to display, return
-{lit}`SequenceView.error` or {lit}`AutomatonView.error`. Problems loading or
+{lit}`SequenceView.error` and {lit}`AutomatonView.error` report invalid input when
+there is no model state to display. Problems loading or
 running the compiled program are reported separately by verso-run.
 
-## For custom integrations
+## Mapping values
 
-{name}`VersoLeanRun.Frame.toWire` converts the HTML to a string in
-{name}`VersoLeanRun.ViewWire.Frame` for sending to the browser. Document adapters
-handle this conversion; use {name}`VersoLeanRun.Frame` when writing a display.
+{name (full := VersoLeanRun.Frame.map)}`Frame.map` changes the value while keeping
+the label and error message. Here the number becomes displayed text:
+
+```lean
+def displayedSnapshot (generation value : Nat) : Frame :=
+  (snapshot generation value).map fun n => Html.ofString s!"Value: {n}"
+```
+
+{name (full := Verso.Output.Html.ofString)}`Html.ofString` escapes text, including
+reader input. Verso's HTML constructors and syntax provide elements and attributes
+for richer displays.
+Sequences and automata provide {lit}`view` helpers to render all their states.
 -/

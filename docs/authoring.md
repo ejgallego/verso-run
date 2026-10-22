@@ -1,13 +1,13 @@
 # Authoring runnable examples
 
-A Run block selects a function with `entry`. Its Lean type chooses the input
-control and result display. The document build handles VIR registration.
+A Run block displays Lean code alongside controls for calling a function.
+The `entry` argument names the function, and its Lean type determines the input
+control and result display. The document build prepares it for browser execution.
 
 ## A basic block
 
-The same `leanRun` block works in Manual, Blog Page/Post and Slides. Select the
-genre adapter import, open its namespace, and keep compilation enabled. For a
-Manual chapter:
+`leanRun` works in Manual, Blog pages and posts, and Slides. Each genre has its
+own adapter import. A minimal Manual chapter looks like this:
 
 ````lean
 module
@@ -23,15 +23,16 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-The function must be public, executable, pure and monomorphic. No
-`@[vir_export]` attribute is required: `entry` selects and registers the callable
-using VIR's existing validator, including its compiled dependencies. Existing
-explicit attributes continue to work. Helpers are compiled as dependencies;
-they do not become entrypoints merely because they appear in the block.
+The function must be public, executable, and monomorphic. Scalar and HTML
+entries, as well as sequence and automaton model functions, must be pure;
+custom live views return an `AutomatonView` action. No `@[vir_export]` attribute
+is required: the build handles VIR registration and checks the entry and any
+helper functions it calls. Existing explicit export attributes remain supported.
 
-`entry` resolves through Lean's actual declaration identity and the retained
-example scopes. Repeated blocks can select the same function, for example with
-`#check Demo.greet` as displayed code. Each placement has its own worker.
+Definitions, namespaces, and open declarations remain available in later Run
+blocks. Several blocks can use the same entry; a later block might display just
+`#check Demo.greet` while providing another set of controls. Each embedded
+example runs independently.
 Ordinary `lean` blocks keep their existing behavior. `-keep`, `+error` and unknown
 Run arguments are rejected.
 
@@ -44,14 +45,15 @@ Run arguments are rejected.
 | `+multiline` | A textarea for a String argument | Off |
 | `+collapsed` | Initially folded source | Off |
 
-Bool gets a true/false selector. Boolean presets are the literal strings
-`"true"` or `"false"`. Nat and UInt64 get exact decimal inputs; UInt64 is bounded
+`Bool` inputs use a true/false selector, with presets written as the strings
+`"true"` or `"false"`. `Nat` and `UInt64` inputs use exact decimal values; UInt64 is bounded
 by `18446744073709551615` and arithmetic uses Lean's normal wraparound. Values
 beyond JavaScript's safe integer range remain exact.
 
-`+multiline` keeps whitespace and blank lines. Enter edits text; Ctrl+Enter or
-⌘+Enter runs the function. Numeric and Boolean entries reject it. String input
-has a 4096 UTF-16 code unit bound; all results have the common output bound.
+`+multiline` displays a String input in a textarea, preserving whitespace and
+blank lines. Enter adds a newline; Ctrl+Enter or ⌘+Enter runs the function.
+The option is only available for String inputs. String input is limited to
+4096 UTF-16 code units; result limits are described below.
 
 `+collapsed` puts source in an expandable “View Lean implementation” panel.
 Source remains present in HTML and Manual TeX, including without JavaScript.
@@ -62,7 +64,18 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | --- | --- |
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
 | `String`, `Nat`, `Bool`, or `UInt64` → `Verso.Output.Html` | An isolated HTML preview |
-| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.SequenceView` | Labelled states with selection and scrubbing |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Sequence α` or `SequenceView` | Labelled states with selection and scrubbing |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Automaton α` or `AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
+
+For a plain `Sequence α` or `Automaton α`, HTML states keep their markup;
+other states need a `ToString` instance and appear as escaped text. The model type
+must be fixed, rather than depend on the input value. Use `.view render` for a
+custom HTML or SVG display, including model types without `ToString`.
+
+Text results are limited to 65,536 UTF-16 code units. In HTML and frame results,
+the strings share that limit, including labels, content, and errors.
+Structured results also have node and depth limits; see
+[execution limits](internals.md#interaction-and-limits).
 
 A String containing markup is still plain text. There is no `output` block
 argument. Return `Html` when the result is intended to be rendered as HTML:
@@ -78,17 +91,14 @@ public def Demo.card (name : String) : Verso.Output.Html :=
 Verso's typed HTML syntax escapes interpolated text and attributes. Raw HTML
 nodes remain an explicit author choice. The preview supports static HTML, inline
 CSS and data images; scripts and external embedded resources are disabled.
-Input edits, Stop, pending calls and failures clear the preview. Errors stay
-plain text; the frame scrolls larger results.
-
-The extension generates a typed transport adapter for VIR. Authors select the original
-Html function. Repeated placements reuse the serializer; a conflicting declaration
-at its generated name causes an author error.
+The preview clears when the input changes, a new call starts, Stop is pressed,
+or a call fails. Errors appear as plain text. Larger results can be scrolled
+within the preview.
 
 ## Run an anchored example from an imported module
 
 `leanRunAnchor` displays a standard Verso source anchor and selects a function
-from an imported module. The producer is ordinary Lean, without VIR annotations:
+from an imported module. The source module is ordinary Lean, without VIR annotations:
 
 ```lean
 module
@@ -97,7 +107,7 @@ public def Examples.twice (n : Nat) : Nat := n + n
 -- ANCHOR_END: twice
 ```
 
-Import the producer into the document. Verso's existing project/module defaults
+Import the source module into the document. Verso's project and module defaults
 can shorten repeated blocks:
 
 ````lean
@@ -112,15 +122,14 @@ public def Examples.twice (n : Nat) : Nat := n + n
 
 Explicit `(project := ".")` and `(module := Examples.Arithmetic)` arguments remain
 available. The entry must be defined in the selected anchor, public and executable.
-The body must match the source region; stale or empty bodies get Verso's normal
-replacement/fill-in suggestions. Anchor comments are omitted from the display.
+The body must match the source region. Verso suggests a replacement when the
+body is stale and can fill in an empty body. Anchor comments are not displayed.
 
-The document creates a callable wrapper around the imported function. Its bundle
-owns that wrapper and includes the producer's compiled dependencies. Register and
-publish the **document module's** resource bundle, just as for inline examples;
-the producer needs no separate export marker or root bundle. Imported `String →
-Html` functions use the same automatic serialization and preview as inline ones.
-Only same-project execution is qualified.
+Publish the **document module's** resource bundle, just as for inline examples.
+It includes the selected function and its compiled dependencies; the source module
+needs no separate export marker or bundle registration. Imported HTML functions
+use the same preview as inline definitions. Execution from anchors is currently
+tested only within the same project.
 
 Input, `+multiline` and `+collapsed` work across Manual, Blog and Slides. Standard
 source options such as `-showProofStates` and `-defSite` remain available. Open
@@ -129,150 +138,145 @@ Manual displays when another block already owns the desired definition target.
 An ordinary `anchor` can show the same source without a Run form.
 
 `leanRun` defines or reuses a function directly in any of the three genres.
-Namespace, open declarations and definitions remain available in later Run blocks.
+Namespaces, open declarations, and definitions remain available in later Run blocks.
 `leanRunAnchor` is optional when several documents share an imported source region.
 Each genre retains native source styling and links. See
 [Blog authoring](blog.md) and [Slides authoring](slides.md).
 
 ## Project wiring and migration
 
-Keep support → producer → document → resource preparation → carrier → generator
-acyclic. The native generator imports the document and its separate resource
-carrier; the document imports support and its source producers, never its carrier.
+A document must not import the module that embeds its generated resources: that
+would create a build dependency cycle. The native generator imports both the
+document and its separate resource carrier.
 See [resource integration](internals.md#resource-ownership-and-site-integration).
 Retain `compiler.postponeCompile false`; native precompilation remains deferred.
 
 When updating an older example, remove redundant `@[vir_export]` markers and
-`output` options. Change a String HTML serialization wrapper to return typed
+`output` options. Change functions that serialize HTML to a String to return
 `Html` directly. For anchors, move root resource registration from the imported
 producer to the document module. The independently pinned
 [Manual starter](../examples/manual-starter/README.md) demonstrates entry-selected
-text and Html functions without explicit export annotations. Its cold Git test
-qualifies that published dependency revision separately from this checkout.
+text and HTML functions without explicit export annotations. It uses a pinned
+published version, tested separately from this development checkout.
 New generators should pass the complete `include_vir_assets` result to the
-ResourceSet publication APIs. Migrate callers when updating the prototype. See
+ResourceSet publication APIs. See
 [resource integration](internals.md#resource-ownership-and-site-integration).
 
 ## Present a sequence of states
 
 For a model in an ordinary Lean source module, import `VersoLeanRun.Views`.
-It provides `Frame`, `Sequence`, `Automaton` and their view helpers. The document
-imports its own genre adapter to select the function with `leanRun`; producer
-modules need no document directives or publication setup.
+It provides `Frame`, `Sequence`, `Automaton`, and their view helpers. The document
+imports the adapter for its genre. Model modules need no document directives
+or publication setup.
 The generated [View API reference](https://ejgallego.github.io/verso-run/api/)
 explains these types and helpers with Lean-checked examples and linked source.
 
-Return `VersoLeanRun.SequenceView` to get previous/next, step selection and a
-scrubber. The same entry works in Manual, Blog Page/Post and Slides. Define your
-model with `Sequence α`, label each `SequenceStep α`, then supply a view using
-Verso's existing `Html` type:
+A function returning `VersoLeanRun.Sequence α` or `SequenceView` gets controls
+for browsing its frames, including step selection and a scrubber. It works in all three genres.
+`Sequence α` records model values, while `SequenceView` contains HTML ready to
+display. For text values, the default renderer is enough:
 
 ```lean
-public def Demo.greetingSteps (name : String) : VersoLeanRun.SequenceView :=
-  let sequence : VersoLeanRun.Sequence String := {
-    initial := { label := "Start", state := name }
-    steps := #[{ label := "Greeting", state := "Hello, " ++ name }] }
-  sequence.view (Verso.Output.Html.text true)
+public def Demo.greetingSteps (name : String) : VersoLeanRun.Sequence String :=
+  { initial := { label := "Start", content := name }
+    steps := #[{ label := "Greeting", content := "Hello, " ++ name }] }
 ```
 
-Select it with `leanRun (entry := Demo.greetingSteps)`. No JSON, export marker or
-output argument is needed. `SequenceStep.error` can report a failure at a state;
-the initial state uses the same `SequenceStep` record as later states. Models and
+The block `leanRun (entry := Demo.greetingSteps)` displays this sequence.
+`Frame.error` can report a failure at a particular step;
+the initial state uses the same `Frame` record as later states. Models and
 views are ordinary Lean code and can live in imported modules with checked source anchors.
 The [stack example](../demo/chapters/LeanRunSequence/Examples.lean) renders both sides
 of each step from the calculator's [shared evaluator](../demo/chapters/LeanRunGate/Stack.lean).
-Both views use one parser, execution loop, and set of limits. The stepper can inspect
-a completed program with several stack values; the calculator additionally asks for
-exactly one final result.
+Both examples use the same parser, execution loop, and limits. The stepper accepts
+a completed program with several values left on its stack; the calculator requires
+exactly one final value.
 
-For an automaton `step : α → α`, use `Sequence.iterate step initial count`.
-It records the initial state followed by exactly `count` transitions. Zero
-transitions still give one state. The optional fourth argument labels iteration
-indices, starting at zero:
+`Sequence.iterate step initial count` records the initial state followed by
+exactly `count` applications of a transition `step : α → α`. Zero transitions
+still give one state. The optional fourth argument labels the steps, starting
+at zero:
 
 ```lean
-def counter (seed : Nat) : SequenceView :=
-  (Sequence.iterate (· + 1) seed 5 (fun i => s!"Iteration {i}")).view
-    (fun n => Verso.Output.Html.text true (toString n))
+def counter (seed : Nat) : Sequence Nat :=
+  Sequence.iterate (· + 1) seed 5 (fun i => s!"Iteration {i}")
 ```
 
-Both `Sequence` and `SequenceView` require an initial state/frame and have an
-optional array of later steps. A view cannot be empty. Report a failure before a
-model state exists with `SequenceView.error`, rather than constructing a dummy
-state:
+Every `Sequence` contains an initial frame and an optional array of later steps.
+`SequenceView` is `Sequence Html`, so a displayed sequence cannot be empty.
+`SequenceView.error` reports a failure when there is no model state to display:
 
 ```lean
 SequenceView.error "The input could not be parsed."
 ```
 
-Result-type abbreviations for `Html` and `SequenceView` work like the underlying
-types. The presentation limits still apply to the resulting view; iteration does
-not truncate a trace to fit them.
+Type aliases for `Html` and `SequenceView` work like the underlying types.
+Oversized sequences are rejected; `iterate` does not shorten them to fit the
+display limits.
 
-The worker computes states and renders their Html. Sequence frames cross the worker
-boundary as typed VIR data, without a JSON envelope. Labels, markup and errors have
-a combined 65,536 UTF-16 code unit budget. A separate Lean/VIR DOM
-presenter owns Html documents, selection and event callbacks. Selecting a frame uses the computed
-presentation and does not rerun the evaluator. Each placement owns both runtimes;
-input edits, Stop and genre navigation cancel acquisition and dispose the view.
-State Html uses the same script-disabled sandbox as an ordinary Html result.
-Labels and failures are text, and exact natural numbers are rendered by Lean.
+Selecting a frame displays a recorded result; it does not rerun the computation.
+Each example is independent. Input edits, Stop, and leaving the example clear its
+view. Frame content uses the same script-disabled preview as an ordinary HTML
+result; labels and errors are displayed as text.
 
-Presentations contain 1–128 frames and share the existing 65,536 UTF-16 output
-limit. Large rendered sequences may exceed that limit even when their computation
-is otherwise valid. Computation remains interruptible by terminating its worker.
-The DOM presenter is a bounded experimental library, not a claim of general VIR
-DOM qualification. Only its exercised bindings are covered here. Illuminate's
-full animation compiler remains unqualified on the current runtime; its existing
-qualified drawing-command/SVG output can be used inside a state Html view.
+A displayed sequence contains 1–128 frames. Its strings, including labels,
+content, and errors, share a limit of 65,536 UTF-16 code units. A large drawing
+can exceed this limit even in a short sequence. Oversized results are rejected,
+rather than silently shortened. Stop interrupts a computation that has not
+finished.
+
+Illuminate's drawing-command/SVG output can provide a frame's content. Its full
+animation compiler is not qualified on the current runtime; see the
+[Illuminate support limits](../evidence/illuminate-gates.md).
 
 ## Map and replay observations
 
-The same pure machine can produce a finite trace or a live view:
+The same automaton can produce a finite trace or a live view:
 
 ```lean
 let machine : Automaton Nat := { initial := 10, step := (· + 1) }
 -- Finite: the initial state plus five transitions.
-let finite : SequenceView := (machine.trace 5).viewText
+let finite : SequenceView := (machine.trace 5).view
 -- Live: one transition per Step, with no retained history.
-let live : AutomatonView := machine.viewText
+let live : AutomatonView := machine.view
 ```
 
-`trace 0` observes the initial state without calling the transition. Trace
-construction uses Lean's standard `List.scanl`. `Sequence.map` and the lawful
-`Functor` instance (`f <$> trace`) transform states while preserving labels and
-errors. `viewText` uses `ToString` and escapes the resulting text. Rich views can
-still supply an explicit `α → Html` renderer.
+`trace 0` observes the initial state without calling the transition.
+`Sequence.map` and the standard `Functor` notation (`f <$> trace`) transform
+states while preserving labels and errors. `view` keeps HTML values and displays
+other values as escaped text using `ToString`. A custom `α → Html` renderer can
+produce a richer display.
 
-To repeat a finite recording, use `trace.cycleView render`. It returns an
-`AutomatonView`, replaying the initial observation and all later observations
-before wrapping to the start. Duplicate states retain their distinct positions
-and labels. Errors remain errors and pause playback. This is an explicit replay
-policy; a recorded trace does not determine the transition that produced it.
+To repeat a finite recording, use `trace.cycleView`, with an optional drawing
+function just as for `view`. It returns an `AutomatonView` that displays each
+recorded frame in order, then returns to the start. Duplicate states keep their positions
+and labels. An error displays the failure and disables Play and Step until a
+fresh run. Replay uses the saved frames and does not recompute the states.
 The [exact-word example](../demo/chapters/LeanRunRendered/Examples.lean) shows a
 finite trace and a cyclic replay of the same states.
 
-For domain-specific live labels or failures, use `machine.observe`: its callback
-receives the iteration index and state and returns a `Frame` containing `label`,
-`html`, and optional `error`. Rendering remains pure; the library owns the worker
-session. All views share `Frame.toWire` at the sandbox boundary.
+`machine.observe` supports labels and errors based on the current state. Its
+callback receives the step number and state and returns a `Frame` containing
+`label`, `content`, and an optional `error` message.
 
 ## Run an automaton continuously
 
-Return `AutomatonView` when a model should advance on demand instead of computing
-an entire trace. `Automaton α` holds an initial model and a pure transition
-`α → α`. `viewText` uses `ToString`; `view` accepts an `α → Html` renderer.
-Both accept an optional iteration label:
+`AutomatonView` computes a new state on demand, without recording an entire
+trace. `Automaton α` holds an initial state and a pure transition `α → α`.
+Its `view` helper accepts an optional `α → Html` renderer and a function that
+labels the steps. The default renderer preserves HTML and displays other values
+as escaped text using `ToString`:
 
 ```lean
-public def counter (seed : Nat) : VersoLeanRun.AutomatonView :=
-  let machine : VersoLeanRun.Automaton Nat := {
-    initial := seed, step := (· + 1) }
-  machine.viewText (fun i => s!"Iteration {i}")
+public def counter (seed : Nat) : VersoLeanRun.Automaton Nat :=
+  { initial := seed, step := (· + 1) }
 ```
 
-Use the same `leanRun (entry := counter)` directive. The reader explicitly
-starts the model and its playback:
+The block `leanRun (entry := counter)` provides playback controls without a call
+to `.view`. For custom labels, return `(counter seed).view (label := ...)` from a
+separate entry. Ordinary Lean code still uses `.view` explicitly to start a
+session; `leanRun` generates that adapter when compiling the document.
+Opening the page leaves the example idle:
 
 | Action | Model and playback |
 | --- | --- |
@@ -283,19 +287,19 @@ starts the model and its playback:
 | Return to the tab | Stay paused. |
 | Edit input | Keep running the current model; edits are a draft. |
 | Restart | Apply the draft to a fresh model; resume only if previously playing. |
-| Stop, leave the placement, or cached-page exit | Terminate the worker and clear the view. |
+| Stop or leave the example, including navigating away | End the run and clear the view. |
 
-Hiding during Restart cancels its pending resume intent even if the tab becomes
-visible again before loading finishes. Stop and leaving the placement cancel it
-too. Error frames disable Play/Step; Stop remains available to release their worker.
+Hiding the tab while Restart is loading leaves playback paused, even if the tab
+becomes visible again before loading finishes. Stop and leaving the example also
+cancel automatic resumption. Error frames disable Play and Step; Stop still
+ends the run and clears the view.
 
-Each placement owns its model and worker. The worker keeps only the current
-state, without collecting a frame history or imposing a generation count. The
-player waits for a transition to finish before scheduling another, rather than
-queuing ticks. Each rendered frame retains the 65,536 UTF-16 code unit budget
-and the same sandbox policy as sequence views. A transition that does not return
-remains interruptible with Stop. Report invalid input with
-`AutomatonView.error`; its view disables Play and Step.
+Each embedded example has independent state. It keeps only the current state,
+with no fixed step limit. Play waits for each transition to finish before
+starting the next. Each frame has the same 65,536 UTF-16 code unit string limit
+and HTML preview restrictions as sequence views. Stop can interrupt a transition
+that has not finished. `AutomatonView.error` reports invalid input with Play and
+Step disabled.
 
 The [Game of Life example](../demo/chapters/LeanRunSequence/Life.lean) uses this
 interface. Its input is a rectangular `#`/`.` seed of at most 8 rows and columns,

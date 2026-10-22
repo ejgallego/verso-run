@@ -5,6 +5,7 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import VersoBlog
+public import VersoLeanRun.Views
 public import VersoLeanRun.Render
 public meta import VersoLeanRun.Anchored
 public meta import VersoLeanRun.Inline

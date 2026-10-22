@@ -5,13 +5,13 @@ const FORMS = Object.freeze({
   nat: {input: "nat", result: "nat"},
   bool: {input: "bool", result: "bool"},
   uint64: {input: "uint64", result: "uint64"},
-  html: {input: "string", result: "string"},
-  multilineHtml: {input: "string", result: "string"},
+  html: {input: "string", result: "html"},
+  multilineHtml: {input: "string", result: "html"},
   sequence: {input: "string", result: "sequence"},
   multilineSequence: {input: "string", result: "sequence"},
-  natHtml: {input: "nat", result: "string"},
-  boolHtml: {input: "bool", result: "string"},
-  uint64Html: {input: "uint64", result: "string"},
+  natHtml: {input: "nat", result: "html"},
+  boolHtml: {input: "bool", result: "html"},
+  uint64Html: {input: "uint64", result: "html"},
   natSequence: {input: "nat", result: "sequence"},
   boolSequence: {input: "bool", result: "sequence"},
   uint64Sequence: {input: "uint64", result: "sequence"},
@@ -33,29 +33,38 @@ export const MAX_NAT_DIGITS = 256;
 export const MAX_OUTPUT = 65536;
 export const MAX_UINT64 = (1n << 64n) - 1n;
 export const MAX_FRAMES = 128;
-export function formatPublishedResult(form, result) {
-  const kind = resultKind(form);
-  if (kind === "automaton") { validateFrame(result); return result; }
-  if (kind !== "sequence") return formatResult(kind, result);
-  if (!result || result.version !== 1n || !Array.isArray(result.frames) ||
-      result.frames.length < 1 || result.frames.length > MAX_FRAMES) {
-    throw new Error("Lean returned an invalid sequence presentation");
-  }
-  let size = 0;
-  for (const frame of result.frames) {
-    size += validateFrame(frame);
+// VIR's compiler contract validates the types. The bridge only bounds the
+// structured value it transfers; it does not decode or render HTML itself.
+export const MAX_VALUE_NODES = 16384;
+export const MAX_VALUE_DEPTH = 128;
+function validateValueBudget(value) {
+  const pending = [[value, 0]];
+  let size = 0, nodes = 0;
+  while (pending.length) {
+    const [value, depth] = pending.pop();
+    if (++nodes > MAX_VALUE_NODES || depth > MAX_VALUE_DEPTH) throw new Error("Result exceeds its structured-value limit");
+    if (typeof value === "string") size += value.length;
+    else if (value !== null && typeof value === "object") {
+      const children = Array.isArray(value) ? value : Object.values(value);
+      // Every queued value must still be visited. Reserve its place before
+      // adding children, and check arrays without copying their contents.
+      if (children.length > MAX_VALUE_NODES - nodes - pending.length) throw new Error("Result exceeds its structured-value limit");
+      for (const child of children) pending.push([child, depth + 1]);
+    } else if (value !== null && !["boolean", "number", "bigint"].includes(typeof value)) {
+      throw new Error("Lean returned an invalid structured value");
+    }
     if (size > MAX_OUTPUT) throw new Error(`Result exceeds ${MAX_OUTPUT} UTF-16 code units`);
   }
-  return result;
 }
-function validateFrame(frame) {
-  if (!frame || typeof frame.label !== "string" || typeof frame.html !== "string" ||
-      !(frame.error === null || typeof frame.error === "string")) {
-    throw new Error("Lean returned an invalid sequence frame");
+export function formatPublishedResult(form, result) {
+  const kind = resultKind(form);
+  if (!["html", "sequence", "automaton"].includes(kind)) return formatResult(kind, result);
+  if (!result || typeof result !== "object") throw new Error("Lean returned an invalid rendered result");
+  if (kind === "sequence" && (!Array.isArray(result.steps) || result.steps.length >= MAX_FRAMES)) {
+    throw new Error("Lean returned an invalid sequence presentation");
   }
-  const size = frame.label.length + frame.html.length + (frame.error?.length ?? 0);
-  if (size > MAX_OUTPUT) throw new Error(`Result exceeds ${MAX_OUTPUT} UTF-16 code units`);
-  return size;
+  validateValueBudget(result);
+  return result;
 }
 export function validateInput(shape, value) {
   if (typeof value !== "string") throw new Error("Input must be text");

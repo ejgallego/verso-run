@@ -19,18 +19,13 @@ open Vir.Resources
 namespace VersoLeanRun
 
 open Lean Elab Term in
-elab "sequenceCallableExpected%" input:ident : term => do
-  let type := mkForall `input .default (mkConst input.getId) (mkConst ``SequenceWire.Payload)
-  let .ok signature ← Vir.Interface.analyzeExportInterface type
-    | throwError "Cannot classify the typed sequence transport"
-  return mkStrLit signature.toExpectedSignatureJson
-
-open Lean Elab Term in
-elab "automatonCallableExpected%" input:ident : term => do
-  let result := mkApp (mkConst ``Lean.Vir.RuntimeM) (mkConst ``AutomatonWire.Session)
-  let type := mkForall `input .default (mkConst input.getId) result
-  let .ok signature ← Vir.Interface.analyzeExportInterface type
-    | throwError "Cannot classify the typed automaton transport"
+elab "renderedCallableExpected%" input:ident result:ident : term => do
+  let input ← resolveGlobalConstNoOverload input
+  let result ← resolveGlobalConstNoOverload result
+  let type := mkForall `input .default (mkConst input) (mkConst result)
+  let signature ← match ← Vir.Interface.analyzeExportInterface type with
+    | .ok signature => pure signature
+    | .error error => throwError "Cannot classify the rendered callable: {error.toMessageData}"
   return mkStrLit signature.toExpectedSignatureJson
 
 /-- Complete validated inventory, ready for a genre's output or asset planner. -/
@@ -55,25 +50,28 @@ def combineResources (resources additional : ResourceSet) : Except String Resour
 /-- Encode the admitted input/result pair through VIR, independently of the
 program bundle. Structured results use the compiled payload layout. -/
 def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
-  if form.isAutomaton then
-    return ← Lean.Json.parse <| match form.scalar with
-      | .string => (automatonCallableExpected% String)
-      | .nat => (automatonCallableExpected% Nat)
-      | .bool => (automatonCallableExpected% Bool)
-      | .uint64 => (automatonCallableExpected% UInt64)
-  if form.isSequence then
-    return ← Lean.Json.parse <| match form.scalar with
-      | .string => (sequenceCallableExpected% String)
-      | .nat => (sequenceCallableExpected% Nat)
-      | .bool => (sequenceCallableExpected% Bool)
-      | .uint64 => (sequenceCallableExpected% UInt64)
+  if form.presentation != .text then
+    return ← Lean.Json.parse <| match form.scalar, form.presentation with
+      | .string, .html => (renderedCallableExpected% String Verso.Output.Html)
+      | .nat, .html => (renderedCallableExpected% Nat Verso.Output.Html)
+      | .bool, .html => (renderedCallableExpected% Bool Verso.Output.Html)
+      | .uint64, .html => (renderedCallableExpected% UInt64 Verso.Output.Html)
+      | .string, .sequence => (renderedCallableExpected% String SequenceView)
+      | .nat, .sequence => (renderedCallableExpected% Nat SequenceView)
+      | .bool, .sequence => (renderedCallableExpected% Bool SequenceView)
+      | .uint64, .sequence => (renderedCallableExpected% UInt64 SequenceView)
+      | .string, .automaton => (renderedCallableExpected% String AutomatonView)
+      | .nat, .automaton => (renderedCallableExpected% Nat AutomatonView)
+      | .bool, .automaton => (renderedCallableExpected% Bool AutomatonView)
+      | .uint64, .automaton => (renderedCallableExpected% UInt64 AutomatonView)
+      | _, .text => unreachable!
   let type : Vir.Interface.InterfaceType := match form.scalar with
     | .string => .string
     | .nat => .nat
     | .bool => .bool
     | .uint64 => .uint64
   let signature : Vir.Interface.ClassifiedSignature := {
-    args := #[{ name := "input", type }], result := if form.isHtml then .string else type, effect := .pure }
+    args := #[{ name := "input", type }], result := type, effect := .pure }
   Lean.Json.parse signature.toExpectedSignatureJson
 
 private structure RegisteredBinding where

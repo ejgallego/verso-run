@@ -25,14 +25,18 @@ for (const { form, expectedExport } of forms) {
   assert.equal(decodeInput(scalarKind(form), input), decoded);
   if (resultKind(form) === "automaton") {
     assert.equal(expectedExport.result.kind, "structure");
-    assert.equal(expectedExport.result.name, "VersoLeanRun.AutomatonWire.Session");
-    const frame = { label: "Generation 129", html: "<p>Frame</p>", error: null };
+    assert.equal(expectedExport.result.name, "VersoLeanRun.AutomatonSession");
+    const frame = { label: "Generation 129", content: {kind:"text", fields:{escape:false, string:"<p>Frame</p>"}}, error: null };
     assert.equal(formatPublishedResult(form, frame), frame);
   } else if (resultKind(form) === "sequence") {
     assert.equal(expectedExport.result.kind, "structure");
-    assert.equal(expectedExport.result.name, "VersoLeanRun.SequenceWire.Payload");
-    const payload = { version: 1n, frames: [{ label: input, html: "<p>Frame</p>", error: null }] };
+    assert.equal(expectedExport.result.name, "VersoLeanRun.Sequence");
+    const payload = {initial: { label: input, content: {kind:"text", fields:{escape:false, string:"<p>Frame</p>"}}, error:null}, steps: []};
     assert.equal(formatPublishedResult(form, payload), payload);
+  } else if (resultKind(form) === "html") {
+    assert.equal(expectedExport.result.name, "Verso.Output.Html");
+    const html = {kind:"text", fields:{escape:true, string:input}};
+    assert.equal(formatPublishedResult(form, html), html);
   } else {
     const output = scalars[expectedExport.result.type];
     assert.ok(output, `unsupported result ABI for ${form}`);

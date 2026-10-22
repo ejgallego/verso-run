@@ -35,7 +35,13 @@ with serve_directory(site) as base, sync_playwright() as p:
         assert plan['presenters']['automaton']['commit']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['automaton']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['automaton']['expectedExport']['result']['type'] == 'Unit'
-        assert plan['presenters']['automaton']['expectedExport']['args'][1]['name'] == 'VersoLeanRun.ViewWire.Frame'
+        assert plan['presenters']['automaton']['expectedExport']['args'][1]['name'] == 'VersoLeanRun.Frame'
+        assert plan['presenters']['html']['expectedExport']['args'][1]['name'] == 'Verso.Output.Html'
+        frame_type = plan['presenters']['automaton']['expectedExport']['args'][1]
+        assert next(f['type'] for f in frame_type['fields'] if f['name'] == 'content')['name'] == 'Verso.Output.Html'
+        commit_args = plan['presenters']['automaton']['commit']['expectedExport']['args']
+        assert len(commit_args) == 3 and commit_args[1]['type'] == 'String'
+        assert commit_args[2]['kind'] == 'option' and commit_args[2]['element']['type'] == 'String'
         assert plan['presenters']['html']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['html']['expectedExport']['result']['type'] == 'Unit'
         assert plan['presenters']['sequence']['expectedExport']['args'][1]['kind'] == 'structure'

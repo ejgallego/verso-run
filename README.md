@@ -2,10 +2,15 @@
 
 **Runnable Lean examples for Verso documents.**
 
-Write a Lean function in your document, give readers an input, and let them
-choose **Run**. The document build compiles the function; a dedicated browser
-worker executes it through [VIR](https://github.com/ejgallego/lean-vir).
-Readers need no Lean installation. **Stop** interrupts a running example.
+verso-run runs selected Lean functions interactively from compiled Verso documents.
+Functions can return primitive values, HTML (including SVG), or richer interactive
+views, including animations. The experimental presenter is also written in Lean
+and uses DOM APIs to manage its controls and previews; see
+[rendering and transport](docs/internals.md#rendering-and-transport).
+
+Functions can be defined in the document or imported from a Lean module. Readers
+need no Lean installation. Execution uses [VIR](https://github.com/ejgallego/lean-vir)
+in a dedicated browser worker; **Stop** interrupts a running example.
 
 [![Build and test](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml/badge.svg)](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml)
 
@@ -37,7 +42,7 @@ There are a few more examples to explore:
 | Example | Try |
 | --- | --- |
 | [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then Play continuously or Step once |
-| [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Move through before/after stacks with Lean-authored controls |
+| [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Inspect the stack before and after each instruction |
 | [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
 | [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |
 | [Illuminate diagrams](http://127.0.0.1:8795/Illuminate-diagrams/) | `1`, `4`, and `8` nodes |
@@ -56,8 +61,8 @@ To share a copy, see [hosting and packaging](docs/hosting.md).
 ## Add an example to your document
 
 The [Manual starter](examples/manual-starter/README.md) is a small independent
-project with everything wired together: a text function, a typed HTML card,
-resource preparation, and a site generator. Copy it and edit its chapter.
+project with a text function, an HTML card, and the configuration needed to build
+and publish a site. Copy it and edit its chapter.
 
 The same runnable block syntax works in Manual, Blog Page/Post, and Slides:
 
@@ -79,27 +84,28 @@ The authoring guide explains [imports, block options, HTML, and registration](do
 | `Bool → Bool` | A true/false selector | Plain `true` or `false` |
 | `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
 | `String/Nat/Bool/UInt64 → Verso.Output.Html` | The corresponding control above | An isolated HTML preview |
-| `String/Nat/Bool/UInt64 → SequenceView` | The corresponding control above | A sequence with previous/next and scrubbing |
-| `String/Nat/Bool/UInt64 → AutomatonView` | The corresponding control above | An on-demand model with Play, Pause and Step |
+| `String/Nat/Bool/UInt64 → Sequence α / SequenceView` | The corresponding control above | A sequence with previous/next and scrubbing |
+| `String/Nat/Bool/UInt64 → Automaton α / AutomatonView` | The corresponding control above | An on-demand model with Step, Play, Pause, and Stop |
 
-Functions must be public, executable, pure, and monomorphic, with one explicit
-argument. Selecting `entry` registers the callable; no VIR attribute is needed.
+Functions must be public, executable, and monomorphic, with one explicit argument.
+Scalar, HTML, sequence and automaton model entries must be pure; custom live
+views return an `AutomatonView` action. Plain models display HTML states directly
+and other states as escaped text through `ToString`. Use `.view render` for a
+custom display. The build handles VIR registration; no VIR attribute is needed.
 VIR also checks their compiled dependencies. A supported function type
 can still reach an operation absent from the runtime; the build will reject it.
 See [troubleshooting](docs/troubleshooting.md) for examples and next steps.
 
 String inputs can use `+multiline`: Enter adds a line break, and Ctrl+Enter or
-⌘+Enter runs the example. All three genres share these controls and codecs.
+⌘+Enter runs the example. All three genres use the same controls.
 
-This experimental release supports **Verso Manual**, **Blog Page/Post**, and **Slides**.
-Manual examples can use inline definitions or
-[checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module).
-All three genres support inline definitions and optional checked anchors, including
-automatic typed HTML adaptation; see [Blog authoring](docs/blog.md) and
-[Slides authoring](docs/slides.md).
-Readers edit function inputs; source editing
-belongs to the future editor work. Ordinary highlighted Lean blocks keep working,
-and source remains readable without JavaScript. Manual also retains its TeX output.
+This experimental release supports **Verso Manual**, **Blog pages and posts**,
+and **Slides**. All three support inline definitions and
+[checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module),
+including functions that return HTML. Readers can edit function inputs; Lean
+source editing is not yet supported in the browser. Source remains readable
+without JavaScript, and Manual also retains its TeX output. See
+[Blog authoring](docs/blog.md) and [Slides authoring](docs/slides.md) for genre setup.
 
 ## Find your way around
 
@@ -119,7 +125,7 @@ acceptance checks and native reference executables live in `tests/`.
 - [Contributing](CONTRIBUTING.md): build, test, and repository layout.
 - [Validation](docs/validation.md): qualification scope and retained evidence.
 - [Multiple genres](docs/multi-genre.md): anchor review and shared/adapter design.
-- [Roadmap](ROADMAP.md): upcoming diagnostics, anchors, genres, and integration work.
+- [Roadmap](ROADMAP.md): remaining integration, qualification, and performance work.
 
 The project grew from a Verso prototype; its [development history](docs/history.md)
 is retained. Licensed under [Apache-2.0](LICENSE).

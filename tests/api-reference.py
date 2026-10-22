@@ -8,7 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 from harness import run_command, serve_directory
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -124,13 +124,13 @@ with serve_directory(served) as base, sync_playwright() as playwright:
     for prefix in ['root/api', 'nested/docs/api']:
         reference = base + prefix + '/'
         assert page.goto(reference).status == 200
-        assert page.get_by_role('heading', name='Interactive Lean examples', exact=True).count() == 1
+        expect(page.get_by_role('heading', name='Interactive Lean examples', exact=True)).to_be_visible()
         for theme in ['light', 'dark']:
             page.emulate_media(color_scheme=theme, reduced_motion='reduce')
             styles = page.locator('.code-content > .mod-doc .hl.lean.block').first.evaluate('''block => {
                 const s = getComputedStyle(block);
                 const inline = document.querySelector('.hl.lean.inline');
-                const link = inline.querySelector('a .const');
+                const link = document.querySelector('.hl.lean.inline a .const');
                 return {
                     scrollable: s.overflowX === 'auto',
                     padding: parseFloat(s.paddingLeft) > parseFloat(getComputedStyle(inline).paddingLeft),
@@ -150,21 +150,33 @@ with serve_directory(served) as base, sync_playwright() as playwright:
             page.screenshot(path=str(output / f'{prefix.replace("/", "-")}-{width}.png'), full_page=True)
         page.set_viewport_size({'width': 1280, 'height': 900})
         page.get_by_role('link', name='Finite sequences', exact=True).click()
+        expect(page.get_by_role('heading', name='Recorded states', exact=True)).to_be_visible()
         assert page.url.startswith(reference + 'VersoLeanRun/Sequence/')
-        assert page.get_by_role('heading', name='Record and display a sequence', exact=True).count() == 1
         page.goto(reference + 'search/?q=Automaton.observe')
         result = page.locator('#search-page-results a').filter(has_text='Automaton.observe').first
         result.wait_for()
         result.click()
-        assert page.url.startswith(reference + 'VersoLeanRun/Automaton/#')
+        page.wait_for_url(reference + 'VersoLeanRun/Automaton/#*')
         page.wait_for_function('document.getElementById(decodeURIComponent(location.hash.slice(1))) !== null')
+        assert page.locator('.api-declarations').evaluate('details => details.open')
+        assert page.locator('[id="VersoLeanRun___Automaton___observe"]').is_visible()
         record(prefix + ': reference navigation, declaration search, and desktop/mobile layouts work')
         for module, fields in {
-            'Frame': ['Frame.label', 'Frame.html', 'Frame.error'],
-            'Sequence': ['Sequence.initial', 'Sequence.steps', 'SequenceView.initial', 'SequenceView.steps'],
-            'Automaton': ['Automaton.initial', 'Automaton.step', 'AutomatonView.start'],
+            'Frame': ['Frame.label', 'Frame.content', 'Frame.error'],
+            'Sequence': ['Sequence.initial', 'Sequence.steps'],
+            'Automaton': ['Automaton.initial', 'Automaton.step', 'AutomatonSession.initial', 'AutomatonSession.advance'],
         }.items():
             page.goto(reference + f'VersoLeanRun/{module}/')
+            declarations = page.locator('.api-declarations')
+            assert not declarations.evaluate('details => details.open')
+            guide = page.locator('.code-content > .mod-doc').last
+            assert guide.locator('h2').first.evaluate('heading => heading.getBoundingClientRect().top < 900')
+            assert guide.evaluate('guide => !!(guide.compareDocumentPosition(document.querySelector(".api-declarations")) & Node.DOCUMENT_POSITION_FOLLOWING)')
+            for width in [1280, 390]:
+                page.set_viewport_size({'width': width, 'height': 900})
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                page.screenshot(path=str(output / f'{prefix.replace("/", "-")}-{module}-guide-{width}.png'))
+            page.get_by_text('Declarations and implementation', exact=True).click()
             for theme in ['light', 'dark']:
                 page.emulate_media(color_scheme=theme, reduced_motion='reduce')
                 for width in [1280, 390]:
@@ -191,10 +203,19 @@ with serve_directory(served) as base, sync_playwright() as playwright:
                             path=str(output / f'{prefix.replace("/", "-")}-fields-{theme}-{width}.png'),
                             animations='disabled')
         record(prefix + ': field descriptions stay beside their declarations and wrap in light/dark desktop/phone layouts')
+        record(prefix + ': guides precede expandable declarations; search reveals the target declaration')
     static = browser.new_context(java_script_enabled=False).new_page()
     static.goto(base + 'root/api/')
-    assert static.get_by_role('heading', name='Record a few steps or keep running?', exact=True).count() == 1
+    assert static.get_by_role('heading', name='Recorded and live views', exact=True).count() == 1
     assert 'def firstFive' in static.locator('main').inner_text()
+    static.goto(base + 'root/api/VersoLeanRun/Frame/')
+    assert static.get_by_role('heading', name='Labels and content', exact=True).is_visible()
+    assert static.locator('[id="VersoLeanRun___Frame___content"]').is_visible()
+    assert static.locator('.code-content').evaluate('''content => {
+        const guide = [...content.querySelectorAll(':scope > .mod-doc')].at(-1);
+        return content.querySelector(':scope > .code-box').getBoundingClientRect().top >=
+            guide.getBoundingClientRect().bottom;
+    }''')
     assert not errors, errors
     assert not failed_styles, failed_styles
     browser.close()

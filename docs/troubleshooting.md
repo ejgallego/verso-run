@@ -8,9 +8,10 @@ error in the build log; later errors may be consequences of it.
 
 VIR supports more interfaces than this extension currently presents. For example,
 an `Int → Int` function is a valid VIR interface, but a Run form accepts only
-pure, monomorphic `String → String`, `Nat → Nat`, `Bool → Bool`,
-`UInt64 → UInt64` functions, or one of these input types returning `Html` or
-`SequenceView`, with one explicit argument.
+monomorphic functions with one explicit argument of type `String`, `Nat`, `Bool`,
+or `UInt64`. The result can be the same scalar type, `Html`, `SequenceView`, or
+`AutomatonView`. Scalar, HTML, and sequence functions must be pure; live views
+return an `AutomatonView` action.
 
 The diagnostic names the entry, shows its type, and explains the form restriction:
 
@@ -20,15 +21,16 @@ This interface is supported by VIR, but not by this Run form.
 ```
 
 Use a wrapper that parses one text input and returns text or typed HTML. For a
-multi-argument function, the wrapper can parse both values from that one input.
-For effectful code, move I/O to the document build or export a pure calculation.
+multi-argument function, the wrapper can parse the arguments from that one input.
+Functions returning `IO` do not have a Run form. Move that work to the document
+build or expose a pure calculation. Live views use the separate `AutomatonView`
+action described in the authoring guide.
 
 ## VIR rejects the interface
 
 Polymorphic or implicit arguments need a concrete wrapper with explicit runtime
 types. Dependent results and some structures cannot cross the pinned runtime’s
-interface boundary. The message retains VIR’s explanation rather than replacing
-it with a generic failure:
+interface boundary. The diagnostic includes VIR’s explanation:
 
 ```text
 Lean Run entry 'polymorphic' has an unsupported VIR interface.
@@ -45,20 +47,20 @@ export marker is not offered as the cure for an unsupported type.
 
 Use an executable public definition instead of a theorem, axiom, private entry,
 or `noncomputable` value. Proofs and noncomputable choices do not supply executable
-IR. Selecting `entry` registers the callable or generates a typed view adapter
-automatically. Read the first compilation or VIR dependency error;
+IR. The build registers the function named by `entry`, including functions
+imported from another module. Read the first compilation or VIR dependency error;
 adding an export annotation is not a remedy for missing executable IR.
 
 ## The type is supported, but a dependency is unavailable
 
 A `String → String` entry can still call an operation missing from the locked
-runtime. VIR checks the compiled dependency closure, including helper functions.
+runtime. VIR checks the entry and the helper functions it calls.
 Its errors identify the exported declaration and blocked dependency. Replace that
 operation, choose a supported path, or wait for a compatible VIR provider update.
 
 For example, general Illuminate diagram rendering reaches `Float.toBits`,
-`Float.atan`, or `Float.asin` on the frozen runtime. The demo uses the qualified
-drawing-command/SVG path instead. See [the recorded gates](../evidence/illuminate-gates.md).
+`Float.atan`, or `Float.asin` on the pinned runtime. The demo uses the tested
+drawing-command/SVG path. See [the support limits](../evidence/illuminate-gates.md).
 
 A failed rebuild must exit unsuccessfully and leave the previous accepted
 publication intact. Its retained output represents the earlier successful build,
@@ -82,30 +84,31 @@ callable-owning module, and document position when no matching bundle is availab
 Identical bundles deduplicate; distinct bundles with the same module logical ID
 produce `LOGICAL_ID_CONFLICT` before writing execution resources.
 
-Each document root exposes entries selected by its Run blocks, including
-generated wrappers for imported functions and typed HTML. Imported producers
-supply dependencies; the callable wrapper belongs to the document's bundle. At Run, `createProgram` checks the selected full declaration
-and independent signature before invoking Lean. A missing root declaration or
-signature mismatch belongs to program validation, not a native recipe check.
+Each document's bundle contains the functions selected by its Run blocks,
+including wrappers for imported functions. The source modules supply the compiled
+dependencies. Before calling Lean, the browser checks that the published program
+contains the selected function with the expected signature. A missing function
+or a signature mismatch is reported during program validation.
 The [starter](../examples/manual-starter/README.md) shows complete wiring.
 
-Rejected native registration does not produce a new successful `publication.json`.
-When using an existing output directory, the previous accepted plan is preserved.
+If native registration fails, no new `publication.json` is accepted. An existing
+output directory keeps its last successful publication plan.
 
 ## The reader sees a failure
 
 Invalid natural-number inputs are rejected before invocation. Use non-negative
 decimal digits; signs, spaces, fractions, and exponent notation are not accepted.
-An input edit clears old results. Stop interrupts the worker, and another Run
-creates a fresh instance.
+Input edits clear ordinary results and recorded views. Live views keep their
+current state until Restart applies the edits. Stop interrupts the worker, and
+another Run starts a fresh example.
 
-A stopped call settles immediately even while the publication is loading. Other
-placements can keep their shared fetch; cancelling the last waiter lets the next Run
-acquire afresh. Publication acquisition fails after 15 seconds rather than waiting
-indefinitely. Choose Run to retry; acquisition failures are not cached.
+A stopped call settles immediately even while publication is loading. Other
+examples can continue using the shared download; if all of them cancel, the next
+Run starts a fresh download. Publication loading has a 15-second deadline.
+Choose Run to retry; acquisition failures are not cached.
 
 Resource or runtime errors appear as plain text with the selected declaration,
-a next step, and the original diagnostic details. HTML previews are cleared on
+a suggested action, and the original diagnostic details. HTML previews are cleared on
 failure. Choose Run to retry; failures are never replayed automatically. If the
 problem persists, contact the document author with the details shown.
 

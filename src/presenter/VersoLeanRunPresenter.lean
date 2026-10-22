@@ -25,8 +25,8 @@ private def attr (element : Js Element) (name value : String) : DomM Unit := do
 
 /-- Html and sequence frames share one compiled sandbox-document policy. -/
 @[vir_export]
-def mountHtml (frame : Js Element) (markup : String) : DomM Unit :=
-  attr frame "srcdoc" (Preview.document markup)
+def mountHtml (frame : Js Element) (html : Html) : DomM Unit :=
+  attr frame "srcdoc" (Preview.document html.asString)
 
 private def child (root : Js Element) (selector : String) : DomM (Js Element) := do
   let found ← Element.querySelector root (← JsValue.ofString selector)
@@ -35,7 +35,7 @@ private def child (root : Js Element) (selector : String) : DomM (Js Element) :=
   return element
 
 -- Explicit bodies keep empty non-void tags closed in the pinned Html serializer.
-private def controls (frames : Array ViewWire.Frame) : Html := Id.run do
+private def controls (frames : Array Frame) : Html := Id.run do
   let labels := Html.fromArray <| frames.mapIdx fun i frame =>
     {{ <button type="button" class="lean-run-sequence-step" data-step={{toString i}}>{{frame.label}}</button> }}
   return {{ <div class="lean-run-sequence-controls">
@@ -53,7 +53,7 @@ private def controls (frames : Array ViewWire.Frame) : Html := Id.run do
 /-- Live controls persist while each new Lean frame replaces the previous one.
 The asynchronous worker bridge owns Play/Pause scheduling and backpressure. -/
 @[vir_export]
-def stageAutomaton (root : Js Element) (frame : ViewWire.Frame) : DomM Unit := do
+def stageAutomaton (root : Js Element) (frame : Frame) : DomM Unit := do
   let controls ← Element.querySelector root (← JsValue.ofString ".lean-run-automaton-controls")
   if (← Js.Nullable.toOption controls).isNone then
     let markup := {{ <div class="lean-run-automaton-controls">
@@ -69,16 +69,16 @@ def stageAutomaton (root : Js Element) (frame : ViewWire.Frame) : DomM Unit := d
       </div>
     </div> }}
     Element.setInnerHTML root (← JsValue.ofString markup.asString)
-  attr (← child root "[data-preview='next']") "srcdoc" (Preview.document frame.html)
+  attr (← child root "[data-preview='next']") "srcdoc" (Preview.document frame.content.asString)
 
 /-- Commit only after the staged sandbox document has loaded. Keep both frames
 allocated so presentation never navigates the currently visible document. -/
 @[vir_export]
-def commitAutomaton (root : Js Element) (frame : ViewWire.Frame) : DomM Unit := do
+def commitAutomaton (root : Js Element) (label : String) (error : Option String) : DomM Unit := do
   let current ← child root "[data-preview='current']"
   let next ← child root "[data-preview='next']"
-  text (← child root ".lean-run-sequence-position") frame.label
-  text (← child root ".lean-run-sequence-error") (frame.error.getD "")
+  text (← child root ".lean-run-sequence-position") label
+  text (← child root ".lean-run-sequence-error") (error.getD "")
   attr current "aria-hidden" "true"
   attr next "aria-hidden" "false"
   attr next "title" "Automaton state"
@@ -88,31 +88,32 @@ def commitAutomaton (root : Js Element) (frame : ViewWire.Frame) : DomM Unit := 
 /-- The bounded presenter runs in the browser; computation stays in the worker.
 The returned callback removes listeners before the host disposes its runtime. -/
 @[vir_export]
-def mount (root : Js Element) (data : SequenceWire.Payload) : DomM (Js.Function0 Unit) := do
-  let payload ← match SequenceWire.validate data with
+def mount (root : Js Element) (data : SequenceView) : DomM (Js.Function0 Unit) := do
+  let payload ← match SequenceView.validate data with
     | .ok payload => pure payload
     | .error message => failure message
-  Element.setInnerHTML root (← JsValue.ofString (controls payload.frames).asString)
+  let frames := payload.frames
+  Element.setInnerHTML root (← JsValue.ofString (controls frames).asString)
   let previous ← child root ".lean-run-sequence-prev"
   let next ← child root ".lean-run-sequence-next"
   let range ← child root ".lean-run-sequence-range"
   let position ← child root ".lean-run-sequence-position"
   let error ← child root ".lean-run-sequence-error"
   let preview ← child root ".lean-run-sequence-frame"
-  let buttons ← payload.frames.mapIdxM fun i _ => child root s!"[data-step='{i}']"
+  let buttons ← frames.mapIdxM fun i _ => child root s!"[data-step='{i}']"
   let selected ← RuntimeRef.new (none : Option Nat)
   let alive ← RuntimeRef.new true
   let display : Nat → DomM Unit := fun (index : Nat) => do
     if !(← alive.get) then return
-    let index := index.min (payload.frames.size - 1)
+    let index := index.min (frames.size - 1)
     if (← selected.get) == some index then return
     selected.set (some index)
-    let frame := payload.frames[index]!
-    text position s!"Step {index + 1} of {payload.frames.size}: {frame.label}"
+    let frame := frames[index]!
+    text position s!"Step {index + 1} of {frames.size}: {frame.label}"
     text error (frame.error.getD "")
-    attr preview "srcdoc" (Preview.document frame.html)
+    attr preview "srcdoc" (Preview.document frame.content.asString)
     attr previous "aria-disabled" (if index == 0 then "true" else "false")
-    attr next "aria-disabled" (if index + 1 == payload.frames.size then "true" else "false")
+    attr next "aria-disabled" (if index + 1 == frames.size then "true" else "false")
     if let some input ← HTMLInputElement.fromElement range then
       HTMLInputElement.setValue input (← JsValue.ofString (toString index))
     for (button, i) in buttons.zipIdx do

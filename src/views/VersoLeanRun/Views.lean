@@ -8,78 +8,123 @@ module
 public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
 
+open scoped Verso.Output.Html
 /-!
 # Interactive Lean examples
 
-Use verso-run to let readers explore a computation: step through a calculator,
-watch a Game of Life board evolve, or compare a few successive values. Define
-the computation and its display in Lean; verso-run adds the browser controls.
+verso-run runs selected Lean functions interactively from compiled Verso documents.
+Functions can return primitive values, HTML, or richer interactive views,
+including animations. HTML results use Verso's
+{name (full := Verso.Output.Html)}`Html` type and can include SVG.
+The experimental presenter is also written in Lean and uses DOM APIs to manage
+its controls and previews; the
+[rendering notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#rendering-and-transport)
+describe this layer.
 
-Import {lit}`VersoLeanRun.Views` in the module containing your computation.
-Start with text output, then add an HTML or SVG drawing when it helps explain
-what is happening.
+## Function results
 
-## Record a few steps or keep running?
+A function can return {lit}`Html` directly. For example, this one produces a
+paragraph containing a greeting. Opening {lit}`Verso.Output.Html` enables the
+HTML quotation syntax; interpolated strings are escaped:
 
-Choose a {name (full := VersoLeanRun.Sequence)}`Sequence` when readers should be able to move back and forth through
-a fixed set of states. Choose an {name (full := VersoLeanRun.Automaton)}`Automaton` when each step should compute the next state,
-as in a simulation. An automaton needs an initial value and a function {lit}`α → α`
-that advances it once.
+```lean
+open Verso.Output Verso.Output.Html
 
-This counter supports both kinds of interaction:
+public def greeting (name : String) : Html :=
+  {{ <p> "Hello, " {{name}} "!" </p> }}
+```
+
+## Runnable document blocks
+
+In a Verso document, put the definition inside a code fence labelled {lit}`leanRun`:
+
+````
+```leanRun (entry := greeting) (input := "Ada")
+open Verso.Output Verso.Output.Html
+
+public def greeting (name : String) : Html :=
+  {{ <p> "Hello, " {{name}} "!" </p> }}
+```
+````
+
+This fence adds an input field, Run and Stop buttons, and a result display alongside
+the source. The {lit}`entry` argument names the function; {lit}`input` provides its
+initial input without running it. The function's Lean type determines the input
+control and result display. Ordinary {lit}`lean` fences display code
+without Run controls.
+
+Run blocks work in Manual, Blog, and Slides, each with its own adapter import. The
+[authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
+shows the imports and publication setup, and lists the supported function types.
+
+## Recorded and live views
+
+The views library also provides helpers for presenting several frames or a
+changing state. A {name (full := VersoLeanRun.Sequence)}`Sequence` contains
+recorded, labelled frames that readers can browse. An
+{name (full := VersoLeanRun.Automaton)}`Automaton` contains an initial state and a
+transition function {lit}`α → α`; its live view provides playback controls.
+A {lit}`leanRun` entry can return either model directly: HTML states retain their
+markup, and other states use their {name}`ToString` instance for escaped text.
+Their {lit}`view` helpers support custom HTML or SVG rendering.
+
+Import {lit}`VersoLeanRun.Views` to use these helpers in an ordinary Lean module.
+
+For example, this counter can provide either a recording or a live view:
 
 ```lean
 open VersoLeanRun
 
-def counter (seed : Nat) : Automaton Nat :=
+public def counter (seed : Nat) : Automaton Nat :=
   { initial := seed, step := Nat.succ }
 
-def firstFive (seed : Nat) : SequenceView :=
-  ((counter seed).trace 4).viewText
-
-def forever (seed : Nat) : AutomatonView :=
-  (counter seed).viewText
+public def firstFive (seed : Nat) : Sequence Nat :=
+  (counter seed).trace 4
 ```
 
 With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
-inspect any of those five values. {lit}`forever` starts at 10 and computes another
-value each time they press Step, or repeatedly while Play is active.
+inspect any of those five values. A block with
+{lit}`leanRun (entry := counter) (input := "10")` provides the live display.
+After the reader presses Run, the automaton starts at 10. Step computes the next
+value; Play advances it repeatedly.
+No call to {lit}`view` is needed for this default display.
 
-## Draw the state
+## Rendering model states
 
-{lit}`viewText` displays a value using its {name}`ToString` instance. To draw it,
-pass a function returning {name}`Verso.Output.Html` to
-{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` or {name (full := VersoLeanRun.Automaton.view)}`Automaton.view`.
-Both accept HTML or SVG and display it in an isolated preview.
+{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` and
+{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` render model states.
+The default renderer preserves HTML values and converts other values to escaped
+text using {name}`ToString`. A custom renderer of type {lit}`α → Html` can produce
+an HTML or SVG display:
 
 ```lean
-open VersoLeanRun
+open VersoLeanRun Verso.Output.Html
 
-def labelledCounter (seed : Nat) : AutomatonView :=
-  ({ initial := seed, step := Nat.succ } : Automaton Nat).view
-    (fun value => .text true s!"Count: {value}")
+public def labelledCounter (seed : Nat) : AutomatonView :=
+  (counter seed).view
+    (fun value => {{ <p> "Count: " {{toString value}} </p> }})
     (fun index => s!"Step {index}")
 ```
 
-For a display with its own label or error message, return a
-{name (full := VersoLeanRun.Frame)}`Frame` from {name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe`.
-The Frames page explains how to build one. The finite sequence and live automaton
-pages show how to adapt a model, repeat a recorded sequence, and report errors.
+{name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe` accepts a
+function that builds a {name (full := VersoLeanRun.Frame)}`Frame` from the step
+number and model state, with a label and optional error message. The Frames page
+explains this record; the other pages cover recorded sequences and live playback.
 
-## Put the example in a document
+## Document integration
 
-Return {name (full := VersoLeanRun.SequenceView)}`SequenceView` or {name (full := VersoLeanRun.AutomatonView)}`AutomatonView` from the function you want readers to call.
-Select that function with the {lit}`entry` argument of a {lit}`leanRun` block.
-This works in a Manual, Blog, or Slides document. The
-computation module imports {lit}`VersoLeanRun.Views`; the document imports the
-adapter for its genre.
+The function's result type determines how a {lit}`leanRun` block displays it.
+{lit}`Sequence α` adds controls for browsing recorded frames; {lit}`Automaton α`
+adds live playback. For custom displays, the view helpers return
+{name (full := VersoLeanRun.SequenceView)}`SequenceView` or
+{name (full := VersoLeanRun.AutomatonView)}`AutomatonView`, which use the same
+controls.
 
-Follow the [authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
-to add a block to your document, or explore the
-[demo](https://ejgallego.github.io/verso-run/) for complete examples.
+The [demo](https://ejgallego.github.io/verso-run/) includes complete examples in
+all three genres.
 
-A live example waits for Run and Play; opening the page does not start it.
-Pause keeps the current state, and Stop ends the run. Editing the input lets
-readers prepare a new seed while the current simulation continues; Restart
-applies those edits. See Live automata for the full playback behavior.
+Opening a page leaves live examples idle. Run displays the initial state; Play
+advances it continuously. Pause keeps the current state, and Stop ends the run.
+Input edits remain a draft while the current computation continues; Restart
+applies them. The Live automata page describes the playback controls in detail.
 -/
