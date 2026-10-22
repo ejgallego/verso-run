@@ -1,5 +1,6 @@
 """Inline Page/Post/Slides authoring, native source, independent workers and Html."""
 from harness import run_command, serve_directory
+from signatures import scalar_descriptor
 import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -43,7 +44,7 @@ public def word (input : UInt64) : UInt64 := input + 1
 #check text
 ```
 ```leanRun (entry := InlineTest.html)
-public def html (input : String) : Verso.Output.Html := .text true input
+public def html (input : String) : Lean.Html := .text input
 end InlineTest
 ```
 ```leanRun (entry := plainTrace)
@@ -76,7 +77,7 @@ site = output/'site'
 command(['lake', 'exe', 'lean-run-blog-demo', '--output', str(site/'blog')], 'blog')
 command(['lake', 'exe', 'lean-run-slides-demo', '--output', str(site/'slides')], 'slides')
 plans = {genre: json.loads((site/genre/'lean-run/publication.json').read_text()) for genre in ['blog', 'slides']}
-descriptor = {'type': 'String', 'interfaceTag': 3}
+descriptor = scalar_descriptor('String')
 for genre, owner in [('blog', 'LeanRunBlog.Page'), ('blog', 'LeanRunBlog.Post'), ('slides', 'LeanRunSlides.Deck')]:
     for role in ['greet', 'card']:
         assert plans[genre]['programs'][owner][owner+'.Inline.'+role]['expectedExport'] == {

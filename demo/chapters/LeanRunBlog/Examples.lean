@@ -1,7 +1,6 @@
 module
 public import Verso.Output.Html
 
-open Verso.Output.Html
 
 set_option compiler.postponeCompile false
 
@@ -12,10 +11,10 @@ public def LeanRunBlog.Examples.greet (name : String) : String :=
 
 -- ANCHOR: card
 public def LeanRunBlog.Examples.card (name : String) : Verso.Output.Html :=
-  {{ <section style="padding:1rem;background:#edf5ff;border-radius:8px">
-    <h2> "Hello, " {{name}} "!" </h2>
-    <p> "This card was computed by Lean." </p>
-  </section> }}
+  html%{<section style="padding:1rem;background:#edf5ff;border-radius:8px">
+    <h2>Hello, {name}!</h2>
+    <p>This card was computed by Lean.</p>
+  </section>}
 
 -- ANCHOR_END: card
 

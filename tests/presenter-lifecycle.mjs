@@ -33,7 +33,7 @@ function fixture() {
   };
 }
 
-const value = { label: "Next", content: {kind:"text", fields:{escape:true, string:"Next"}}, error: null };
+const value = { label: "Next", content: {kind:"text", value:"Next"}, error: {kind:"none"} };
 for (const painted of [0, 1]) {
   const f = fixture(), pending = f.view.update(value);
   f.load();

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { scalarKind, resultKind, formatPublishedResult, MAX_FRAMES, MAX_OUTPUT,
   MAX_VALUE_DEPTH, MAX_VALUE_NODES } from "../web/contract.js";
 
-const text = string => ({kind:"text", fields:{escape:true, string}});
-const frame = {label:"Start", content:text("世界 🌍"), error:null};
+const text = string => ({kind:"text", value:string});
+const frame = {label:"Start", content:text("世界 🌍"), error:{kind:"none"}};
 const sequence = {initial:frame, steps:[]};
 for (const [form, value] of [["html",frame.content],["sequence",sequence],["automaton",frame]]) {
   assert.equal(formatPublishedResult(form,value),value);
@@ -20,9 +20,9 @@ for (const form of ["toString", "__proto__", "natSvg", "multilineBool", null, {}
   assert.throws(() => resultKind(form), /Unsupported Lean Run form/);
 }
 assert.throws(() => formatPublishedResult("sequence", {initial:frame, steps:Array(MAX_FRAMES).fill(frame)}), /invalid sequence/);
-const limit = {label:"", content:text("🌍".repeat((MAX_OUTPUT-4)/2)), error:null};
+const limit = {label:"", content:text("🌍".repeat((MAX_OUTPUT-8)/2)), error:{kind:"none"}};
 assert.equal(formatPublishedResult("automaton",limit),limit);
-assert.throws(() => formatPublishedResult("automaton", {...limit, error:"x"}), /exceeds/);
+assert.throws(() => formatPublishedResult("automaton", {...limit, error:{kind:"some", value:"x"}}), /exceeds/);
 assert.throws(() => formatPublishedResult("automaton", {...limit, label:"x"}), /exceeds/);
 // Bounds apply to the complete value, independently of constructor encodings.
 assert.throws(() => formatPublishedResult("html", {values:Array(MAX_VALUE_NODES).fill(null)}), /structured-value limit/);

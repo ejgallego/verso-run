@@ -25,7 +25,7 @@ in a dedicated browser worker; **Stop** interrupts a running example.
 ## Try it locally
 
 Install [elan](https://github.com/leanprover/elan) and Python 3. The checkout selects
-Lean 4.35.0-rc4 and fetches its compatible dependencies and runtime automatically.
+Lean 4.36.0-rc1 and fetches its compatible dependencies and runtime automatically.
 
 ```sh
 git clone https://github.com/ejgallego/verso-run.git

@@ -87,10 +87,10 @@ the label and error message. Here the number becomes displayed text:
 
 ```lean
 def displayedSnapshot (generation value : Nat) : Frame :=
-  (snapshot generation value).map fun n => Html.ofString s!"Value: {n}"
+  (snapshot generation value).map fun n => Lean.Html.text s!"Value: {n}"
 ```
 
-{name (full := Verso.Output.Html.ofString)}`Html.ofString` escapes text, including
+{name (full := Lean.Html.text)}`Lean.Html.text` escapes text, including
 reader input. Verso's HTML constructors and syntax provide elements and attributes
 for richer displays.
 Sequences and automata provide {lit}`view` helpers to render all their states.

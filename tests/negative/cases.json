@@ -28,9 +28,6 @@
   "PrivateHtml": "private",
   "ImportedCollision": "already in use",
   "NonExecutableHtml": "non-executable",
-  "IlluminateHashing": "Float.toBits",
-  "IlluminateCompile": "Float.atan",
-  "IlluminateAsin": "Float.asin",
   "Arity": {
     "contains": [
       "Lean Run entry 'combine'",
@@ -113,8 +110,7 @@
       "Type:",
       "unsupported result type",
       "Fin",
-      "isLt",
-      "erased or void runtime layout"
+      "closed natural-number literal bound"
     ],
     "notContains": [
       "must carry"

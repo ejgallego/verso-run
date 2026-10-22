@@ -94,15 +94,11 @@ blocks.
 
 ## Compatibility and demo
 
-The selected [Slides snapshot](https://github.com/ejgallego/verso-slides/commit/6e514cd443a51a39d92534b5a2ef08a5e47ed262)
-uses module-owned assets on Lean 4.35.0-rc4 and exposes `Config.extraAssets`
-for binary additions. Slides owns built-in theme CSS, font paths, and asset
-collision checks; the Run adapter supplies only its own files. The ownership
-change is reviewed in [Slides PR #2](https://github.com/ejgallego/verso-slides/pull/2). The root Lake manifest locks its
-shared VIR and Verso dependencies. The Verso fork supplies the Manual highlighting
-hook and two upstream compiler-compatibility adjustments; Illuminate is unchanged.
-See the [exact dependency and runtime pins](internals.md#pinned-dependencies).
-This consumer qualification does not establish upstream integration of the Slides snapshot.
+Slides owns built-in theme CSS, font paths, and asset collision checks; the Run
+adapter supplies only its own files. The binary-assets extension is reviewed in
+[Slides PR #2](https://github.com/ejgallego/verso-slides/pull/2), rebased onto the
+4.36 Slides branch. The root Lake manifest locks the shared VIR and Verso
+dependencies; see the [exact dependency and runtime pins](internals.md#pinned-dependencies).
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined
 `python3 scripts/build-demo-site.py` puts the deck under `_out/html-multi/slides`

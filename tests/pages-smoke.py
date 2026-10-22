@@ -28,7 +28,8 @@ with ExitStack() as servers:
         assert build_identity['dirty'] is False, build_identity
     local_manifest = json.loads((root / 'lake-manifest.json').read_text())
     assert build_identity['dependencies'] == {p['name']: p['rev'] for p in local_manifest['packages']}
-    assert build_identity['runtime'] == '6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20'
+    runtime_lock = json.loads((root / '.lake/packages/lean_vir/vir-resources/runtime.json').read_text())
+    assert build_identity['runtime'] == runtime_lock['contentId']
     plans = {}
     for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
         with urlopen(base + path + 'lean-run/publication.json') as response:

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 const description = { program: "Test", declaration: "Test.echo", callable: "Test.echo", form: "string" };
-const signature = { args: [{ type: "String", interfaceTag: 3 }],
-  result: { type: "String", interfaceTag: 3 }, effect: "pure" };
+const signature = { args: [{ native: {type: {tag: "string"}}, value: {tag: "string"} }],
+  result: { native: {type: {tag: "string"}}, value: {tag: "string"} }, effect: "pure" };
 const plan = { runtimeModule: "runtime.js", runtimeManifest: "runtime.json",
   programs: { Test: { "Test.echo": { manifest: "program.json", expectedExport: signature } } } };
 const realSetTimeout = globalThis.setTimeout;

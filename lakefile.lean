@@ -2,10 +2,10 @@ import Lake
 open Lake DSL
 
 -- VIR's source revision also selects its locked browser runtime.
-require verso from git "https://github.com/ejgallego/verso" @ "aff0fc92d7b9e56a3b309d409b7ef69629af3770"
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "957854b9df1202d4fadbd00ac5fa34e5adf278cc"
-require illuminate from git "https://github.com/leanprover/illuminate" @ "a1a61c9678da010e958ed24cdfa6f635b85f172a"
-require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "6e514cd443a51a39d92534b5a2ef08a5e47ed262"
+require verso from git "https://github.com/leanprover/verso.git" @ "d0a5f92ee585a92d2cd4c4904469c123f5ae5f10"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668"
+require illuminate from git "https://github.com/leanprover/illuminate" @ "d22e76ef3d2a925132315af902ea432233b4a44a"
+require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "e7705d546f7432bd8a32adda035310376db79839"
 
 package verso_run
 
@@ -208,7 +208,7 @@ lean_exe «lean-run-resource-set-check» where
   srcDir := "tests/native"
   root := `ResourceSetMain
 
--- This fixture elaborates, but packaging must reject its unavailable native provider.
+-- Requesting this program must reject its unavailable native provider.
 
 lean_lib LeanRunGateFailures where
   srcDir := "tests/negative"

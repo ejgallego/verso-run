@@ -33,7 +33,7 @@ block_extension Block.leanRun (experiment : Experiment) where
 @[code_block]
 meta def leanRun : CodeBlockExpanderOf Config
   | config, str => do
-    elabInlineRun config str toHighlightedLeanBlock fun experiment source => do
+    elabInlineRun config str nativeRunSource fun experiment source => do
       let description ← quoteExperiment experiment
       ``(Verso.Doc.Block.other (VersoLeanRun.Block.leanRun $description) #[$source])
 

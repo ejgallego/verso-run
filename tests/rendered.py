@@ -3,6 +3,7 @@ import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from harness import run_command, serve_directory
+from signatures import native_field, type_name
 
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
@@ -34,17 +35,19 @@ with serve_directory(site) as base, sync_playwright() as p:
         assert set(plan['presenters']) == {'html','sequence','automaton'}
         assert plan['presenters']['automaton']['commit']['expectedExport']['effect'] == 'dom'
         assert plan['presenters']['automaton']['expectedExport']['effect'] == 'dom'
-        assert plan['presenters']['automaton']['expectedExport']['result']['type'] == 'Unit'
-        assert plan['presenters']['automaton']['expectedExport']['args'][1]['name'] == 'VersoLeanRun.Frame'
-        assert plan['presenters']['html']['expectedExport']['args'][1]['name'] == 'Verso.Output.Html'
+        assert plan['presenters']['automaton']['expectedExport']['result']['value']['tag'] == 'unit'
+        assert type_name(plan['presenters']['automaton']['expectedExport']['args'][1]) == 'VersoLeanRun.Frame'
+        assert type_name(plan['presenters']['html']['expectedExport']['args'][1]) == 'Lean.Html'
         frame_type = plan['presenters']['automaton']['expectedExport']['args'][1]
-        assert next(f['type'] for f in frame_type['fields'] if f['name'] == 'content')['name'] == 'Verso.Output.Html'
+        assert native_field(frame_type, 'content')['metadata']['declaration'] == 'Lean.Html'
         commit_args = plan['presenters']['automaton']['commit']['expectedExport']['args']
-        assert len(commit_args) == 3 and commit_args[1]['type'] == 'String'
-        assert commit_args[2]['kind'] == 'option' and commit_args[2]['element']['type'] == 'String'
+        assert len(commit_args) == 3 and type_name(commit_args[1]) == 'String'
+        assert type_name(commit_args[2]) == 'Option' and commit_args[2]['value'] == {
+            'tag': 'variant', 'cases': [{'kind': 'none', 'payload': 'none'},
+                {'kind': 'some', 'payload': 'value', 'value': {'tag': 'string'}}]}
         assert plan['presenters']['html']['expectedExport']['effect'] == 'dom'
-        assert plan['presenters']['html']['expectedExport']['result']['type'] == 'Unit'
-        assert plan['presenters']['sequence']['expectedExport']['args'][1]['kind'] == 'structure'
+        assert plan['presenters']['html']['expectedExport']['result']['value']['tag'] == 'unit'
+        assert plan['presenters']['sequence']['expectedExport']['args'][1]['value']['tag'] == 'record'
         prefix = 'blog' if genre == 'post' else genre
         if genre == 'manual': prefix += '/html-multi'
         page.goto(base+prefix+'/'+path)

@@ -77,10 +77,13 @@ test isolation. CI also cold-builds the independently pinned
 reuse and runs its 11 checks. The starter acquires public extension `f2a1491` and
 the selected runtime through its complete Git manifest, without local seeds.
 
-The selected dependencies are VIR PR #229 at `957854b9` and compatible Slides `6e514cd4`,
-with VIR's locked runtime `6cddc4b8…`. Resource dependencies and includes now name
-program modules explicitly. The independently pinned starter tests the same Lean 4.35.0-rc4 and
-module-owned-assets API from the published extension revision.
+Full acceptance includes the Illuminate SVG example as well as scalar, HTML,
+finite, and live views. Partial builds and client results do not establish full
+demo acceptance. The independently pinned starter qualifies public extension
+`f2a1491` on Lean 4.35.0-rc4; candidate integration separately checks the revision
+under review. Exact project dependencies are listed in the
+[dependency table](internals.md#pinned-dependencies).
+
 Publication loading cancellation is qualified before any response, with fresh-fetch
 retry and concurrent placements. The browser test also checks actual public promise
 settlement; runtime-Wasm cancellation remains a separate test.

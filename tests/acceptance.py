@@ -1,5 +1,6 @@
 """Real native/browser acceptance; run from the repository root with uv/Playwright."""
 from harness import run_command, inventory, serve_directory
+from signatures import type_name
 import argparse, copy, functools, json, re, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -59,15 +60,15 @@ assert plan == json.loads((OUTPUT/'native-only/html-multi/lean-run/publication.j
 assert inventory(site/'html-multi/lean-run') == inventory(OUTPUT/'native-only/html-multi/lean-run')
 published = plan['programs']['LeanRunGate.Chapter']
 for declaration, input_type, result_type in [('greet', 'String', 'String'),
-        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'Verso.Output.Html'),
-        ('diagram', 'Nat', 'Verso.Output.Html'), ('double', 'Nat', 'Nat'),
+        ('Stack.run', 'String', 'String'), ('htmlGreeting', 'String', 'Lean.Html'),
+        ('diagram', 'Nat', 'Lean.Html'), ('double', 'Nat', 'Nat'),
         ('Helper.twice', 'Nat', 'Nat'), ('spin', 'Nat', 'Nat')]:
     contract = published['LeanRunGate.'+declaration]['expectedExport']
     assert set(contract) == {'args', 'result', 'effect'}
     assert contract['effect'] == 'pure'
     assert len(contract['args']) == 1
-    assert contract['args'][0]['type'] == input_type
-    assert contract['result']['type'] == result_type
+    assert type_name(contract['args'][0]) == input_type
+    assert type_name(contract['result']) == result_type
 chapter_manifest = json.loads((site/'html-multi'/published['LeanRunGate.greet']['manifest']).read_text())
 helper_manifest = json.loads((site/'html-multi'/published['LeanRunGate.Helper.twice']['manifest']).read_text())
 assert chapter_manifest['descriptor']['logicalId'] == 'LeanRunGate.Chapter'
@@ -574,10 +575,10 @@ with serve_directory(server_root) as base:
                 # last accepted publication. Keep the prior valid site available.
                 published_before=(site/'html-multi/lean-run/publication.json').read_bytes()
                 chapter.write_text(originals[chapter].replace('"Hello, " ++ name',
-                    'name ++ toString (Float.atan 0)'))
+                    '(Lean.Expr.const (Lean.Name.mkSimple name) []).dbgToString'))
                 rejected=command(['lake','exe','lean-run-demo','--output',str(site),
                     '--with-html-single'],'unsupported-rebuild',expected=1)
-                assert 'LeanRunGate.greet' in rejected and 'Float.atan' in rejected, rejected
+                assert 'LeanRunGate.greet' in rejected and 'Lean.Expr.dbgToString' in rejected, rejected
                 assert (site/'html-multi/lean-run/publication.json').read_bytes() == published_before
                 chapter.write_text(originals[chapter])
                 record('unsupported replacement fails before publishing over the last accepted site')

@@ -6,5 +6,5 @@ set_option compiler.postponeCompile false
 
 ```leanRun (entry := card)
 public noncomputable def card (name : String) : Verso.Output.Html :=
-  Classical.choice (show Nonempty Verso.Output.Html from ⟨.text true name⟩)
+  Classical.choice (show Nonempty Verso.Output.Html from ⟨.text name⟩)
 ```
