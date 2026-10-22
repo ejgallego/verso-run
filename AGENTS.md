@@ -23,6 +23,12 @@ separation between elaboration, invocation, resource publication, and rendering.
 
 ## Development workflow
 
+- Follow [the development lanes](CONTRIBUTING.md#development-lanes): record a
+  task's writer, dependencies, and completion checks in its issue or PR, and
+  agree ownership before editing overlapping files. Keep one integration owner
+  for a batch of dependent PRs.
+- Keep the CLI thread title current using the lane and owned open PRs, as in
+  `Authoring/docs · verso-run · #16, #14`. Use `Coordinator` for integration.
 - Start new code work on a task branch in `.worktree/<task>/`, with one worktree
   per task. Keep the main checkout for integration and the local demo. Preserve
   existing working changes and legacy `.worktrees/` checkouts; do not relocate or
@@ -30,16 +36,18 @@ separation between elaboration, invocation, resource publication, and rendering.
 - Each worktree owns its build and generated outputs. Do not share these writable
   directories between concurrent tasks. Run builds and mutation tests sequentially
   within each worktree.
-- Submit focused PRs against `main`, with a conventional title and a short
-  description of the behavior, validation, and any remaining limits. Include a
-  screenshot or demo instructions for visible changes. Use drafts for unfinished
-  work, and report the PR URL when it is ready for review.
+- Submit focused PRs against `main`, or against the prerequisite branch for an
+  agreed stack. Use a conventional title and a short description of the behavior,
+  validation, and any remaining limits. Include a screenshot or demo instructions
+  for visible changes. Use drafts for unfinished work, and report the PR URL when
+  it is ready for review.
 - Merge when the maintainer requests or approves it, after addressing review and
   checking CI on the exact current PR head. Squash merge by default; do not bypass
   checks. A merge to `main` also triggers the Pages deployment.
-- After a confirmed merge, preserve needed evidence, remove only the task's clean
-  worktree, and delete its merged branches. Never force-remove dirty worktrees or
-  perform broad cleanup. Leave unrelated worktrees and working changes alone.
+- After a confirmed merge, preserve needed evidence and rebase/retarget any open
+  dependent PRs before deleting their base branch. Remove only the task's clean
+  worktree and merged branches. Never force-remove dirty worktrees or perform
+  broad cleanup. Leave unrelated worktrees and working changes alone.
 
 Commands and the squash-merge branch cleanup procedure are in
 [CONTRIBUTING.md](CONTRIBUTING.md#worktrees-and-pull-requests).

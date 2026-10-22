@@ -4,6 +4,83 @@ Start with the [README](README.md) to run the demo and the
 [author starter](examples/manual-starter/README.md) to build a document of your own.
 Repository-specific constraints are in [AGENTS.md](AGENTS.md).
 
+## Development lanes
+
+Group work by its main purpose. A lane helps people find related tasks and agree
+on dependencies. Tasks have short-lived branches, and lanes can touch shared files.
+
+| Lane | Work |
+| --- | --- |
+| Library and runtime | Lean APIs, elaboration, genre adapters, publication, worker and presenter lifetimes, dependency integration |
+| Authoring and documentation | Setup guides, API explanations, checked examples, reference presentation, contributor instructions |
+| Examples and presentation | Demo computations, gallery, walkthroughs, slide composition, and visual design |
+
+Each task includes its own relevant tests and documentation. Complete the required
+checks before marking it ready for review.
+
+For a batch of related work, name one integration owner to keep the landing order,
+reviewed revisions, preview, and publication status clear. That person can also
+implement a task; merges still require maintainer approval and current CI.
+
+### Thread titles
+
+Name each development thread after its lane and the open PRs it owns:
+`<lane> · verso-run · #<PR>, #<PR>`.
+Use `Coordinator` for the thread responsible for integration and the landing queue.
+For example, `Authoring/docs · verso-run · #16, #14` identifies a lane and its work
+at a glance. Before a PR exists, use a short task name in its place.
+
+Set the title when taking ownership and update it when PRs open, land, close, or
+move to another writer. Include only owned work; record dependencies in GitHub.
+The coordinator keeps the list of PRs still under its ownership as lanes take
+over individual tasks. In Codex CLI,
+[`/rename <title>`](https://learn.chatgpt.com/docs/developer-commands?surface=cli#rename-the-current-chat-with-rename)
+updates the saved thread name. The title supplements the issue or PR's task record.
+
+### Starting and handing over a task
+
+Use an issue or a draft PR to record the intended change, its lane and writer,
+the branch/worktree, any prerequisite PR, and how completion will be checked.
+A small task can use its PR alone. Keep concrete task status in GitHub; do not
+maintain a second status board in the roadmap or user guides.
+
+Keep one active implementation per lane as the default. Start another when its
+scope and dependencies are independent. One writer owns each task. When work
+overlaps a file or API, agree which writer makes that change before editing;
+different worktrees do not resolve conflicting ownership. This matters especially
+for library source that contains both implementation and API documentation.
+Reviewers can work alongside the writer without changing the same files.
+
+Start from current `origin/main`, or from an agreed prerequisite PR when a stack
+is needed. Record that dependency and keep the new patch separate. Do not begin
+new implementation in an old checkout with preserved WIP. The worktree rules
+below cover isolation and generated outputs.
+
+On handoff, give the commit hash, worktree, completed and pending checks, any
+blocker, and the next action. A blocked or unfinished task can be handed over;
+keep any unfinished PR as a draft. Link the PR or retained evidence rather than copying the
+work history into messages or guides.
+
+### Landing and retirement
+
+Keep one landing order for changes that depend on each other. Independent tasks
+can proceed in parallel; downstream work should consume the selected API rather
+than rebuilding it on another branch. After a prerequisite is squash-merged,
+move only the dependent task's own changes onto the landed baseline and retarget
+its PR to that branch (usually `main`). Check the resulting diff and validation
+again before landing.
+
+The integration owner identifies the revision served by a preview and reports
+the merge and Pages deployment separately. A preview from a PR is useful, but it
+must be distinguishable from the published `main` site.
+
+Once a task lands, apply the cleanup procedure below. Closed or superseded PRs
+need an extra check: identify the commits and evidence that preserve their work
+before retiring a checkout. A closed PR alone is not proof that every local
+change was incorporated. Keep dirty or unaccounted-for worktrees until their
+contents have been reviewed. A preserved checkout is archival work, not an
+active lane or the integration baseline.
+
 ## Worktrees and pull requests
 
 Use one task branch and one worktree under `.worktree/` for new code work. From the
@@ -23,7 +100,9 @@ Keep a PR focused on one change. Before submission, inspect the diff and working
 tree, run the validation below sequentially for code changes, and use conventional
 commit subjects. Documentation-only changes need a diff and link review.
 
-Push the task branch and open a PR against `main`:
+Ordinary PRs target `main`. For an agreed stack, target the prerequisite branch
+and link its PR so the review shows only the dependent task's changes. The example
+below targets `main`:
 
 ```sh
 git push -u origin feat/example
@@ -49,8 +128,10 @@ merging. Do not bypass checks. Merging to `main` triggers the demo's Pages workf
 report the merge and deployment status separately.
 
 After GitHub confirms the PR is merged, retain any evidence referenced by the PR
-outside disposable worktree outputs. From the main checkout, inspect and remove
-only that task's clean worktree:
+outside disposable worktree outputs. Before deleting its branch, rebase and
+retarget any open PRs that use it as their base, as described above. Keep the base
+branch until their new bases and diffs have been checked. From the main checkout,
+inspect and remove only that task's clean worktree:
 
 ```sh
 git -C .worktree/example status --short
