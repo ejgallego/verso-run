@@ -96,9 +96,8 @@ blocks.
 
 Slides owns built-in theme CSS, font paths, and asset collision checks; the Run
 adapter supplies only its own files. The binary-assets extension is reviewed in
-[Slides PR #2](https://github.com/ejgallego/verso-slides/pull/2). That patch still
-needs to be brought onto the selected 4.36 Slides base before the migration can
-pass its full build. The root Lake manifest locks the shared VIR and Verso
+[Slides PR #2](https://github.com/ejgallego/verso-slides/pull/2), rebased onto the
+4.36 Slides branch. The root Lake manifest locks the shared VIR and Verso
 dependencies; see the [exact dependency and runtime pins](internals.md#pinned-dependencies).
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined

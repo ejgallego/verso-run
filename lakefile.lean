@@ -5,7 +5,7 @@ open Lake DSL
 require verso from git "https://github.com/leanprover/verso.git" @ "d0a5f92ee585a92d2cd4c4904469c123f5ae5f10"
 require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "5a5614b802e1eb15607b885f84d11cbd8cd4fd21"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "d22e76ef3d2a925132315af902ea432233b4a44a"
-require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "ca3cfb845151ce56097cf0366b898c1c507506e7"
+require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "e7705d546f7432bd8a32adda035310376db79839"
 
 package verso_run
 

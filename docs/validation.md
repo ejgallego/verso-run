@@ -78,8 +78,8 @@ reuse and runs its 11 checks. The starter acquires public extension `f2a1491` an
 the selected runtime through its complete Git manifest, without local seeds.
 
 The 4.36 migration selects public VIR `5a5614b8` and runtime `8f643abe…`.
-Its full acceptance remains pending the Slides binary-assets prerequisite and
-VIR support for the `Float.maximum` operation reached by Illuminate SVG output.
+Its full acceptance remains pending VIR support for the `Float.maximum`
+operation reached by Illuminate SVG output.
 Partial build or client results do not establish full demo acceptance. The
 independently pinned starter still qualifies public extension `f2a1491` on
 Lean 4.35.0-rc4; it does not qualify this candidate. Exact revisions are listed

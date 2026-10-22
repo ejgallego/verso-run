@@ -253,7 +253,7 @@ highlighted source without interactive controls.
 | Verso | `d0a5f92ee585a92d2cd4c4904469c123f5ae5f10` |
 | VIR | `5a5614b802e1eb15607b885f84d11cbd8cd4fd21` (`v4.36.0-rc1`) |
 | Illuminate | `d22e76ef3d2a925132315af902ea432233b4a44a` |
-| Slides | `ca3cfb845151ce56097cf0366b898c1c507506e7` (4.36 migration base; binary-assets prerequisite pending) |
+| Slides | `e7705d546f7432bd8a32adda035310376db79839` (binary-assets review snapshot on 4.36) |
 | Runtime | `8f643abe3e11eabf3d659bdd1a25e716e9f8726bdec6ed32759702cd0d9cb93d` |
 
 Lake acquires and verifies VIR's locked runtime; authors do not need a separate
@@ -266,9 +266,8 @@ retained commands through the public `ExternalCode.leanBlock` API. The Verso
 revision also includes the module-system import fix needed by the literate API
 reference generator.
 
-The 4.36 migration is not yet qualified for landing: the Slides base needs the
-`Config.extraAssets` patch from its earlier review snapshot, and the Illuminate
-SVG example reaches `Float.maximum`, which this VIR runtime does not provide.
+The 4.36 migration is not yet qualified for landing: the Illuminate SVG example
+reaches `Float.maximum`, which this VIR runtime does not provide.
 The independently pinned starter remains on its published 4.35 baseline until a
 new consumer revision lands. See [validation](validation.md) for the gates.
 

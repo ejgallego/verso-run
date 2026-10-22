@@ -13,9 +13,6 @@ public def card (name : String) : Card := .text name
 #check card
 ```
 
-#check (card : String → Verso.Output.Html)
-#guard (card "<b>&").render == "&lt;b&gt;&amp;"
-
 ```leanRun (entry := markup)
 public def markup (text : String) : String := text
 ```
@@ -32,4 +29,6 @@ public def markup (text : String) : String := text
 
 ```leanRun (entry := alreadyRegistered)
 #check alreadyRegistered
+#check (card : String → Verso.Output.Html)
+#guard (card "<b>&").render == "&lt;b&gt;&amp;"
 ```

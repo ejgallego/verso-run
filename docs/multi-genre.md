@@ -184,5 +184,5 @@ source/runtime pair and consumer qualification.
 [manual]: https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-manual/VersoManual/ExternalLean.lean
 [blog]: https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-blog/VersoBlog.lean
 [subverso]: https://github.com/leanprover/subverso/blob/892d6dc520270b5fb8c1291dd1b131e8c16255ed/src/SubVerso/Highlighting/Anchors/Basic.lean
-[slides-basic]: https://github.com/ejgallego/verso-slides/blob/6e514cd443a51a39d92534b5a2ef08a5e47ed262/VersoSlides/Basic.lean
-[slides-assets]: https://github.com/ejgallego/verso-slides/blob/6e514cd443a51a39d92534b5a2ef08a5e47ed262/VersoSlides/Render.lean
+[slides-basic]: https://github.com/ejgallego/verso-slides/blob/e7705d546f7432bd8a32adda035310376db79839/VersoSlides/Basic.lean
+[slides-assets]: https://github.com/ejgallego/verso-slides/blob/e7705d546f7432bd8a32adda035310376db79839/VersoSlides/Render.lean
