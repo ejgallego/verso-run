@@ -307,12 +307,17 @@ carrier in `doc/resources/` embeds the programs for runnable guide examples;
 document modules never import that carrier. The pure view library has no guide
 or document-generation prerequisite.
 
-Build and preview the guide:
+Build and preview the combined site, so the guide, API, and demo links resolve
+against the same revision:
 
 ```sh
-python3 scripts/build-user-guide.py
-python3 -m http.server 8797 --bind 127.0.0.1 --directory _out/guide/html-multi
+python3 scripts/build-demo-site.py
+python3 -m http.server 8797 --bind 127.0.0.1 --directory _out/html-multi
 ```
+
+Open `/guide/` or `/api/`. To compile and generate only the guide, run
+`python3 scripts/build-user-guide.py`; its standalone output under
+`_out/guide/html-multi` does not include the sibling API or demo.
 
 Ordinary Lean snippets in the guide use Verso's checked code blocks. Complete
 file templates, shell commands, and diagnostic excerpts use literal blocks.

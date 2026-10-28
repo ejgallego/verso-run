@@ -10,7 +10,8 @@ supply inputs and run the published examples in their browser.
 Functions can be defined in the document or imported from a Lean module.
 Execution uses [VIR](https://github.com/ejgallego/lean-vir) in a dedicated worker;
 **Stop** interrupts a running example. Readers need no Lean installation.
-Manual, Blog pages and posts, and Slides are supported.
+Manual, Blog pages and posts, and Slides are supported. Readers can edit function
+inputs; editing Lean source in the browser is not supported.
 
 [Demo](https://ejgallego.github.io/verso-run/) ·
 [User guide](https://ejgallego.github.io/verso-run/guide/) ·
@@ -23,7 +24,7 @@ Manual, Blog pages and posts, and Slides are supported.
 
 ## Try it locally
 
-Install [elan](https://github.com/leanprover/elan) and Python 3. The checkout selects
+Install [elan](https://github.com/leanprover/elan) and Python 3.11 or later. The checkout selects
 Lean 4.36.0-rc1 and fetches its compatible dependencies and runtime.
 
 ```sh
