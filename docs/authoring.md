@@ -24,26 +24,26 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-The function must be public, executable, and monomorphic. Scalar and HTML
-entries, as well as sequence and automaton model functions, must be pure;
-custom live views return an `AutomatonView` action. No `@[vir_export]` attribute
-is required: the build handles VIR registration and checks the entry and any
-helper functions it calls. Existing explicit export attributes remain supported.
+`entry` names `Demo.greet`, and `input` sets the text field to `Ada`. Pressing
+Run displays `Hello, Ada`. Readers can edit the name and run the function again.
+
+The [Manual starter](../examples/manual-starter/README.md) provides a complete,
+version-pinned project and the commands to build and serve it locally. See
+[Hosting and sharing](hosting.md#share-a-complete-copy) for hosting requirements.
 
 Definitions, namespaces, and open declarations remain available in later Run
 blocks. Several blocks can use the same entry; a later block might display just
 `#check Demo.greet` while providing another set of controls. Each embedded
 example runs independently.
-Ordinary `lean` blocks keep their existing behavior. `-keep`, `+error` and unknown
-Run arguments are rejected.
+Ordinary `lean` blocks display code without adding Run controls.
 
 ## Choose where the code lives
 
 | Goal | Authoring choice |
 | --- | --- |
 | Write a self-contained example | Define the function inside `leanRun`. |
-| Reuse a function from a Lean module | Import the module and select the function with `leanRun`; display a reference such as `#check`. |
-| Explain an existing library implementation | Use `leanRunAnchor` to display a checked quotation of its source region. |
+| Reuse a function from a Lean module | [Import the module and use `leanRun`](#reuse-a-function-from-an-imported-module); display a reference such as `#check`. |
+| Explain an existing library implementation | [Use `leanRunAnchor`](#run-an-anchored-example-from-an-imported-module) to display a checked quotation of its source region. |
 
 Both forms run and publish functions in the same way. Anchors also check that
 the displayed code matches its source; they are useful when the implementation
@@ -53,7 +53,7 @@ itself belongs in the explanation.
 
 | Argument | Meaning | Default |
 | --- | --- | --- |
-| `(entry := My.function)` | Select the function | Required |
+| `(entry := My.function)` | Function to call | Required |
 | `(input := "...")` | Initial reader input; does not run on page load | Empty String, `"0"` for Nat/UInt64, `"false"` for Bool |
 | `+multiline` | A textarea for a String argument | Off |
 | `+collapsed` | Initially folded source | Off |
@@ -71,27 +71,12 @@ The option is only available for String inputs. String input is limited to
 `+collapsed` puts source in an expandable “View Lean implementation” panel.
 Source remains present in HTML and Manual TeX, including without JavaScript.
 
+Run blocks reject `-keep`, `+error`, and unknown arguments.
+
 ## The result type chooses the display
 
-| Function type | Result display |
-| --- | --- |
-| `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
-| `String`, `Nat`, `Bool`, or `UInt64` → `Lean.Html` | An isolated HTML preview |
-| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Sequence α` or `SequenceView` | Labelled states with selection and scrubbing |
-| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Automaton α` or `AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
-
-For a plain `Sequence α` or `Automaton α`, HTML states keep their markup;
-other states need a `ToString` instance and appear as escaped text. The model type
-must be fixed, rather than depend on the input value. Use `.view render` for a
-custom HTML or SVG display, including model types without `ToString`.
-
-Text results are limited to 65,536 UTF-16 code units. In HTML and frame results,
-the strings share that limit, including labels, content, and errors.
-Structured results also have node and depth limits; see
-[execution limits](internals.md#interaction-and-limits).
-
-A String containing markup is still plain text. There is no `output` block
-argument. Return `Html` when the result is intended to be rendered as HTML:
+A `String` result appears as plain text, even when it contains markup. Return
+`Lean.Html` to display HTML or SVG:
 
 ````lean
 ```leanRun (entry := Demo.card) (input := "Ada")
@@ -106,6 +91,31 @@ CSS and data images; scripts and external embedded resources are disabled.
 The preview clears when the input changes, a new call starts, Stop is pressed,
 or a call fails. Errors appear as plain text. Larger results can be scrolled
 within the preview.
+
+The supported function types are:
+
+| Function type | Result display |
+| --- | --- |
+| `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
+| `String`, `Nat`, `Bool`, or `UInt64` → `Lean.Html` | An isolated HTML preview |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Sequence α` or `SequenceView` | Labelled states with selection and scrubbing |
+| `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Automaton α` or `AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
+
+Functions must be public, executable, and monomorphic, with one explicit argument.
+Scalar and HTML entries, as well as sequence and automaton model functions, must
+be pure; custom live views return an `AutomatonView` action. The build registers
+the entry with VIR and checks the helper functions it calls. No export attribute
+is required.
+
+For a plain `Sequence α` or `Automaton α`, HTML states keep their markup;
+other states need a `ToString` instance and appear as escaped text. The model type
+must be fixed, rather than depend on the input value. Use `.view render` for a
+custom HTML or SVG display, including model types without `ToString`.
+
+Text results are limited to 65,536 UTF-16 code units. In HTML and frame results,
+the strings share that limit, including labels, content, and errors.
+Structured results also have node and depth limits; see
+[execution limits](internals.md#interaction-and-limits).
 
 ## Reuse a function from an imported module
 
@@ -138,10 +148,31 @@ reference. Blog and Slides support imported functions in the same way.
 Several documents can reuse one implementation without adding source markers or
 quoting its body.
 
-Publish the **document module's** resource bundle, as for inline definitions.
+Publish the **document module's** resource bundle for both imported and inline functions.
 It includes the selected function and its compiled dependencies; the source
 module needs no VIR export marker or separate bundle registration. Imported
 functions use the same controls and result displays as inline definitions.
+See [Publishing the document](#publishing-the-document) for the project setup
+and the publishers for each genre.
+
+## Publishing the document
+
+The [Manual starter](../examples/manual-starter/README.md) includes a complete
+project and build instructions. It pins its own published extension version;
+follow its accompanying guide when copying that project. For an existing project,
+[resource integration](internals.md#resource-ownership-and-site-integration)
+explains the Lake configuration and generator setup. Blog and Slides use their
+respective [site](blog.md#publish-a-site) and [deck](slides.md#publish-a-deck)
+publishers.
+
+The document's compiled functions and their dependencies are published together
+as a resource bundle. A separate module embeds these resources for the native
+generator. The generator imports both the document and its resource module;
+the document must not import the resource module, since that would create a
+build dependency cycle.
+
+Pass the complete `include_vir_assets` result to the publisher. Keep
+`compiler.postponeCompile false` in runnable document modules.
 
 ## Run an anchored example from an imported module
 
@@ -195,25 +226,6 @@ Namespaces, open declarations, and definitions remain available in later Run blo
 `leanRunAnchor` is optional when the document needs a checked source quotation.
 Each genre retains native source styling and links. See
 [Blog authoring](blog.md) and [Slides authoring](slides.md).
-
-## Project wiring and migration
-
-A document must not import the module that embeds its generated resources: that
-would create a build dependency cycle. The native generator imports both the
-document and its separate resource carrier.
-See [resource integration](internals.md#resource-ownership-and-site-integration).
-Retain `compiler.postponeCompile false`; native precompilation remains deferred.
-
-When updating an older example, remove redundant `@[vir_export]` markers and
-`output` options. Change functions that serialize HTML to a String to return
-`Html` directly. For anchors, move root resource registration from the imported
-producer to the document module. The independently pinned
-[Manual starter](../examples/manual-starter/README.md) demonstrates entry-selected
-text and HTML functions without explicit export annotations. It uses a pinned
-published version, tested separately from this development checkout.
-New generators should pass the complete `include_vir_assets` result to the
-ResourceSet publication APIs. See
-[resource integration](internals.md#resource-ownership-and-site-integration).
 
 ## Present a sequence of states
 
@@ -360,3 +372,15 @@ centred on an 8×8 board with dead cells beyond the edge. Lean computes and rend
 every generation. A still life or an empty board continues to advance its
 counter; Play has no trace boundary at which to stop. Use `SequenceView` instead
 when readers need to inspect earlier states of a bounded computation.
+
+## Updating older examples
+
+For documents written against older versions:
+
+- Remove redundant `@[vir_export]` markers and `output` options.
+- Return `Html` directly from functions that previously serialized HTML to a
+  `String`.
+- For anchors, register the document module's resources instead of a separate
+  bundle for the imported source module. Pass the complete `include_vir_assets`
+  result to the publisher, as described in
+  [resource integration](internals.md#resource-ownership-and-site-integration).

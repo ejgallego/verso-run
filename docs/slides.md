@@ -32,26 +32,7 @@ accessible. Reveal's scroll view retains its usual navigation.
 Shared functions can be imported and selected with `leanRun`, displaying a
 reference such as `#check MyExamples.greet`. See
 [reusing an imported function](authoring.md#reuse-a-function-from-an-imported-module)
-for a complete example and publication setup.
-
-## Optional shared source anchors
-
-`leanRunAnchor` displays a checked quotation of an imported implementation. This
-is useful when a slide explains the function's body:
-
-````lean
-```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
-public def MyExamples.greet (name : String) : String :=
-  "Hello, " ++ name ++ "!"
-```
-````
-
-`MyExamples` must contain that region between `-- ANCHOR: greeting` and
-`-- ANCHOR_END: greeting`. The function named by `entry` must be defined within
-that region. Verso checks that the displayed code matches the source and suggests
-a replacement when it does not. Anchored proof states can be hidden with
-`-showProofStates`; definition links follow native Slides policy. See
-[anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
+for a complete code example, then [publish the deck](#publish-a-deck).
 
 ## Publish a deck
 
@@ -97,6 +78,26 @@ without changing slides, and Ctrl+Enter or ⌘+Enter runs the example. `Html` re
 appear in an isolated preview; String results remain text. No `output` argument
 or VIR annotation is required. These behaviors apply to both inline and anchored
 blocks.
+
+## Optional shared source anchors
+
+`leanRunAnchor` displays a checked quotation of an imported implementation. This
+is useful when a slide explains the function's body. Import `MyExamples` into
+the deck's Lean module before adding this block:
+
+````lean
+```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
+public def MyExamples.greet (name : String) : String :=
+  "Hello, " ++ name ++ "!"
+```
+````
+
+`MyExamples` must contain that region between `-- ANCHOR: greeting` and
+`-- ANCHOR_END: greeting`. The function named by `entry` must be defined within
+that region. Verso checks that the displayed code matches the source and suggests
+a replacement when it does not. Anchored proof states can be hidden with
+`-showProofStates`; definition links follow native Slides policy. See
+[anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
 ## Compatibility and demo
 
