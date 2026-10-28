@@ -116,6 +116,7 @@ with serve_directory(served) as base, sync_playwright() as p:
         result = page.locator('#cb1-listbox').get_by_role('option').filter(has_text='Publishing the document').first
         result.click()
         page.wait_for_url('**/*guide-authoring-publishing-the-document*')
+        page.wait_for_function('document.getElementById("guide-authoring-publishing-the-document") !== null')
         for chapter in ['authoring', 'blog', 'slides', 'hosting', 'troubleshooting']:
             page.goto(home + chapter + '/')
             for width in [1280, 390]:

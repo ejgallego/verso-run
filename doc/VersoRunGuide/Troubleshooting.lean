@@ -85,8 +85,9 @@ VIR rejects its compiled dependency closure during entry registration or
 resource packaging. Check the complete resource build as well as Lean elaboration.
 
 Interface and resource-validation errors stop publication before new execution
-resources are written. Previously generated output represents an older successful
-build. Deploy a new site only after the complete build succeeds.
+resources are written. An existing publication plan belongs to an earlier
+successful build; other output may already have changed. Deploy a new site only
+after the complete build succeeds.
 
 # Resource sets disagree about their runtime
 %%%
