@@ -29,6 +29,9 @@ Run a function during a talk; leaving its slide stops the example.
 
 # Write your own examples
 
+The [User guide](../guide/) covers runnable blocks, imported functions, publication,
+and the setup for each genre.
+
 The [View API reference](../api/) introduces HTML results and the optional helpers
 for recorded sequences and live computations, with checked Lean examples and
 links to the library source.

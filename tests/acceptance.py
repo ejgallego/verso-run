@@ -28,6 +28,8 @@ def oracle(role, value):
     return json.loads(output)
 
 command(['lake','build'], 'build')
+command([sys.executable, 'tests/user-guide.py', '--output', str(OUTPUT/'user-guide')], 'user-guide')
+record('Verso user guide: checked authoring, cross-chapter links, compiled examples and relocated root/nested sites')
 command([sys.executable, 'tests/client.py', '--output', str(OUTPUT/'client')], 'client-library')
 record('view/client/authoring library ownership, import phases, standalone native publication and direct worker agreement')
 command([sys.executable, 'tests/api-reference.py', '--output', str(OUTPUT/'api-reference')]
