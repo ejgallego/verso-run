@@ -64,7 +64,8 @@ The [Manual starter](examples/manual-starter/README.md) is a small independent
 project with a text function, an HTML card, and the configuration needed to build
 and publish a site. Copy it and edit its chapter.
 
-The same runnable block syntax works in Manual, Blog Page/Post, and Slides:
+A small example can define its function directly inside `leanRun`. The same
+runnable block syntax works in Manual, Blog pages and posts, and Slides:
 
 ````lean
 ```leanRun (entry := Demo.greet) (input := "Ada")
@@ -73,7 +74,11 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-The authoring guide explains [imports, block options, HTML, and registration](docs/authoring.md).
+An [imported function](docs/authoring.md#reuse-a-function-from-an-imported-module)
+can run in the same kind of block. When an explanation needs the implementation
+itself, [checked source anchors](docs/authoring.md#run-an-anchored-example-from-an-imported-module)
+display its code and report when the quotation no longer matches the source.
+The authoring guide also explains [block options, HTML, and registration](docs/authoring.md).
 
 ## What works today
 
@@ -100,10 +105,10 @@ String inputs can use `+multiline`: Enter adds a line break, and Ctrl+Enter or
 ⌘+Enter runs the example. All three genres use the same controls.
 
 This experimental release supports **Verso Manual**, **Blog pages and posts**,
-and **Slides**. All three support inline definitions and
-[checked source anchors from imported modules](docs/authoring.md#run-an-anchored-example-from-an-imported-module),
-including functions that return HTML. Readers can edit function inputs; Lean
-source editing is not yet supported in the browser. Source remains readable
+and **Slides**. All three support inline definitions, imported functions, and
+optional checked source quotations, including functions that return HTML.
+Readers can edit function inputs; Lean source editing is not yet supported in
+the browser. Source remains readable
 without JavaScript, and Manual also retains its TeX output. See
 [Blog authoring](docs/blog.md) and [Slides authoring](docs/slides.md) for genre setup.
 

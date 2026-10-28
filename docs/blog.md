@@ -2,7 +2,7 @@
 
 Run blocks work in both Blog `Page` and `Post` documents. Import
 `VersoLeanRun.Blog` and open its namespace alongside `Verso.Genre.Blog`.
-This page defines a function and makes it runnable:
+A simple example defines its function inside a `leanRun` block:
 
 ````lean
 module
@@ -28,23 +28,10 @@ Definitions in Blog's ordinary `leanInit` and `lean` blocks belong to separate
 named example contexts. They are not automatically available in Run blocks.
 A runnable function must be defined in the document or imported from a module.
 
-## Optional shared source anchors
-
-`leanRunAnchor` displays source from an imported module and checks it against a
-named source region. This is useful when several documents share the same code:
-
-````lean
-```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
-public def MyExamples.greet (name : String) : String :=
-  "Hello, " ++ name ++ "!"
-```
-````
-
-Import `MyExamples` into the document. Its source region must be between
-`-- ANCHOR: greeting` and `-- ANCHOR_END: greeting`, and the displayed body must
-match. The function named by `entry` must be defined within that region. Verso's
-usual highlighting, proof states, and hover information remain available. See
-[anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
+Shared functions can be imported and selected with `leanRun`, displaying a
+reference such as `#check MyExamples.greet`. See
+[reusing an imported function](authoring.md#reuse-a-function-from-an-imported-module)
+for a complete code example, then [publish the site](#publish-a-site).
 
 ## Publish a site
 
@@ -92,6 +79,26 @@ show both result types.
 Input, collapsed source, Stop, and retry behave as described in the authoring
 guide. Blog keeps its own links and code formatting; Manual's `defSite` option
 does not apply here.
+
+## Optional shared source anchors
+
+`leanRunAnchor` displays a checked quotation of an imported implementation. This
+is useful when a walkthrough explains the function's body:
+
+````lean
+```leanRunAnchor greeting (project := ".") (module := MyExamples) (entry := MyExamples.greet) (input := "Ada")
+public def MyExamples.greet (name : String) : String :=
+  "Hello, " ++ name ++ "!"
+```
+````
+
+Import `MyExamples` into the document. Its source region must be between
+`-- ANCHOR: greeting` and `-- ANCHOR_END: greeting`, and the displayed body must
+match. The function named by `entry` must be defined within that region. Verso's
+usual highlighting, proof states, and hover information remain available.
+If the quotation no longer matches the source, Verso reports an error and
+suggests a replacement. See
+[anchor authoring](authoring.md#run-an-anchored-example-from-an-imported-module).
 
 ## Demo layout
 
