@@ -319,7 +319,7 @@ For a model in an ordinary Lean source module, import `VersoLeanRun.Views`.
 It provides `Frame`, `Sequence`, `Automaton`, and their view helpers. The document
 imports the adapter for its genre. Model modules need no document directives
 or publication setup.
-The generated [View API reference](https://ejgallego.github.io/verso-run/api/)
+The generated [View API reference](../api/)
 explains these types and helpers with Lean-checked examples and linked source.
 
 A function returning `VersoLeanRun.Sequence α` or `SequenceView` gets controls

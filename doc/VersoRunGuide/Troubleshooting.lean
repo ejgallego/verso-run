@@ -84,9 +84,9 @@ For example, `Lean.Expr.dbgToString` is unavailable in the pinned runtime.
 VIR rejects its compiled dependency closure during entry registration or
 resource packaging. Check the complete resource build as well as Lean elaboration.
 
-A failed rebuild must exit unsuccessfully and leave the previous accepted
-publication intact. Its retained output represents the earlier successful build,
-not the rejected replacement. CI deploys only after all checks pass.
+Interface and resource-validation errors stop publication before new execution
+resources are written. Previously generated output represents an older successful
+build. Deploy a new site only after the complete build succeeds.
 
 # Resource sets disagree about their runtime
 %%%
@@ -107,7 +107,12 @@ tag := "guide-troubleshooting-a-program-bundle-or-callable-is-missing"
 
 Add the document's module resource facet (for example,
 `` `+MyChapter:virResourcePack ``) to the asset library's `needs`, and embed with
-`include_vir_assets (modules := #[Module])`. Pass the returned `ResourceSet` to `VersoLeanRun.publish`. Publication reports the declaration,
+`include_vir_assets (modules := #[Module])`. Pass the complete returned
+`ResourceSet` to the publisher for the document's genre:
+{ref "guide-authoring-publishing-the-document"}[`publish` for Manual],
+{ref "guide-blog-publish-a-site"}[`blogMain` for Blog], or
+{ref "guide-slides-publish-a-deck"}[`slidesMain` for Slides].
+Publication reports the declaration,
 callable-owning module, and document position when no matching bundle is available.
 Identical bundles deduplicate; distinct bundles with the same module logical ID
 produce `LOGICAL_ID_CONFLICT` before writing execution resources.
