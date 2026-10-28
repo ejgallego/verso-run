@@ -2,30 +2,29 @@
 
 **Runnable Lean examples for Verso documents.**
 
-verso-run runs selected Lean functions interactively from compiled Verso documents.
-Functions can return primitive values, HTML (including SVG), or richer interactive
-views, including animations. The experimental presenter is also written in Lean
-and uses DOM APIs to manage its controls and previews; see
-[rendering and transport](docs/internals.md#rendering-and-transport).
+verso-run runs Lean functions interactively from compiled Verso documents.
+Functions can return primitive values, HTML (including SVG), or recorded and
+live views. Authors define the computation and its display in Lean; readers
+supply inputs and run the published examples in their browser.
 
-Functions can be defined in the document or imported from a Lean module. Readers
-need no Lean installation. Execution uses [VIR](https://github.com/ejgallego/lean-vir)
-in a dedicated browser worker; **Stop** interrupts a running example.
+Functions can be defined in the document or imported from a Lean module.
+Execution uses [VIR](https://github.com/ejgallego/lean-vir) in a dedicated worker;
+**Stop** interrupts a running example. Readers need no Lean installation.
+Manual, Blog pages and posts, and Slides are supported.
+
+[Demo](https://ejgallego.github.io/verso-run/) ·
+[User guide](https://ejgallego.github.io/verso-run/guide/) ·
+[View API](https://ejgallego.github.io/verso-run/api/) ·
+[Manual starter](examples/manual-starter/README.md)
 
 [![Build and test](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml/badge.svg)](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml)
 
-[Demo](https://ejgallego.github.io/verso-run/) ·
-[Start your own manual](examples/manual-starter/README.md) ·
-[Manual authoring](docs/authoring.md) ·
-[Blog authoring](docs/blog.md) ·
-[Slides authoring](docs/slides.md)
-
-![Lean computes a chain of four nodes and renders it with Illuminate](docs/images/illuminate-desktop-4.png)
+![Lean computes and renders a diagram with Illuminate](docs/images/illuminate-desktop-4.png)
 
 ## Try it locally
 
 Install [elan](https://github.com/leanprover/elan) and Python 3. The checkout selects
-Lean 4.36.0-rc1 and fetches its compatible dependencies and runtime automatically.
+Lean 4.36.0-rc1 and fetches its compatible dependencies and runtime.
 
 ```sh
 git clone https://github.com/ejgallego/verso-run.git
@@ -35,102 +34,23 @@ python3 scripts/build-demo-site.py
 python3 -m http.server 8795 --bind 127.0.0.1 --directory _out/html-multi
 ```
 
-Open [the landing page](http://127.0.0.1:8795/), choose Manual, Blog, or Slides,
-change an input, and choose Run.
-There are a few more examples to explore:
+Open [the demo](http://127.0.0.1:8795/), the
+[user guide](http://127.0.0.1:8795/guide/), or the
+[API reference](http://127.0.0.1:8795/api/).
+The guide covers authoring, imported functions, HTML results, sequences and
+automata, genre setup, hosting, and troubleshooting. Lean examples remain
+readable without JavaScript; Manual also retains TeX output.
 
-| Example | Try |
-| --- | --- |
-| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then Play continuously or Step once |
-| [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Inspect the stack before and after each instruction |
-| [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
-| [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |
-| [Illuminate diagrams](http://127.0.0.1:8795/Illuminate-diagrams/) | `1`, `4`, and `8` nodes |
-| [Exact natural numbers](http://127.0.0.1:8795/Exact-natural-numbers/) | `9007199254740993` |
-| [Try Stop](http://127.0.0.1:8795/Try-Stop/) | Start a large calculation, then interrupt it |
-| [Blog page](http://127.0.0.1:8795/blog/page/) | Exact natural numbers from an imported source anchor |
-| [Blog post](http://127.0.0.1:8795/blog/notes/2026-10-8-running-lean-in-a-post/) | Greetings, an HTML card, and Stop |
-| [Slides](http://127.0.0.1:8795/slides/) | Run exact numbers and greetings, then navigate away to stop work |
-| [Typed inputs](http://127.0.0.1:8795/Typed-inputs/) | Boolean choices and UInt64 maximum/wraparound |
-| [Multiline text](http://127.0.0.1:8795/Multiline-text/) | Keep blank lines and number each line |
+To start a document of your own, copy the [Manual starter](examples/manual-starter/README.md)
+and follow its version-pinned instructions.
 
-The combined site lives in `_out/html-multi`, with Blog under `blog/` and Slides under `slides/`.
-Manual also generates `_out/html-single` and `_out/tex`.
-To share a copy, see [hosting and packaging](docs/hosting.md).
+## Contributing
 
-## Add an example to your document
+[Contributing](CONTRIBUTING.md) covers development, checks, and documentation.
+The [library map](docs/internals.md#library-boundaries) explains the source layout.
+User-guide sources live in `doc/`; the View API explanations live beside the
+public library in `src/views/`. [Architecture](docs/internals.md),
+[validation](docs/validation.md), [history](docs/history.md), and the
+[roadmap](ROADMAP.md) remain in Markdown.
 
-The [Manual starter](examples/manual-starter/README.md) is a small independent
-project with a text function, an HTML card, and the configuration needed to build
-and publish a site. Copy it and edit its chapter.
-
-A small example can define its function directly inside `leanRun`. The same
-runnable block syntax works in Manual, Blog pages and posts, and Slides:
-
-````lean
-```leanRun (entry := Demo.greet) (input := "Ada")
-public def Demo.greet (name : String) : String :=
-  "Hello, " ++ name ++ "!"
-```
-````
-
-An [imported function](docs/authoring.md#reuse-a-function-from-an-imported-module)
-can run in the same kind of block. When an explanation needs the implementation
-itself, [checked source anchors](docs/authoring.md#run-an-anchored-example-from-an-imported-module)
-display its code and report when the quotation no longer matches the source.
-The authoring guide also explains [block options, HTML, and registration](docs/authoring.md).
-
-## What works today
-
-| Function | Reader input | Result |
-| --- | --- | --- |
-| `String → String` | Text | Plain text |
-| `Nat → Nat` | An exact decimal natural number | An exact decimal natural number |
-| `Bool → Bool` | A true/false selector | Plain `true` or `false` |
-| `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
-| `String/Nat/Bool/UInt64 → Lean.Html` | The corresponding control above | An isolated HTML preview |
-| `String/Nat/Bool/UInt64 → Sequence α / SequenceView` | The corresponding control above | A sequence with previous/next and scrubbing |
-| `String/Nat/Bool/UInt64 → Automaton α / AutomatonView` | The corresponding control above | An on-demand model with Step, Play, Pause, and Stop |
-
-Functions must be public, executable, and monomorphic, with one explicit argument.
-Scalar, HTML, sequence and automaton model entries must be pure; custom live
-views return an `AutomatonView` action. Plain models display HTML states directly
-and other states as escaped text through `ToString`. Use `.view render` for a
-custom display. The build handles VIR registration; no VIR attribute is needed.
-VIR also checks their compiled dependencies. A supported function type
-can still reach an operation absent from the runtime; the build will reject it.
-See [troubleshooting](docs/troubleshooting.md) for examples and next steps.
-
-String inputs can use `+multiline`: Enter adds a line break, and Ctrl+Enter or
-⌘+Enter runs the example. All three genres use the same controls.
-
-This experimental release supports **Verso Manual**, **Blog pages and posts**,
-and **Slides**. All three support inline definitions, imported functions, and
-optional checked source quotations, including functions that return HTML.
-Readers can edit function inputs; Lean source editing is not yet supported in
-the browser. Source remains readable
-without JavaScript, and Manual also retains its TeX output. See
-[Blog authoring](docs/blog.md) and [Slides authoring](docs/slides.md) for genre setup.
-
-## Find your way around
-
-Libraries have separate source directories under `src/`; the
-[library map](docs/internals.md#library-boundaries) lists their owners and imports.
-Browser assets live in `web/`, and the complete three-genre
-demo in `demo/`. The independent author project is in `examples/manual-starter/`;
-acceptance checks and native reference executables live in `tests/`.
-
-
-- [Authoring](docs/authoring.md): runnable blocks and typed HTML.
-- [View API reference](https://ejgallego.github.io/verso-run/api/): generated library documentation and checked examples.
-- [Blog authoring](docs/blog.md): runnable pages, posts, and site publication.
-- [Slides authoring](docs/slides.md): native fragments, visibility-based Stop, and asset composition.
-- [Troubleshooting](docs/troubleshooting.md): unsupported programs and build/runtime errors.
-- [Internals](docs/internals.md): resource ownership, execution, limits, and exact pins.
-- [Contributing](CONTRIBUTING.md): build, test, and repository layout.
-- [Validation](docs/validation.md): qualification scope and retained evidence.
-- [Multiple genres](docs/multi-genre.md): anchor review and shared/adapter design.
-- [Roadmap](ROADMAP.md): remaining integration, qualification, and performance work.
-
-The project grew from a Verso prototype; its [development history](docs/history.md)
-is retained. Licensed under [Apache-2.0](LICENSE).
+Licensed under [Apache-2.0](LICENSE).

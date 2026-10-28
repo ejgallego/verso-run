@@ -53,7 +53,7 @@ control and result display. Ordinary {lit}`lean` fences display code
 without Run controls.
 
 Run blocks work in Manual, Blog, and Slides, each with its own adapter import. The
-[authoring guide](https://github.com/ejgallego/verso-run/blob/main/docs/authoring.md)
+[authoring guide](https://ejgallego.github.io/verso-run/guide/authoring/)
 shows the imports and publication setup, and lists the supported function types.
 
 ## Recorded and live views
