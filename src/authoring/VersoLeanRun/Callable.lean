@@ -81,7 +81,7 @@ private meta def unsupportedForm {α : Type} (entry : Ident) (name : Name) (type
 /-- Default displays preserve HTML and otherwise use the model's `ToString` instance. -/
 private meta def defaultRenderer (entry : Ident) (type : Expr) : DocElabM Expr :=
   Lean.Meta.withLocalDeclD `value type fun value => do
-    let html ← if ← Lean.Meta.isDefEq type (mkConst ``Verso.Output.Html) then pure value
+    let html ← if ← Lean.Meta.isDefEq type (mkConst ``Lean.Html) then pure value
       else
         let text ← try Lean.Meta.mkAppM ``toString #[value]
           catch _ => throwErrorAt entry
@@ -101,7 +101,7 @@ private meta def describePresentation (entry : Ident) (name : Name) (info : Cons
     if !info.levelParams.isEmpty then return (.text, original)
     Lean.Meta.withLocalDeclD binder domain fun argument => do
       let result ← Lean.Meta.whnf (result.instantiate1 argument)
-      if result.isConstOf ``Verso.Output.Html then return (.html, original)
+      if result.isConstOf ``Lean.Html then return (.html, original)
       if ← Lean.Meta.isDefEq result (mkConst ``SequenceView) then return (.sequence, original)
       if ← Lean.Meta.isDefEq result (mkConst ``AutomatonView) then return (.automaton, original)
       let sequence := result.isAppOfArity ``Sequence 1
@@ -154,7 +154,7 @@ meta def describeEntry (config : Config) (name : Name) (source : Syntax) : DocEl
       let admitted := match mode, callSignature.result with
         | .sequence, .structure result .. => result == ``Sequence
         | .automaton, .structure result .. => result == ``AutomatonSession
-        | .html, .customInductive result .. => result == ``Verso.Output.Html
+        | .html, .customInductive result .. => result == ``Lean.Html
         | .text, result => result == argument.type
         | _, _ => false
       unless admitted do

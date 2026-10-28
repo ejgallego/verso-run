@@ -83,7 +83,7 @@ The authoring guide explains [imports, block options, HTML, and registration](do
 | `Nat → Nat` | An exact decimal natural number | An exact decimal natural number |
 | `Bool → Bool` | A true/false selector | Plain `true` or `false` |
 | `UInt64 → UInt64` | Exact decimal from 0 to 18446744073709551615 | Exact decimal; Lean arithmetic wraps |
-| `String/Nat/Bool/UInt64 → Verso.Output.Html` | The corresponding control above | An isolated HTML preview |
+| `String/Nat/Bool/UInt64 → Lean.Html` | The corresponding control above | An isolated HTML preview |
 | `String/Nat/Bool/UInt64 → Sequence α / SequenceView` | The corresponding control above | A sequence with previous/next and scrubbing |
 | `String/Nat/Bool/UInt64 → Automaton α / AutomatonView` | The corresponding control above | An on-demand model with Step, Play, Pause, and Stop |
 

@@ -2,7 +2,7 @@ module
 public import VersoLeanRun.Views
 public section
 namespace LeanRunRendered.Examples
-open VersoLeanRun Verso.Output
+open VersoLeanRun Lean
 
 -- ANCHOR: badge
 public def badge (enabled : Bool) : Html :=

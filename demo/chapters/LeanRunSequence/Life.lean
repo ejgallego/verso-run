@@ -3,7 +3,7 @@ public import VersoLeanRun.Views
 public section
 
 namespace LeanRunSequence.Life
-open VersoLeanRun Verso.Output
+open VersoLeanRun Lean
 
 def side : Nat := 8
 

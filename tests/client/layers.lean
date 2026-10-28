@@ -18,9 +18,9 @@ private meta partial def ordinaryClosure (env : Environment) (name : Name)
 run_cmd do
   let env ← Lean.getEnv
   for (root, forbidden) in #[
-      (`VersoLeanRunPresenter, #[`VersoManual, `VersoBlog, `VersoSlides,
+      (`VersoLeanRunPresenter, #[`Verso, `VersoManual, `VersoBlog, `VersoSlides,
         `VersoLeanRun.Callable, `VersoLeanRun.Publication]),
-      (`ClientResources, #[`Vir.Browser, `VersoLeanRunPresenter,
+      (`ClientResources, #[`Verso, `Vir.Browser, `VersoLeanRunPresenter,
         `VersoManual, `VersoBlog, `VersoSlides, `Vir.Compiler])] do
     for imported in ordinaryClosure env root do
       for forbiddenPrefix in forbidden do

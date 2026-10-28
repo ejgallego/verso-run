@@ -17,7 +17,7 @@ for example, or a series of related illustrations.
 public section
 
 namespace VersoLeanRun
-open Verso.Output Lean
+open Lean
 
 /-- A recorded sequence of states, starting with an initial state. -/
 structure Sequence (α : Type) where

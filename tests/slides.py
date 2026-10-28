@@ -106,6 +106,49 @@ with serve_directory(served) as base:
             assert call(selected, '21', keyboard=True) == oracle('twice', '21')
             assert page.evaluate('Reveal.getIndices().h') == 0
             record(prefix+': native highlighting, lazy Run worker, exact Nat, and keyboard submission')
+            # Reuse the actual DOM node, not a clone. Retired listeners must not
+            # submit to disposed hosts or accumulate across observer refreshes.
+            try:
+                selected.evaluate('''async element => {
+                    const {enhance} = await import(new URL('lean-run/renderer.js', location.href));
+                    const {ExperimentHost} = await import(new URL('lean-run/host.js', location.href));
+                    const owner = enhance(element);
+                    if (enhance(element) !== owner) throw new Error('enhance lost placement identity');
+                    const invoke = ExperimentHost.prototype.invoke;
+                    const attempts = [];
+                    globalThis.placementProbe = {ExperimentHost, invoke, attempts, retired:owner};
+                    ExperimentHost.prototype.invoke = function(input) {
+                        attempts.push({disposed:this.disposed});
+                        return invoke.call(this,input);
+                    };
+                    const parent = element.parentNode;
+                    const form = element.querySelector('form');
+                    for (let i=0;i<3;i++) {
+                        element.remove();
+                        await new Promise(resolve => setTimeout(resolve,0));
+                        form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+                        if (attempts.length) throw new Error('disposed form still submitted');
+                        parent.append(element);
+                        await new Promise(resolve => setTimeout(resolve,0));
+                        const current = enhance(element);
+                        if (current === owner || current.signal.aborted) throw new Error('placement was not reacquired');
+                    }
+                    if (!owner.signal.aborted) throw new Error('old placement was not disposed');
+                }''')
+                no_workers()
+                assert call(selected, '21', keyboard=True) == oracle('twice', '21')
+                assert page.evaluate('placementProbe.attempts') == [{'disposed': False}]
+                page.evaluate('placementProbe.retired.dispose(); placementProbe.retired.stop()')
+                assert selected.get_attribute('data-state') == 'success'
+                assert selected.locator('.lean-run-output').text_content() == oracle('twice', '21')
+            finally:
+                page.evaluate('''() => {
+                    if (globalThis.placementProbe) {
+                        placementProbe.ExperimentHost.prototype.invoke = placementProbe.invoke;
+                        delete globalThis.placementProbe;
+                    }
+                }''')
+            record(prefix+': same-node reinsertion releases retired bindings and submits to exactly one live host')
             slide(1)
             assert selected.get_attribute('data-state') == 'stopped'
             greeting = form('LeanRunBlog.Examples.greet')

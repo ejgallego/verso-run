@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Emilio J. Gallego Arias
 -/
 module
-public import Verso.Output.Html
+public import Lean.Data.Html
 
 /-!
 # Frames
@@ -16,7 +16,7 @@ such as a number or a board, or HTML ready to display.
 public section
 
 namespace VersoLeanRun
-open Verso.Output
+open Lean
 
 /-- A labelled value with an optional error message. A rendered frame contains HTML. -/
 structure Frame (α : Type := Html) where
@@ -58,7 +58,7 @@ heading. For example, a simulation can label its board with a generation number.
 Here the value is simply a number:
 
 ```lean
-open VersoLeanRun Verso.Output
+open VersoLeanRun Lean
 
 def snapshot (generation : Nat) (value : Nat) : Frame Nat :=
   { label := s!"Generation {generation}"
@@ -91,7 +91,7 @@ def displayedSnapshot (generation value : Nat) : Frame :=
 ```
 
 {name (full := Lean.Html.text)}`Lean.Html.text` escapes text, including
-reader input. Verso's HTML constructors and syntax provide elements and attributes
+reader input. Lean's HTML constructors and syntax provide elements and attributes
 for richer displays.
 Sequences and automata provide {lit}`view` helpers to render all their states.
 -/

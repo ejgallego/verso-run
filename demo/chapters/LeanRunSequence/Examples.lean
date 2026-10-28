@@ -4,7 +4,7 @@ public import LeanRunGate.Stack
 public section
 
 namespace LeanRunSequence.Examples
-open VersoLeanRun Verso.Output
+open VersoLeanRun Lean
 
 /-- The view uses the ordinary evaluator's instruction snapshots directly. -/
 abbrev Snapshot := LeanRunGate.Stack.TraceStep

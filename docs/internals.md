@@ -25,20 +25,19 @@ globs give every source one owner even where namespaces overlap; namespace-wide
 roots would also claim modules in other libraries. `lake run check-library-ownership`
 checks that every source is registered to the library whose directory contains it.
 
-The views library needs no browser assets and directly imports no genre adapter,
-VIR compiler or DOM binding. The presenter depends on view types; authoring depends on views and the
-native compiler APIs. Native publication imports the presenter carrier. That
-carrier classifies the prepared program in an elaboration-time environment and
-embeds its resources, keeping the DOM implementation out of ordinary native
-imports.
+The views library needs no browser assets and imports no Verso, VIR compiler or
+DOM binding modules. The presenter depends on view types and VIR's browser APIs;
+authoring depends on views and the native compiler APIs. Native publication imports
+the presenter carrier. That carrier classifies the prepared program in an
+elaboration-time environment and embeds its resources, keeping the DOM
+implementation out of ordinary native imports.
 
-The pinned `Verso.Output.Html` also imports its Lean quoter machinery. VIR's DOM
-bindings import host validation through `Vir.Host`, including VIR classifier
-modules. These upstream imports remain intact. Separating their syntax and
-runtime data would require an upstream change; this split makes verso-run's
-ownership explicit. It does not remove those transitive imports, and its effect
-on build time has not been measured. VIR packages executable declarations
-together with their reachable IR dependencies.
+View models and the compiled presenter use stdlib `Lean.Html` and import no
+Verso modules. HTML syntax and rendering come from `Lean.Data.Html`. VIR's DOM
+bindings still import host validation through `Vir.Host`, including VIR classifier
+modules; those upstream imports remain intact. This separation describes source
+ownership and import dependencies; its effect on build time has not been measured.
+VIR packages executable declarations together with their reachable IR dependencies.
 
 `tests/client.py` checks source-directory ownership and import phases, then runs a
 plain Lean producer through native and dedicated-worker execution without a
@@ -360,6 +359,14 @@ Lake already supports this split through the presenter library's module resource
 facet and its separate carrier. Extending that compiled presentation library
 does not require a new Lake rendering API. Its generated resources must remain
 outside the modules they embed, as with document programs.
+
+Each enhanced placement has one ownership handle. Repeated enhancement returns
+the same live handle; copied DOM attributes do not confer ownership. Its abort
+signal scopes the form and genre-specific listeners. Disposal terminates execution,
+clears the presenter and playback, removes the listeners and registry entry, and
+allows the same DOM node to be enhanced again. Stop and Pause preserve those
+placement bindings. Play/Step listeners have a shorter scope that ends when their
+rendered view is cleared.
 
 Stop and the loading deadline settle the module-import wait. They do not cancel
 ECMAScript import or its possible later evaluation. Late rejection stays observed,

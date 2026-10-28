@@ -21,7 +21,9 @@ def type_name(descriptor):
     native = descriptor['native']
     if 'metadata' in native:
         return native['metadata']['declaration']
-    return {'string': 'String', 'nat': 'Nat', 'unsigned': 'UInt64'}[native['type']['tag']]
+    if native['type']['tag'] == 'unsigned':
+        return 'UInt' + str(native['type']['width'])
+    return {'string': 'String', 'nat': 'Nat'}[native['type']['tag']]
 
 
 def native_field(descriptor, name):

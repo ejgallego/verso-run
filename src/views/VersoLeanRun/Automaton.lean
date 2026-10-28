@@ -56,7 +56,7 @@ def Automaton.observe (machine : Automaton α) (observe : Nat → α → Frame) 
 
 /-- Draw each state as HTML or SVG. The label function receives the step number, starting at zero. -/
 def Automaton.view (machine : Automaton α)
-    (render : α → Verso.Output.Html := by
+    (render : α → Lean.Html := by
       first | exact id | exact fun value => Lean.Html.text (toString value))
     (label : Nat → String := toString) : AutomatonView :=
   machine.observe fun index state => { label := label index, content := render state }
@@ -65,7 +65,7 @@ def Automaton.view (machine : Automaton α)
 Labels and error messages are preserved; an error disables further playback.
 Each run starts at the first step; no states are recomputed. -/
 def Sequence.cycleView (sequence : Sequence α)
-    (render : α → Verso.Output.Html := by
+    (render : α → Lean.Html := by
       first | exact id | exact fun value => Lean.Html.text (toString value)) : AutomatonView :=
   let observations := sequence.frames
   have nonempty : 0 < observations.size := by

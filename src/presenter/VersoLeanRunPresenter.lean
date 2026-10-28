@@ -11,7 +11,7 @@ public meta import Vir.Attributes
 public section
 
 namespace VersoLeanRun.Presenter
-open Lean.Vir Lean.Vir.Browser Verso.Output
+open Lean Lean.Vir Lean.Vir.Browser
 
 private def failure {α : Type} (message : String) : DomM α := by
   unfold DomM RuntimeM

@@ -27,7 +27,7 @@ paragraph containing a greeting. The {lit}`html%{…}` syntax builds HTML;
 interpolated strings are escaped:
 
 ```lean
-open Verso.Output
+open Lean
 
 public def greeting (name : String) : Html :=
   html%{<p>Hello, {name}!</p>}
@@ -39,7 +39,7 @@ In a Verso document, put the definition inside a code fence labelled {lit}`leanR
 
 ````
 ```leanRun (entry := greeting) (input := "Ada")
-open Verso.Output
+open Lean
 
 public def greeting (name : String) : Html :=
   html%{<p>Hello, {name}!</p>}

@@ -39,8 +39,8 @@ def html (input : String) : Lean.Html := .text input
 def naturalHtml (input : Nat) : Lean.Html := .text (toString input)
 def sequence (input : String) : SequenceView :=
   { initial := { label := input, content := .empty } }
-def booleanHtml (input : Bool) : Verso.Output.Html := .text (toString input)
-def unsignedHtml (input : UInt64) : Verso.Output.Html := .text (toString input)
+def booleanHtml (input : Bool) : Lean.Html := .text (toString input)
+def unsignedHtml (input : UInt64) : Lean.Html := .text (toString input)
 def naturalSequence (input : Nat) : SequenceView := SequenceView.error (toString input)
 def booleanSequence (input : Bool) : SequenceView := SequenceView.error (toString input)
 def unsignedSequence (input : UInt64) : SequenceView := SequenceView.error (toString input)

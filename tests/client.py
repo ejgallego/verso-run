@@ -19,10 +19,10 @@ def record(name):
 command(['lake', 'run', 'check-library-ownership'], 'ownership')
 command(['lake', 'build', '+VersoLeanRun.Views:olean'], 'views-build')
 command(['lake', 'env', 'lean', 'tests/client/ViewsOnly.lean'], 'view-imports')
-record('each source lives in its Lake owner directory; Views imports no genre, VIR compiler or DOM modules')
+record('each source lives in its Lake owner directory; Views imports no Verso, VIR compiler or DOM modules')
 command(['lake', 'build', '+VersoLeanRunPresenter:olean', 'lean-run-client-check'], 'build')
 command(['lake', 'env', 'lean', 'tests/client/layers.lean'], 'ordinary-imports')
-record('presenter ordinary imports exclude Verso authoring; native carrier excludes VIR compiler and DOM implementation')
+record('presenter ordinary imports exclude Verso; native carrier excludes VIR compiler and DOM implementation')
 site = output/'site'
 # The native binary supplies its own complete resources. Run outside the source
 # checkout without a Verso document, generator configuration or project marker.
