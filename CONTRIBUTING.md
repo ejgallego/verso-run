@@ -208,6 +208,12 @@ public pin until a new baseline has landed and its acquisition is qualified.
 
 ## Writing documentation
 
+User-facing explanations belong in the Verso manual under `doc/`, and public
+view-library reference prose belongs beside the declarations in `src/views/`.
+Keep README setup brief and link to those guides. Markdown remains the home for
+contributor instructions, architecture, validation, history, and planning.
+When moving a guide, leave a short pointer rather than maintaining two versions.
+
 Write for a Lean programmer who has not read the project history. Start with
 what an author can build and what readers can do with it. A useful default is to
 introduce the capability, show a small example, explain the relevant API, and
@@ -293,6 +299,32 @@ this section. Keep it as the canonical guidance, with a short pointer in
 
 ## Repository layout
 
+### User guide and API reference
+
+The user manual is a Verso Manual in `doc/VersoRunGuide.lean` and its chapter
+modules. `doc/GuideMain.lean` is its native generator. The separate resource
+carrier in `doc/resources/` embeds the programs for runnable guide examples;
+document modules never import that carrier. The pure view library has no guide
+or document-generation prerequisite.
+
+Build and preview the guide:
+
+```sh
+python3 scripts/build-user-guide.py
+python3 -m http.server 8797 --bind 127.0.0.1 --directory _out/guide/html-multi
+```
+
+Ordinary Lean snippets in the guide use Verso's checked code blocks. Complete
+file templates, shell commands, and diagnostic excerpts use literal blocks.
+Runnable examples use the same public adapters and resource workflow as other
+consumers. Review the rendered guide after prose changes, including narrow
+layouts and cross-chapter links.
+
+`scripts/build-demo-site.py` publishes the guide under `/guide/` beside the
+API reference at `/api/`. `tests/user-guide.py` checks its generated links,
+search, examples, and root/nested deployment. User-facing Markdown files under
+`docs/` are entry points to the manual, not another copy of its chapters.
+
 ### Generated library reference
 
 Run `python3 scripts/build-api-reference.py` to generate the public view library's reference in
@@ -333,12 +365,13 @@ UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
 | `src/presenter/` | VIR DOM rendering and sandbox policy |
 | `src/presenter-resources/` | Native carrier for the prepared browser presenter |
 | `web/` | Input validation, UI state, worker ownership, and asynchronous invocation |
+| `doc/` | Verso user manual, checked examples, and native guide generator |
 | `demo/chapters/` | Manual, Blog, and Slides documents and their Lean functions |
 | `demo/generators/` | Native generators for the three demo genres |
 | `demo/resources/` | Embedded program carriers; `lakefile.lean` owns module registration |
 | `examples/manual-starter/` | Copyable independent author project |
 | `tests/` | Native/browser acceptance and negative author fixtures |
-| `docs/`, `evidence/` | Guides, documentation artwork, and written qualification limits |
+| `docs/`, `evidence/` | Guide pointers, artwork, architecture, and qualification limits |
 
 `demo/generators/DemoMain.lean` builds the Manual; `demo/generators/BlogMain.lean` builds the Blog site.
 `demo/generators/SlidesMain.lean` builds the deck. `scripts/build-demo-site.py` combines them with a landing page.
@@ -386,3 +419,17 @@ artifact, plus consumer qualification; local producer packs are not a substitute
 
 Compiler scheduling, native precompilation, Verso core upstreaming, and wider
 browser qualification retain their deferred status in [the roadmap](ROADMAP.md).
+
+## Publishing the repository demo
+
+Enable Pages in the repository settings with *GitHub Actions* as the source.
+The main-branch workflow builds and validates the combined demo, user guide and
+API reference, then deploys the complete `_out/html-multi` artifact. PRs validate
+that package without deploying it. If Pages has not been enabled, the job reports
+its settings link and skips deployment.
+
+After deployment, regenerate local output and run
+`uv run --with playwright python tests/pages-smoke.py` to check the live site's
+programs, runtime, module bytes and MIME types against the local package.
+Record hosted checks separately from local acceptance; a passing local build
+alone does not establish what the public server is serving.

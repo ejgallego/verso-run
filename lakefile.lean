@@ -73,6 +73,20 @@ lean_lib VersoLeanRunPresenterResources where
 
 -- Demo documents and ordinary Lean producers. They never import their carriers.
 
+lean_lib VersoRunGuide where
+  srcDir := "doc"
+  roots := #[`VersoRunGuide]
+
+lean_lib VersoRunGuideResources where
+  srcDir := "doc/resources"
+  roots := #[`GuideResources]
+  needs := #[`+VersoRunGuide.Authoring:virResourcePack]
+
+@[default_target]
+lean_exe «verso-run-guide» where
+  srcDir := "doc"
+  root := `GuideMain
+
 lean_lib LeanRunGateProgram where
   srcDir := "demo/chapters"
   roots := #[`LeanRunGate.Chapter, `LeanRunGate.Helper, `LeanRunGate.Stack]
