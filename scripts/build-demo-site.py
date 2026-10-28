@@ -16,9 +16,10 @@ subprocess.run(["lake", "exe", "lean-run-slides-demo", "--output", str(site / "s
 # The root landing uses the Blog home's own relative asset/link convention.
 # Existing Manual chapters and their root execution inventory keep their URLs.
 home = (site / "blog/index.html").read_text()
-assert len(re.findall(r'<base href="[^"]*">', home)) == 1
-(site / "index.html").write_text(re.sub(r'<base href="[^"]*">',
-    '<base href="blog/">', home, count=1))
+home, base_count = re.subn(r'(<base\s+href=")[^"]*(")',
+    lambda match: match[1] + 'blog/' + match[2], home)
+assert base_count == 1, "Expected one Blog base URL in the generated homepage"
+(site / "index.html").write_text(home)
 subprocess.run(["python3", "scripts/build-api-reference.py"], cwd=root, check=True)
 reference = site / "api"
 if reference.exists():

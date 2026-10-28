@@ -3,7 +3,7 @@ public import VersoLeanRun.Views
 public section
 
 namespace LeanRunSequence.Life
-open VersoLeanRun Verso.Output Verso.Output.Html
+open VersoLeanRun Lean
 
 def side : Nat := 8
 
@@ -82,15 +82,15 @@ private def gridPath : String := Id.run do
 
 -- ANCHOR: lifeSvg
 def renderState (state : State) : Html :=
-  {{ <div style="padding:.5rem">
-    <p style="margin:0 0 .5rem;font-weight:600">{{s!"Generation {state.generation} · {state.board.population} living cells"}}</p>
+  html%{<div style="padding:.5rem">
+    <p style="margin:0 0 .5rem;font-weight:600">{s!"Generation {state.generation} · {state.board.population} living cells"}</p>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img"
-         aria-label={{s!"Game of Life generation {state.generation}, {state.board.population} living cells"}}
+         aria-label={s!"Game of Life generation {state.generation}, {state.board.population} living cells"}
          style="display:block;width:176px;height:176px;max-width:100%;background:#f3f6fa">
-      <path class="life-cells" d={{livePath state.board}} fill="#285674"> " " </path>
-      <path d={{gridPath}} fill="none" stroke="#ccd9e5" stroke-width=".5"> " " </path>
+      <path class="life-cells" d={livePath state.board} fill="#285674"></path>
+      <path d={gridPath} fill="none" stroke="#ccd9e5" stroke-width=".5"></path>
     </svg>
-  </div> }}
+  </div>}
 
 -- ANCHOR_END: lifeSvg
 

@@ -63,7 +63,7 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 | Function type | Result display |
 | --- | --- |
 | `String → String`, `Nat → Nat`, `Bool → Bool`, `UInt64 → UInt64` | Plain text |
-| `String`, `Nat`, `Bool`, or `UInt64` → `Verso.Output.Html` | An isolated HTML preview |
+| `String`, `Nat`, `Bool`, or `UInt64` → `Lean.Html` | An isolated HTML preview |
 | `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Sequence α` or `SequenceView` | Labelled states with selection and scrubbing |
 | `String`, `Nat`, `Bool`, or `UInt64` → `VersoLeanRun.Automaton α` or `AutomatonView` | A live simulation with Step, Play, Pause, and Stop |
 
@@ -82,9 +82,8 @@ argument. Return `Html` when the result is intended to be rendered as HTML:
 
 ````lean
 ```leanRun (entry := Demo.card) (input := "Ada")
-open Verso.Output.Html
-public def Demo.card (name : String) : Verso.Output.Html :=
-  {{ <h2> "Hello, " {{name}} "!" </h2> }}
+public def Demo.card (name : String) : Lean.Html :=
+  html%{<h2>Hello, {name}!</h2>}
 ```
 ````
 

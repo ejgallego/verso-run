@@ -52,10 +52,10 @@ program bundle. Structured results use the compiled payload layout. -/
 def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
   if form.presentation != .text then
     return ← Lean.Json.parse <| match form.scalar, form.presentation with
-      | .string, .html => (renderedCallableExpected% String Verso.Output.Html)
-      | .nat, .html => (renderedCallableExpected% Nat Verso.Output.Html)
-      | .bool, .html => (renderedCallableExpected% Bool Verso.Output.Html)
-      | .uint64, .html => (renderedCallableExpected% UInt64 Verso.Output.Html)
+      | .string, .html => (renderedCallableExpected% String Lean.Html)
+      | .nat, .html => (renderedCallableExpected% Nat Lean.Html)
+      | .bool, .html => (renderedCallableExpected% Bool Lean.Html)
+      | .uint64, .html => (renderedCallableExpected% UInt64 Lean.Html)
       | .string, .sequence => (renderedCallableExpected% String SequenceView)
       | .nat, .sequence => (renderedCallableExpected% Nat SequenceView)
       | .bool, .sequence => (renderedCallableExpected% Bool SequenceView)

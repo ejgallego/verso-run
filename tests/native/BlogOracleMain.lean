@@ -10,12 +10,12 @@ def main (args : List String) : IO Unit := do
   let result ← match role with
     | "greet" => pure <| LeanRunBlog.Examples.greet input
     | "pageInlineGreet" => pure <| LeanRunBlog.Page.Inline.greet input
-    | "pageInlineCard" => pure <| (LeanRunBlog.Page.Inline.card input).asString
+    | "pageInlineCard" => pure <| (LeanRunBlog.Page.Inline.card input).render
     | "postInlineGreet" => pure <| LeanRunBlog.Post.Inline.greet input
-    | "postInlineCard" => pure <| (LeanRunBlog.Post.Inline.card input).asString
+    | "postInlineCard" => pure <| (LeanRunBlog.Post.Inline.card input).render
     | "slideInlineGreet" => pure <| LeanRunSlides.Deck.Inline.greet input
-    | "slideInlineCard" => pure <| (LeanRunSlides.Deck.Inline.card input).asString
-    | "card" => pure <| (LeanRunBlog.Examples.card input).asString
+    | "slideInlineCard" => pure <| (LeanRunSlides.Deck.Inline.card input).render
+    | "card" => pure <| (LeanRunBlog.Examples.card input).render
     | "count" | "twice" => do
       let some n := input.toNat? | throw <| IO.userError "invalid Nat"
       pure <| toString <| if role == "count" then LeanRunBlog.Examples.count n else LeanRunGate.Helper.twice n

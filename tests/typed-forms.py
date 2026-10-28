@@ -1,5 +1,6 @@
 """Concrete Bool/UInt64/multiline forms, independently compiled signatures and real workers."""
 from harness import run_command, serve_directory
+from signatures import scalar_descriptor
 import argparse, functools, json, shutil, subprocess
 from pathlib import Path
 from html.parser import HTMLParser
@@ -69,9 +70,9 @@ for genre, path, owner in [('Manual', site/'manual/html-multi', 'LeanRunGate.Cha
     if genre == 'Manual':
         check_descriptions(site/'manual/html-single', plan)
     record(genre+': native HTML carries only reader/invocation fields with published bindings')
-    for role, name, tag in [('flip', 'Bool', 2), ('increment', 'UInt64', 7), ('lines', 'String', 3)]:
+    for role, name in [('flip', 'Bool'), ('increment', 'UInt64'), ('lines', 'String')]:
         binding = plan['programs'][owner]['LeanRunTyped.Examples.'+role]
-        descriptor = {'type': name, 'interfaceTag': tag}
+        descriptor = scalar_descriptor(name)
         assert binding['expectedExport'] == {'args': [descriptor], 'result': descriptor, 'effect': 'pure'}
     record(genre+': independent type-only canonical Bool/UInt64/String signatures')
 
@@ -166,11 +167,10 @@ with serve_directory(served) as base:
         assert len({form(role).get_attribute('data-instance') for role in ['flip', 'increment', 'lines']}) == 3
         record('different typed controls keep independent worker state on one page')
         # Independent expectations must reject a wrong compiler-facing type before call.
-        for role, wrong_type, wrong_tag in [('flip', 'Nat', 0), ('increment', 'Nat', 0)]:
+        for role in ['flip', 'increment']:
             original = plans['Blog']
             bad = json.loads(json.dumps(original))
-            bad['programs']['LeanRunBlog.Page']['LeanRunTyped.Examples.'+role]['expectedExport']['result'] = {
-                'type': wrong_type, 'interfaceTag': wrong_tag}
+            bad['programs']['LeanRunBlog.Page']['LeanRunTyped.Examples.'+role]['expectedExport']['result'] = scalar_descriptor('Nat')
             page.route('**/lean-run/publication.json', lambda route, request, data=bad: route.fulfill(
                 content_type='application/json', body=json.dumps(data)))
             visit('root', 'blog', role)

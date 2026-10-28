@@ -298,8 +298,8 @@ this section. Keep it as the canonical guidance, with a short pointer in
 Run `python3 scripts/build-api-reference.py` to generate the public view library's reference in
 `.lake/build/literate-html/`. `literate.toml` selects `VersoLeanRunViews` and its
 landing page; module prose and Lean-checked examples live with the library source.
-For HTML quotation in checked examples, put `open scoped Verso.Output.Html`
-before the module prose. Keep the `/-! ... -/` comment as a standalone command
+For HTML quotation in checked examples, import `Lean.Data.Html` and use
+`html%{…}`. Keep the `/-! ... -/` comment as a standalone command
 so the pinned reference generator includes it. The copyable examples should
 also show the namespace open they need when used in a document or Lean module.
 Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.

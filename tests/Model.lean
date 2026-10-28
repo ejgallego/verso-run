@@ -1,5 +1,4 @@
 import VersoLeanRun.Publication
-import LeanRunGate.Chapter
 import Vir.Compiler.Interface.Classify.Signature
 import Lean.Elab.Command
 
@@ -36,10 +35,12 @@ def text (input : String) : String := input
 def natural (input : Nat) : Nat := input
 def boolean (input : Bool) : Bool := input
 def unsigned (input : UInt64) : UInt64 := input
+def html (input : String) : Lean.Html := .text input
+def naturalHtml (input : Nat) : Lean.Html := .text (toString input)
 def sequence (input : String) : SequenceView :=
   { initial := { label := input, content := .empty } }
-def booleanHtml (input : Bool) : Verso.Output.Html := .text true (toString input)
-def unsignedHtml (input : UInt64) : Verso.Output.Html := .text true (toString input)
+def booleanHtml (input : Bool) : Lean.Html := .text (toString input)
+def unsignedHtml (input : UInt64) : Lean.Html := .text (toString input)
 def naturalSequence (input : Nat) : SequenceView := SequenceView.error (toString input)
 def booleanSequence (input : Bool) : SequenceView := SequenceView.error (toString input)
 def unsignedSequence (input : UInt64) : SequenceView := SequenceView.error (toString input)
@@ -55,14 +56,14 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   let cases : Array (Name × FormKind) := #[
     (`ContractFixtures.text, ⟨.string .line, .text⟩),
     (`ContractFixtures.text, ⟨.string .multiline, .text⟩),
-    (`LeanRunGate.htmlGreeting, ⟨.string .line, .html⟩),
-    (`LeanRunGate.htmlGreeting, ⟨.string .multiline, .html⟩),
+    (`ContractFixtures.html, ⟨.string .line, .html⟩),
+    (`ContractFixtures.html, ⟨.string .multiline, .html⟩),
     (`ContractFixtures.sequence, ⟨.string .line, .sequence⟩),
     (`ContractFixtures.sequence, ⟨.string .multiline, .sequence⟩),
     (`ContractFixtures.natural, ⟨.nat, .text⟩),
     (`ContractFixtures.boolean, ⟨.bool, .text⟩),
     (`ContractFixtures.unsigned, ⟨.uint64, .text⟩),
-    (`LeanRunGate.diagram, ⟨.nat, .html⟩),
+    (`ContractFixtures.naturalHtml, ⟨.nat, .html⟩),
     (`ContractFixtures.booleanHtml, ⟨.bool, .html⟩),
     (`ContractFixtures.unsignedHtml, ⟨.uint64, .html⟩),
     (`ContractFixtures.naturalSequence, ⟨.nat, .sequence⟩),

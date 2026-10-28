@@ -81,13 +81,13 @@ private meta def unsupportedForm {α : Type} (entry : Ident) (name : Name) (type
 /-- Default displays preserve HTML and otherwise use the model's `ToString` instance. -/
 private meta def defaultRenderer (entry : Ident) (type : Expr) : DocElabM Expr :=
   Lean.Meta.withLocalDeclD `value type fun value => do
-    let html ← if ← Lean.Meta.isDefEq type (mkConst ``Verso.Output.Html) then pure value
+    let html ← if ← Lean.Meta.isDefEq type (mkConst ``Lean.Html) then pure value
       else
         let text ← try Lean.Meta.mkAppM ``toString #[value]
           catch _ => throwErrorAt entry
             "Lean Run cannot display model type {type} automatically. \
               Provide a ToString instance or return a custom view with '.view render'."
-        Lean.Meta.mkAppM ``Verso.Output.Html.ofString #[text]
+        Lean.Meta.mkAppM ``Lean.Html.text #[text]
     Lean.Meta.mkLambdaFVars #[value] html
 
 /-- Choose the presentation before export classification. Models stay pure until
@@ -101,7 +101,7 @@ private meta def describePresentation (entry : Ident) (name : Name) (info : Cons
     if !info.levelParams.isEmpty then return (.text, original)
     Lean.Meta.withLocalDeclD binder domain fun argument => do
       let result ← Lean.Meta.whnf (result.instantiate1 argument)
-      if result.isConstOf ``Verso.Output.Html then return (.html, original)
+      if result.isConstOf ``Lean.Html then return (.html, original)
       if ← Lean.Meta.isDefEq result (mkConst ``SequenceView) then return (.sequence, original)
       if ← Lean.Meta.isDefEq result (mkConst ``AutomatonView) then return (.automaton, original)
       let sequence := result.isAppOfArity ``Sequence 1
@@ -123,7 +123,7 @@ private meta def describePresentation (entry : Ident) (name : Name) (info : Cons
 
 /-- Classify an explicitly resolved callable independently of genre-specific command elaboration.
 Default model displays and imported entries receive a document-owned export. -/
-meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM Experiment := do
+meta def describeEntry (config : Config) (name : Name) (source : Syntax) : DocElabM Experiment := do
   if isPrivateName name then
     throwErrorAt config.entry "Lean Run entry '{name}' is private. \
       Export a public wrapper or remove 'private'."
@@ -154,7 +154,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
       let admitted := match mode, callSignature.result with
         | .sequence, .structure result .. => result == ``Sequence
         | .automaton, .structure result .. => result == ``AutomatonSession
-        | .html, .customInductive result .. => result == ``Verso.Output.Html
+        | .html, .customInductive result .. => result == ``Lean.Html
         | .text, result => result == argument.type
         | _, _ => false
       unless admitted do
@@ -170,7 +170,7 @@ meta def describeEntry (config : Config) (name : Name) (str : StrLit) : DocElabM
   let name ← callableAdapter config.entry name value
   registerEntry config.entry name
   let env ← getEnv
-  let pos := (← getFileMap).toPosition <| str.raw.getPos?.getD 0
+  let pos := (← getFileMap).toPosition <| source.getPos?.getD 0
   let experiment : Experiment := {
     program := env.mainModule.toString, declaration := sourceName.toString, callable := name.toString, form,
     producerModule := match env.getModuleIdxFor? name with

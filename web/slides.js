@@ -1,7 +1,7 @@
 import { enhance } from "./renderer.js";
 
 addEventListener("DOMContentLoaded", () => {
-  const forms = new Set();
+  const forms = new Map();
   const visible = element => {
     const slide = element.closest(".slides section");
     if (slide && !slide.classList.contains("present")) return false;
@@ -15,10 +15,6 @@ addEventListener("DOMContentLoaded", () => {
     return true;
   };
   const attach = element => {
-    forms.add(element);
-    // Reveal restores its saved HTML when leaving scroll view. Copied attributes
-    // do not carry the original controls' listeners or worker ownership.
-    delete element.dataset.enhanced;
     const description = JSON.parse(element.dataset.experiment);
     if (description.collapsed) {
       const source = element.querySelector(".lean-run-source");
@@ -31,32 +27,33 @@ addEventListener("DOMContentLoaded", () => {
         source.replaceWith(details);
       }
     }
-    // Reveal also uses Enter, arrows, and Space. The form owns keys while focused.
-    element.addEventListener("keydown", event => event.stopPropagation());
+    const owner = enhance(element);
+    forms.set(element, owner);
+    // Reveal also uses Enter, arrows, and Space. These guards share the placement's lifetime.
+    element.addEventListener("keydown", event => event.stopPropagation(), { signal: owner.signal });
     element.addEventListener("submit", event => {
       if (!visible(element)) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
-    }, true);
-    enhance(element);
+    }, { capture: true, signal: owner.signal });
   };
   const stopHidden = () => {
-    for (const element of forms) {
+    for (const [element, owner] of forms) {
       const shown = visible(element);
       // Unvisited placements have no session to stop. Keep their initial Ready
       // state; entering a slide must not imply an earlier Run or cancellation.
       if (!shown && element.dataset.state && element.dataset.state !== "stopped") {
-        element.dispatchEvent(new Event("lean-run-stop"));
+        owner.stop();
       }
       element.querySelector('[type="submit"]').disabled = !shown ||
         ["loading", "running"].includes(element.dataset.state);
     }
   };
   const refresh = () => {
-    for (const element of forms) {
+    for (const [element, owner] of forms) {
       if (!element.isConnected) {
-        element.dispatchEvent(new Event("lean-run-dispose"));
+        owner.dispose();
         forms.delete(element);
       }
     }

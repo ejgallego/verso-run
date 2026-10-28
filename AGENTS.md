@@ -16,7 +16,7 @@ separation between elaboration, invocation, resource publication, and rendering.
 - Compiler scheduling and native precompilation remain deferred: retain
   `compiler.postponeCompile false` and the current package setup.
 - Qualify only the Illuminate drawing-command/SVG path; general diagram
-  rendering has recorded float-provider gaps in evidence/illuminate-gates.md.
+  rendering remains unqualified. See evidence/illuminate-gates.md.
 - Use conventional commit subjects; explain changes and validation clearly.
 - Read and apply [the writing principles](CONTRIBUTING.md#writing-documentation)
   before editing guides, API prose, demo text, or PR descriptions.

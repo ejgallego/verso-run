@@ -13,7 +13,7 @@ public meta import VersoLeanRun.Inline
 public meta import VersoSlides.InlineLean
 
 public section
-open Lean Verso Doc Elab Output Html Code.External
+open Lean Verso Doc Elab Output Code.External
 open SubVerso.Highlighting (Highlighted hlToExport)
 open VersoSlides
 
@@ -41,9 +41,9 @@ instance : ExternalCode VersoSlides.Slides where
     else .other (.leanCode (hlToExport (.point message.severity message.contents))) #[]
   leanOutputBlock message summarize expandTraces :=
     let body := message.contents.toString expandTraces
-    let output := {{ <pre class="hl lean lean-output"> {{body}} </pre> }}
+    let output := html%{<pre class="hl lean lean-output">{body}</pre>}
     .other (.ofHtml (if summarize then
-      {{ <details><summary> "Expand..." </summary> {{output}} </details> }} else output)) #[]
+      html%{<details><summary>Expand...</summary>{output}</details>} else output)) #[]
 
 /-- Keep native source children in the typed tree while sharing the console. -/
 def leanRun (experiment : Experiment) (source : Array (Block VersoSlides.Slides)) : Block VersoSlides.Slides :=
@@ -54,7 +54,7 @@ def leanRun (experiment : Experiment) (source : Array (Block VersoSlides.Slides)
       .other (.ofHtml (renderControls experiment)) #[]]
 
 private meta def inlineSource (shouldShow : Bool) (hls : Highlighted)
-    (str : StrLit) : DocElabM Term := do
+    (str : Lean.Doc.VersoCodeBlock) : DocElabM Term := do
   if !shouldShow then return ← ``(Verso.Doc.Block.concat #[])
   let col? := (← getRef).getPos? |>.map (← getFileMap).utf8PosToLspPos |>.map (·.character)
   let hls := match col? with
@@ -63,7 +63,7 @@ private meta def inlineSource (shouldShow : Bool) (hls : Highlighted)
   match fragmentize hls.trim with
   | .ok code =>
     ``(Verso.Doc.Block.other (VersoSlides.BlockExt.slideCode $(quote (scToExport code)) false false)
-      #[Verso.Doc.Block.code $(quote str.getString)])
+      #[Verso.Doc.Block.code $(quote str.getVersoCodeBlock)])
   | .error message => throwErrorAt str message
 
 /-- Inline Run retains Slides' native formatting and fragment data. -/

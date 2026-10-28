@@ -8,14 +8,13 @@ module
 public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
 
-open scoped Verso.Output.Html
 /-!
 # Interactive Lean examples
 
 verso-run runs selected Lean functions interactively from compiled Verso documents.
 Functions can return primitive values, HTML, or richer interactive views,
-including animations. HTML results use Verso's
-{name (full := Verso.Output.Html)}`Html` type and can include SVG.
+including animations. HTML results use Lean's
+{name (full := Lean.Html)}`Html` type and can include SVG.
 The experimental presenter is also written in Lean and uses DOM APIs to manage
 its controls and previews; the
 [rendering notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#rendering-and-transport)
@@ -24,14 +23,14 @@ describe this layer.
 ## Function results
 
 A function can return {lit}`Html` directly. For example, this one produces a
-paragraph containing a greeting. Opening {lit}`Verso.Output.Html` enables the
-HTML quotation syntax; interpolated strings are escaped:
+paragraph containing a greeting. The {lit}`html%{…}` syntax builds HTML;
+interpolated strings are escaped:
 
 ```lean
-open Verso.Output Verso.Output.Html
+open Lean
 
 public def greeting (name : String) : Html :=
-  {{ <p> "Hello, " {{name}} "!" </p> }}
+  html%{<p>Hello, {name}!</p>}
 ```
 
 ## Runnable document blocks
@@ -40,10 +39,10 @@ In a Verso document, put the definition inside a code fence labelled {lit}`leanR
 
 ````
 ```leanRun (entry := greeting) (input := "Ada")
-open Verso.Output Verso.Output.Html
+open Lean
 
 public def greeting (name : String) : Html :=
-  {{ <p> "Hello, " {{name}} "!" </p> }}
+  html%{<p>Hello, {name}!</p>}
 ```
 ````
 
@@ -98,11 +97,11 @@ text using {name}`ToString`. A custom renderer of type {lit}`α → Html` can pr
 an HTML or SVG display:
 
 ```lean
-open VersoLeanRun Verso.Output.Html
+open VersoLeanRun
 
 public def labelledCounter (seed : Nat) : AutomatonView :=
   (counter seed).view
-    (fun value => {{ <p> "Count: " {{toString value}} </p> }})
+    (fun value => html%{<p>Count: {toString value}</p>})
     (fun index => s!"Step {index}")
 ```
 

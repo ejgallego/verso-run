@@ -25,20 +25,19 @@ globs give every source one owner even where namespaces overlap; namespace-wide
 roots would also claim modules in other libraries. `lake run check-library-ownership`
 checks that every source is registered to the library whose directory contains it.
 
-The views library needs no browser assets and directly imports no genre adapter,
-VIR compiler or DOM binding. The presenter depends on view types; authoring depends on views and the
-native compiler APIs. Native publication imports the presenter carrier. That
-carrier classifies the prepared program in an elaboration-time environment and
-embeds its resources, keeping the DOM implementation out of ordinary native
-imports.
+The views library needs no browser assets and imports no Verso, VIR compiler or
+DOM binding modules. The presenter depends on view types and VIR's browser APIs;
+authoring depends on views and the native compiler APIs. Native publication imports
+the presenter carrier. That carrier classifies the prepared program in an
+elaboration-time environment and embeds its resources, keeping the DOM
+implementation out of ordinary native imports.
 
-The pinned `Verso.Output.Html` also imports its Lean quoter machinery. VIR's DOM
-bindings import host validation through `Vir.Host`, including VIR classifier
-modules. These upstream imports remain intact. Separating their syntax and
-runtime data would require an upstream change; this split makes verso-run's
-ownership explicit. It does not remove those transitive imports, and its effect
-on build time has not been measured. VIR packages executable declarations
-together with their reachable IR dependencies.
+View models and the compiled presenter use stdlib `Lean.Html` and import no
+Verso modules. HTML syntax and rendering come from `Lean.Data.Html`. VIR's DOM
+bindings still import host validation through `Vir.Host`, including VIR classifier
+modules; those upstream imports remain intact. This separation describes source
+ownership and import dependencies; its effect on build time has not been measured.
+VIR packages executable declarations together with their reachable IR dependencies.
 
 `tests/client.py` checks source-directory ownership and import phases, then runs a
 plain Lean producer through native and dedicated-worker execution without a
@@ -249,23 +248,26 @@ highlighted source without interactive controls.
 
 | Component | Pinned revision |
 | --- | --- |
-| Lean | 4.35.0-rc4 (required by VIR PR #229) |
-| Verso | `aff0fc92d7b9e56a3b309d409b7ef69629af3770` |
-| VIR | `957854b9df1202d4fadbd00ac5fa34e5adf278cc` (PR #229 head) |
-| Illuminate | `a1a61c9678da010e958ed24cdfa6f635b85f172a` |
-| Slides | `6e514cd443a51a39d92534b5a2ef08a5e47ed262` (public review snapshot) |
-| Runtime | `6cddc4b897410d7524a69bdaff0327d9f07916735078a0b12d548e2f88c23d20` |
+| Lean | `4.36.0-rc1` (prerelease) |
+| Verso | `d0a5f92ee585a92d2cd4c4904469c123f5ae5f10` |
+| VIR | `bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668` |
+| Illuminate | `d22e76ef3d2a925132315af902ea432233b4a44a` |
+| Slides | `e7705d546f7432bd8a32adda035310376db79839` (binary-assets review snapshot on 4.36) |
+| Runtime | `0d7d7edd3dde264439803e247dab0376116d5527d280359a67f80980e715bea6` |
 
-The minimal Verso fork is based on release `cad4b633` and exposes the existing
-`toHighlightedLeanBlock` helper; it contains no demo code. The runtime uses VIR
-compatibility version 3 (resource descriptor version 2). Lake acquires and verifies VIR's locked runtime, so
-authors do not need a separate SDK installation or Wasm build.
+Lake acquires and verifies VIR's locked runtime; authors do not need a separate
+SDK installation or Wasm build. The runtime uses compatibility version 7,
+resource descriptor version 2, and manifest version 13. Its pack SHA256 is
+`cc3c4694a9e7106f9d5c45bfd6f56b8ac2d8c4a1372473af0f9d4ebbb4845cbe`.
 
+Verso now uses Lean's `Html` type and `html%{…}` syntax. Manual and Blog render
+retained commands through the public `ExternalCode.leanBlock` API. The Verso
+revision also includes the module-system import fix needed by the literate API
+reference generator.
 
-The VIR pin is the exact source head selected from PR #229. Its Lean toolchain
-and runtime lock must be qualified together. Verso adds the upstream base-85 digit proof and deprecation-check adjustment needed by Lean 4.35, while
-Slides uses its module-owned-assets review snapshot. Illuminate retains its pin; consumer acceptance is recorded separately in
-[validation](validation.md).
+The independently pinned starter qualifies its own published baseline.
+[Validation](validation.md) describes the separate starter and candidate-consumer gates.
+
 
 ## Sequence presentation boundary
 
@@ -358,11 +360,18 @@ facet and its separate carrier. Extending that compiled presentation library
 does not require a new Lake rendering API. Its generated resources must remain
 outside the modules they embed, as with document programs.
 
+Each enhanced placement has one ownership handle. Repeated enhancement returns
+the same live handle; copied DOM attributes do not confer ownership. Its abort
+signal scopes the form and genre-specific listeners. Disposal terminates execution,
+clears the presenter and playback, removes the listeners and registry entry, and
+allows the same DOM node to be enhanced again. Stop and Pause preserve those
+placement bindings. Play/Step listeners have a shorter scope that ends when their
+rendered view is cleared.
+
 Stop and the loading deadline settle the module-import wait. They do not cancel
 ECMAScript import or its possible later evaluation. Late rejection stays observed,
 and generation checks prevent an abandoned wait from creating a presenter.
 
-The current Verso Html string serializer can omit closing tags for empty non-void
-elements. Presenter control paragraphs and the iframe have explicit bodies so
-fragment parsing preserves their sibling relationship. This belongs with the
-later Verso upstreaming review; the dependency pin is unchanged.
+Lean's HTML serializer emits closing tags for non-void elements, including empty
+paragraphs and iframes. Presenter controls therefore need no placeholder text to
+preserve their sibling structure.

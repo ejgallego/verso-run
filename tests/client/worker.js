@@ -10,7 +10,9 @@ onmessage = async ({ data: { base, plan, seed } }) => {
       expectedExports: plan.expectedExports,
     });
     const trace = program.call("ClientFixture.trace", BigInt(seed));
-    const render = frame => ({label:frame.label, html:program.call("ClientFixture.render", frame), error:frame.error});
+    // Native reference JSON uses null/string for Option; VIR uses tagged variants.
+    const render = frame => ({label:frame.label, html:program.call("ClientFixture.render", frame),
+      error:frame.error.kind === "none" ? null : frame.error.value});
     const session = program.call("ClientFixture.start", BigInt(seed));
     const other = program.call("ClientFixture.start", BigInt(seed));
     const frames = [session.initial];

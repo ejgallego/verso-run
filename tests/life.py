@@ -143,7 +143,6 @@ with serve_directory(served) as base:
         page.evaluate("""async url => {
             const original = document.querySelector('.lean-run[data-experiment*="LeanRunSequence.Life.lifeView"]');
             const copy = original.cloneNode(true);
-            delete copy.dataset.enhanced;
             copy.id = 'independent-life';
             original.after(copy);
             const {enhance} = await import(url);

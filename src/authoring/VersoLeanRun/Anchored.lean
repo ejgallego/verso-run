@@ -25,7 +25,7 @@ own Run block. Standard Verso code-body checks and highlighting remain authorita
 Imported, same-project entries use a document-owned scalar callable. -/
 meta def elabAnchoredRun
     (wrap : Experiment → Array Term → DocElabM (Array Term))
-    (args : Array Arg) (str : StrLit) : DocElabM (Array Term) := do
+    (args : Array Arg) (str : Lean.Doc.VersoCodeBlock) : DocElabM (Array Term) := do
   let config ← parseThe AnchorConfig args
   let project ← IO.FS.realPath config.source.project.getString
   let current ← IO.FS.realPath "."

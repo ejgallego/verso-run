@@ -17,7 +17,7 @@ for example, or a series of related illustrations.
 public section
 
 namespace VersoLeanRun
-open Verso.Output Lean
+open Lean
 
 /-- A recorded sequence of states, starting with an initial state. -/
 structure Sequence (α : Type) where
@@ -70,7 +70,7 @@ def SequenceView.error (message : String) (label : String := "Input") : Sequence
 Without a renderer, keep HTML or display other values as escaped text using `ToString`. -/
 def Sequence.view (sequence : Sequence α)
     (render : α → Html := by
-      first | exact id | exact fun value => Verso.Output.Html.ofString (toString value)) : SequenceView :=
+      first | exact id | exact fun value => Lean.Html.text (toString value)) : SequenceView :=
   sequence.map render
 
 /-- The maximum number of displayed frames, including the initial frame. -/

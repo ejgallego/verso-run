@@ -9,7 +9,7 @@ import Lean.Data.Json
 -- the structured VIR transport. This is test output, not an executable ABI.
 def referenceFrame (frame : VersoLeanRun.Frame) : Lean.Json :=
   Lean.Json.mkObj [("label", Lean.toJson frame.label),
-    ("html", Lean.toJson frame.content.asString), ("error", Lean.toJson frame.error)]
+    ("html", Lean.toJson frame.content.render), ("error", Lean.toJson frame.error)]
 
 def referenceSequence (view : VersoLeanRun.SequenceView) : Lean.Json :=
   Lean.Json.mkObj [("frames", Lean.toJson (view.frames.map referenceFrame))]
@@ -26,13 +26,13 @@ def main (args : List String) : IO Unit := do
         frames := frames.push (← Lean.Vir.RuntimeM.run session.advance)
       pure <| (Lean.toJson (frames.map referenceFrame)).compress
     | "stack" => pure <| LeanRunGate.Stack.run input
-    | "htmlGreeting" => pure <| (LeanRunGate.htmlGreeting input).asString
+    | "htmlGreeting" => pure <| (LeanRunGate.htmlGreeting input).render
     | "diagram" => do
       let some n := input.toNat? | throw <| IO.userError "invalid Nat"
-      pure <| (LeanRunGate.diagram n).asString
+      pure <| (LeanRunGate.diagram n).render
     | "badge" =>
       if input == "true" || input == "false" then
-        pure <| (LeanRunRendered.Examples.badge (input == "true")).asString
+        pure <| (LeanRunRendered.Examples.badge (input == "true")).render
       else throw <| IO.userError "invalid Bool"
     | "wordSteps" => do
       let some n := input.toNat? | throw <| IO.userError "invalid UInt64"
