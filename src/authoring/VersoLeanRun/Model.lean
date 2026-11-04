@@ -68,8 +68,8 @@ instance : ToJson FormKind where
     | ⟨.uint64, .automaton⟩ => "uint64Automaton"
     | ⟨_, .custom _⟩ => unreachable!
 
-/-- Accept exactly the supported string tags. Object encodings must not silently
-lose unsupported options at the native metadata boundary. -/
+/-- Accept the built-in string tags and the exact custom-result object shape.
+Reject unknown options at the native metadata boundary. -/
 instance : FromJson FormKind where
   fromJson? json := do
     if let .obj fields := json then

@@ -10,7 +10,7 @@ module.
 
 | Library | Source directory | Owned modules |
 | --- | --- | --- |
-| `VersoLeanRunViews` | `src/views/` | `Views`, `Frame`, `Sequence`, `Automaton` |
+| `VersoLeanRunViews` | `src/views/` | `Views`, `Frame`, `Sequence`, `Automaton`, `Result` |
 | `VersoLeanRunAuthoring` | `src/authoring/` | `Model`, `Callable`, `Anchored`, `Inline`, `Render`, `Collect` |
 | `VersoLeanRun` | `src/manual/` | Manual facade and `Manual` |
 | `VersoLeanRunPublish` | `src/publication/` | `Publish`, `Publication` |

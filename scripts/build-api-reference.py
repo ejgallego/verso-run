@@ -35,7 +35,9 @@ if not stamp.is_file() or stamp.read_text().strip() != signature:
     # The HTML facet writes current pages but does not retire old paths after a
     # module or its configured URL moves. This directory contains only our
     # generated reference; rebuilding it prevents stale pages entering a package.
-    shutil.rmtree(build / 'literate-html', ignore_errors=True)
+    rendered = build / 'literate-html'
+    if rendered.exists():
+        shutil.rmtree(rendered)
 
 subprocess.run(['lake', 'build', ':literateHtml'], cwd=root, check=True)
 stamp.write_text(signature + '\n')
