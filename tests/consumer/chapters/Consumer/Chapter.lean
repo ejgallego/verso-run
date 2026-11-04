@@ -30,3 +30,17 @@ The model, document, carrier, and publisher belong to this project.
 ```leanRun (entry := Consumer.live) (input := "7")
 #check Consumer.live
 ```
+
+# Typed result
+
+```leanRun (entry := Consumer.packet) (input := "255")
+#check Consumer.packet
+```
+
+```leanRun (entry := Consumer.packet) (input := "7")
+#check Consumer.packet
+```
+
+```leanRun (entry := Consumer.textPacket) +multiline (input := "initial text")
+#check Consumer.textPacket
+```

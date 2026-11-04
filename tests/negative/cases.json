@@ -174,5 +174,12 @@
     "contains": [
       "already in use"
     ]
+  },
+  "UnmarkedResult": {
+    "contains": [
+      "supported by VIR, but not by this Run form",
+      "CustomResult",
+      "Packet"
+    ]
   }
 }

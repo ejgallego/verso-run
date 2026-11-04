@@ -43,7 +43,7 @@ addEventListener("DOMContentLoaded", () => {
       const shown = visible(element);
       // Unvisited placements have no session to stop. Keep their initial Ready
       // state; entering a slide must not imply an earlier Run or cancellation.
-      if (!shown && element.dataset.state && element.dataset.state !== "stopped") {
+      if (!shown && element.dataset.state && !["idle", "stopped"].includes(element.dataset.state)) {
         owner.stop();
       }
       element.querySelector('[type="submit"]').disabled = !shown ||

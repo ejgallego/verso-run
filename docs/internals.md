@@ -375,3 +375,83 @@ and generation checks prevent an abandoned wait from creating a presenter.
 Lean's HTML serializer emits closing tags for non-void elements, including empty
 paragraphs and iframes. Presenter controls therefore need no placeholder text to
 preserve their sibling structure.
+
+## Custom result presenters
+
+A document extension can display a concrete Lean result type through the standard
+Run controls. The ordinary producer imports `VersoLeanRun.Result` (also included
+by `VersoLeanRun.Views`) and declares an empty marker instance:
+
+```lean
+instance : VersoLeanRun.CustomResult My.Result := ⟨⟩
+```
+
+The native publisher registers the result type and its presentation modules:
+
+```lean
+def presenter : VersoLeanRun.ResultPresenter := {
+  resultType := resultType% My.Result
+  workerModule := { path := "lean-run/my/normalize.js", bytes := normalizerBytes }
+  rendererModule := { path := "lean-run/my/render.js", bytes := rendererBytes }
+}
+```
+
+`resultType%` uses VIR's compiler to classify calls from each supported scalar
+input to that concrete result type. Publication supplies these contracts
+independently of the downloaded executable. The result type's qualified name
+identifies its presenter; authors need no output argument or custom fence. The
+existing `leanRun` block admits the marked type, while unmarked types retain
+the normal unsupported-form diagnostic. Built-in HTML, sequence and automaton
+presentations keep their existing admission and compiled Lean presenters.
+
+Manual's `publish`, Blog's `blogMain`, and Slides' `slidesMain` all accept
+`(presenters := #[presenter])` alongside their `ResourceSet`. The common planner
+validates the entire custom inventory before writing: module and auxiliary
+files must remain beneath `lean-run/`, and cannot collide with stock resources,
+reserved paths or one another, including case and file/directory aliases.
+
+The worker module exports `normalizeResult(value, description)`, returning
+`{ result, transfer? }` or a promise of that object. It receives an owned
+structured clone of the decoded VIR value. Transfer lists contain unique
+`ArrayBuffer`s reachable from the returned result; runtime-owned buffers remain
+intact. Normalizers should validate their domain's value and size limits. This
+copy boundary is deliberate, rather than a claim of end-to-end zero-copy transport.
+The core worker retains compiler-contract checking, errors and real termination
+on Stop. A normalizer import or asynchronous normalization has a loading deadline.
+
+The renderer module exports synchronous `mount(slot, { signal })`. The slot is a
+persistent `.lean-run-result` element inside the owning `.lean-run` placement.
+Mount returns four hooks:
+
+- `show(result, { signal })` displays a normalized result and may return a promise.
+- `clear()` removes the displayed result and stops its side effects.
+- `pause()` stops playback or animation without discarding the panel.
+- `dispose()` releases panel resources.
+
+The mount signal owns the renderer's listeners and is aborted on disposal or
+failed attachment. Each result receives a separate signal, retired before clear
+or pause. Extensions must check that signal after asynchronous work, especially
+before resuming media or updating the DOM. The core bounds its waits and ignores
+stale completion; it cannot prevent trusted extension code that ignores abort
+from performing its own later side effects. Cleanup hooks are synchronous and
+should be safe after partial work.
+
+Hiding a tab pauses presentation. Returning re-presents the retained result
+with a new signal, including when the first renderer import was still pending.
+Presentation must not automatically start or resume sound. Input edits, Stop and
+replacement invalidate the result; placement disposal also releases the worker
+and renderer. Removal is detected across all three genres. Connected DOM moves
+preserve ownership; a later reinsertion after disposal receives a fresh idle
+owner and retains reader input.
+
+A bubbling `lean-run-result` event carries `{state, result}`. Initial success
+is emitted after `show` completes, so listeners see a displayed result. Other
+execution states carry `result: null` after invalidation. Ordinary visibility
+restoration does not emit a second success for a result already shown. The core
+also emits `lean-run-dispose` when it retires a placement internally; explicit
+disposal events are not emitted a second time.
+
+The independent consumer fixture in `tests/consumer/` exercises custom typed
+bytes alongside stock scalar, finite and live calls, and publishes through all
+three genre adapters. Its result panel has explicit silent media playback to
+check ownership without depending on a downstream application.

@@ -74,7 +74,8 @@ private meta def unsupportedForm {α : Type} (entry : Ident) (name : Name) (type
         Export a wrapper taking one String, Nat, Bool, or UInt64 input."
     else
       m!"This form supports homogeneous scalar calls or a scalar input returning Html, Sequence, Automaton, or a rendered view. \
-        Use a supported scalar type or return a typed rendered view."
+        Use a supported scalar type or return a typed rendered view. \
+        A document extension can register a CustomResult presenter for another concrete result type."
   throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
     This interface is supported by VIR, but not by this Run form.\n\
     {reason}\nUse a pure homogeneous scalar call, or a String, Nat, Bool, or UInt64 input returning Html, Sequence, Automaton, or a rendered view."

@@ -10,6 +10,7 @@ import tempfile
 
 from playwright.sync_api import expect, sync_playwright
 from harness import inventory, run_command, serve_directory
+from result_browser import qualify_result_presenters
 
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
@@ -100,11 +101,14 @@ try:
     plan = json.loads((site / 'lean-run/publication.json').read_text())
     report['publication'] = plan
     bindings = plan['programs']['Consumer.Chapter']
-    assert set(bindings) == {'Consumer.finite', 'Consumer.live', 'Consumer.increment'}
+    assert set(bindings) == {'Consumer.finite', 'Consumer.live', 'Consumer.increment', 'Consumer.packet', 'Consumer.textPacket'}
     assert bindings['Consumer.finite']['expectedExport']['effect'] == 'pure'
     assert bindings['Consumer.live']['expectedExport']['effect'] == 'runtime'
     assert bindings['Consumer.increment']['expectedExport']['effect'] == 'pure'
     assert set(plan['presenters']) == {'sequence', 'automaton'}
+    assert set(plan['resultPresenters']) == {'Consumer.Packet'}
+    assert bindings['Consumer.packet']['expectedExport']['effect'] == 'pure'
+    assert bindings['Consumer.textPacket']['expectedExport']['effect'] == 'pure'
     vir = project / '.lake/packages/lean_vir'
     runtime_lock = json.loads((vir / 'vir-resources/runtime.json').read_text())
     report['runtimeContentId'] = runtime_lock['contentId']
@@ -113,11 +117,21 @@ try:
     assert (project / '.lake/build/lib/lean/vir-assets/Consumer/Chapter.virres').is_file()
     assert (extension_dir / '.lake/build/lib/lean/vir-assets/VersoLeanRunPresenter.virres').is_file()
     record('public Manual/publisher imports prepare consumer and dependency presenter resources through ordinary Lake needs')
+    packet_route = next(str(path.relative_to(site)) for path in site.rglob('*.html')
+                        if 'Consumer.textPacket' in path.read_text() and 'data-experiment=' in path.read_text())
+    for genre in ['blog', 'slides']:
+        command(['lake', 'exe', 'consumer-' + genre, str(project / '_out' / genre)], 'generate-' + genre)
+        genre_plan = json.loads((project / '_out' / genre / 'lean-run/publication.json').read_text())
+        assert genre_plan['resultPresenters'] == plan['resultPresenters']
+        report[genre + 'Publication'] = genre_plan
+    record('independent Blog and Slides adapters publish the same typed registration through their own resource carriers')
     served = output / 'served'
     for prefix in ['root', 'nested/manual']:
         destination = served / prefix
         shutil.copytree(site, destination, dirs_exist_ok=True)
         assert inventory(destination) == inventory(site)
+        for genre in ['blog', 'slides']:
+            shutil.copytree(project / '_out' / genre, destination / genre, dirs_exist_ok=True)
     # Remove the generated source site before HTTP execution: the server serves
     # only the copied files, and cannot fall back to the producer's output.
     hidden_site = project / '_out/generated-before-relocation'
@@ -195,6 +209,24 @@ try:
                 assert first.get_attribute('data-state') == 'stopped'
                 advance(second, b['live'][2])
                 record(prefix + ': repeated live placements advance independently; stopping one preserves the other')
+            qualify_result_presenters(page, base, ['root', 'nested/manual'], packet_route, native, record)
+            for prefix in ['root', 'nested/manual']:
+                for genre in ['blog', 'slides']:
+                    page.goto(base + prefix + '/' + genre + '/')
+                    page.wait_for_selector('.lean-run[data-enhanced]')
+                    if genre == 'slides':
+                        page.evaluate('''() => Reveal.slide(Reveal.getSlides().findIndex(slide => slide.querySelector('.lean-run')))''')
+                    form = page.locator('.lean-run').first
+                    form.locator('[type=submit]').click()
+                    success(form)
+                    assert json.loads(form.locator('.packet-value').text_content()) == {'label': '255', 'bytes': [255, 0]}
+                    if genre == 'slides':
+                        form.get_by_role('button', name='Play', exact=True).click()
+                        expect(form).to_have_attribute('data-playing', 'true')
+                        page.evaluate('Reveal.next()')
+                        expect(form).to_have_attribute('data-playing', 'false')
+                        expect(form).to_have_attribute('data-state', 'stopped')
+                record(prefix + ': custom typed results execute in Blog and Slides; slide exit retires media and worker')
             assert not errors, errors
         finally:
             browser.close()

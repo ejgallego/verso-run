@@ -173,6 +173,7 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
       ("contract.js", include_str "../../../web/contract.js"),
       ("presenter.js", include_str "../../../web/presenter.js"),
       ("result.js", include_str "../../../web/result.js"),
+      ("result-view.js", include_str "../../../web/result-view.js"),
       ("lifetime.js", include_str "../../../web/lifetime.js"),
       ("automaton.js", include_str "../../../web/automaton.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }

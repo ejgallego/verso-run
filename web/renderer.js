@@ -1,7 +1,7 @@
 import { ExperimentHost } from "./host.js";
 import { AutomatonPlayer } from "./automaton.js";
 import { ViewHost } from "./presenter.js";
-import { ResultView } from "./result.js";
+import { ResultView } from "./result-view.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Map();
 const retired = new WeakSet();
@@ -17,7 +17,7 @@ function reconcile() {
   // Slides discovers/rebinds its own controls. A reinserted Manual/Blog node
   // gets a fresh idle owner; connected DOM moves keep the existing one.
   for (const element of document.querySelectorAll(".lean-run:not(.lean-run-slides)")) {
-    if (retired.has(element)) { retired.delete(element); enhance(element); }
+    if (retired.has(element) || !initialized.has(element)) { retired.delete(element); enhance(element); }
   }
 }
 addEventListener("pagehide", event => {
@@ -37,12 +37,12 @@ let instance = 0;
 export function enhance(element) {
   // Reveal can clone the marker without cloning a placement's ownership.
   const existing = owners.get(element);
-  if (!element.isConnected) { existing?.dispose(); return null; }
-  if (existing) return existing;
   if (!observing) {
     new MutationObserver(reconcile).observe(document.documentElement, { childList: true, subtree: true });
     observing = true;
   }
+  if (!element.isConnected) { existing?.dispose(); return null; }
+  if (existing) return existing;
   const lifetime = new AbortController();
   const binding = { signal: lifetime.signal };
   const description = JSON.parse(element.dataset.experiment);
@@ -162,6 +162,7 @@ export function enhance(element) {
           resumeAfterStart = false;
         }
       });
+      if (resultElement && view.paused) setState("paused");
     } else emit(state, state === "success" ? value : null);
   });
   if (automatonElement) {
@@ -198,10 +199,18 @@ export function enhance(element) {
       }
     },
     resume: () => {
-      if (!lifetime.signal.aborted && resultElement) void view.resume();
+      if (!lifetime.signal.aborted && resultElement) {
+        const wasShown = view.shown;
+        void view.resume().then(shown => {
+          if (!shown) return;
+          setState("success");
+          if (!wasShown) emit("success", view.value);
+        });
+      }
     },
   };
-  run.disabled = false;
+  setState("idle");
+  if (document.hidden) owner.pause();
   form.addEventListener("submit", event => {
     event.preventDefault();
     if (busy && !(automatonElement && ready)) return;
