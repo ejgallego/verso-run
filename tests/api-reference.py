@@ -34,13 +34,13 @@ else:
     command(['python3', 'scripts/build-api-reference.py'], 'generate')
     site = ROOT / '.lake/build/literate-html'
 
-modules = {'VersoLeanRun.' + name for name in ['Views', 'Frame', 'Sequence', 'Automaton']}
+modules = {'VersoLeanRun.' + name for name in ['Views', 'Frame', 'Sequence', 'Automaton', 'Result']}
 assert set((ROOT / '.lake/build/literate-plan').read_text().splitlines()) == modules
 pages = sorted(site.rglob('index.html'))
 assert {str(page.relative_to(site)) for page in pages} == {
     'index.html', 'search/index.html',
     *[name.replace('.', '/') + '/index.html' for name in modules]}
-record('reference selects only the four public view modules, with a landing page and search')
+record('reference selects only the public view modules, with a landing page and search')
 
 class Page(HTMLParser):
     def __init__(self, path):
