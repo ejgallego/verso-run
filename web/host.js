@@ -1,4 +1,4 @@
-import { validateInput, scalarKind, resultKind } from "./contract.js";
+import { validateInput, scalarKind, resultKind, presenterKey } from "./contract.js";
 let publication;
 // Pending acquisition is shared only while a placement still needs it. A stopped
 // placement releases its interest, without aborting another placement's fetch.
@@ -77,6 +77,14 @@ export class ExperimentHost {
         const publication = { runtimeModule: url(plan.runtimeModule),
           runtimeManifest: url(plan.runtimeManifest), programManifest: url(binding.manifest),
           expectedExport: binding.expectedExport };
+        const key = presenterKey(this.description.form);
+        if (key) {
+          if (!Object.hasOwn(plan.resultPresenters ?? {}, key))
+            throw new Error(`No registered result presenter for type '${key}'`);
+          const presenter = plan.resultPresenters[key];
+          publication.resultModule = url(presenter.workerModule);
+          this.resultRendererUrl = url(presenter.rendererModule);
+        }
         if (!this.worker) {
           const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
           this.worker = worker;

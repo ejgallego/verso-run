@@ -27,6 +27,7 @@ inductive InputKind where
 the input's scalar type; rendered results use their own transport contract. -/
 inductive PresentationKind where
   | text | html | sequence | automaton
+  | custom (resultType : String)
   deriving BEq, Repr
 
 structure FormKind where
@@ -35,7 +36,16 @@ structure FormKind where
   deriving BEq, Repr
 
 instance : ToJson FormKind where
-  toJson form := .str <| match form with
+  toJson form := Id.run do
+    if let .custom resultType := form.presentation then
+      let input := match form.input with
+        | .string .line => "string"
+        | .string .multiline => "multilineString"
+        | .nat => "nat"
+        | .bool => "bool"
+        | .uint64 => "uint64"
+      return .mkObj [("input", .str input), ("presenter", .str resultType)]
+    return .str <| match form with
     | ⟨.string .line, .text⟩ => "string"
     | ⟨.string .multiline, .text⟩ => "multilineString"
     | ⟨.string .line, .html⟩ => "html"
@@ -56,11 +66,24 @@ instance : ToJson FormKind where
     | ⟨.nat, .automaton⟩ => "natAutomaton"
     | ⟨.bool, .automaton⟩ => "boolAutomaton"
     | ⟨.uint64, .automaton⟩ => "uint64Automaton"
+    | ⟨_, .custom _⟩ => unreachable!
 
 /-- Accept exactly the supported string tags. Object encodings must not silently
 lose unsupported options at the native metadata boundary. -/
 instance : FromJson FormKind where
   fromJson? json := do
+    if let .obj fields := json then
+      unless fields.size == 2 do throw "Invalid custom Lean Run form"
+      let presenter ← json.getObjValAs? String "presenter"
+      if presenter.isEmpty then throw "Empty Lean Run presenter type"
+      let input ← match ← json.getObjValAs? String "input" with
+        | "string" => pure (.string .line)
+        | "multilineString" => pure (.string .multiline)
+        | "nat" => pure .nat
+        | "bool" => pure .bool
+        | "uint64" => pure .uint64
+        | _ => throw "Unsupported custom Lean Run input"
+      return ⟨input, .custom presenter⟩
     match ← json.getStr? with
     | "string" => pure ⟨.string .line, .text⟩
     | "multilineString" => pure ⟨.string .multiline, .text⟩
@@ -100,6 +123,11 @@ def FormKind.isHtml (form : FormKind) : Bool := form.presentation == .html
 def FormKind.isSequence (form : FormKind) : Bool := form.presentation == .sequence
 
 def FormKind.isAutomaton (form : FormKind) : Bool := form.presentation == .automaton
+
+def FormKind.customResult? (form : FormKind) : Option String :=
+  match form.presentation with
+  | .custom name => some name
+  | _ => none
 
 /-- Portable call description admitted from the independently classified Lean
 interface. Runtime URLs and encoded expected signatures belong to publication. -/

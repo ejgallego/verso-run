@@ -1,8 +1,25 @@
 import { ExperimentHost } from "./host.js";
 import { AutomatonPlayer } from "./automaton.js";
 import { ViewHost } from "./presenter.js";
+import { ResultView } from "./result.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Map();
+const retired = new WeakSet();
+const initialized = new WeakSet();
+let observing = false;
+function reconcile() {
+  for (const [element, owner] of owners) {
+    if (!element.isConnected) {
+      owner.dispose();
+      retired.add(element);
+    }
+  }
+  // Slides discovers/rebinds its own controls. A reinserted Manual/Blog node
+  // gets a fresh idle owner; connected DOM moves keep the existing one.
+  for (const element of document.querySelectorAll(".lean-run:not(.lean-run-slides)")) {
+    if (retired.has(element)) { retired.delete(element); enhance(element); }
+  }
+}
 addEventListener("pagehide", event => {
   for (const owner of owners.values()) {
     // A cached page retains its controls and listeners when Back restores it.
@@ -12,19 +29,29 @@ addEventListener("pagehide", event => {
   if (!event.persisted) owners.clear();
 });
 addEventListener("visibilitychange", () => {
-  if (document.hidden) for (const owner of owners.values()) owner.pause();
+  for (const owner of owners.values()) {
+    if (document.hidden) owner.pause(); else owner.resume();
+  }
 });
 let instance = 0;
 export function enhance(element) {
   // Reveal can clone the marker without cloning a placement's ownership.
   const existing = owners.get(element);
+  if (!element.isConnected) { existing?.dispose(); return null; }
   if (existing) return existing;
+  if (!observing) {
+    new MutationObserver(reconcile).observe(document.documentElement, { childList: true, subtree: true });
+    observing = true;
+  }
   const lifetime = new AbortController();
   const binding = { signal: lifetime.signal };
   const description = JSON.parse(element.dataset.experiment);
   const form = element.querySelector("form");
   const input = form.querySelector("input, select, textarea");
-  if (input.tagName === "TEXTAREA") input.value = description.initialInput;
+  if (!initialized.has(element)) {
+    if (input.tagName === "TEXTAREA") input.value = description.initialInput;
+    initialized.add(element);
+  }
   const run = form.querySelector('[type="submit"]');
   const stop = form.querySelector(".lean-run-stop");
   const status = element.querySelector(".lean-run-status");
@@ -32,6 +59,10 @@ export function enhance(element) {
   const preview = element.querySelector(".lean-run-preview");
   const sequenceElement = element.querySelector(".lean-run-sequence");
   const automatonElement = element.querySelector(".lean-run-automaton");
+  const resultElement = element.querySelector(".lean-run-result");
+  const emit = (state, result = null) => element.dispatchEvent(new CustomEvent("lean-run-result", {
+    bubbles: true, detail: { state, result },
+  }));
   let ready = false;
   let appliedInput = null;
   let resumeAfterStart = false;
@@ -62,7 +93,7 @@ export function enhance(element) {
     element.dataset.state = state;
     busy = ["loading", "running", "loading view", "advancing"].includes(state);
     run.disabled = busy && !(automatonElement && ready);
-    stop.disabled = !busy && !(automatonElement && ready);
+    stop.disabled = !busy && !(automatonElement && ready) && !(resultElement && view.hasValue);
     status.textContent = automatonElement && ready && (state === "success" || state === "advancing") ?
       (player.playing ? "Playing" : state === "advancing" ? "Advancing" : "Paused") :
       state === "idle" ? "Ready" :
@@ -72,10 +103,13 @@ export function enhance(element) {
     inputState();
   };
   const pane = automatonElement || sequenceElement || preview;
-  const view = pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", error => {
+  const displayError = error => {
     if (automatonElement) host.stop();
     setState("failed", `Could not display the view. Try Run again. ${error.message}`);
-  }) : null;
+    emit("failed");
+  };
+  const view = resultElement ? new ResultView(resultElement, lifetime.signal, displayError) :
+    pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", displayError) : null;
   let viewControls = null;
   const clearResult = () => {
     viewControls?.abort();
@@ -95,6 +129,7 @@ export function enhance(element) {
         if (value.error.kind === "some") { ready = false; player.pause(); }
         setState("success");
         liveControls();
+        emit("success", value);
         return true;
       });
       return;
@@ -104,9 +139,10 @@ export function enhance(element) {
     setState(state, state === "success" && view ? "" : value);
     if (state === "success" && view) {
       setState("loading view");
-      void view.show(value).then(shown => {
+      void view.show(value, host.resultRendererUrl).then(shown => {
         if (!shown) return;
         setState("success");
+        emit("success", value);
         if (automatonElement) {
           ready = value.error.kind === "none";
           viewControls = new AbortController();
@@ -126,7 +162,7 @@ export function enhance(element) {
           resumeAfterStart = false;
         }
       });
-    }
+    } else emit(state, state === "success" ? value : null);
   });
   if (automatonElement) {
     player = new AutomatonPlayer(async () => {
@@ -139,21 +175,30 @@ export function enhance(element) {
   const owner = {
     signal: lifetime.signal,
     stop: state => { if (!lifetime.signal.aborted) host.stop(state); },
-    dispose: () => {
+    dispose: (notify = true) => {
       if (lifetime.signal.aborted) return;
       lifetime.abort();
       try { host.dispose(); }
       finally {
+        if (resultElement) view.dispose();
         owners.delete(element);
         delete element.dataset.enhanced;
         run.disabled = true;
         stop.disabled = true;
+        if (notify) element.dispatchEvent(new Event("lean-run-dispose", { bubbles: true }));
       }
     },
     pause: () => {
       if (lifetime.signal.aborted) return;
       resumeAfterStart = false;
       player?.pause();
+      if (resultElement) {
+        view.pause();
+        if (element.dataset.state === "loading view") setState("paused");
+      }
+    },
+    resume: () => {
+      if (!lifetime.signal.aborted && resultElement) void view.resume();
     },
   };
   run.disabled = false;
@@ -176,7 +221,7 @@ export function enhance(element) {
   }, binding);
   stop.addEventListener("click", () => owner.stop(), binding);
   element.addEventListener("lean-run-stop", () => owner.stop(), binding);
-  element.addEventListener("lean-run-dispose", () => owner.dispose(), binding);
+  element.addEventListener("lean-run-dispose", () => owner.dispose(false), binding);
   input.addEventListener("input", () => {
     if (automatonElement) inputState();
     else host.stop("idle");

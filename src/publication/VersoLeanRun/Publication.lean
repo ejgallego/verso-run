@@ -5,6 +5,7 @@ Author: Emilio J. Gallego Arias
 -/
 module
 public import VersoLeanRun.Model
+public import VersoLeanRun.ResultPresenter
 public import Lean.Data.Json.Parser
 public import Std.Data.TreeMap.Basic
 public import Vir.Resources
@@ -50,6 +51,8 @@ def combineResources (resources additional : ResourceSet) : Except String Resour
 /-- Encode the admitted input/result pair through VIR, independently of the
 program bundle. Structured results use the compiled payload layout. -/
 def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
+  if form.customResult?.isSome then
+    throw "A custom result needs its registered compiler contract"
   if form.presentation != .text then
     return ← Lean.Json.parse <| match form.scalar, form.presentation with
       | .string, .html => (renderedCallableExpected% String Lean.Html)
@@ -65,6 +68,7 @@ def FormKind.expectedExport (form : FormKind) : Except String Lean.Json := do
       | .bool, .automaton => (renderedCallableExpected% Bool AutomatonView)
       | .uint64, .automaton => (renderedCallableExpected% UInt64 AutomatonView)
       | _, .text => unreachable!
+      | _, .custom _ => unreachable!
   let type : Vir.Interface.InterfaceType := match form.scalar with
     | .string => .string
     | .nat => .nat
@@ -97,10 +101,18 @@ private def registerBinding (bindings : PublicationBindings) (experiment : Exper
   return bindings.insert experiment.program <|
     declarations.insert experiment.declaration { source := experiment, value := binding }
 
+private def expectedExport (form : FormKind) (presenters : Array ResultPresenter) : Except String Lean.Json := do
+  if let some name := form.customResult? then
+    let some presenter := presenters.find? (fun presenter => presenter.resultType.name == name)
+      | throw s!"No registered result presenter for type '{name}'"
+    presenter.resultType.expectedExport form.scalar
+  else form.expectedExport
+
 /-- Plan the supplied inventory without acquiring or replacing its runtime.
 Resolve declarations and validate contracts before performing any output writes. -/
 def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
-    (resourcePrefix : String := "lean-run/resources") : Except String Publication := do
+    (resourcePrefix : String := "lean-run/resources")
+    (presenters : Array ResultPresenter := #[]) : Except String Publication := do
   let automaton := rendered.any (·.form.isAutomaton)
   let sequence := rendered.any (·.form.isSequence)
   let html := rendered.any (·.form.isHtml)
@@ -118,7 +130,7 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
     -- Preserve the original index-to-manifest mapping for identical repetitions.
     let some i := programs.findIdx? (fun bundle => bundle.descriptor.logicalId == producer)
       | throw s!"{provenance}: no published program bundle for {experiment.declaration} (producer module {producer}). Add +Module:virResourcePack to the asset library needs, embed with include_vir_assets (modules := #[Module]), and supply its ResourceSet to VersoLeanRun.publish."
-    let signature ← experiment.form.expectedExport.mapError fun error =>
+    let signature ← (expectedExport experiment.form presenters).mapError fun error =>
       s!"{provenance}: invalid compiled VIR signature: {error}"
     let binding := Lean.Json.mkObj [
       ("manifest", .str site.programManifests[i]!),
@@ -155,14 +167,23 @@ def preparePublication (rendered : Array Experiment) (resources : ResourceSet)
         ("manifest", .str manifest), ("declaration", .str "VersoLeanRun.Presenter.mountHtml"),
         ("expectedExport", expected)])]
     fields := fields ++ [("presenters", Lean.Json.mkObj presenters)]
-  let plan := Lean.Json.mkObj fields
-  let mut files := site.files.push { path := "lean-run/publication.json", bytes := plan.compress.toUTF8 }
+  let mut files := site.files
   for (name, contents) in [("renderer.js", include_str "../../../web/renderer.js"),
       ("host.js", include_str "../../../web/host.js"), ("worker.js", include_str "../../../web/worker.js"),
       ("contract.js", include_str "../../../web/contract.js"),
       ("presenter.js", include_str "../../../web/presenter.js"),
+      ("result.js", include_str "../../../web/result.js"),
+      ("lifetime.js", include_str "../../../web/lifetime.js"),
       ("automaton.js", include_str "../../../web/automaton.js")] do
     files := files.push { path := "lean-run/" ++ name, bytes := contents.toUTF8 }
+  let reserved := #["publication.json", "bootstrap.js", "console.css", "slides.js", "slides.css"]
+    |>.map (fun name => ({ path := "lean-run/" ++ name, bytes := ⟨#[]⟩ } : File))
+  let (inventory, registry) ← ResultPresenter.inventory presenters (files ++ reserved)
+  -- Genre adapters supply their reserved assets; they are not empty output files.
+  files := inventory.filter fun file => !(reserved.any (·.path == file.path))
+  if !presenters.isEmpty then fields := fields ++ [("resultPresenters", registry)]
+  let plan := Lean.Json.mkObj fields
+  files := files.push { path := "lean-run/publication.json", bytes := plan.compress.toUTF8 }
   return { files, plan }
 
 /-- Write an already validated publication to the generator-selected site root. -/

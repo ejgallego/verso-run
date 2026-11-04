@@ -7,6 +7,7 @@ module
 
 public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
+public import VersoLeanRun.Result
 
 /-!
 # Interactive Lean examples

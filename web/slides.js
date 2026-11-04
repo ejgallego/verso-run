@@ -52,7 +52,7 @@ addEventListener("DOMContentLoaded", () => {
   };
   const refresh = () => {
     for (const [element, owner] of forms) {
-      if (!element.isConnected) {
+      if (!element.isConnected || owner.signal.aborted) {
         owner.dispose();
         forms.delete(element);
       }

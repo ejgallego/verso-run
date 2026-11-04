@@ -58,9 +58,10 @@ and draft policy are explicit; the supplied runtime and inventory are preserved.
 def blogMain (theme : Theme) (site : Site) (resources : Vir.Resources.ResourceSet)
     (destination : System.FilePath := "_site") (showDrafts : Bool := false)
     (components : Components := by exact %registered_components)
-    (linkTargets : Verso.Code.LinkTargets TraverseContext := {}) : IO UInt32 := do
+    (linkTargets : Verso.Code.LinkTargets TraverseContext := {})
+    (presenters : Array ResultPresenter := #[]) : IO UInt32 := do
   let found ← IO.ofExcept <| siteExperiments site showDrafts
-  let publication ← IO.ofExcept <| preparePublication found resources
+  let publication ← IO.ofExcept <| preparePublication found resources (presenters := presenters)
   let options := ["--output", destination.toString] ++ (if showDrafts then ["--drafts"] else [])
   let result ← Verso.Genre.Blog.blogMain theme site linkTargets options (components := components)
   if result == 0 then writePublication destination publication

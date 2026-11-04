@@ -10,6 +10,7 @@ public import Verso.Doc.Elab
 meta import Verso.Instances.Deriving
 public import Verso.Output.Html
 public import VersoLeanRun.Views
+public import VersoLeanRun.Result
 public meta import Vir.Attributes
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Lean.ToExpr
@@ -106,7 +107,11 @@ private meta def describePresentation (entry : Ident) (name : Name) (info : Cons
       if ← Lean.Meta.isDefEq result (mkConst ``AutomatonView) then return (.automaton, original)
       let sequence := result.isAppOfArity ``Sequence 1
       let automaton := result.isAppOfArity ``Automaton 1
-      if !sequence && !automaton then return (.text, original)
+      if !sequence && !automaton then
+        if let .const resultType [] := result then
+          if (← Lean.Meta.synthInstance? (mkApp (mkConst ``CustomResult) result)).isSome then
+            return (.custom resultType.toString, original)
+        return (.text, original)
       if result.hasFVar then
         throwErrorAt entry "Lean Run automatic display needs a fixed model type. \
           Return a rendered view for a model whose type depends on the input."
@@ -155,6 +160,8 @@ meta def describeEntry (config : Config) (name : Name) (source : Syntax) : DocEl
         | .sequence, .structure result .. => result == ``Sequence
         | .automaton, .structure result .. => result == ``AutomatonSession
         | .html, .customInductive result .. => result == ``Lean.Html
+        | .custom resultType, .structure result .. => result.toString == resultType
+        | .custom resultType, .customInductive result .. => result.toString == resultType
         | .text, result => result == argument.type
         | _, _ => false
       unless admitted do

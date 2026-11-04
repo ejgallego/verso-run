@@ -24,7 +24,7 @@ lean_lib VersoLeanRunViews where
   leanOptions := #[⟨`doc.verso.module, true⟩]
   roots := #[]
   globs := #[.one `VersoLeanRun.Views, .one `VersoLeanRun.Frame,
-    .one `VersoLeanRun.Sequence, .one `VersoLeanRun.Automaton]
+    .one `VersoLeanRun.Sequence, .one `VersoLeanRun.Automaton, .one `VersoLeanRun.Result]
 
 lean_lib VersoLeanRunAuthoring where
   srcDir := "src/authoring"
@@ -44,7 +44,8 @@ lean_lib VersoLeanRun where
 lean_lib VersoLeanRunPublish where
   srcDir := "src/publication"
   roots := #[]
-  globs := #[.one `VersoLeanRun.Publish, .one `VersoLeanRun.Publication]
+  globs := #[.one `VersoLeanRun.Publish, .one `VersoLeanRun.Publication,
+    .one `VersoLeanRun.ResultPresenter]
   needs := #[leanRunWeb]
 
 lean_lib VersoLeanRunBlog where

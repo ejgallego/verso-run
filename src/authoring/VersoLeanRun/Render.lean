@@ -45,6 +45,8 @@ def renderControls (experiment : Experiment) : Html := Id.run do
       html%{<div class="lean-run-automaton" hidden="hidden"/>}
     else if experiment.form.isSequence then
       html%{<div class="lean-run-sequence" hidden="hidden"/>}
+    else if experiment.form.customResult?.isSome then
+      html%{<div class="lean-run-result" hidden="hidden"/>}
     else .empty
   let inputNote := if experiment.form.isAutomaton then
     html%{<p class="lean-run-input-note" role="status"></p>} else .empty

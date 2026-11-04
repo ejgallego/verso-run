@@ -22,11 +22,19 @@ const FORMS = Object.freeze({
   uint64Automaton: {input: "uint64", result: "automaton"},
 });
 function description(form) {
+  if (form && typeof form === "object" && !Array.isArray(form) &&
+      Object.keys(form).length === 2 && Object.hasOwn(form, "input") &&
+      Object.hasOwn(form, "presenter") && typeof form.presenter === "string" && form.presenter.length &&
+      ["string", "multilineString", "nat", "bool", "uint64"].includes(form.input)) {
+    return { input: form.input === "multilineString" ? "string" : form.input,
+      result: "custom", presenter: form.presenter };
+  }
   if (typeof form !== "string" || !Object.hasOwn(FORMS, form)) throw new Error("Unsupported Lean Run form");
   return FORMS[form];
 }
 export function scalarKind(form) { return description(form).input; }
 export function resultKind(form) { return description(form).result; }
+export function presenterKey(form) { return description(form).presenter; }
 // Concrete scalar form policy, shared by the host and its worker.
 export const MAX_STRING = 4096;
 export const MAX_NAT_DIGITS = 256;
