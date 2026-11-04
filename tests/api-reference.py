@@ -69,11 +69,15 @@ if args.mutations:
     original = source.read_text()
     original_hash = hashlib.sha256(public.read_bytes()).hexdigest()
     marker = 'Reference refresh probe.'
+    obsolete = site / 'retired-reference-page/index.html'
+    obsolete.parent.mkdir(parents=True, exist_ok=True)
+    obsolete.write_text('obsolete generated page')
     try:
         source.write_text(original.replace('/-!\n', '/-!\n' + marker + '\n\n', 1))
         command(['python3', 'scripts/build-api-reference.py'], 'doc-edit')
         assert hashlib.sha256(public.read_bytes()).hexdigest() == original_hash
         assert marker in ''.join(Page(site / 'index.html').text)
+        assert not obsolete.exists(), 'Retired generated pages must not survive a reference rebuild'
     finally:
         source.write_text(original)
         command(['python3', 'scripts/build-api-reference.py'], 'doc-restore')

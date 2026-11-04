@@ -92,12 +92,12 @@ def qualify_result_presenters(page, base, prefixes, route, native, record):
         events = page.evaluate('resultEvents.filter(e => e.state === "success").length')
         page.evaluate('''() => {
             Object.defineProperty(document, 'hidden', {configurable:true, value:true});
-            document.dispatchEvent(new Event('visibilitychange'));
+            document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
         }''')
         expect(first).to_have_attribute('data-playing', 'false')
         page.evaluate('''() => {
             Object.defineProperty(document, 'hidden', {configurable:true, value:false});
-            document.dispatchEvent(new Event('visibilitychange'));
+            document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
         }''')
         expect(first.locator('.packet-value')).to_have_text(json.dumps({'label': '123', 'bytes': [123, 124]}, separators=(',', ':')))
         assert first.get_attribute('data-playing') == 'false'
@@ -143,9 +143,9 @@ def qualify_result_presenters(page, base, prefixes, route, native, record):
         assert held
         page.evaluate('''() => {
             Object.defineProperty(document, 'hidden', {configurable:true, value:true});
-            document.dispatchEvent(new Event('visibilitychange'));
+            document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
             Object.defineProperty(document, 'hidden', {configurable:true, value:false});
-            document.dispatchEvent(new Event('visibilitychange'));
+            document.dispatchEvent(new Event('visibilitychange', {bubbles:true}));
         }''')
         for request in held:
             request.continue_()
