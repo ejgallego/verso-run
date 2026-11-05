@@ -47,8 +47,12 @@ Try the greeting here:
 #check Demo.greet
 ```
 
-The [Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md) provides a complete,
-version-pinned project and the commands to build and serve it locally. See
+The [Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md)
+provides a complete project and commands to build and serve it locally. It uses
+Lean 4.35 and an earlier verso-run API, including `Verso.Output.Html`. Follow its
+README and [version-specific authoring guide](https://github.com/ejgallego/verso-run/blob/f2a1491257b8ad0c71b0468abf909c6dcfda9459/docs/authoring.md)
+when copying that project. This guide describes the current Lean 4.36 checkout,
+including `Lean.Html` and the sequence and automaton helpers. See
 {ref "guide-hosting-share-a-complete-copy"}[Hosting and sharing] for hosting requirements.
 
 Definitions, namespaces, and open declarations remain available in later Run
@@ -73,14 +77,15 @@ tag := "guide-authoring-choose-where-the-code-lives"
   * Reuse a function from a Lean module
   * {ref "guide-authoring-reuse-a-function-from-an-imported-module"}[Import the module and use `leanRun`]; display a reference such as `#check`.
 *
-  * Explain an existing library implementation
+  * Explain an implementation in this project
   * {ref "guide-authoring-run-an-anchored-example-from-an-imported-module"}[Use `leanRunAnchor`] to display a checked quotation of its source region.
 :::
 
 
-Both forms run and publish functions in the same way. Anchors also check that
-the displayed code matches its source; they are useful when the implementation
-itself belongs in the explanation.
+Both forms run and publish functions in the same way. Runnable anchors use
+source from the document's own project and check that the displayed quotation
+matches it. They are useful when the implementation itself belongs in the
+explanation.
 
 # Arguments and defaults
 %%%
@@ -238,8 +243,7 @@ tag := "guide-authoring-publishing-the-document"
 %%%
 
 The [Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md) includes a complete
-project and build instructions. It pins its own published extension version;
-follow its accompanying guide when copying that project. For an existing project,
+project and build instructions for its pinned release. For an existing project,
 [resource integration](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#resource-ownership-and-site-integration)
 explains the Lake configuration and generator setup. Blog and Slides use their
 respective {ref "guide-blog-publish-a-site"}[site] and {ref "guide-slides-publish-a-deck"}[deck]
@@ -315,9 +319,16 @@ Each genre retains native source styling and links. See
 tag := "guide-authoring-present-a-sequence-of-states"
 %%%
 
-For a model in an ordinary Lean source module, import `VersoLeanRun.Views`.
-It provides `Frame`, `Sequence`, `Automaton`, and their view helpers. The document
-imports the adapter for its genre. Model modules need no document directives
+An ordinary Lean model module starts with:
+
+```
+module
+public import VersoLeanRun.Views
+open VersoLeanRun
+```
+
+This import provides `Frame`, `Sequence`, `Automaton`, and their view helpers.
+The document imports the adapter for its genre. Model modules need no document directives
 or publication setup.
 The generated [View API reference](../api/)
 explains these types and helpers with Lean-checked examples and linked source.
@@ -351,13 +362,15 @@ still give one state. The optional fourth argument labels the steps, starting
 at zero:
 
 ```lean -keep
-def counter (seed : Nat) : Sequence Nat :=
+open VersoLeanRun
+
+public def countedSteps (seed : Nat) : Sequence Nat :=
   Sequence.iterate (· + 1) seed 5
     (fun i => s!"Iteration {i}")
 ```
 
 Every `Sequence` contains an initial frame and an optional array of later steps.
-`SequenceView` is `Sequence Html`, so a displayed sequence cannot be empty.
+`SequenceView` is `Sequence Lean.Html`, so a displayed sequence cannot be empty.
 `SequenceView.error` reports a failure when there is no model state to display:
 
 ```leanTerm
@@ -383,39 +396,6 @@ Illuminate's drawing-command/SVG output can provide a frame's content. Its full
 animation compiler is not qualified on the current runtime; see the
 [Illuminate support limits](https://github.com/ejgallego/verso-run/blob/main/docs/../evidence/illuminate-gates.md).
 
-# Map and replay observations
-%%%
-tag := "guide-authoring-map-and-replay-observations"
-%%%
-
-The same automaton can produce a finite trace or a live view:
-
-```
-let machine : Automaton Nat := { initial := 10, step := (· + 1) }
--- Finite: the initial state plus five transitions.
-let finite : SequenceView := (machine.trace 5).view
--- Live: one transition per Step, with no retained history.
-let live : AutomatonView := machine.view
-```
-
-`trace 0` observes the initial state without calling the transition.
-`Sequence.map` and the standard `Functor` notation (`f <$> trace`) transform
-states while preserving labels and errors. `view` keeps HTML values and displays
-other values as escaped text using `ToString`. A custom `α → Html` renderer can
-produce a richer display.
-
-To repeat a finite recording, use `trace.cycleView`, with an optional drawing
-function just as for `view`. It returns an `AutomatonView` that displays each
-recorded frame in order, then returns to the start. Duplicate states keep their positions
-and labels. An error displays the failure and disables Play and Step until a
-fresh run. Replay uses the saved frames and does not recompute the states.
-The [exact-word example](https://github.com/ejgallego/verso-run/blob/main/demo/chapters/LeanRunRendered/Examples.lean) shows a
-finite trace and a cyclic replay of the same states.
-
-`machine.observe` supports labels and errors based on the current state. Its
-callback receives the step number and state and returns a `Frame` containing
-`label`, `content`, and an optional `error` message.
-
 # Run an automaton continuously
 %%%
 tag := "guide-authoring-run-an-automaton-continuously"
@@ -423,7 +403,7 @@ tag := "guide-authoring-run-an-automaton-continuously"
 
 `AutomatonView` computes a new state on demand, without recording an entire
 trace. `Automaton α` holds an initial state and a pure transition `α → α`.
-Its `view` helper accepts an optional `α → Html` renderer and a function that
+Its `view` helper accepts an optional `α → Lean.Html` renderer and a function that
 labels the steps. The default renderer preserves HTML and displays other values
 as escaped text using `ToString`:
 
@@ -488,6 +468,50 @@ centred on an 8×8 board with dead cells beyond the edge. Lean computes and rend
 every generation. A still life or an empty board continues to advance its
 counter; Play has no trace boundary at which to stop. Use `SequenceView` instead
 when readers need to inspect earlier states of a bounded computation.
+
+# Map and replay observations
+%%%
+tag := "guide-authoring-map-and-replay-observations"
+%%%
+
+The same transition can provide both a recorded sequence and a live simulation:
+
+```lean -keep
+open VersoLeanRun
+
+public def machine (seed : Nat) : Automaton Nat :=
+  { initial := seed, step := (· + 1) }
+
+-- Record the initial state and five transitions.
+public def finite (seed : Nat) : Sequence Nat :=
+  (machine seed).trace 5
+
+-- Compute each transition when requested.
+public def live (seed : Nat) : Automaton Nat :=
+  machine seed
+```
+
+`leanRun (entry := finite)` provides sequence controls; `leanRun (entry := live)`
+provides playback controls. Both use the same model, and neither function needs
+to render it explicitly.
+
+`trace 0` observes the initial state without calling the transition.
+`Sequence.map` and the standard `Functor` notation (`f <$> trace`) transform
+states while preserving labels and errors. `view` keeps HTML values and displays
+other values as escaped text using `ToString`. A custom `α → Lean.Html` renderer can
+produce a richer display.
+
+To repeat a finite recording, use `trace.cycleView`, with an optional drawing
+function just as for `view`. It returns an `AutomatonView` that displays each
+recorded frame in order, then returns to the start. Duplicate states keep their positions
+and labels. An error displays the failure and disables Play and Step until a
+fresh run. Replay uses the saved frames and does not recompute the states.
+The [exact-word example](https://github.com/ejgallego/verso-run/blob/main/demo/chapters/LeanRunRendered/Examples.lean) shows a
+finite trace and a cyclic replay of the same states.
+
+`(machine seed).observe` supports labels and errors based on the current state. Its
+callback receives the step number and state and returns a `Frame` containing
+`label`, `content`, and an optional `error` message.
 
 # Updating older examples
 %%%
