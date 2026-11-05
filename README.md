@@ -14,13 +14,33 @@ in a dedicated browser worker; **Stop** interrupts a running example.
 
 [![Build and test](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml/badge.svg)](https://github.com/ejgallego/verso-run/actions/workflows/ci.yml)
 
-[Demo](https://ejgallego.github.io/verso-run/) ·
+[Published demo](https://ejgallego.github.io/verso-run/) ·
 [Start your own manual](examples/manual-starter/README.md) ·
 [Manual authoring](docs/authoring.md) ·
 [Blog authoring](docs/blog.md) ·
 [Slides authoring](docs/slides.md)
 
 ![Lean computes a chain of four nodes and renders it with Illuminate](docs/images/illuminate-desktop-4.png)
+
+## Explore the published examples
+
+These links open the demo published from `main`. Readers can run the examples
+without installing Lean.
+
+| Example | Try |
+| --- | --- |
+| [Game of Life](https://ejgallego.github.io/verso-run/Game-of-Life/) | Edit a seed, then Play continuously or Step once |
+| [Stack stepper](https://ejgallego.github.io/verso-run/Stack-stepper/) | Inspect the stack before and after each instruction |
+| [Stack calculator](https://ejgallego.github.io/verso-run/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
+| [HTML greeting](https://ejgallego.github.io/verso-run/HTML-greeting/) | A name containing `<b>&` to see text escaping |
+| [Illuminate diagrams](https://ejgallego.github.io/verso-run/Illuminate-diagrams/) | `1`, `4`, and `8` nodes |
+| [Exact natural numbers](https://ejgallego.github.io/verso-run/Exact-natural-numbers/) | `9007199254740993` |
+| [Try Stop](https://ejgallego.github.io/verso-run/Try-Stop/) | Start a large calculation, then interrupt it |
+| [Blog page](https://ejgallego.github.io/verso-run/blog/page/) | Exact natural numbers from an imported source anchor |
+| [Blog post](https://ejgallego.github.io/verso-run/blog/notes/2026-10-8-running-lean-in-a-post/) | Greetings, an HTML card, and Stop |
+| [Slides](https://ejgallego.github.io/verso-run/slides/) | Run exact numbers and greetings, then navigate away to stop work |
+| [Typed inputs](https://ejgallego.github.io/verso-run/Typed-inputs/) | Boolean choices and UInt64 maximum/wraparound |
+| [Multiline text](https://ejgallego.github.io/verso-run/Multiline-text/) | Keep blank lines and number each line |
 
 ## Try it locally
 
@@ -35,24 +55,9 @@ python3 scripts/build-demo-site.py
 python3 -m http.server 8795 --bind 127.0.0.1 --directory _out/html-multi
 ```
 
-Open [the landing page](http://127.0.0.1:8795/), choose Manual, Blog, or Slides,
-change an input, and choose Run.
-There are a few more examples to explore:
-
-| Example | Try |
-| --- | --- |
-| [Game of Life](http://127.0.0.1:8795/Game-of-Life/) | Edit a seed, then Play continuously or Step once |
-| [Stack stepper](http://127.0.0.1:8795/Stack-stepper/) | Inspect the stack before and after each instruction |
-| [Stack calculator](http://127.0.0.1:8795/Stack-calculator/) | `6 7 * 2 +`, then `5 dup *` |
-| [HTML greeting](http://127.0.0.1:8795/HTML-greeting/) | A name containing `<b>&` to see text escaping |
-| [Illuminate diagrams](http://127.0.0.1:8795/Illuminate-diagrams/) | `1`, `4`, and `8` nodes |
-| [Exact natural numbers](http://127.0.0.1:8795/Exact-natural-numbers/) | `9007199254740993` |
-| [Try Stop](http://127.0.0.1:8795/Try-Stop/) | Start a large calculation, then interrupt it |
-| [Blog page](http://127.0.0.1:8795/blog/page/) | Exact natural numbers from an imported source anchor |
-| [Blog post](http://127.0.0.1:8795/blog/notes/2026-10-8-running-lean-in-a-post/) | Greetings, an HTML card, and Stop |
-| [Slides](http://127.0.0.1:8795/slides/) | Run exact numbers and greetings, then navigate away to stop work |
-| [Typed inputs](http://127.0.0.1:8795/Typed-inputs/) | Boolean choices and UInt64 maximum/wraparound |
-| [Multiline text](http://127.0.0.1:8795/Multiline-text/) | Keep blank lines and number each line |
+After the server starts, open the [local landing page](http://127.0.0.1:8795/).
+Choose Manual, Blog, or Slides, change an input, and choose Run. This address
+serves the checkout on your machine.
 
 The combined site lives in `_out/html-multi`, with Blog under `blog/` and Slides under `slides/`.
 Manual also generates `_out/html-single` and `_out/tex`.
@@ -62,7 +67,10 @@ To share a copy, see [hosting and packaging](docs/hosting.md).
 
 The [Manual starter](examples/manual-starter/README.md) is a small independent
 project with a text function, an HTML card, and the configuration needed to build
-and publish a site. Copy it and edit its chapter.
+and publish a site. It pins an earlier release using `Verso.Output.Html`. Its README
+and [version-specific authoring guide](https://github.com/ejgallego/verso-run/blob/f2a1491257b8ad0c71b0468abf909c6dcfda9459/docs/authoring.md)
+apply to that project; the examples below describe the current checkout, including
+`Lean.Html` and the sequence and automaton APIs.
 
 A small example can define its function directly inside `leanRun`. The same
 runnable block syntax works in Manual, Blog pages and posts, and Slides:

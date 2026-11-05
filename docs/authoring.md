@@ -27,8 +27,12 @@ public def Demo.greet (name : String) : String :=
 `entry` names `Demo.greet`, and `input` sets the text field to `Ada`. Pressing
 Run displays `Hello, Ada`. Readers can edit the name and run the function again.
 
-The [Manual starter](../examples/manual-starter/README.md) provides a complete,
-version-pinned project and the commands to build and serve it locally. See
+The [Manual starter](../examples/manual-starter/README.md) provides a complete
+project and commands to build and serve it locally. It pins an earlier release
+for its text and HTML examples; follow its README and
+[version-specific authoring guide](https://github.com/ejgallego/verso-run/blob/f2a1491257b8ad0c71b0468abf909c6dcfda9459/docs/authoring.md)
+when copying that project. This guide describes the current checkout, including
+the newer `Lean.Html` and view APIs. See
 [Hosting and sharing](hosting.md#share-a-complete-copy) for hosting requirements.
 
 Definitions, namespaces, and open declarations remain available in later Run
@@ -43,11 +47,12 @@ Ordinary `lean` blocks display code without adding Run controls.
 | --- | --- |
 | Write a self-contained example | Define the function inside `leanRun`. |
 | Reuse a function from a Lean module | [Import the module and use `leanRun`](#reuse-a-function-from-an-imported-module); display a reference such as `#check`. |
-| Explain an existing library implementation | [Use `leanRunAnchor`](#run-an-anchored-example-from-an-imported-module) to display a checked quotation of its source region. |
+| Explain an implementation in this project | [Use `leanRunAnchor`](#run-an-anchored-example-from-an-imported-module) to display a checked quotation of its source region. |
 
-Both forms run and publish functions in the same way. Anchors also check that
-the displayed code matches its source; they are useful when the implementation
-itself belongs in the explanation.
+Both forms run and publish functions in the same way. Runnable anchors use
+source from the document's own project and check that the displayed quotation
+matches it. They are useful when the implementation itself belongs in the
+explanation.
 
 ## Arguments and defaults
 
@@ -158,8 +163,7 @@ and the publishers for each genre.
 ## Publishing the document
 
 The [Manual starter](../examples/manual-starter/README.md) includes a complete
-project and build instructions. It pins its own published extension version;
-follow its accompanying guide when copying that project. For an existing project,
+project and build instructions for its pinned release. For an existing project,
 [resource integration](internals.md#resource-ownership-and-site-integration)
 explains the Lake configuration and generator setup. Blog and Slides use their
 respective [site](blog.md#publish-a-site) and [deck](slides.md#publish-a-deck)
