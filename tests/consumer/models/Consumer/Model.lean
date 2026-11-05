@@ -17,4 +17,16 @@ def live (seed : UInt64) : Automaton UInt64 :=
 
 def increment (seed : UInt64) : UInt64 := seed + 1
 
+structure Packet where
+  label : String
+  bytes : ByteArray
+
+instance : CustomResult Packet := ⟨⟩
+
+def packet (seed : UInt64) : Packet :=
+  { label := toString seed, bytes := ⟨#[seed.toUInt8, (seed + 1).toUInt8]⟩ }
+
+def textPacket (text : String) : Packet :=
+  { label := text, bytes := ⟨#[text.length.toUInt8, 0]⟩ }
+
 end Consumer

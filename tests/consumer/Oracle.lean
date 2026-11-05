@@ -23,6 +23,8 @@ def main : IO Unit := do
     cases := cases.push <| Json.mkObj [
       ("seed", toJson (toString seed)),
       ("scalar", toJson (toString (Consumer.increment seed))),
+      ("packet", Json.mkObj [("label", toJson (Consumer.packet seed).label),
+        ("bytes", toJson ((Consumer.packet seed).bytes.data.map UInt8.toNat))]),
       ("finite", referenceSequence (Consumer.finite seed).view),
       ("live", toJson (frames.map referenceFrame)),
       ("independent", referenceFrame (← Lean.Vir.RuntimeM.run other.advance))]

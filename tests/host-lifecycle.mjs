@@ -168,4 +168,22 @@ await test("Automaton advance reuses the worker; Stop settles held work and igno
   assert.equal(await next, "next"); assert.equal(workers.length, 2);
   h.dispose();
 });
+await test("Custom result registration supplies worker and renderer modules; missing registration creates no worker", async () => {
+  const experiment = {...description, form:{input:"string", presenter:"Fixture.Packet"}};
+  const first = await fixture({experiment});
+  const h = first.host(), pending = h.invoke("input");
+  first.requests[0].reply({...plan, resultPresenters:{"Fixture.Packet":{
+    workerModule:"lean-run/packet/normalize.js", rendererModule:"lean-run/packet/render.js"}}});
+  assert.equal(await promptly(pending), "input");
+  assert.match(first.workers[0].messages[0].publication.resultModule, /lean-run\/packet\/normalize.js$/);
+  assert.match(h.resultRendererUrl, /lean-run\/packet\/render.js$/);
+  assert.deepEqual(first.workers[0].messages[0].publication.expectedExport, signature);
+  h.dispose();
+  const missing = await fixture({experiment});
+  const no = missing.host(), failed = outcome(no.invoke("input"));
+  missing.requests[0].reply();
+  assert.match((await promptly(failed)).error.message, /No registered result presenter/);
+  assert.equal(missing.workers.length, 0);
+  no.dispose();
+});
 console.log(JSON.stringify({ checks, count: checks.length }));

@@ -1,18 +1,6 @@
+import { waitForSignal } from "./lifetime.js";
 // The Lean/VIR presenter owns selection, controls and event listeners.
 // This bridge owns asynchronous acquisition and the placement's lifetime.
-function waitForModule(imported, signal) {
-  let abort;
-  const cancelled = new Promise((_, reject) => {
-    abort = () => reject(signal.reason);
-    if (signal.aborted) abort();
-    else signal.addEventListener("abort", abort, { once: true });
-  });
-  // Import itself can continue and evaluate. The race keeps observing its late
-  // rejection, while only our wait settles on Stop or the loading deadline.
-  return Promise.race([imported, cancelled]).finally(() =>
-    signal.removeEventListener("abort", abort));
-}
-
 // The visible document stays untouched until its replacement has loaded and
 // had a rendering opportunity. Stop observes the same abort signal as loading.
 function waitForPreview(frame, signal) {
@@ -125,7 +113,7 @@ export class ViewHost {
       const expectedExports = { [presenter.declaration]: presenter.expectedExport };
       if (this.kind === "automaton") expectedExports[presenter.commit.declaration] = presenter.commit.expectedExport;
       const url = path => new URL(path, new URL("../", import.meta.url));
-      const { createProgram } = await waitForModule(
+      const { createProgram } = await waitForSignal(
         import(url(plan.runtimeModule).href), controller.signal);
       if (generation !== this.generation) return false;
       if (controller.signal.aborted) throw controller.signal.reason;

@@ -57,10 +57,11 @@ private partial def browserDocument (doc : Part VersoSlides.Slides) :
 The embedded stock runtime remains authoritative; a different supplied runtime is
 rejected before generation rather than silently replaced. -/
 def slidesMain (config : VersoSlides.Config) (doc : Part VersoSlides.Slides)
-    (resources : Vir.Resources.ResourceSet) : IO UInt32 := do
+    (resources : Vir.Resources.ResourceSet)
+    (presenters : Array ResultPresenter := #[]) : IO UInt32 := do
   let found ← IO.ofExcept <| slideExperiments doc
   let resources ← IO.ofExcept <| combineResources VersoSlides.VirPrettyMResources.resources resources
-  let publication ← IO.ofExcept <| preparePublication found resources "lib/vir"
+  let publication ← IO.ofExcept <| preparePublication found resources "lib/vir" presenters
   let assets := publication.files.map fun file =>
     ({ filename := file.path, contents := file.bytes } : ThemeAsset)
   let config := { config with

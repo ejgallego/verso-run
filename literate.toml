@@ -1,5 +1,5 @@
 landing_page = "VersoLeanRun.Views"
-order = ["VersoLeanRun.Views", "VersoLeanRun.Frame", "VersoLeanRun.Sequence", "VersoLeanRun.Automaton"]
+order = ["VersoLeanRun.Views", "VersoLeanRun.Frame", "VersoLeanRun.Sequence", "VersoLeanRun.Automaton", "VersoLeanRun.Result"]
 docstrings_as_text = false
 extra_css = ["docs/api-reference.css"]
 extra_js = ["docs/api-reference.js"]
@@ -27,6 +27,9 @@ title = "Finite sequences"
 
 [modules."VersoLeanRun.Automaton"]
 title = "Live automata"
+
+[modules."VersoLeanRun.Result"]
+title = "Custom results"
 
 [theme]
 code_keyword_color = "#79358c"

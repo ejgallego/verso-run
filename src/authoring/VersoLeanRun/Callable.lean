@@ -10,6 +10,7 @@ public import Verso.Doc.Elab
 meta import Verso.Instances.Deriving
 public import Verso.Output.Html
 public import VersoLeanRun.Views
+public import VersoLeanRun.Result
 public meta import Vir.Attributes
 public meta import Vir.Compiler.Interface.Classify.Signature
 public meta import Lean.ToExpr
@@ -73,7 +74,8 @@ private meta def unsupportedForm {α : Type} (entry : Ident) (name : Name) (type
         Export a wrapper taking one String, Nat, Bool, or UInt64 input."
     else
       m!"This form supports homogeneous scalar calls or a scalar input returning Html, Sequence, Automaton, or a rendered view. \
-        Use a supported scalar type or return a typed rendered view."
+        Use a supported scalar type or return a typed rendered view. \
+        A document extension can register a CustomResult presenter for another concrete result type."
   throwErrorAt entry "Lean Run entry '{name}' has type {type}.\n\
     This interface is supported by VIR, but not by this Run form.\n\
     {reason}\nUse a pure homogeneous scalar call, or a String, Nat, Bool, or UInt64 input returning Html, Sequence, Automaton, or a rendered view."
@@ -106,7 +108,11 @@ private meta def describePresentation (entry : Ident) (name : Name) (info : Cons
       if ← Lean.Meta.isDefEq result (mkConst ``AutomatonView) then return (.automaton, original)
       let sequence := result.isAppOfArity ``Sequence 1
       let automaton := result.isAppOfArity ``Automaton 1
-      if !sequence && !automaton then return (.text, original)
+      if !sequence && !automaton then
+        if let .const resultType [] := result then
+          if (← Lean.Meta.synthInstance? (mkApp (mkConst ``CustomResult) result)).isSome then
+            return (.custom resultType.toString, original)
+        return (.text, original)
       if result.hasFVar then
         throwErrorAt entry "Lean Run automatic display needs a fixed model type. \
           Return a rendered view for a model whose type depends on the input."
@@ -155,6 +161,8 @@ meta def describeEntry (config : Config) (name : Name) (source : Syntax) : DocEl
         | .sequence, .structure result .. => result == ``Sequence
         | .automaton, .structure result .. => result == ``AutomatonSession
         | .html, .customInductive result .. => result == ``Lean.Html
+        | .custom resultType, .structure result .. => result.toString == resultType
+        | .custom resultType, .customInductive result .. => result.toString == resultType
         | .text, result => result == argument.type
         | _, _ => false
       unless admitted do

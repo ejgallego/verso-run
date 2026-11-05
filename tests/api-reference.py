@@ -34,13 +34,13 @@ else:
     command(['python3', 'scripts/build-api-reference.py'], 'generate')
     site = ROOT / '.lake/build/literate-html'
 
-modules = {'VersoLeanRun.' + name for name in ['Views', 'Frame', 'Sequence', 'Automaton']}
+modules = {'VersoLeanRun.' + name for name in ['Views', 'Frame', 'Sequence', 'Automaton', 'Result']}
 assert set((ROOT / '.lake/build/literate-plan').read_text().splitlines()) == modules
 pages = sorted(site.rglob('index.html'))
 assert {str(page.relative_to(site)) for page in pages} == {
     'index.html', 'search/index.html',
     *[name.replace('.', '/') + '/index.html' for name in modules]}
-record('reference selects only the four public view modules, with a landing page and search')
+record('reference selects only the public view modules, with a landing page and search')
 
 class Page(HTMLParser):
     def __init__(self, path):
@@ -69,11 +69,15 @@ if args.mutations:
     original = source.read_text()
     original_hash = hashlib.sha256(public.read_bytes()).hexdigest()
     marker = 'Reference refresh probe.'
+    obsolete = site / 'retired-reference-page/index.html'
+    obsolete.parent.mkdir(parents=True, exist_ok=True)
+    obsolete.write_text('obsolete generated page')
     try:
         source.write_text(original.replace('/-!\n', '/-!\n' + marker + '\n\n', 1))
         command(['python3', 'scripts/build-api-reference.py'], 'doc-edit')
         assert hashlib.sha256(public.read_bytes()).hexdigest() == original_hash
         assert marker in ''.join(Page(site / 'index.html').text)
+        assert not obsolete.exists(), 'Retired generated pages must not survive a reference rebuild'
     finally:
         source.write_text(original)
         command(['python3', 'scripts/build-api-reference.py'], 'doc-restore')

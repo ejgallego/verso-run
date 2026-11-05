@@ -5,6 +5,10 @@ require verso_run from git {{source}} @ {{revision}}
 
 package candidate_consumer
 
+input_dir consumerWeb where
+  path := "web"
+  text := true
+
 lean_lib ConsumerModel where
   srcDir := "models"
   roots := #[`Consumer.Model]
@@ -13,15 +17,44 @@ lean_lib ConsumerChapter where
   srcDir := "chapters"
   roots := #[`Consumer.Chapter]
 
+lean_lib ConsumerBlog where
+  srcDir := "blog"
+  roots := #[`Consumer.Blog]
+
+lean_lib ConsumerSlides where
+  srcDir := "slides"
+  roots := #[`Consumer.Slides]
+
+lean_lib ConsumerPublication where
+  roots := #[`Presenter]
+  needs := #[consumerWeb]
+
 lean_lib ConsumerResources where
   srcDir := "resources"
   roots := #[`Consumer.Resources]
   needs := #[`+Consumer.Chapter:virResourcePack]
 
+lean_lib ConsumerBlogResources where
+  srcDir := "blog-resources"
+  roots := #[`Consumer.BlogResources]
+  needs := #[`+Consumer.Blog:virResourcePack]
+
+lean_lib ConsumerSlidesResources where
+  srcDir := "slides-resources"
+  roots := #[`Consumer.SlidesResources]
+  needs := #[`+Consumer.Slides:virResourcePack]
+
 @[default_target]
 lean_exe «consumer-manual» where
   root := `Main
+  needs := #[consumerWeb]
 
 @[default_target]
 lean_exe «consumer-oracle» where
   root := `Oracle
+
+lean_exe «consumer-blog» where
+  root := `BlogMain
+
+lean_exe «consumer-slides» where
+  root := `SlidesMain
