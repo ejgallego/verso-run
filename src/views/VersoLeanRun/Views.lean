@@ -9,67 +9,23 @@ public import VersoLeanRun.Sequence
 public import VersoLeanRun.Automaton
 
 /-!
-# Interactive Lean examples
+# View library
 
-verso-run runs selected Lean functions interactively from compiled Verso documents.
-Functions can return primitive values, HTML, or richer interactive views,
-including animations. HTML results use Lean's
-{name (full := Lean.Html)}`Html` type and can include SVG.
-The experimental presenter is also written in Lean and uses DOM APIs to manage
-its controls and previews; the
-[rendering notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#rendering-and-transport)
-describe this layer.
+The view library provides optional helpers for displaying recorded states and
+live computations in verso-run. Import {lit}`VersoLeanRun.Views` in an ordinary
+Lean module; it does not require a document or publication setup.
 
-## Function results
-
-A function can return {lit}`Html` directly. For example, this one produces a
-paragraph containing a greeting. The {lit}`html%{…}` syntax builds HTML;
-interpolated strings are escaped:
-
-```lean
-open Lean
-
-public def greeting (name : String) : Html :=
-  html%{<p>Hello, {name}!</p>}
-```
-
-## Runnable document blocks
-
-In a Verso document, put the definition inside a code fence labelled {lit}`leanRun`:
-
-````
-```leanRun (entry := greeting) (input := "Ada")
-open Lean
-
-public def greeting (name : String) : Html :=
-  html%{<p>Hello, {name}!</p>}
-```
-````
-
-This fence adds an input field, Run and Stop buttons, and a result display alongside
-the source. The {lit}`entry` argument names the function; {lit}`input` provides its
-initial input without running it. The function's Lean type determines the input
-control and result display. Ordinary {lit}`lean` fences display code
-without Run controls.
-
-Run blocks work in Manual, Blog, and Slides, each with its own adapter import. The
-[authoring guide](https://ejgallego.github.io/verso-run/guide/authoring/)
-shows the imports and publication setup, and lists the supported function types.
+The [user guide](../guide/) covers runnable functions, HTML results, and document
+setup for Manual, Blog, and Slides. This reference explains the view types,
+their operations, and custom rendering, with Lean-checked examples.
 
 ## Recorded and live views
 
-The views library also provides helpers for presenting several frames or a
-changing state. A {name (full := VersoLeanRun.Sequence)}`Sequence` contains
-recorded, labelled frames that readers can browse. An
-{name (full := VersoLeanRun.Automaton)}`Automaton` contains an initial state and a
-transition function {lit}`α → α`; its live view provides playback controls.
-A {lit}`leanRun` entry can return either model directly: HTML states retain their
-markup, and other states use their {name}`ToString` instance for escaped text.
-Their {lit}`view` helpers support custom HTML or SVG rendering.
-
-Import {lit}`VersoLeanRun.Views` to use these helpers in an ordinary Lean module.
-
-For example, this counter can provide either a recording or a live view:
+A {name (full := VersoLeanRun.Sequence)}`Sequence` stores labelled frames that
+readers can browse in either direction. An
+{name (full := VersoLeanRun.Automaton)}`Automaton` describes an initial state and
+a transition {lit}`α → α`; its live view computes a new state on each advance.
+For example, one counter can provide either a live computation or a recording:
 
 ```lean
 open VersoLeanRun
@@ -81,49 +37,39 @@ public def firstFive (seed : Nat) : Sequence Nat :=
   (counter seed).trace 4
 ```
 
-With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14. Readers can
-inspect any of those five values. A block with
-{lit}`leanRun (entry := counter) (input := "10")` provides the live display.
-After the reader presses Run, the automaton starts at 10. Step computes the next
-value; Play advances it repeatedly.
-No call to {lit}`view` is needed for this default display.
+With a seed of 10, {lit}`firstFive` records 10, 11, 12, 13, and 14.
+{lit}`counter` can keep advancing without recording the earlier values.
 
-## Rendering model states
+The [Finite sequences](VersoLeanRun/Sequence/) page covers constructing,
+mapping, and rendering recordings. [Live automata](VersoLeanRun/Automaton/)
+covers transitions, observations, and cyclic replay. Both use
+[Frames](VersoLeanRun/Frame/) to pair content with labels and optional errors.
 
-{name (full := VersoLeanRun.Sequence.view)}`Sequence.view` and
-{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` render model states.
-The default renderer preserves HTML values and converts other values to escaped
-text using {name}`ToString`. A custom renderer of type {lit}`α → Html` can produce
-an HTML or SVG display:
+## Runnable document blocks
 
-```lean
-open VersoLeanRun
+In a document that imports the module containing {lit}`counter`, this
+{lit}`leanRun` fence adds an input field and playback controls:
 
-public def labelledCounter (seed : Nat) : AutomatonView :=
-  (counter seed).view
-    (fun value => html%{<p>Count: {toString value}</p>})
-    (fun index => s!"Step {index}")
+````
+```leanRun (entry := counter) (input := "10")
+#check counter
 ```
+````
 
-{name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe` accepts a
-function that builds a {name (full := VersoLeanRun.Frame)}`Frame` from the step
-number and model state, with a label and optional error message. The Frames page
-explains this record; the other pages cover recorded sequences and live playback.
+The {lit}`entry` argument names the function; {lit}`input` sets the initial input
+without running it. Returning a {lit}`Sequence α` instead provides controls for
+browsing recorded frames. The [authoring guide](../guide/authoring/)
+shows a complete chapter, the supported function types, and publication setup.
+It also explains the browser controls and the lifetime of a run.
 
-## Document integration
+## Custom displays
 
-The function's result type determines how a {lit}`leanRun` block displays it.
-{lit}`Sequence α` adds controls for browsing recorded frames; {lit}`Automaton α`
-adds live playback. For custom displays, the view helpers return
-{name (full := VersoLeanRun.SequenceView)}`SequenceView` or
-{name (full := VersoLeanRun.AutomatonView)}`AutomatonView`, which use the same
-controls.
-
-The [demo](https://ejgallego.github.io/verso-run/) includes complete examples in
-all three genres.
-
-Opening a page leaves live examples idle. Run displays the initial state; Play
-advances it continuously. Pause keeps the current state, and Stop ends the run.
-Input edits remain a draft while the current computation continues; Restart
-applies them. The Live automata page describes the playback controls in detail.
+A {lit}`leanRun` entry can return either model directly. HTML states retain their
+markup; other states use their {name}`ToString` instance for escaped text.
+For custom HTML or SVG, {name (full := VersoLeanRun.Sequence.view)}`Sequence.view`
+and {name (full := VersoLeanRun.Automaton.view)}`Automaton.view` accept a renderer
+of type {lit}`α → Lean.Html`. They return
+{name (full := VersoLeanRun.SequenceView)}`SequenceView` and
+{name (full := VersoLeanRun.AutomatonView)}`AutomatonView`, respectively.
+The individual reference pages show these operations in context.
 -/

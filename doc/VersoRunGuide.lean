@@ -22,10 +22,11 @@ Start with {ref "guide-authoring"}[a runnable block], then use the setup for
 The guide also covers {ref "guide-hosting"}[hosting] and
 {ref "guide-troubleshooting"}[diagnosing errors].
 
-The [View API reference](../api/) documents the ordinary Lean library and its
-checked examples. [Explore the demos](../) for runnable Manual, Blog, and Slides
-examples. Contributor instructions and implementation notes remain in the
-[repository](https://github.com/ejgallego/verso-run).
+For recorded and live displays, this guide introduces the models and shows how
+to use them in a document. The [View API reference](../api/) covers their types,
+operations, and custom rendering in detail, with checked Lean examples.
+[Explore the demos](../) for runnable Manual, Blog, and Slides examples.
+Contributor instructions and implementation notes remain in the [repository](https://github.com/ejgallego/verso-run).
 
 {include 0 VersoRunGuide.Authoring}
 

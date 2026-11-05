@@ -62,7 +62,7 @@ class Page(HTMLParser):
 
 
 parsed = {}
-for path in guide.rglob('*.html'):
+for path in [*guide.rglob('*.html'), *(site / 'api').rglob('*.html')]:
     parsed[path] = Page(path)
 for path, page in parsed.items():
     current = 'https://guide.invalid/' + str(path.relative_to(site))
@@ -71,15 +71,15 @@ for path, page in parsed.items():
         target = urlsplit(urljoin(base, link))
         if target.netloc != 'guide.invalid': continue
         relative = unquote(target.path).lstrip('/')
-        # The standalone guide check has no demo homepage. The complete
-        # package checks that link through pages-smoke.py.
-        if relative == '' and not args.site: continue
+        # Standalone output contains only the guide and API. The packaged-site
+        # invocation also checks links to runnable demo pages.
+        if not args.site and not relative.startswith(('guide/', 'api/')): continue
         file = site / relative
         if file.is_dir() or target.path.endswith('/'): file /= 'index.html'
         assert file.is_relative_to(site) and file.is_file(), (path, link, file)
-        if target.fragment and file in parsed and 'find/' not in str(file.relative_to(guide)):
+        if target.fragment and file in parsed and 'find/' not in str(file.relative_to(site)):
             assert unquote(target.fragment) in parsed[file].ids, (path, link)
-record('generated cross-chapter links and section anchors resolve; API reference is adjacent')
+record('guide and API navigation links resolve across both sites, including section and declaration anchors')
 
 served = output / 'served'
 for prefix in ['root', 'nested/prefix']:
@@ -110,8 +110,14 @@ with serve_directory(served) as base, sync_playwright() as p:
                 assert preview.locator('b').count() == 0
             if form.locator('.lean-run-stop').is_enabled():
                 form.locator('.lean-run-stop').click()
+        # Follow both sides of the guide/reference boundary after relocation.
+        page.get_by_role('link', name='Live automata reference', exact=True).click()
+        page.wait_for_url(base + prefix + '/api/VersoLeanRun/Automaton/')
+        page.get_by_role('link', name="authoring guide's playback table", exact=True).click()
+        page.wait_for_url(home + 'authoring/#guide-authoring-run-an-automaton-continuously')
+        assert page.locator('[id="guide-authoring-run-an-automaton-continuously"]').is_visible()
         search = page.get_by_role('searchbox', name='Search', exact=True)
-        page.wait_for_function('document.querySelector("#cb1-input")?.hasAttribute("aria-activedescendant")')
+        page.wait_for_load_state('networkidle')
         search.press_sequentially('Publishing the document')
         result = page.locator('#cb1-listbox').get_by_role('option').filter(has_text='Publishing the document').first
         result.click()

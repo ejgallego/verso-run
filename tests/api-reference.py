@@ -94,18 +94,26 @@ if args.mutations:
 
 parsed = {path: Page(path) for path in pages}
 for path, page in parsed.items():
-    url = 'https://reference.invalid/' + str(path.relative_to(site))
+    url = 'https://reference.invalid/api/' + str(path.relative_to(site))
     base = urljoin(url, page.base)
     for href in page.links:
         target = urlsplit(urljoin(base, href))
         if target.netloc != 'reference.invalid':
             continue
-        destination = site / unquote(target.path).lstrip('/')
+        relative = unquote(target.path).lstrip('/')
+        if relative.startswith('api/'):
+            destination = site / relative.removeprefix('api/')
+        elif args.site:
+            destination = site.parent / relative
+        else:
+            # The standalone reference omits its sibling user guide. The
+            # combined guide gate checks these links and their anchors.
+            continue
         if destination.is_dir():
             destination /= 'index.html'
         assert destination.is_file(), (path, href, destination)
         if target.fragment:
-            assert unquote(target.fragment) in parsed[destination].ids, (path, href)
+            assert unquote(target.fragment) in Page(destination).ids, (path, href)
 record('all generated local navigation and declaration links resolve to files and real anchors')
 
 served = output / 'served'
@@ -124,7 +132,7 @@ with serve_directory(served) as base, sync_playwright() as playwright:
     for prefix in ['root/api', 'nested/docs/api']:
         reference = base + prefix + '/'
         assert page.goto(reference).status == 200
-        expect(page.get_by_role('heading', name='Interactive Lean examples', exact=True)).to_be_visible()
+        expect(page.get_by_role('heading', name='View library', exact=True)).to_be_visible()
         for theme in ['light', 'dark']:
             page.emulate_media(color_scheme=theme, reduced_motion='reduce')
             styles = page.locator('.code-content > .mod-doc .hl.lean.block').first.evaluate('''block => {
@@ -149,7 +157,8 @@ with serve_directory(served) as base, sync_playwright() as playwright:
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (prefix, width)
             page.screenshot(path=str(output / f'{prefix.replace("/", "-")}-{width}.png'), full_page=True)
         page.set_viewport_size({'width': 1280, 'height': 900})
-        page.get_by_role('link', name='Finite sequences', exact=True).click()
+        page.get_by_role('navigation', name='Module navigation').get_by_role(
+            'link', name='Finite sequences', exact=True).click()
         expect(page.get_by_role('heading', name='Recorded states', exact=True)).to_be_visible()
         assert page.url.startswith(reference + 'VersoLeanRun/Sequence/')
         page.goto(reference + 'search/?q=Automaton.observe')

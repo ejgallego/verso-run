@@ -94,7 +94,7 @@ Life, the state is a board and each transition computes the next generation.
 The same automaton can provide a recorded sequence or a live view:
 
 ```lean
-open VersoLeanRun
+open Lean VersoLeanRun
 
 public def counter (seed : Nat) : Automaton Nat :=
   { initial := seed, step := Nat.succ }
@@ -103,13 +103,16 @@ public def recorded (seed : Nat) : Sequence Nat :=
   (counter seed).trace 4
 
 public def live (seed : Nat) : AutomatonView :=
-  (counter seed).view (label := fun n => s!"Generation {n}")
+  (counter seed).view
+    (fun value => html%{<p>Count: {toString value}</p>})
+    (fun n => s!"Step {n}")
 ```
 
 {name (full := VersoLeanRun.Automaton.trace)}`Automaton.trace` records a fixed number
 of steps that readers can browse in either direction. A {lit}`leanRun` entry can
 use {lit}`counter` or {lit}`recorded` directly; their numeric states use the
-default text display. The {lit}`live` example customizes the step labels.
+default text display. The {lit}`live` example customizes the HTML display and
+step labels.
 {name (full := VersoLeanRun.Automaton.view)}`Automaton.view` displays the current
 state and computes the next one when the reader advances. Its default renderer
 preserves HTML and converts other values to escaped text using {name}`ToString`.
@@ -145,24 +148,13 @@ as {lit}`view` and keeps the labels and errors. Playback returns to the first
 step after the last, unless an error prevents further advancement. It reuses
 the recorded frames, so it does not need a transition function.
 
-## Playback and input edits
+## Live runs
 
-Opening a page or entering a slide leaves the example idle. Run displays the
-initial state. Step advances once; Play advances repeatedly. Pause lets a step
-already in progress finish, then keeps the resulting state. Stop cancels active
-work and ends the run.
+A live run keeps only its current state, with no fixed step limit. Each run
+starts from the model's initial state and advances independently of other copies.
+A model whose state grows with each step can still use more memory over time.
 
-Input edits do not interrupt a live simulation. Restart applies the edited
-input and begins again at the new initial state. If the simulation was playing,
-Restart resumes playback. Pause, Stop, hiding the tab, or leaving the example
-cancels that automatic resumption. Returning to the tab does not start playback.
-
-Each example has its own state. A live run keeps only the current state and has
-no fixed step limit. A model whose state grows with each step will still need
-more memory over time.
-
-## Independent runs
-
-Two embedded copies of an example have independent state, even if both start
-from the same input. Restart resets only the selected copy.
+The [authoring guide's playback table](../guide/authoring/#guide-authoring-run-an-automaton-continuously)
+describes Run, Play, Pause, Stop, input edits, and Restart, including what happens
+when a tab is hidden or the example is left.
 -/

@@ -214,6 +214,14 @@ Keep README setup brief and link to those guides. Markdown remains the home for
 contributor instructions, architecture, validation, history, and planning.
 When moving a guide, leave a short pointer rather than maintaining two versions.
 
+The user guide owns document setup, `leanRun` arguments, publication, and browser
+controls. Introduce recorded and live views there with small examples, then link
+to the API reference for model operations, rendering, and their precise semantics.
+The reference owns those API explanations. Keep a brief `leanRun` example there
+so library readers can find the document integration, and link back to the guide
+for the complete setup. Use relative links within the generated site so this
+navigation also works in local previews and nested deployments.
+
 Write for a Lean programmer who has not read the project history. Start with
 what an author can build and what readers can do with it. A useful default is to
 introduce the capability, show a small example, explain the relevant API, and

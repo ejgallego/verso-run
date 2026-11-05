@@ -319,7 +319,12 @@ Each genre retains native source styling and links. See
 tag := "guide-authoring-present-a-sequence-of-states"
 %%%
 
-An ordinary Lean model module starts with:
+A sequence records labelled states that readers can browse in either direction.
+An automaton computes each new state on demand. Both are optional helpers for
+functions that need more than a single result.
+
+The models can live in an ordinary Lean module, with no document directives or
+publication setup:
 
 ```
 module
@@ -327,16 +332,7 @@ public import VersoLeanRun.Views
 open VersoLeanRun
 ```
 
-This import provides `Frame`, `Sequence`, `Automaton`, and their view helpers.
-The document imports the adapter for its genre. Model modules need no document directives
-or publication setup.
-The generated [View API reference](../api/)
-explains these types and helpers with Lean-checked examples and linked source.
-
-A function returning `VersoLeanRun.Sequence α` or `SequenceView` gets controls
-for browsing its frames, including step selection and a scrubber. It works in all three genres.
-`Sequence α` records model values, while `SequenceView` contains HTML ready to
-display. For text values, the default renderer is enough:
+For example, this function records two text frames:
 
 ```lean -keep
 public def Demo.greetingSteps
@@ -346,66 +342,37 @@ public def Demo.greetingSteps
                  content := "Hello, " ++ name }] }
 ```
 
-The block `leanRun (entry := Demo.greetingSteps)` displays this sequence.
-`Frame.error` can report a failure at a particular step;
-the initial state uses the same `Frame` record as later states. Models and
-views are ordinary Lean code and can live in imported modules with checked source anchors.
-The [stack example](https://github.com/ejgallego/verso-run/blob/main/demo/chapters/LeanRunSequence/Examples.lean) renders both sides
-of each step from the calculator's [shared evaluator](https://github.com/ejgallego/verso-run/blob/main/demo/chapters/LeanRunGate/Stack.lean).
-Both examples use the same parser, execution loop, and limits. The stepper accepts
-a completed program with several values left on its stack; the calculator requires
-exactly one final value.
+The document imports that module and uses the same `leanRun` fence as for other
+functions:
 
-`Sequence.iterate step initial count` records the initial state followed by
-exactly `count` applications of a transition `step : α → α`. Zero transitions
-still give one state. The optional fourth argument labels the steps, starting
-at zero:
-
-```lean -keep
-open VersoLeanRun
-
-public def countedSteps (seed : Nat) : Sequence Nat :=
-  Sequence.iterate (· + 1) seed 5
-    (fun i => s!"Iteration {i}")
+````
+```leanRun (entry := Demo.greetingSteps) (input := "Ada")
+#check Demo.greetingSteps
 ```
+````
 
-Every `Sequence` contains an initial frame and an optional array of later steps.
-`SequenceView` is `Sequence Lean.Html`, so a displayed sequence cannot be empty.
-`SequenceView.error` reports a failure when there is no model state to display:
+The result provides step selection and a scrubber. Selecting a frame displays a
+recorded value; it does not rerun the computation. Input edits, Stop, and leaving
+the example clear its view. The [stack-machine demo](../Stack-stepper/)
+shows a longer trace with a display for each instruction.
 
-```leanTerm
-SequenceView.error "The input could not be parsed."
-```
+A displayed sequence contains 1–128 frames. Labels, content, and error messages
+share the 65,536 UTF-16 code unit result limit. Oversized results are rejected
+rather than shortened. Frame content uses the same isolated preview as HTML
+results; labels and errors appear as text.
 
-Type aliases for `Html` and `SequenceView` work like the underlying types.
-Oversized sequences are rejected; `iterate` does not shorten them to fit the
-display limits.
-
-Selecting a frame displays a recorded result; it does not rerun the computation.
-Each example is independent. Input edits, Stop, and leaving the example clear its
-view. Frame content uses the same script-disabled preview as an ordinary HTML
-result; labels and errors are displayed as text.
-
-A displayed sequence contains 1–128 frames. Its strings, including labels,
-content, and errors, share a limit of 65,536 UTF-16 code units. A large drawing
-can exceed this limit even in a short sequence. Oversized results are rejected,
-rather than silently shortened. Stop interrupts a computation that has not
-finished.
-
-Illuminate's drawing-command/SVG output can provide a frame's content. Its full
-animation compiler is not qualified on the current runtime; see the
-[Illuminate support limits](https://github.com/ejgallego/verso-run/blob/main/docs/../evidence/illuminate-gates.md).
+The [Finite sequences reference](../api/VersoLeanRun/Sequence/) explains
+construction, mapping, and rendering. It includes `Sequence.iterate`, which
+records repeated applications of a transition, and `SequenceView.error` for
+inputs that cannot produce a recording.
 
 # Run an automaton continuously
 %%%
 tag := "guide-authoring-run-an-automaton-continuously"
 %%%
 
-`AutomatonView` computes a new state on demand, without recording an entire
-trace. `Automaton α` holds an initial state and a pure transition `α → α`.
-Its `view` helper accepts an optional `α → Lean.Html` renderer and a function that
-labels the steps. The default renderer preserves HTML and displays other values
-as escaped text using `ToString`:
+An `Automaton α` holds an initial state and a pure transition `α → α`. This
+counter adds one whenever the reader advances:
 
 ```lean -keep
 public def counter
@@ -413,10 +380,20 @@ public def counter
   { initial := seed, step := (· + 1) }
 ```
 
-The block `leanRun (entry := counter)` provides playback controls without a call
-to `.view`. For custom labels, return `(counter seed).view (label := ...)` from a
-separate entry. Ordinary Lean code still uses `.view` explicitly to start a
-session; `leanRun` generates that adapter when compiling the document.
+In a document that imports the counter's module, this block provides playback
+controls:
+
+````
+```leanRun (entry := counter) (input := "10")
+#check counter
+```
+````
+
+The numeric state uses the default text display. No call to `.view` is needed.
+For custom HTML or SVG, return `(counter seed).view render` from a separate entry.
+The [Live automata reference](../api/VersoLeanRun/Automaton/)
+shows rendering, step labels, and error reporting.
+
 Opening the page leaves the example idle:
 
 :::table +header
@@ -449,69 +426,37 @@ Opening the page leaves the example idle:
   * End the run and clear the view.
 :::
 
+Hiding the tab, Stop, and leaving the example cancel any pending restart
+resumption. Showing the tab again does not resume playback. Error frames display
+the failure and disable Play and Step; Stop still ends the run.
 
-Hiding the tab while Restart is loading leaves playback paused, even if the tab
-becomes visible again before loading finishes. Stop and leaving the example also
-cancel automatic resumption. Error frames disable Play and Step; Stop still
-ends the run and clears the view.
+Each example has independent state and keeps only its current state. Play waits
+for each transition to finish before starting the next, with no fixed step
+limit. A model that grows with each step can still use more memory over time.
+Each frame has the same string limit and HTML preview restrictions as a sequence
+result. Stop can interrupt a transition that has not finished.
 
-Each embedded example has independent state. It keeps only the current state,
-with no fixed step limit. Play waits for each transition to finish before
-starting the next. Each frame has the same 65,536 UTF-16 code unit string limit
-and HTML preview restrictions as sequence views. Stop can interrupt a transition
-that has not finished. `AutomatonView.error` reports invalid input with Play and
-Step disabled.
+The [Game of Life demo](../Game-of-Life/) computes and renders each new generation in
+Lean. It keeps advancing even when the board stops changing. A sequence is more
+suitable when readers need to revisit earlier states.
 
-The [Game of Life example](https://github.com/ejgallego/verso-run/blob/main/demo/chapters/LeanRunSequence/Life.lean) uses this
-interface. Its input is a rectangular `#`/`.` seed of at most 8 rows and columns,
-centred on an 8×8 board with dead cells beyond the edge. Lean computes and renders
-every generation. A still life or an empty board continues to advance its
-counter; Play has no trace boundary at which to stop. Use `SequenceView` instead
-when readers need to inspect earlier states of a bounded computation.
-
-# Map and replay observations
+# Further view operations
 %%%
 tag := "guide-authoring-map-and-replay-observations"
 %%%
 
-The same transition can provide both a recorded sequence and a live simulation:
+The [View API reference](../api/) covers operations for adapting these models:
 
-```lean -keep
-open VersoLeanRun
+- [Frames](../api/VersoLeanRun/Frame/) pair content with a label and an optional
+  error message.
+- [Finite sequences](../api/VersoLeanRun/Sequence/) support mapping and custom
+  rendering without rerunning the computation.
+- [Live automata](../api/VersoLeanRun/Automaton/) can record a bounded trace,
+  repeat a saved sequence, or build a display from the step number and state.
 
-public def machine (seed : Nat) : Automaton Nat :=
-  { initial := seed, step := (· + 1) }
-
--- Record the initial state and five transitions.
-public def finite (seed : Nat) : Sequence Nat :=
-  (machine seed).trace 5
-
--- Compute each transition when requested.
-public def live (seed : Nat) : Automaton Nat :=
-  machine seed
-```
-
-`leanRun (entry := finite)` provides sequence controls; `leanRun (entry := live)`
-provides playback controls. Both use the same model, and neither function needs
-to render it explicitly.
-
-`trace 0` observes the initial state without calling the transition.
-`Sequence.map` and the standard `Functor` notation (`f <$> trace`) transform
-states while preserving labels and errors. `view` keeps HTML values and displays
-other values as escaped text using `ToString`. A custom `α → Lean.Html` renderer can
-produce a richer display.
-
-To repeat a finite recording, use `trace.cycleView`, with an optional drawing
-function just as for `view`. It returns an `AutomatonView` that displays each
-recorded frame in order, then returns to the start. Duplicate states keep their positions
-and labels. An error displays the failure and disables Play and Step until a
-fresh run. Replay uses the saved frames and does not recompute the states.
-The [exact-word example](https://github.com/ejgallego/verso-run/blob/main/demo/chapters/LeanRunRendered/Examples.lean) shows a
-finite trace and a cyclic replay of the same states.
-
-`(machine seed).observe` supports labels and errors based on the current state. Its
-callback receives the step number and state and returns a `Frame` containing
-`label`, `content`, and an optional `error` message.
+HTML renderers can also use Illuminate's drawing-command/SVG output. Its full
+animation compiler is not qualified on the current runtime; see the
+[Illuminate support limits](https://github.com/ejgallego/verso-run/blob/main/evidence/illuminate-gates.md).
 
 # Updating older examples
 %%%

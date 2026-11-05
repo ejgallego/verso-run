@@ -94,10 +94,10 @@ This example starts at zero, adds one four times, and displays the five values
 ```lean
 open VersoLeanRun
 
-def counting : Sequence Nat :=
+public def counting : Sequence Nat :=
   Sequence.iterate Nat.succ 0 4 (fun n => s!"Step {n}")
 
-def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
+public def doubled : Sequence Nat := (fun n => 2 * n) <$> counting
 ```
 
 {name (full := VersoLeanRun.Sequence.view)}`Sequence.view` renders the recorded
