@@ -76,8 +76,9 @@ such as a calculator instruction that needs more values on the stack. A live
 simulation displays the error and disables Play and Step. The reader can start
 a fresh run or use Stop to clear the view.
 
-{lit}`SequenceView.error` and {lit}`AutomatonView.error` report invalid input when
-there is no model state to display. Problems loading or
+[SequenceView.error](VersoLeanRun/Sequence/#VersoLeanRun___SequenceView___error)
+and [AutomatonView.error](VersoLeanRun/Automaton/#VersoLeanRun___AutomatonView___error)
+report invalid input when there is no model state to display. Problems loading or
 running the compiled program are reported separately by verso-run.
 
 ## Mapping values

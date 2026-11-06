@@ -20,6 +20,11 @@ home, base_count = re.subn(r'(<base\s+href=")[^"]*(")',
     lambda match: match[1] + 'blog/' + match[2], home)
 assert base_count == 1, "Expected one Blog base URL in the generated homepage"
 (site / "index.html").write_text(home)
+subprocess.run(["python3", "scripts/build-user-guide.py"], cwd=root, check=True)
+guide = site / "guide"
+if guide.exists():
+    shutil.rmtree(guide)
+shutil.copytree(root / "_out/guide/html-multi", guide)
 subprocess.run(["python3", "scripts/build-api-reference.py"], cwd=root, check=True)
 reference = site / "api"
 if reference.exists():

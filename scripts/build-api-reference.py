@@ -33,4 +33,12 @@ if not stamp.is_file() or stamp.read_text().strip() != signature:
     (build / 'literate-html.trace').unlink(missing_ok=True)
 
 subprocess.run(['lake', 'build', ':literateHtml'], cwd=root, check=True)
+# The pinned literate renderer inserts this raw entity after dots in highlighted
+# tokens, including inside string literals. Use a word-break element so line
+# wrapping adds no characters to copied Lean. Authored U+00AD characters and
+# escaped text such as &amp;shy; remain unchanged.
+for page in (build / 'literate-html').rglob('*.html'):
+    html = page.read_text()
+    if '&shy;' in html:
+        page.write_text(html.replace('&shy;', '<wbr>'))
 stamp.write_text(signature + '\n')

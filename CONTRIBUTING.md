@@ -189,6 +189,19 @@ It copies the starter outside the repository, builds its pinned published
 dependency, and runs its text and HTML examples at root and nested URLs. It
 qualifies that published revision; it does not select the current PR candidate.
 
+The user guide has a separate current-version project recipe. Check its verbatim
+files and published dependency with:
+
+```sh
+UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
+  uv run --with playwright python tests/guide-project.py
+```
+
+This gate builds a fresh temporary project, runs its copied site at root and
+nested URLs, and retains the inputs, manifest, logs and results before removing
+the temporary build. CI runs it separately from the older starter and the exact
+candidate-consumer gate.
+
 Check downstream consumption of your committed candidate separately:
 
 ```sh
@@ -207,6 +220,20 @@ merge commits, and requires both gates before deploying Pages. Keep the starter'
 public pin until a new baseline has landed and its acquisition is qualified.
 
 ## Writing documentation
+
+User-facing explanations belong in the Verso manual under `doc/`, and public
+view-library reference prose belongs beside the declarations in `src/views/`.
+Keep README setup brief and link to those guides. Markdown remains the home for
+contributor instructions, architecture, validation, history, and planning.
+When moving a guide, leave a short pointer rather than maintaining two versions.
+
+The user guide owns document setup, `leanRun` arguments, publication, and browser
+controls. Introduce recorded and live views there with small examples, then link
+to the API reference for model operations, rendering, and their precise semantics.
+The reference owns those API explanations. Keep a brief `leanRun` example there
+so library readers can find the document integration, and link back to the guide
+for the complete setup. Use relative links within the generated site so this
+navigation also works in local previews and nested deployments.
 
 Write for a Lean programmer who has not read the project history. Start with
 what an author can build and what readers can do with it. A useful default is to
@@ -239,6 +266,15 @@ the reference without preceding the guide. Use Verso's HTML quotation for
 examples that build markup; keep constructor calls when explaining escaping or
 programmatic HTML construction. Prefer one canonical explanation with links to
 it over repeated paragraphs that drift apart.
+
+In a runnable illustration, show the definition whose result appears below it.
+Use `#check` when explaining a reference to an imported function, and distinguish
+its type-checking role from the function called by Run. Put toolchain versions
+and compatibility details in project setup or migration notes, where they help
+with an actual installation; the opening examples should teach one API.
+Headings should identify the subject, such as “Inline and imported functions”
+or “Result types and displays”, rather than an unexplained decision such as
+“Choose where the code lives”.
 
 Match the content to its purpose:
 
@@ -293,6 +329,37 @@ this section. Keep it as the canonical guidance, with a short pointer in
 
 ## Repository layout
 
+### User guide and API reference
+
+The user manual is a Verso Manual in `doc/VersoRunGuide.lean` and its chapter
+modules. `doc/GuideMain.lean` is its native generator. The separate resource
+carrier in `doc/resources/` embeds the programs for runnable guide examples;
+document modules never import that carrier. The pure view library has no guide
+or document-generation prerequisite.
+
+Build and preview the combined site, so the guide, API, and demo links resolve
+against the same revision:
+
+```sh
+python3 scripts/build-demo-site.py
+python3 -m http.server 8797 --bind 127.0.0.1 --directory _out/html-multi
+```
+
+Open `/guide/` or `/api/`. To compile and generate only the guide, run
+`python3 scripts/build-user-guide.py`; its standalone output under
+`_out/guide/html-multi` does not include the sibling API or demo.
+
+Ordinary Lean snippets in the guide use Verso's checked code blocks. Complete
+file templates, shell commands, and diagnostic excerpts use literal blocks.
+Runnable examples use the same public adapters and resource workflow as other
+consumers. Review the rendered guide after prose changes, including narrow
+layouts and cross-chapter links.
+
+`scripts/build-demo-site.py` publishes the guide under `/guide/` beside the
+API reference at `/api/`. `tests/user-guide.py` checks its generated links,
+search, examples, and root/nested deployment. User-facing Markdown files under
+`docs/` are entry points to the manual, not another copy of its chapters.
+
 ### Generated library reference
 
 Run `python3 scripts/build-api-reference.py` to generate the public view library's reference in
@@ -303,10 +370,15 @@ For HTML quotation in checked examples, import `Lean.Data.Html` and use
 so the pinned reference generator includes it. The copyable examples should
 also show the namespace open they need when used in a document or Lean module.
 Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.
+This standalone output does not include the sibling user guide, so links to
+`/guide/` need the combined-site preview described above.
 The helper invokes Verso's `lake build :literateHtml` facet and supplies the source
 dependency missing from the pinned facet: documentation-only edits must refresh
 HTML even when the public olean stays unchanged. It also tracks the configured
 extra stylesheets so style edits refresh the generated site.
+The helper also replaces the pinned renderer's generated `&shy;` break markers
+with `<wbr>` elements so copied Lean retains the authored text, including string
+literals. Literal soft-hyphen characters in source remain unchanged.
 The configured CSS and JavaScript put checked examples before the expandable
 declaration reference. Declaration links open the reference at their target.
 Without JavaScript, the declarations remain visible below the guide. Keep all
@@ -333,12 +405,13 @@ UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
 | `src/presenter/` | VIR DOM rendering and sandbox policy |
 | `src/presenter-resources/` | Native carrier for the prepared browser presenter |
 | `web/` | Input validation, UI state, worker ownership, and asynchronous invocation |
+| `doc/` | Verso user manual, checked examples, and native guide generator |
 | `demo/chapters/` | Manual, Blog, and Slides documents and their Lean functions |
 | `demo/generators/` | Native generators for the three demo genres |
 | `demo/resources/` | Embedded program carriers; `lakefile.lean` owns module registration |
 | `examples/manual-starter/` | Copyable independent author project |
 | `tests/` | Native/browser acceptance and negative author fixtures |
-| `docs/`, `evidence/` | Guides, documentation artwork, and written qualification limits |
+| `docs/`, `evidence/` | Guide pointers, artwork, architecture, and qualification limits |
 
 `demo/generators/DemoMain.lean` builds the Manual; `demo/generators/BlogMain.lean` builds the Blog site.
 `demo/generators/SlidesMain.lean` builds the deck. `scripts/build-demo-site.py` combines them with a landing page.
@@ -386,3 +459,17 @@ artifact, plus consumer qualification; local producer packs are not a substitute
 
 Compiler scheduling, native precompilation, Verso core upstreaming, and wider
 browser qualification retain their deferred status in [the roadmap](ROADMAP.md).
+
+## Publishing the repository demo
+
+Enable Pages in the repository settings with *GitHub Actions* as the source.
+The main-branch workflow builds and validates the combined demo, user guide and
+API reference, then deploys the complete `_out/html-multi` artifact. PRs validate
+that package without deploying it. If Pages has not been enabled, the job reports
+its settings link and skips deployment.
+
+After deployment, regenerate local output and run
+`uv run --with playwright python tests/pages-smoke.py` to check the live site's
+programs, runtime, module bytes and MIME types against the local package.
+Record hosted checks separately from local acceptance; a passing local build
+alone does not establish what the public server is serving.

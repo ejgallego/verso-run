@@ -10,7 +10,7 @@ library = "VersoLeanRunViews"
 
 [metadata]
 title = "verso-run · View API"
-description = "Build interactive Lean examples with recorded steps, live simulations, and HTML or SVG displays."
+description = "Reference for verso-run frames, recorded sequences, live automata, and custom rendering."
 
 [modules."VersoLeanRun"]
 title = "View API"

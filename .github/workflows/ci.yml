@@ -28,9 +28,12 @@ jobs:
         run: lake test -- --mutations --output _out/acceptance
       - name: Published starter acquisition
         run: uv run --with playwright python tests/starter.py --output _out/starter-acceptance
+      - name: Published guide project
+        run: uv run --with playwright python tests/guide-project.py --output _out/guide-project
       - name: Package demo
         run: |
           python3 scripts/build-demo-site.py
+          uv run --with playwright python tests/user-guide.py --site _out/html-multi --output _out/user-guide-site
           uv run --with playwright python tests/api-reference.py --site _out/html-multi/api --output _out/api-reference-site
           uv run --with playwright python tests/pages-smoke.py --site _out/html-multi --output _out/demo-site-results.json
           python3 scripts/package-demo.py
