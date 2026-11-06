@@ -14,7 +14,7 @@ not a Lean installation or a server that runs Lean. Copy the complete generated
 HTML directory to the web host, including its `lean-run/` resources and other
 assets.
 
-# Preview locally
+# Local preview
 %%%
 tag := "guide-hosting-preview-locally"
 %%%
@@ -30,7 +30,7 @@ For Blog or Slides, use the output directory selected in the generator instead.
 Serve the site over HTTP; opening an HTML file directly is not sufficient for
 worker execution.
 
-# Publish on a web host
+# Web hosting
 %%%
 tag := "guide-hosting-publish-on-a-web-host"
 %%%
@@ -50,7 +50,7 @@ and deploy its complete HTML output. GitHub's
 [custom-workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 describes that setup.
 
-# Share a complete copy
+# Sharing a site
 %%%
 tag := "guide-hosting-share-a-complete-copy"
 %%%

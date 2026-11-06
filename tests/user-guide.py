@@ -98,6 +98,9 @@ with serve_directory(served) as base, sync_playwright() as p:
         page.wait_for_url('**/authoring/**')
         for declaration, value in [('Demo.greet', 'Ada'), ('Demo.card', '<b>& Ada')]:
             form = page.locator('.lean-run[data-experiment*="' + declaration + '"]').first
+            displayed = form.locator('.lean-run-source').inner_text()
+            assert 'public def ' + declaration in displayed, displayed
+            assert '#check' not in displayed, displayed
             form.locator('input').fill(value)
             form.locator('[type=submit]').click()
             page.wait_for_function('e => ["success","failed"].includes(e.dataset.state)', arg=form.element_handle())
@@ -118,8 +121,8 @@ with serve_directory(served) as base, sync_playwright() as p:
         assert page.locator('[id="guide-authoring-run-an-automaton-continuously"]').is_visible()
         search = page.get_by_role('searchbox', name='Search', exact=True)
         page.wait_for_load_state('networkidle')
-        search.press_sequentially('Publishing the document')
-        result = page.locator('#cb1-listbox').get_by_role('option').filter(has_text='Publishing the document').first
+        search.press_sequentially('Project setup and publication')
+        result = page.locator('#cb1-listbox').get_by_role('option').filter(has_text='Project setup and publication').first
         result.click()
         page.wait_for_url('**/*guide-authoring-publishing-the-document*')
         page.wait_for_function('document.getElementById("guide-authoring-publishing-the-document") !== null')

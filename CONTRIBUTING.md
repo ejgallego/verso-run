@@ -267,6 +267,15 @@ examples that build markup; keep constructor calls when explaining escaping or
 programmatic HTML construction. Prefer one canonical explanation with links to
 it over repeated paragraphs that drift apart.
 
+In a runnable illustration, show the definition whose result appears below it.
+Use `#check` when explaining a reference to an imported function, and distinguish
+its type-checking role from the function called by Run. Put toolchain versions
+and compatibility details in project setup or migration notes, where they help
+with an actual installation; the opening examples should teach one API.
+Headings should identify the subject, such as “Inline and imported functions”
+or “Result types and displays”, rather than an unexplained decision such as
+“Choose where the code lives”.
+
 Match the content to its purpose:
 
 - **Guides** explain a capability and help authors use it, with working examples

@@ -43,7 +43,7 @@ reference such as `#check MyExamples.greet`. See
 {ref "guide-authoring-reuse-a-function-from-an-imported-module"}[reusing an imported function]
 for a complete code example, then {ref "guide-blog-publish-a-site"}[publish the site].
 
-# Publish a site
+# Site publication
 %%%
 tag := "guide-blog-publish-a-site"
 %%%
@@ -94,7 +94,7 @@ Input, collapsed source, Stop, and retry behave as described in the authoring
 guide. Blog keeps its own links and code formatting; Manual's `defSite` option
 does not apply here.
 
-# Optional shared source anchors
+# Shared source quotations
 %%%
 tag := "guide-blog-optional-shared-source-anchors"
 %%%
@@ -117,7 +117,7 @@ If the quotation no longer matches the source, Verso reports an error and
 suggests a replacement. See
 {ref "guide-authoring-run-an-anchored-example-from-an-imported-module"}[anchor authoring].
 
-# Demo layout
+# Repository demo
 %%%
 tag := "guide-blog-demo-layout"
 %%%

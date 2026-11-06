@@ -44,7 +44,7 @@ reference such as `#check MyExamples.greet`. See
 {ref "guide-authoring-reuse-a-function-from-an-imported-module"}[reusing an imported function]
 for a complete code example, then {ref "guide-slides-publish-a-deck"}[publish the deck].
 
-# Publish a deck
+# Deck publication
 %%%
 tag := "guide-slides-publish-a-deck"
 %%%
@@ -70,7 +70,7 @@ Slides' asset planner checks for collisions before writing output. Built-in and
 custom themes retain their CSS, fonts, and other assets. Extra CSS, JavaScript,
 and head elements are also preserved.
 
-# Reveal and workers
+# Slide navigation
 %%%
 tag := "guide-slides-reveal-and-workers"
 %%%
@@ -95,7 +95,7 @@ appear in an isolated preview; String results remain text. No `output` argument
 or VIR annotation is required. These behaviors apply to both inline and anchored
 blocks.
 
-# Optional shared source anchors
+# Shared source quotations
 %%%
 tag := "guide-slides-optional-shared-source-anchors"
 %%%

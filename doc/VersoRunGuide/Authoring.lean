@@ -1,6 +1,5 @@
 module
 public import VersoLeanRun
-import VersoRunGuide.Examples
 open Verso Genre Manual InlineLean VersoLeanRun
 set_option compiler.postponeCompile false
 
@@ -15,14 +14,24 @@ A Run block displays Lean code alongside controls for calling a function.
 The `entry` argument names the function, and its Lean type determines the input
 control and result display. The document build prepares it for browser execution.
 
-# A basic block
+# A runnable function
 %%%
 tag := "guide-authoring-a-basic-block"
 %%%
 
-`leanRun` works in Manual, Blog pages and posts, and Slides. Each genre has its
-own adapter import. A small, self-contained example defines its function inside
-the block. A minimal Manual chapter looks like this:
+A `leanRun` block pairs a function with an input field and a result display.
+This function returns a greeting:
+
+```leanRun (entry := Demo.greet) (input := "Ada")
+public def Demo.greet (name : String) : String :=
+  "Hello, " ++ name
+```
+
+The `entry` argument names `Demo.greet`, and `input` sets the field to `Ada`.
+Run calls the function with the text in that field and displays `Hello, Ada`.
+Changing the name and pressing Run again produces a new greeting.
+
+In a Manual chapter, the definition belongs in a fence labelled `leanRun`:
 
 ````
 module
@@ -38,56 +47,30 @@ public def Demo.greet (name : String) : String :=
 ```
 ````
 
-`entry` names `Demo.greet`, and `input` sets the text field to `Ada`. Pressing
-Run displays `Hello, Ada`. Readers can edit the name and run the function again.
+{ref "guide-authoring-publishing-the-document"}[Project setup and publication]
+provides the remaining files and build commands for this chapter.
+{ref "guide-blog"}[Blog] and {ref "guide-slides"}[Slides] use the same block syntax
+with their own adapter imports.
 
-Try the greeting here:
-
-```leanRun (entry := Demo.greet) (input := "Ada")
-#check Demo.greet
-```
-
-{ref "guide-authoring-publishing-the-document"}[Publishing the document] gives a
-complete Lean 4.36 project for this chapter. The separate
-[Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md)
-still uses Lean 4.35 and an earlier API, including `Verso.Output.Html`. Follow
-its README and [version-specific guide](https://github.com/ejgallego/verso-run/blob/f2a1491257b8ad0c71b0468abf909c6dcfda9459/docs/authoring.md)
-when copying that project. See {ref "guide-hosting"}[Hosting and sharing] for
-HTTP and web-host requirements.
-
-Definitions, namespaces, and open declarations remain available in later Run
-blocks. Several blocks can use the same entry; a later block might display just
-`#check Demo.greet` while providing another set of controls. Each embedded
-example runs independently.
-Ordinary `lean` blocks display code without adding Run controls.
-
-# Choose where the code lives
+# Inline and imported functions
 %%%
 tag := "guide-authoring-choose-where-the-code-lives"
 %%%
 
-:::table +header
-*
-  * Goal
-  * Authoring choice
-*
-  * Write a self-contained example
-  * Define the function inside `leanRun`.
-*
-  * Reuse a function from a Lean module
-  * {ref "guide-authoring-reuse-a-function-from-an-imported-module"}[Import the module and use `leanRun`]; display a reference such as `#check`.
-*
-  * Explain an implementation in this project
-  * {ref "guide-authoring-run-an-anchored-example-from-an-imported-module"}[Use `leanRunAnchor`] to display a checked quotation of its source region.
-:::
+A function can be defined inside `leanRun`, as above, or
+{ref "guide-authoring-reuse-a-function-from-an-imported-module"}[imported from a Lean module].
+Definitions, namespaces, and open declarations in Run blocks remain available
+in later Run blocks. Several blocks can call the same function with different
+initial inputs; each embedded example runs independently.
 
+The code displayed with the controls is the content of the block. For an
+imported function, {ref "guide-authoring-run-an-anchored-example-from-an-imported-module"}[`leanRunAnchor`]
+can display a checked quotation of its implementation. This uses source from
+the document's own project and checks that the quotation still matches it.
+Both block types provide the same input controls and result displays.
+Ordinary `lean` blocks display code without Run controls.
 
-Both forms run and publish functions in the same way. Runnable anchors use
-source from the document's own project and check that the displayed quotation
-matches it. They are useful when the implementation itself belongs in the
-explanation.
-
-# Arguments and defaults
+# Block arguments
 %%%
 tag := "guide-authoring-arguments-and-defaults"
 %%%
@@ -132,7 +115,7 @@ Source remains present in HTML and Manual TeX, including without JavaScript.
 
 Run blocks reject `-keep`, `+error`, and unknown arguments.
 
-# The result type chooses the display
+# Result types and displays
 %%%
 tag := "guide-authoring-the-result-type-chooses-the-display"
 %%%
@@ -140,25 +123,18 @@ tag := "guide-authoring-the-result-type-chooses-the-display"
 A `String` result appears as plain text, even when it contains markup. Return
 `Lean.Html` to display HTML or SVG:
 
-````
 ```leanRun (entry := Demo.card) (input := "Ada")
 public def Demo.card (name : String) : Lean.Html :=
   html%{<h2>Hello, {name}!</h2>}
 ```
-````
 
-Lean's typed HTML syntax escapes interpolated text and attributes. Raw HTML
-nodes remain an explicit author choice. The preview supports static HTML, inline
-CSS and data images; scripts and external embedded resources are disabled.
-The preview clears when the input changes, a new call starts, Stop is pressed,
+Lean's typed HTML syntax escapes interpolated text and attributes. Entering a
+name containing `<b>&` displays those characters as text in the heading.
+Raw HTML nodes remain an explicit author choice. The preview supports static
+HTML, inline CSS and data images; scripts and external embedded resources are
+disabled. It clears when the input changes, a new call starts, Stop is pressed,
 or a call fails. Errors appear as plain text. Larger results can be scrolled
 within the preview.
-
-Try a name containing `<b>&` to see how interpolated text is escaped:
-
-```leanRun (entry := Demo.card) (input := "Ada")
-#check Demo.card
-```
 
 The supported function types are:
 
@@ -197,7 +173,7 @@ the strings share that limit, including labels, content, and errors.
 Structured results also have node and depth limits; see
 [execution limits](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#interaction-and-limits).
 
-# Reuse a function from an imported module
+# Imported functions
 %%%
 tag := "guide-authoring-reuse-a-function-from-an-imported-module"
 %%%
@@ -226,8 +202,10 @@ set_option compiler.postponeCompile false
 ```
 ````
 
-The form runs the imported function; its source panel shows the `#check`
-reference. Blog and Slides support imported functions in the same way.
+`#check Examples.twice` asks Lean for the imported function's type. In the
+published document, the source panel shows this reference, with the type
+available on hover. The Run button calls `Examples.twice` with the input value.
+Blog and Slides support imported functions in the same way.
 Several documents can reuse one implementation without adding source markers or
 quoting its body.
 
@@ -235,18 +213,19 @@ Publish the *document module's* resource bundle for both imported and inline fun
 It includes the selected function and its compiled dependencies; the source
 module needs no VIR export marker or separate bundle registration. Imported
 functions use the same controls and result displays as inline definitions.
-See {ref "guide-authoring-publishing-the-document"}[Publishing the document] for the project setup
+See {ref "guide-authoring-publishing-the-document"}[Project setup and publication] for the project setup
 and the publishers for each genre.
 
-# Publishing the document
+# Project setup and publication
 %%%
 tag := "guide-authoring-publishing-the-document"
 %%%
 
-The chapter above can become a small standalone project. Install
+The {ref "guide-authoring-a-basic-block"}[greeting chapter] can become a small
+standalone project. Install
 [elan](https://github.com/leanprover/elan) and create a directory for these five
-files. This recipe uses Lean 4.36.0-rc1 and a fixed, published verso-run revision;
-copy the two versions together.
+files. The toolchain and dependency are pinned together in this recipe;
+copy these values into the project as shown.
 
 `lean-toolchain`:
 
@@ -278,7 +257,7 @@ lean_exe «my-manual» where
   root := `Main
 ```
 
-Save the complete chapter from {ref "guide-authoring-a-basic-block"}[A basic block]
+Save the complete chapter from {ref "guide-authoring-a-basic-block"}[A runnable function]
 as `MyChapter.lean`, beside the Lake file. It contains the imports, `#doc`
 declaration, and greeting function. Keep `compiler.postponeCompile false` in
 runnable document modules.
@@ -330,6 +309,10 @@ Open [http://127.0.0.1:8795/](http://127.0.0.1:8795/) and press Run to display
 needed. Keep the generated `lake-manifest.json` with the project to record its
 resolved dependencies.
 
+The separate [Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md)
+targets an older release. Follow its own README and linked guide when copying
+that project.
+
 Additional chapters follow the same pattern: register their document libraries,
 add their resource prerequisites and include their modules in the resource set.
 For other genres, use the {ref "guide-blog-publish-a-site"}[Blog site] or
@@ -337,7 +320,7 @@ For other genres, use the {ref "guide-blog-publish-a-site"}[Blog site] or
 [resource integration notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#resource-ownership-and-site-integration)
 explain how the build and publication steps fit together.
 
-# Run an anchored example from an imported module
+# Checked source quotations
 %%%
 tag := "guide-authoring-run-an-anchored-example-from-an-imported-module"
 %%%
@@ -393,7 +376,7 @@ Namespaces, open declarations, and definitions remain available in later Run blo
 Each genre retains native source styling and links. See
 {ref "guide-blog"}[Blog authoring] and {ref "guide-slides"}[Slides authoring].
 
-# Present a sequence of states
+# Recorded sequences
 %%%
 tag := "guide-authoring-present-a-sequence-of-states"
 %%%
@@ -446,7 +429,7 @@ records repeated applications of a transition, and
 [error views](../api/VersoLeanRun/Sequence/#Errors) for inputs that cannot
 produce a recording.
 
-# Run an automaton continuously
+# Live automata
 %%%
 tag := "guide-authoring-run-an-automaton-continuously"
 %%%
@@ -521,7 +504,7 @@ The [Game of Life demo](../Game-of-Life/) computes and renders each new generati
 Lean. It keeps advancing even when the board stops changing. A sequence is more
 suitable when readers need to revisit earlier states.
 
-# Further view operations
+# Rendering and model operations
 %%%
 tag := "guide-authoring-map-and-replay-observations"
 %%%
@@ -539,7 +522,7 @@ HTML renderers can also use Illuminate's drawing-command/SVG output. Its full
 animation compiler is not qualified on the current runtime; see the
 [Illuminate support limits](https://github.com/ejgallego/verso-run/blob/main/evidence/illuminate-gates.md).
 
-# Updating older examples
+# Migration notes
 %%%
 tag := "guide-authoring-updating-older-examples"
 %%%
