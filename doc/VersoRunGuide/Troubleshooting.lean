@@ -135,6 +135,8 @@ tag := "guide-troubleshooting-the-reader-sees-a-failure"
 
 Invalid natural-number inputs are rejected before invocation. Use non-negative
 decimal digits; signs, spaces, fractions, and exponent notation are not accepted.
+`Nat` and `UInt64` inputs accept at most 256 digits, including leading zeros;
+UInt64 values must also fit in 64 bits.
 Input edits clear ordinary results and recorded views. Live views keep their
 current state until Restart applies the edits. Stop interrupts the worker, and
 another Run starts a fresh example.

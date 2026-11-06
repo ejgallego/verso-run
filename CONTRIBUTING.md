@@ -189,6 +189,19 @@ It copies the starter outside the repository, builds its pinned published
 dependency, and runs its text and HTML examples at root and nested URLs. It
 qualifies that published revision; it does not select the current PR candidate.
 
+The user guide has a separate current-version project recipe. Check its verbatim
+files and published dependency with:
+
+```sh
+UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INSTALL_DIR="$PWD/.cache/uv-python" \
+  uv run --with playwright python tests/guide-project.py
+```
+
+This gate builds a fresh temporary project, runs its copied site at root and
+nested URLs, and retains the inputs, manifest, logs and results before removing
+the temporary build. CI runs it separately from the older starter and the exact
+candidate-consumer gate.
+
 Check downstream consumption of your committed candidate separately:
 
 ```sh
@@ -348,10 +361,15 @@ For HTML quotation in checked examples, import `Lean.Data.Html` and use
 so the pinned reference generator includes it. The copyable examples should
 also show the namespace open they need when used in a document or Lean module.
 Use `python3 -m http.server --directory .lake/build/literate-html` to preview it.
+This standalone output does not include the sibling user guide, so links to
+`/guide/` need the combined-site preview described above.
 The helper invokes Verso's `lake build :literateHtml` facet and supplies the source
 dependency missing from the pinned facet: documentation-only edits must refresh
 HTML even when the public olean stays unchanged. It also tracks the configured
 extra stylesheets so style edits refresh the generated site.
+The helper also replaces the pinned renderer's generated `&shy;` break markers
+with `<wbr>` elements so copied Lean retains the authored text, including string
+literals. Literal soft-hyphen characters in source remain unchanged.
 The configured CSS and JavaScript put checked examples before the expandable
 declaration reference. Declaration links open the reference at their target.
 Without JavaScript, the declarations remain visible below the guide. Keep all

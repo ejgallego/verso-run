@@ -3,6 +3,7 @@ import argparse
 import functools
 import hashlib
 import json
+import re
 import shutil
 from html.parser import HTMLParser
 from pathlib import Path
@@ -35,6 +36,9 @@ else:
     site = ROOT / '.lake/build/literate-html'
 
 modules = {'VersoLeanRun.' + name for name in ['Views', 'Frame', 'Sequence', 'Automaton']}
+sequence_source = (ROOT / 'src/views/VersoLeanRun/Sequence.lean').read_text()
+error_example, = [block.strip() for block in re.findall(r'^```lean\n(.*?)^```$', sequence_source, re.M | re.S)
+                  if 'def invalidInput' in block]
 assert set((ROOT / '.lake/build/literate-plan').read_text().splitlines()) == modules
 pages = sorted(site.rglob('index.html'))
 assert {str(page.relative_to(site)) for page in pages} == {
@@ -122,6 +126,7 @@ for prefix in ['root/api', 'nested/docs/api']:
 with serve_directory(served) as base, sync_playwright() as playwright:
     browser = playwright.chromium.launch(headless=True, executable_path=shutil.which('google-chrome'))
     page = browser.new_page()
+    page.context.grant_permissions(['clipboard-read', 'clipboard-write'])
     errors = []
     failed_styles = []
     page.on('pageerror', lambda error: errors.append(str(error)))
@@ -161,6 +166,18 @@ with serve_directory(served) as base, sync_playwright() as playwright:
             'link', name='Finite sequences', exact=True).click()
         expect(page.get_by_role('heading', name='Recorded states', exact=True)).to_be_visible()
         assert page.url.startswith(reference + 'VersoLeanRun/Sequence/')
+        example = page.locator('.mod-doc .hl.lean.block').filter(has_text='def invalidInput')
+        example.evaluate('''block => {
+            const range = document.createRange();
+            range.selectNodeContents(block);
+            const selection = getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }''')
+        page.keyboard.press('Control+C')
+        assert page.evaluate('navigator.clipboard.readText()').strip() == error_example
+        page.evaluate('getSelection().removeAllRanges()')
+        record(prefix + ': copying the checked error example preserves the exact Lean source')
         page.goto(reference + 'search/?q=Automaton.observe')
         result = page.locator('#search-page-results a').filter(has_text='Automaton.observe').first
         result.wait_for()

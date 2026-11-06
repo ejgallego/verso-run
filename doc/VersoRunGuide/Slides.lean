@@ -123,11 +123,9 @@ a replacement when it does not. Anchored proof states can be hidden with
 tag := "guide-slides-compatibility-and-demo"
 %%%
 
-Slides owns built-in theme CSS, font paths, and asset collision checks; the Run
-adapter supplies only its own files. The binary-assets extension is reviewed in
-[Slides PR #2](https://github.com/ejgallego/verso-slides/pull/2), rebased onto the
-4.36 Slides branch. The root Lake manifest locks the shared VIR and Verso
-dependencies; see the [exact dependency and runtime pins](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#pinned-dependencies).
+Build the deck and its resource carrier with the same dependency versions.
+The [dependency notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#pinned-dependencies)
+list the versions used by this repository's demo.
 
 `lake exe lean-run-slides-demo` generates `_out/slides`. The combined
 `python3 scripts/build-demo-site.py` puts the deck under `_out/html-multi/slides`

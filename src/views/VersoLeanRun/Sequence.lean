@@ -130,7 +130,8 @@ one frame. The browser displays at most 128 frames, including that initial frame
 An example built with {name (full := VersoLeanRun.Sequence.iterate)}`Sequence.iterate`
 can therefore display at most 127 transitions. This limit applies to the display;
 the model has no fixed length limit. Oversized results are rejected rather than
-shortened. Live views compute new states on demand without storing a full history.
+shortened. An automaton can compute states on demand without recording its
+history; cyclic replay instead retains an existing recording.
 
 ## Rendering
 
@@ -138,4 +139,20 @@ shortened. Live views compute new states on demand without storing a full histor
 Rendering changes the content of its frames while preserving their labels and
 error messages. Selecting a frame displays a recorded result; it does not run
 the computation again.
+
+## Errors
+
+{name (full := VersoLeanRun.SequenceView.error)}`SequenceView.error` displays a
+message when the input cannot produce a recording:
+
+```lean
+open VersoLeanRun
+
+def invalidInput : SequenceView :=
+  SequenceView.error "The input could not be parsed."
+```
+
+For a problem at a particular step, use that frame's
+{name (full := VersoLeanRun.Frame.error)}`error` field. The other recorded frames
+remain available for inspection.
 -/

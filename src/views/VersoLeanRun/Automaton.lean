@@ -146,13 +146,17 @@ error view with playback disabled.
 sequence into a looping view. It accepts the same optional drawing function
 as {lit}`view` and keeps the labels and errors. Playback returns to the first
 step after the last, unless an error prevents further advancement. It reuses
-the recorded frames, so it does not need a transition function.
+the recorded frames, so it does not need a transition function. The run retains
+the complete recording for as long as it needs to replay it.
 
 ## Live runs
 
-A live run keeps only its current state, with no fixed step limit. Each run
-starts from the model's initial state and advances independently of other copies.
-A model whose state grows with each step can still use more memory over time.
+{name (full := VersoLeanRun.Automaton.observe)}`Automaton.observe` and
+{name (full := VersoLeanRun.Automaton.view)}`Automaton.view` do not automatically
+record previous states. A model or callback can still retain history or other
+data; cyclic replay retains its recording. Each run starts from the model's
+initial state and advances independently of other copies, with no fixed step
+limit.
 
 The [authoring guide's playback table](../guide/authoring/#guide-authoring-run-an-automaton-continuously)
 describes Run, Play, Pause, Stop, input edits, and Restart, including what happens

@@ -47,13 +47,13 @@ Try the greeting here:
 #check Demo.greet
 ```
 
-The [Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md)
-provides a complete project and commands to build and serve it locally. It uses
-Lean 4.35 and an earlier verso-run API, including `Verso.Output.Html`. Follow its
-README and [version-specific authoring guide](https://github.com/ejgallego/verso-run/blob/f2a1491257b8ad0c71b0468abf909c6dcfda9459/docs/authoring.md)
-when copying that project. This guide describes the current Lean 4.36 checkout,
-including `Lean.Html` and the sequence and automaton helpers. See
-{ref "guide-hosting-share-a-complete-copy"}[Hosting and sharing] for hosting requirements.
+{ref "guide-authoring-publishing-the-document"}[Publishing the document] gives a
+complete Lean 4.36 project for this chapter. The separate
+[Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md)
+still uses Lean 4.35 and an earlier API, including `Verso.Output.Html`. Follow
+its README and [version-specific guide](https://github.com/ejgallego/verso-run/blob/f2a1491257b8ad0c71b0468abf909c6dcfda9459/docs/authoring.md)
+when copying that project. See {ref "guide-hosting"}[Hosting and sharing] for
+HTTP and web-host requirements.
 
 Definitions, namespaces, and open declarations remain available in later Run
 blocks. Several blocks can use the same entry; a later block might display just
@@ -117,9 +117,10 @@ tag := "guide-authoring-arguments-and-defaults"
 
 
 `Bool` inputs use a true/false selector, with presets written as the strings
-`"true"` or `"false"`. `Nat` and `UInt64` inputs use exact decimal values; UInt64 is bounded
-by `18446744073709551615` and arithmetic uses Lean's normal wraparound. Values
-beyond JavaScript's safe integer range remain exact.
+`"true"` or `"false"`. `Nat` and `UInt64` inputs accept up to 256 decimal digits,
+including leading zeros. UInt64 values cannot exceed `18446744073709551615`,
+and arithmetic uses Lean's normal wraparound. Values beyond JavaScript's safe
+integer range remain exact.
 
 `+multiline` displays a String input in a textarea, preserving whitespace and
 blank lines. Enter adds a newline; Ctrl+Enter or ⌘+Enter runs the function.
@@ -242,21 +243,99 @@ and the publishers for each genre.
 tag := "guide-authoring-publishing-the-document"
 %%%
 
-The [Manual starter](https://github.com/ejgallego/verso-run/blob/main/examples/manual-starter/README.md) includes a complete
-project and build instructions for its pinned release. For an existing project,
-[resource integration](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#resource-ownership-and-site-integration)
-explains the Lake configuration and generator setup. Blog and Slides use their
-respective {ref "guide-blog-publish-a-site"}[site] and {ref "guide-slides-publish-a-deck"}[deck]
-publishers.
+The chapter above can become a small standalone project. Install
+[elan](https://github.com/leanprover/elan) and create a directory for these five
+files. This recipe uses Lean 4.36.0-rc1 and a fixed, published verso-run revision;
+copy the two versions together.
 
-The document's compiled functions and their dependencies are published together
-as a resource bundle. A separate module embeds these resources for the native
-generator. The generator imports both the document and its resource module;
-the document must not import the resource module, since that would create a
-build dependency cycle.
+`lean-toolchain`:
 
-Pass the complete `include_vir_assets` result to the publisher. Keep
-`compiler.postponeCompile false` in runnable document modules.
+```
+leanprover/lean4:v4.36.0-rc1
+```
+
+`lakefile.lean`:
+
+```
+import Lake
+open Lake DSL
+
+require verso_run from git
+  "https://github.com/ejgallego/verso-run" @
+  "2365399b99a140a3caff690fa1b00ced58dc0b73"
+
+package my_manual
+
+lean_lib MyChapter where
+  roots := #[`MyChapter]
+
+lean_lib MyResources where
+  roots := #[`MyResources]
+  needs := #[`+MyChapter:virResourcePack]
+
+@[default_target]
+lean_exe «my-manual» where
+  root := `Main
+```
+
+Save the complete chapter from {ref "guide-authoring-a-basic-block"}[A basic block]
+as `MyChapter.lean`, beside the Lake file. It contains the imports, `#doc`
+declaration, and greeting function. Keep `compiler.postponeCompile false` in
+runnable document modules.
+
+The document build compiles its selected functions and their dependencies into
+a resource bundle. The `needs` entry prepares that bundle before compiling a
+separate module that embeds it:
+
+`MyResources.lean`:
+
+```
+module
+public import Vir.Resources.Assets
+
+public def MyResources.resources : Vir.Resources.ResourceSet :=
+  include_vir_assets (modules := #[MyChapter])
+```
+
+The native generator imports both the chapter and its resources. The chapter
+must not import `MyResources`, since that would create a build dependency cycle.
+Pass the complete `include_vir_assets` result to the publisher:
+
+`Main.lean`:
+
+```
+import MyChapter
+import MyResources
+import VersoLeanRun.Publish
+
+open Verso Genre Manual
+
+def main := manualMain (%doc MyChapter)
+  (extraSteps := [VersoLeanRun.publish MyResources.resources])
+```
+
+Run these commands from the directory containing the five files. Code blocks
+scroll horizontally when a line does not fit:
+
+```
+lake update
+lake build
+lake exe my-manual --output _out
+python3 -m http.server 8795 --bind 127.0.0.1 \
+  --directory _out/html-multi
+```
+
+Open [http://127.0.0.1:8795/](http://127.0.0.1:8795/) and press Run to display
+`Hello, Ada`. Lake acquires the matching runtime; no separate Wasm build is
+needed. Keep the generated `lake-manifest.json` with the project to record its
+resolved dependencies.
+
+Additional chapters follow the same pattern: register their document libraries,
+add their resource prerequisites and include their modules in the resource set.
+For other genres, use the {ref "guide-blog-publish-a-site"}[Blog site] or
+{ref "guide-slides-publish-a-deck"}[Slides deck] publisher. The
+[resource integration notes](https://github.com/ejgallego/verso-run/blob/main/docs/internals.md#resource-ownership-and-site-integration)
+explain how the build and publication steps fit together.
 
 # Run an anchored example from an imported module
 %%%
@@ -363,8 +442,9 @@ results; labels and errors appear as text.
 
 The [Finite sequences reference](../api/VersoLeanRun/Sequence/) explains
 construction, mapping, and rendering. It includes `Sequence.iterate`, which
-records repeated applications of a transition, and `SequenceView.error` for
-inputs that cannot produce a recording.
+records repeated applications of a transition, and
+[error views](../api/VersoLeanRun/Sequence/#Errors) for inputs that cannot
+produce a recording.
 
 # Run an automaton continuously
 %%%
@@ -430,9 +510,10 @@ Hiding the tab, Stop, and leaving the example cancel any pending restart
 resumption. Showing the tab again does not resume playback. Error frames display
 the failure and disable Play and Step; Stop still ends the run.
 
-Each example has independent state and keeps only its current state. Play waits
-for each transition to finish before starting the next, with no fixed step
-limit. A model that grows with each step can still use more memory over time.
+Each example has independent state. An ordinary automaton computes its next state
+without automatically recording the earlier ones. Cyclic replay keeps its saved
+recording, and a model or custom view can retain additional data. Play waits for
+each transition to finish before starting the next, with no fixed step limit.
 Each frame has the same string limit and HTML preview restrictions as a sequence
 result. Stop can interrupt a transition that has not finished.
 
