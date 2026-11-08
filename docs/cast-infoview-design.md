@@ -110,6 +110,65 @@ invocation, session handling and result formatting; only program opening varies.
 Freeze the final backend surface after the scalar experiment rather than
 generalizing it in advance.
 
+### Contract against typed result presenters
+
+The shared-file implementation must build on #22's placement owner, inspected at
+`189514025eec7ad8b644e985d7f9c826bffdb131`. The proposed interface is deliberately
+below that owner:
+
+```text
+Lease<T> = { promise: Promise<T>, release(): void }
+
+PlacementBackend.acquireCall(description, signal): Lease<CallResources>
+PlacementBackend.createWorker(): Worker
+PlacementBackend.acquireView(kind, signal): Lease<ViewResources>
+
+CallResources = { programRequest, resultRendererUrl? }
+ViewResources = { program, declaration, commitDeclaration? }
+```
+
+`programRequest` is structured-cloneable data. The site variant contains current
+publication URLs/contracts; the editor variant contains the snapshot identity,
+package bytes, independently expected contracts and prepared runtime input.
+The backend performs RPC before posting to the worker. Workers do not receive an
+RPC session or a React handle. The worker's program-opening helper consumes the
+variant; its invocation/session/normalization loop remains shared.
+
+`release` is idempotent and releases an acquisition interest, including a pending
+RPC. It does not dispose a successfully handed-off program. `ExperimentHost`
+owns each worker and its termination; `ViewHost` owns each acquired presenter
+program and its disposal. Cache only immutable bytes or compiled Wasm modules,
+scoped to project/runtime and snapshot identity. Each placement gets its own
+mutable program, and posting must not detach cached buffers. Every consumer keeps
+its existing post-await generation checks, including late success after abort.
+The caller owns request abort/deadline signals; a backend cannot extend them.
+
+`renderer.js` keeps all Run/Restart/Stop controls, visibility transitions, result
+events and disposal. A backend does not get status callbacks or mount UI.
+`ResultView` keeps its persistent result slot, `mount`, `show`, `clear`, `pause`
+and `dispose` contract. Supplying a relocated `resultRendererUrl` must not give
+that renderer access to the placement controls. Worker normalization keeps #22's
+owned-copy and reachable-transfer-buffer checks.
+
+Cast must bind the backend before the element can be discovered by #22's global
+reconciliation observer. An infoview context marker prevents automatic site
+enhancement while this binding is absent. Reattachment looks up the same
+per-element binding and creates a fresh idle owner. It must never fall back to
+site publication URLs. Reject changing the backend beneath an existing owner;
+dispose and attach explicitly when the snapshot binding changes. React ref/layout
+setup and the observer ordering need a regression test.
+
+Custom result modules need the same explicit registration used by publication;
+the `CustomResult` type marker alone does not identify JavaScript assets. Preview
+setup must supply those registrations before claiming custom-result support.
+The first scalar/HTML slice does not invent a second registration mechanism.
+
+The design branch can remain based on main. Compatibility experiments stay in
+isolated modules/outputs. Agree this surface and the implementation writer with
+#22's owner before changing the shared files; then stack the runtime patch on
+the selected #22 revision, or rebase onto its landed squash. A separate preview
+controller or a fork of `ResultView` is not part of this proposal.
+
 Two VIR seams need a focused experiment before deciding on upstream changes:
 
 1. **In-memory program opening with expected contracts.** The public runtime
