@@ -36,26 +36,39 @@ come from the last successful Lake build.
 
 ## Document and execution requests
 
-Use two RPC methods, with names and record definitions finalized during the
-first implementation slice:
+Improve Cast's existing checked-page request and add one Run-specific request.
+The public Cast namespace below is proposed: today's implementation lives under
+`tests/reference-manual/CastManualPreview`, not in Cast's library API.
 
 ```text
-preview(position) -> { uri, version, documentJson }
-program({ version, document, declaration })
+Cast.Manual.Preview.document({ expectedVersion? })
+    -> { uri, version, snapshotRef, documentJson }
+VersoLeanRun.Cast.program({ snapshotRef, version, document, declaration })
     -> { uri, version, callable, fingerprint, expectedExport, packageBase64 }
 ```
 
-`preview` follows Cast's existing pattern: wait for the page's final snapshot,
+`document` follows Cast's existing pattern: wait for the page's final snapshot,
 wait for its checked environment, evaluate the document, then serialize its
 `Part Manual`. The current decoder can carry Manual's JSON extension data; the
-new generated-codec work is not a prerequisite.
+new generated-codec work is not a prerequisite. Factor this checked-page
+selection/evaluation into a public server helper used by both requests. The
+helper invokes its consumer with the page metadata, environment, options and
+document within the request. The endpoint retains this checked page through
+Lean's existing `WithRpcRef` mechanism and returns the opaque handle alongside
+the existing JSON string and URI/version. The environment remains server-side,
+in a session-scoped RPC object rather than a persistent module extension. Drop
+old client references when replacing or unmounting the page, using the existing
+RPC session's reference lifecycle.
 
-`program` obtains a checked snapshot for the requested page and requires the
-exact requested version. It re-collects the page's admitted Run entries and
-resolves the selected document/declaration to its `Experiment.callable`.
+`program` accepts that checked-page reference, checks its page identity and the
+current requested version, then selects an entry from its admitted Run blocks.
+It resolves the document/declaration to its `Experiment.callable`.
 It then uses VIR's snapshot analyzer and binary emitter. The expected callable
 signature comes independently from the admitted Run form, as it does in site
 publication. The client checks the response identity before worker creation.
+It does not re-evaluate a different environment by looking up only the version:
+a document version alone does not identify a snapshot across server sessions or
+import reprocessing. A retired RPC session requires a new preview/reference.
 
 A changed document version produces a refresh response/error, never code from
 a different revision under the old visible source. The handler must not re-run
@@ -69,6 +82,33 @@ existing expected signatures. It uses the same runtime identity and program
 loader as the entry. It does not import a document-owned resource carrier into
 that document.
 
+The existing VIR RPCs retain their responsibilities:
+
+| Request | Decision | Reason |
+| --- | --- | --- |
+| `readAsset` | Reuse | Already transports project-relative binary files through the editor RPC session. No new runtime/file-download endpoint is needed. |
+| `buildIRPackage` | Reuse for the preview widget's compiled UI | It selects an immutable package retained by `vir_proof_widget` using its entry and fingerprint. |
+| Cast's `document` | Promote and improve | A checked page needs an explicit URI/version response and a reusable refresh component. |
+| Run's `program` | Add in verso-run | Its authority comes from the requested version's admitted Run blocks, not from a retained widget definition. |
+
+The new program handler calls VIR's existing snapshot analyzer and emitter;
+it does not implement another compiler. Do not broaden `buildIRPackage` to accept
+arbitrary browser-supplied roots or make Run entries masquerade as widget
+definitions merely to reuse an endpoint. Execution stays in the worker, so
+there is no server-side run/evaluate RPC. If another consumer later needs this
+same selection contract, extract a shared selector then.
+
+Use the existing RPC-reference protocol for the snapshot handle. No custom
+server-side snapshot registry, raw Environment serialization or new reference
+transport is required. Cast's shared refresh component must refresh/revalidate
+its page after server-session replacement and page reprocessing, as well as
+ordinary source edits. Imported-module preparation remains Lean's responsibility.
+
+Cancellation polling around asset reads, package emission and base64 encoding
+would be a small improvement to the existing VIR handlers. It should preserve
+their protocols and complement the caller's abort/generation guards. It does not
+make those synchronous operations preemptible or replace worker termination.
+
 ## React and execution ownership
 
 Cast renders the source and surrounding document. A stable Run component owns
@@ -77,6 +117,13 @@ result DOM inside that container, and returns its existing disposal handle.
 React must not also reconcile nodes mutated by the enhancer or presenter.
 Component effects attach and dispose the enhancer; Cast rendering callbacks
 remain hook-free.
+
+The console's markup comes from the existing `renderControls experiment`,
+serialized into its imperative DOM slot. The source remains a separate,
+React-managed child rendered by Cast's existing Manual/highlighting adapter.
+Only the Run wrapper connects these two pieces. Do not maintain a second JSX
+implementation of the form, a second source highlighter or a second HTML-result
+isolation policy.
 
 Create component factories once, as Cast's extension contract requires. Preserve
 Cast's supplied identity/focus attributes. Repeated placements of one callable
@@ -192,9 +239,26 @@ Wasm/package bytes; it needs no relative module imports. Actual VS Code worker
 and CSP behavior must be tested, not inferred from a localhost browser harness.
 
 Cast already has the renderer extension point. No Cast traversal fork or new
-document interchange format is needed for this design. Any reusable preview-shell
-extraction can be proposed to Cast after the initial integration establishes the
-required surface.
+document interchange format is needed for this design. Promote the existing
+checked-page helper and refresh component into an optional Cast infoview module,
+separating them from reference-manual-specific roles. The refresh component
+accepts an extension-renderer factory and a page-invalidated notification; that
+notification lets the placement owner stop immediately on edits. Keep its stable
+component construction, stale-reply suppression and last-successful-preview
+behavior in one place.
+
+The useful upstream changes are therefore specific:
+
+| Project | Improvement | Priority |
+| --- | --- | --- |
+| Cast | Public checked-page/refresh component, with versioned responses and extension configuration | Enables reuse of the existing test-consumer preview without copying it. |
+| VIR | Public in-memory program opening sharing expected-signature validation and owned-program disposal | Keeps editor and site execution on one callable contract. |
+| VIR | Supported infoview shell/component package export | Avoids importing private paths or copying the runtime loader. |
+| VIR | Cooperative cancellation checkpoints in existing byte/package RPC handlers | Useful bounded follow-up; not a new protocol or a prerequisite for worker Stop. |
+
+These are proposed changes, not findings that upstream implementations are
+broken. The compatibility/worker experiment should determine the exact API
+signatures before any of these library surfaces is committed.
 
 ## Dependency baseline
 
