@@ -10,7 +10,9 @@ and read-only editor smoke test below are historical evidence, not the selected
 client API. The next integration uses only the immutable successor: one
 host-owned selection lifetime represented by an ordinary abort signal,
 acquisition separate from demo chrome, and no `onLoaded`, stored `isCurrent` or
-dual Cast/host invalidation ownership. Replace the old fixtures when that API
+dual Cast/host invalidation ownership. A native React request hook owns cleanup;
+the Lean decoder/view receives immutable page data plus derived `matchesSelection`.
+Replace the old fixtures when that API
 lands; do not add a compatibility adapter. Preserve edits to the open smoke
 consumer while retiring or replacing its setup.
 
@@ -86,11 +88,26 @@ signature comes independently from the admitted Run form, as it does in site
 publication. The client checks the response identity before worker creation.
 It does not re-evaluate a different environment by looking up only the version.
 The reference identifies captured data; it does not establish that the captured
-page is still current. The compact processing/context comparison is experimental;
-it is not an authoritative lease against later edits or full editor freshness.
-Keep that limitation explicit pending a supported upstream identity API. The
-host must abort the selected page's lifetime on actual invalidation, including
+page is still current. Use request-relative URI/version and cancellation checks,
+plus standard session/reference validity. Do not retain scheduler pointer
+identities or the whole `EditableDocument` as a freshness mechanism. The host
+must abort the selected page's lifetime on supported invalidation, including
 an invalidation during package preparation, and ignore late results.
+
+The supported contract follows the pinned Lean worker: nonempty `didChange`
+updates the document and cancels pending requests as edits; versions are assumed
+monotonic by the client/protocol. Re-entering import setup requests a worker
+restart because imports cannot be unloaded in that process. A same-URI,
+same-version close/reopen therefore needs a new selection and session; old native
+session/reference pairs must fail rather than become usable in the replacement
+worker. Qualify that path with the real worker restart, not a substituted-context
+test alone. `RequestM.readDoc` reads the request's captured context, so checking
+it again is not a global latestness lease against future edits.
+
+Same-version plugin reprocessing within a surviving session is outside this
+bounded contract. Supporting such a mode would require an explicit upstream
+processing stamp. It does not justify a stamp or pointer workaround for the
+supported edit/restart lifecycle.
 
 Waiting for `env.checked` does not establish that the page has no errors. The
 initial Run admission policy requires a completed page with no error-severity
@@ -157,7 +174,11 @@ Run children bind to that captured selection and send program requests through
 that exact session. The host owns one ordinary abort signal for the selection;
 source/reprocessing/session invalidation aborts it before replacement acquisition.
 Cast consumes that lifetime rather than maintaining a second didChange/generation
-state machine. Acquisition is reusable without the demo's chrome.
+state machine. Acquisition and request cleanup live in native React, independently
+of the Lean decoder/view and demo chrome. The renderer receives immutable
+`PageInfo` and a derived `matchesSelection`; the old selected page must not match
+the replacement merely because its URI/version are equal. Native execution guards
+also check the captured signal directly, even if the Wasm view has not rerendered.
 
 Mandatory cleanup belongs to native placement ownership: stop workers, abort
 acquisition and release native resources even if a Wasm callback is unavailable
@@ -510,9 +531,11 @@ Report those observations separately from preparation.
    held loading, Stop/retry, document edits, page switches, visibility and
    unmount. Late results must never commit into the replacement document.
    Require explicit checks for an error-bearing page, incomplete elaboration,
-   same-version reprocessing, session retirement and position-only session
-   changes. Observe immediate invalidation before a held replacement response,
-   and server refusal of stale package requests. Real-editor evidence must
+   same-version close/reopen worker restart, session retirement and position-only
+   session changes. Observe immediate invalidation before a held replacement
+   response and failure of old captured session/reference requests after restart;
+   a fresh pair must recover. Verify native cleanup with a failing Wasm callback,
+   and ignore late replies after abort. Real-editor evidence must
    establish cursor-only behavior; the controlled harness cannot prove it.
 4. **Consumer acceptance.** A fresh consumer owns its source, dependencies and
    outputs. Record exact source/runtime/package identities and exercise a real
