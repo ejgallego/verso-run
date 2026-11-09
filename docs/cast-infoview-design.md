@@ -287,7 +287,27 @@ existing shell-consumption experiment:
    verify the payload and compare package compiler metadata before initialization.
    A bare precompiled module plus a caller-provided identity string is not proof
    of that association. Reuse compiled modules only while preserving verified
-   provenance. Settle this input contract with VIR before coding. Do not weaken
+   provenance. The selected contract with VIR's API owner is:
+
+   ```js
+   const factory = createVirRuntimeFactory({
+     wasmBytes, runtimeManifest, expectedRuntimeContentId,
+   });
+   const program = await factory.createProgram({
+     irPackageSet, expectedExports, signal,
+   });
+   ```
+
+   `runtimeManifest` is the existing runtime resource envelope; the expected
+   content ID is independently selected by the consumer's lock/build contract.
+   Snapshot the runtime inputs at factory construction and per-call package
+   bytes/contracts at operation entry, before asynchronous work. Keep the
+   verified bytes/module association private and shared only as immutable input;
+   every operation owns a separate program instance. This API is selected for
+   upstream implementation, not available on the current consumer pin. VIR's
+   source branch is based on a different compiler pair; a matched immutable
+   source/runtime/SDK checkpoint still needs qualification before consumption.
+   Do not weaken
    the site loader's URL policy or copy its signature comparison into verso-run.
 2. **Composing the registered infoview widget.** The locked infoview supports
    `importWidgetModule` and `widget_module:hash,<decimal hash>` imports. Qualify a
