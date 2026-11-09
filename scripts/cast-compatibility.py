@@ -20,8 +20,8 @@ import tarfile
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--cast-source', type=Path, required=True, help='Git checkout containing the source commit')
-parser.add_argument('--cast-revision', default='9701d6f1794c20a6ad8966bd92f6ebba12872f62')
-parser.add_argument('--output', type=Path, default=ROOT / '_out/cast-preview-9701d6f')
+parser.add_argument('--cast-revision', default='6bee7e7e06546cef75ee873bbe7e6252151e0432')
+parser.add_argument('--output', type=Path, default=ROOT / '_out/cast-preview-6bee7e7')
 parser.add_argument('--prepare', action='store_true', help='acquire the isolated consumer without compiling')
 parser.add_argument('--build', action='store_true', help='build an already prepared consumer')
 parser.add_argument('--shell', action='store_true', help='compile and extract a registered shell wrapper')
@@ -81,7 +81,9 @@ if args.prepare:
     source.mkdir()
     archive = subprocess.check_output(['git', 'archive', '--format=tar', revision,
                                       'VersoCast.lean', 'VersoCast', 'js', 'package.json',
-                                      'LICENSE', 'ORIGIN.md'], cwd=args.cast_source)
+                                      'LICENSE', 'ORIGIN.md', 'tests/preview-client.browser.mjs',
+                                      'tests/reference-manual/widget.browser.mjs',
+                                      'tests/reference-manual/infoview-peer.mjs'], cwd=args.cast_source)
     inventory = {}
     with tarfile.open(fileobj=io.BytesIO(archive)) as members:
         for member in members:

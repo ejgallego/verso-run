@@ -1,7 +1,7 @@
 # Run blocks in the infoview
 
 Implementation design, based on verso-run `2365399`. Exact Cast successor
-`9701d6f1794c20a6ad8966bd92f6ebba12872f62` compiles on the unchanged consumer
+`6bee7e7e06546cef75ee873bbe7e6252151e0432` compiles on the unchanged consumer
 pins, including its public Preview client/server APIs and a registered native
 editor wrapper. Actual editor rendering, Run source rendering and execution
 remain unqualified. Cast is not yet a root dependency.
@@ -9,8 +9,8 @@ remain unqualified. Cast is not yet a root dependency.
 The current fixtures use only this successor: one host-owned selection lifetime
 represented by an ordinary abort signal, a native React request hook, and a Lean
 decoder/view bridge. Immutable page metadata describes the displayed snapshot;
-`matchesSelection` is derived. Earlier `27085ea` results remain historical, and
-the old open smoke consumer is preserved with any local edits.
+`matchesSelection` is derived. Earlier `27085ea` and `9701d6f` results remain
+historical, and their consumers are preserved with any local edits.
 
 ## Author experience
 
@@ -398,7 +398,7 @@ No additional Cast RPC or client hook is required by this ownership review.
 
 The isolated task is `feat/cast-infoview` in `.worktree/cast-infoview`. Its root
 Lean, Verso, VIR, Illuminate and Slides pins remain unchanged. The selected Cast
-source is `9701d6f1794c20a6ad8966bd92f6ebba12872f62` from
+source is `6bee7e7e06546cef75ee873bbe7e6252151e0432` from
 [Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1).
 Cast's own pins remain Lean 4.36.0-rc1 / Verso `f7a4dc6` / VIR `5a5614b`;
 this consumer uses Lean 4.36.0-rc1 / Verso `d0a5f92` / VIR `bf8b6a8`.
@@ -407,9 +407,10 @@ Matching Lean versions alone does not establish binary compatibility.
 ### Current successor gate
 
 `scripts/cast-compatibility.py` extracts exact Cast Lean and JavaScript sources
-plus the public npm export map into a fresh ignored consumer. Each consumer
-owns all eight dependency checkouts and build directories. The driver checks
-the resolved manifest and checkout revisions against this worktree's pins and
+plus the public npm export map and native regression sources into a fresh
+ignored consumer. Each consumer owns all eight dependency checkouts and build
+directories. The driver checks the resolved manifest and checkout revisions
+against this worktree's pins and
 records extracted-source hashes. It refuses an existing consumer at preparation
 and refuses mismatched revisions or edited editor templates on later steps.
 No Cast runtime, SDK or compiled output is copied.
@@ -418,16 +419,17 @@ No Cast runtime, SDK or compiled output is copied.
 python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --prepare
 python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --preview
 python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --editor
+UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python scripts/cast-preview-client.py --cast-source /path/to/verso-cast
 ```
 
-The defaults select exactly `9701d6f` and `_out/cast-preview-9701d6f/`.
+The defaults select exactly `6bee7e7` and `_out/cast-preview-6bee7e7/`.
 The public Preview client/server build passes on the unchanged consumer pins
 (771 jobs in the fresh consumer). `PreviewCompatibility.lean` configures
 `Bridge {decode, view}` without reference-manual roles. Its typed consumer RPC
 accepts `WithRpcRef Page`, calls `requireErrorFree` before its work and
 `requireMatchingVersion` afterward. The captured session/reference remain native
-values. Beam reports no errors or warnings; its workspace is dropped before
-batch validation. This gate compiles the RPC but does not invoke it.
+values. This gate compiles the RPC but does not invoke it. The Lean API/wire
+modules and dependency pins are byte-identical to `9701d6f`.
 
 The replacement editor fixture also compiles (878 jobs including its asset
 preparer). `EditorHost.mjs` uses native `usePage` / `renderPage`, resolved through
@@ -437,14 +439,29 @@ external. `EditorPreview.widget` derives the shell hash from the pinned public
 widget. The Lake input tracks the generated wrapper bundle. The native host
 anchors `EnvPosContext` at the imported header and aborts before clearing or
 replacing its selection on edits, processing and server stop/restart.
-This event mapping follows the upstream reference host; our actual editor
-behavior has not yet been observed.
+The host also preserves invalidation when busy/finished notifications batch
+back to the same processing flag, and ignores empty edits like Lean. Actual
+editor behavior has not yet been observed.
+
+The native browser gate replays Cast's exact `6bee7e7` hook and editor-owner
+regressions against our `EditorHost.mjs`, the public helper, and this consumer's
+locked React. A controlled Infoview peer supplies notifications and held replies;
+it replaces transport hooks and stubs the shell, so it does not exercise the
+actual editor or LSP. The current host/helper pass StrictMode, batched and
+duplicate progress, empty/nonempty edits, late replies, decoder replacement,
+server stop/restart, unmount, and native request cleanup under decoder failure.
+Two negative controls must fail: the `9701d6f` host strands the selection after
+batched busy/finished, and its helper accepts an obsolete decoder's reply in the
+commit/cleanup gap. Test source hashes, bundle inputs, console observations and
+control outcomes are retained in `preview-client.json` and `client-*-bundle.log`.
+This qualifies the native preview boundary under controlled scheduling; Run
+worker cleanup still needs its own integration check.
 
 The asset preparer acquires this consumer's locked bf8 runtime and checks its
 compiler identity. Open the prepared example with:
 
 ```sh
-code --new-window _out/cast-preview-9701d6f/consumer --goto _out/cast-preview-9701d6f/consumer/EditorDemo.lean:15
+code --new-window _out/cast-preview-6bee7e7/consumer --goto _out/cast-preview-6bee7e7/consumer/EditorDemo.lean:15
 ```
 
 Edit a sentence and observe the infoview; press Ctrl+Shift+Enter in the Lean
@@ -466,6 +483,7 @@ instructions and fixture versions are preserved in
 | --- | --- | --- |
 | Cast `0e2bc83` core/Manual source | 761-job build; actual `ExternalCode.leanBlock` constructor/data/children assertion | `_out/cast-compatibility/` |
 | Registered wrapper through locked official infoview loader | Six controlled-browser checks: shell and native-prop identity, stable factory, shared React state and unmount | `_out/cast-compatibility/widget-import.json` |
+| Cast `9701d6f` public Preview imports and native editor fixture | 771/878-job builds, Beam no errors/warnings; superseded native race behavior | `_out/cast-preview-9701d6f/` |
 | Cast `27085ea` public Preview imports | 845-job source/API build | `_out/cast-preview-27085ea/` |
 | Cast `27085ea` editor smoke | 883-job build, runtime identity check and CLI launch; rendered panel not observed | Same consumer; preserve the open file and any local edits |
 

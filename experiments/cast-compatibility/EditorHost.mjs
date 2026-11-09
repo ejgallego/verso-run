@@ -5,7 +5,7 @@ import { EditorContext, EnvPosContext, useClientNotificationEffect,
 import { usePage, renderPage } from "verso-cast/preview";
 import VirShell from "__VIR_SHELL__";
 
-// Consumer-owned event mapping, following Cast 9701d6f's reference host. The
+// Consumer-owned event mapping, following Cast 6bee7e7's reference host. The
 // acquisition/decoder/view and VIR shell remain their public implementations.
 // This host has no Run workers; execution acceptance belongs to the next gate.
 export function PageHost({ uri, ...bridge }) {
@@ -20,7 +20,7 @@ function PageAtUri({ uri, decode, view }) {
   const owner = React.useRef(null);
   const [processing, setProcessing] = React.useState(false);
   const [version, setVersion] = React.useState(undefined);
-  const [restart, setRestart] = React.useState(0);
+  const [refresh, setRefresh] = React.useState(0);
   const [stopped, setStopped] = React.useState(false);
   const [selection, setSelection] = React.useState(null);
   const invalidate = () => {
@@ -30,7 +30,7 @@ function PageAtUri({ uri, decode, view }) {
     setSelection(null);
   };
   useClientNotificationEffect("textDocument/didChange", event => {
-    if (event.textDocument.uri !== uri) return;
+    if (event.textDocument.uri !== uri || event.contentChanges.length === 0) return;
     invalidate();
     setVersion(event.textDocument.version);
     setProcessing(true);
@@ -38,7 +38,12 @@ function PageAtUri({ uri, decode, view }) {
   useServerNotificationEffect("$/lean/fileProgress", event => {
     if (event.textDocument.uri !== uri) return;
     const busy = event.processing.length > 0;
-    if (busy) invalidate();
+    if (busy && owner.current && !owner.current.signal.aborted) {
+      invalidate();
+      // A busy/finished pair can batch back to processing=false. Preserve the
+      // invalidation so that pair still creates one replacement selection.
+      setRefresh(value => value + 1);
+    }
     setProcessing(busy);
   }, [uri]);
   useEvent(editor.events.serverStopped, () => {
@@ -46,7 +51,7 @@ function PageAtUri({ uri, decode, view }) {
   }, [uri]);
   useEvent(editor.events.serverRestarted, () => {
     invalidate(); setStopped(false); setProcessing(false); setVersion(undefined);
-    setRestart(value => value + 1);
+    setRefresh(value => value + 1);
   }, [uri]);
   React.useLayoutEffect(() => {
     if (processing || stopped) return;
@@ -54,7 +59,7 @@ function PageAtUri({ uri, decode, view }) {
     owner.current = controller;
     setSelection(Object.freeze({ session, uri, expectedVersion: version, signal: controller.signal }));
     return () => { controller.abort(); owner.current = null; };
-  }, [session, uri, version, processing, stopped, restart]);
+  }, [session, uri, version, processing, stopped, refresh]);
   return React.createElement(Preview, { selection, decode, view });
 }
 
