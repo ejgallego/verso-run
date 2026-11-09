@@ -3,7 +3,9 @@
 The experimental consumer owns all dependencies and outputs. No Cast build files,
 runtime or SDK are copied. This is a source-compatibility gate, not editor/runtime
 acceptance. Run --prepare first when using an interactive Lean checker, close that
-workspace, then run --build for batch evidence.
+workspace, then run --build for batch evidence. --shell compiles a registered
+wrapper using the existing infoview hash-import route; a separate browser driver
+checks the official loader with controlled source replies.
 """
 import argparse
 import hashlib
@@ -21,8 +23,9 @@ parser.add_argument('--cast-revision', default='0e2bc830bc43a88fc3ceea5561691192
 parser.add_argument('--output', type=Path, default=ROOT / '_out/cast-compatibility')
 parser.add_argument('--prepare', action='store_true', help='acquire the isolated consumer without compiling')
 parser.add_argument('--build', action='store_true', help='build an already prepared consumer')
+parser.add_argument('--shell', action='store_true', help='compile and extract a registered shell wrapper')
 args = parser.parse_args()
-assert args.prepare != args.build, 'Select exactly one of --prepare or --build'
+assert sum([args.prepare, args.build, args.shell]) == 1, 'Select --prepare, --build or --shell'
 output = args.output.resolve()
 assert output.is_relative_to(ROOT / '_out'), 'Keep experimental outputs inside this task worktree'
 project = output / 'consumer'
@@ -38,10 +41,10 @@ def write_report(report):
     report_path.write_text(json.dumps(report, indent=2) + '\n')
 
 
-def run(parts, log_name):
+def run(parts, log_name, cwd=project):
     print('RUN', ' '.join(map(str, parts)), flush=True)
     with (output / log_name).open('w') as log:
-        subprocess.run(parts, cwd=project, stdout=log, stderr=subprocess.STDOUT, check=True)
+        subprocess.run(parts, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, check=True)
 
 
 def check_dependencies(expected):
@@ -111,9 +114,9 @@ lean_lib Compatibility where
     finally:
         write_report(report)
     print(f'Prepared isolated consumer: {project}', flush=True)
-else:
+elif args.build:
     report = json.loads(report_path.read_text())
-    assert report['status'] in ['prepared', 'build-failed']
+    assert report['status'] in ['prepared', 'build-failed', 'source-compile-passed']
     check_dependencies(report['expectedManifest'])
     for name, digest in report['sourceFiles'].items():
         assert hashlib.sha256((project / 'cast-source' / name).read_bytes()).hexdigest() == digest
@@ -130,3 +133,32 @@ else:
     finally:
         write_report(report)
     print('PASS exact Cast core/Manual source compile; runtime/editor remain unqualified', flush=True)
+else:
+    report = json.loads(report_path.read_text())
+    assert report['status'] == 'source-compile-passed'
+    check_dependencies(report['expectedManifest'])
+    fixture = ROOT / 'experiments/cast-compatibility/WidgetComposition.lean'
+    shutil.copyfile(fixture, project / fixture.name)
+    lakefile = project / 'lakefile.lean'
+    addition = '\nlean_lib WidgetComposition where\n  requiresModuleSystem := true\n'
+    if addition not in lakefile.read_text():
+        lakefile.write_text(lakefile.read_text() + addition)
+    vir = project / '.lake/packages/lean_vir'
+    lock = (vir / 'package-lock.json').read_bytes()
+    try:
+        run(['npm', 'ci', '--cache', str(project / '.cache/npm')], 'npm.log', cwd=vir)
+        assert (vir / 'package-lock.json').read_bytes() == lock
+        run(['lake', '--no-cache', 'build', '+WidgetComposition:olean'], 'shell-build.log')
+        artifact = json.loads((project / 'widget-composition.json').read_text())
+        expected_import = "import VirShell from 'widget_module:hash," + artifact['shellHash'] + "';"
+        assert artifact['wrapperSource'].startswith(expected_import)
+        report['shell'] = {'status': 'registered-wrapper-compiled',
+                           'shellHash': artifact['shellHash'], 'wrapperHash': artifact['wrapperHash'],
+                           'fixtureSha256': hashlib.sha256(fixture.read_bytes()).hexdigest(),
+                           'loaderQualified': False}
+    except Exception as error:
+        report['shell'] = {'status': 'compile-failed', 'error': str(error)}
+        raise
+    finally:
+        write_report(report)
+    print('PASS registered wrapper compiles; loader/runtime/editor remain unqualified', flush=True)

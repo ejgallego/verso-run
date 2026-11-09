@@ -285,7 +285,8 @@ existing shell-consumption experiment:
    with the import hash generated from that exact module's `javascriptHash`.
    The wrapper supplies the stable native Run component through props; the shell
    already forwards those props to its compiled root. This route needs no new
-   npm export or copied loader. Actual wrapper/editor acceptance remains pending.
+   npm export or copied loader. The controlled wrapper/import check below passes;
+   real-editor acceptance remains pending.
    Normal shell unmount releases UI ownership without forcing disposal of
    callback/JSL-retained runtimes; preserve that behavior. Our explicitly owned
    workers and presenter programs retain their separate disposal owners.
@@ -367,6 +368,30 @@ and logs are under `_out/cast-compatibility/`; the fixture is in
 [the experiment directory](../experiments/cast-compatibility/Compatibility.lean).
 This establishes source compilation, not rendering of actual Run blocks,
 runtime/native extern compatibility or a working editor connection.
+
+### Registered shell import gate
+
+After the source gate, build the registered wrapper and test the official
+infoview loader:
+
+```sh
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --shell
+UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python scripts/cast-widget-import.py
+```
+
+`WidgetComposition.lean` registers the wrapper and derives its shell import from
+the actual dependency's `javascriptHash`. Its batch build passes. The browser
+driver uses the locked official infoview loader and React import map, with
+controlled widget-source replies containing Lean's emitted modules. It checks
+recursive hash-import loading, exact shell component identity, unchanged native
+props, one stable supplied component factory, shared React hooks/state across
+rerendering, and unmount of that test component. All six checks pass.
+
+The wrapper source contains no private import or copied VIR loader. The shell
+source is transported as a registered module, just as the infoview requests it.
+Results and hashes are in `_out/cast-compatibility/widget-import.json`. The
+experiment does not mount the VIR shell or open its runtime, connect to an
+editor/LSP server, establish snapshot freshness, or qualify worker/CSP behavior.
 
 ## Implementation slices and acceptance
 
