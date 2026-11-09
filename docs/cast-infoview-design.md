@@ -5,6 +5,15 @@ optional Preview public imports compile on these pins in the isolated gates
 below. The adapter, package integration and actual infoview execution remain
 unqualified.
 
+Adoption of Cast `27085ea` is on hold while PR #1 is simplified. Its source gates
+and read-only editor smoke test below are historical evidence, not the selected
+client API. The next integration uses only the immutable successor: one
+host-owned selection lifetime represented by an ordinary abort signal,
+acquisition separate from demo chrome, and no `onLoaded`, stored `isCurrent` or
+dual Cast/host invalidation ownership. Replace the old fixtures when that API
+lands; do not add a compatibility adapter. Preserve edits to the open smoke
+consumer while retiring or replacing its setup.
+
 ## Author experience
 
 An optional `VersoLeanRun.Cast` import enables a Cast preview of a Manual page.
@@ -38,9 +47,9 @@ come from the last successful Lake build.
 
 ## Document and execution requests
 
-Improve Cast's existing checked-page request and add one Run-specific request.
-The public Cast namespace below is proposed: today's implementation lives under
-`tests/reference-manual/CastManualPreview`, not in Cast's library API.
+Reuse Cast's optional checked-page acquisition and add one Run-specific request.
+The wire envelope below captures the intended native reference boundary; the
+successor's exact public acquisition surface is pending its immutable handoff.
 
 ```text
 VersoCast.Manual.Preview.Server.document({ expectedVersion? })
@@ -77,16 +86,18 @@ signature comes independently from the admitted Run form, as it does in site
 publication. The client checks the response identity before worker creation.
 It does not re-evaluate a different environment by looking up only the version.
 The reference identifies captured data; it does not establish that the captured
-page is still current. The program handler must refuse a retired snapshot after
-same-version reprocessing or session retirement, including an invalidation that
-occurs during package preparation. Establish the server's authoritative
-freshness check in the compatibility/lifecycle experiment before enabling Run.
+page is still current. The compact processing/context comparison is experimental;
+it is not an authoritative lease against later edits or full editor freshness.
+Keep that limitation explicit pending a supported upstream identity API. The
+host must abort the selected page's lifetime on actual invalidation, including
+an invalidation during package preparation, and ignore late results.
 
 Waiting for `env.checked` does not establish that the page has no errors. The
-initial execution policy requires a completed page with no error-severity
-diagnostics; warnings alone do not disable Run. Capture admission with the
-checked page, revalidate freshness when packaging, and refuse error-bearing or
-incomplete pages. Keep last-good prose visible with execution disabled. The
+initial Run admission policy requires a completed page with no error-severity
+diagnostics; warnings alone do not disable Run. Cast reports preview/error facts;
+verso-run makes this execution decision independently. Refuse error-bearing or
+incomplete pages even if they can still be displayed. Keep last-good prose
+visible with execution disabled after selection abort. The
 diagnostic/admission check and how it observes the full page require a real
 server test; successful document evaluation is not a substitute.
 
@@ -141,14 +152,20 @@ React must not also reconcile nodes mutated by the enhancer or presenter.
 Component effects attach and dispose the enhancer; Cast rendering callbacks
 remain hook-free.
 
-The public preview's `PageInfo` retains the native reference and its owning
-session. Each stable Run child binds to that captured `PageInfo` in its own
-effect and sends program requests through that exact session. `onLoaded` is a
-precommit reply notification, not a React commit or permission to retarget old
-controls. Last-good content receives `isCurrent = false` during refresh; that
-flag is local display state rather than a server freshness lease. The host must
-stop owners before changing `Input.generation`, and supply a cursor-independent
-session whose position makes the imported RPC methods available.
+Each selected page retains the native reference and its owning session. Stable
+Run children bind to that captured selection and send program requests through
+that exact session. The host owns one ordinary abort signal for the selection;
+source/reprocessing/session invalidation aborts it before replacement acquisition.
+Cast consumes that lifetime rather than maintaining a second didChange/generation
+state machine. Acquisition is reusable without the demo's chrome.
+
+Mandatory cleanup belongs to native placement ownership: stop workers, abort
+acquisition and release native resources even if a Wasm callback is unavailable
+or fails. A best-effort Cast/Lean UI callback must not be the only path to
+termination. Per-placement Stop remains independent of the document selection
+lifetime, so stopping one example does not retire the other examples. Keep a
+cursor-independent session at a position where imported RPC methods are available;
+position-session object identity is not a freshness signal.
 
 The console's markup comes from the existing `renderControls experiment`,
 serialized into its imperative DOM slot. The source remains a separate,
@@ -329,18 +346,17 @@ and CSP behavior must be tested, not inferred from a localhost browser harness.
 
 Cast already has the renderer extension point. No Cast traversal fork or new
 document interchange format is needed for this design. Promote the existing
-checked-page helper and refresh component into an optional Cast infoview module,
-separating them from reference-manual-specific roles. The refresh component
-accepts an extension-renderer factory and a page-invalidated notification; that
-notification lets the placement owner stop immediately on edits. Keep its stable
-component construction, stale-reply suppression and last-successful-preview
-behavior in one place.
+checked-page acquisition into an optional Cast infoview module, separating it
+from reference-manual-specific roles and demo chrome. The host supplies the
+selection lifetime; renderer factories stay stable and late acquisition results
+are ignored after abort. Keep reference routing and last-successful prose without
+a second stored freshness flag or precommit loaded callback.
 
 The useful upstream changes are therefore specific:
 
 | Project | Improvement | Priority |
 | --- | --- | --- |
-| Cast | Public checked-page/refresh component, with versioned responses and extension configuration | Enables reuse of the existing test-consumer preview without copying it. |
+| Cast | Public checked-page acquisition with captured references, separate from demo chrome | Reuses preview/error facts under one host-owned selection lifetime. |
 | Cast | Decoder for standard `Manual.Block.lean` source data | Required to show inline and anchored Run source through existing highlighting. |
 | VIR | Public in-memory program opening sharing expected-signature validation and owned-program disposal | Keeps editor and site execution on one callable contract. |
 | Consumer | Qualify the existing registered widget-module import | Reuses the VIR shell without a new npm export or copied loader. |
@@ -425,6 +441,9 @@ editor/LSP server, establish snapshot freshness, or qualify worker/CSP behavior.
 
 ### Public preview handoff gate
 
+Historical gate for the superseded client shape; adoption is held pending PR #1's
+qualified successor. This result must not be reused as successor qualification.
+
 [Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1) supplies exact source
 `27085eaea49ee0c510335747212756391096deba`, including the external-code source
 decoder and optional public client/server modules. Extend the same source-only
@@ -450,6 +469,9 @@ hashes, all eight resolved/checked-out revisions and logs are retained under
 `_out/cast-preview-27085ea/`. No runtime/SDK is copied between Cast's pair and ours.
 
 ### VS Code document-preview smoke test
+
+Historical read-only smoke using `27085ea`. Keep the open consumer and any edits;
+do not silently update it to the successor or add dual-API compatibility.
 
 After the public-preview gate, prepare and open a read-only editor example:
 
