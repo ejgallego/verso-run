@@ -200,7 +200,11 @@ else:
     assert report.get('preview', {}).get('status') == 'public-imports-compiled'
     check_dependencies(report['expectedManifest'])
     for name in ['EditorPreview.lean', 'EditorDemo.lean', 'EditorAssets.lean']:
-        shutil.copyfile(ROOT / 'experiments/cast-compatibility' / name, project / name)
+        template = ROOT / 'experiments/cast-compatibility' / name
+        target = project / name
+        if target.exists() and target.read_bytes() != template.read_bytes():
+            raise SystemExit(f'Refusing to overwrite edited smoke-test file: {target}')
+        shutil.copyfile(template, target)
     lakefile = project / 'lakefile.lean'
     addition = '''
 lean_lib EditorPreview where
