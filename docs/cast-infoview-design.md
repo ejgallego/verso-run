@@ -1,20 +1,16 @@
 # Run blocks in the infoview
 
-Implementation design, based on verso-run `2365399`. Cast core/Manual and the
-optional Preview public imports compile on these pins in the isolated gates
-below. The adapter, package integration and actual infoview execution remain
-unqualified.
+Implementation design, based on verso-run `2365399`. Exact Cast successor
+`9701d6f1794c20a6ad8966bd92f6ebba12872f62` compiles on the unchanged consumer
+pins, including its public Preview client/server APIs and a registered native
+editor wrapper. Actual editor rendering, Run source rendering and execution
+remain unqualified. Cast is not yet a root dependency.
 
-Adoption of Cast `27085ea` is on hold while PR #1 is simplified. Its source gates
-and read-only editor smoke test below are historical evidence, not the selected
-client API. The next integration uses only the immutable successor: one
-host-owned selection lifetime represented by an ordinary abort signal,
-acquisition separate from demo chrome, and no `onLoaded`, stored `isCurrent` or
-dual Cast/host invalidation ownership. A native React request hook owns cleanup;
-the Lean decoder/view receives immutable page data plus derived `matchesSelection`.
-Replace the old fixtures when that API
-lands; do not add a compatibility adapter. Preserve edits to the open smoke
-consumer while retiring or replacing its setup.
+The current fixtures use only this successor: one host-owned selection lifetime
+represented by an ordinary abort signal, a native React request hook, and a Lean
+decoder/view bridge. Immutable page metadata describes the displayed snapshot;
+`matchesSelection` is derived. Earlier `27085ea` results remain historical, and
+the old open smoke consumer is preserved with any local edits.
 
 ## Author experience
 
@@ -33,8 +29,8 @@ with their own Cast extension decoders.
 
 | Responsibility | Existing implementation | Integration |
 | --- | --- | --- |
-| Checked document and edits | Cast's reference-manual preview RPC and refresh effect | Use the end-of-document checked snapshot; keep its URI and version with the response. |
-| Document rendering | `VersoCast.Manual.createRenderers`, `Renderer.Renderers.renderBlock?` | Decode the Run wrapper and add the missing `Manual.Block.lean` source decoder described below; reuse Cast's highlighting and delegate other supported extensions. |
+| Checked document and edits | Cast's optional `Preview.Server.document` and native `usePage` helper | Use the final checked snapshot; the native host owns edit/restart invalidation. |
+| Document rendering | `VersoCast.Manual.createRenderers`, `Renderer.Renderers.renderBlock?` | Decode the Run wrapper; reuse the successor's `Manual.Block.lean` decoder and existing highlighting. |
 | Runnable metadata | `Experiment`, `Experiment.browserDescription`, `Collect.experiments` | Select callables from the checked document rather than accepting arbitrary names from the browser. |
 | Current executable code | VIR `prepareWidgetPackage`, built on `prepareSnapshotInput` and imported-owner resolution | Analyze the selected callable in the same live environment as the document. Emit package bytes on demand. |
 | Infoview byte transport | VIR `readAsset`, `base64Encode`, RPC cancellation | Load the locked runtime through RPC and send current package bytes through an execution RPC. |
@@ -50,12 +46,11 @@ come from the last successful Lake build.
 ## Document and execution requests
 
 Reuse Cast's optional checked-page acquisition and add one Run-specific request.
-The wire envelope below captures the intended native reference boundary; the
-successor's exact public acquisition surface is pending its immutable handoff.
+The native reference stays outside the document JSON codec.
 
 ```text
 VersoCast.Manual.Preview.Server.document({ expectedVersion? })
-    -> { uri, version, snapshotRef, documentJson }
+    -> { uri, version, snapshotRef, documentJson, hasErrors }
 VersoLeanRun.Cast.program({ snapshotRef, version, document, declaration })
     -> { uri, version, callable, fingerprint, expectedExport, packageBase64 }
 ```
@@ -63,10 +58,9 @@ VersoLeanRun.Cast.program({ snapshotRef, version, document, declaration })
 `document` follows Cast's existing pattern: wait for the page's final snapshot,
 wait for its checked environment, evaluate the document, then serialize its
 `Part Manual`. The current decoder can carry Manual's JSON extension data; the
-new generated-codec work is not a prerequisite. Factor this checked-page
-selection/evaluation into a public server helper used by both requests. The
-helper invokes its consumer with the page metadata, environment, options and
-document within the request. The endpoint retains this checked page through
+new generated-codec work is not a prerequisite. Use the public `withPage` helper
+to capture `Page` metadata, environment, options, document and complete error
+fact within one request. The endpoint retains this checked page through
 Lean's existing `WithRpcRef` mechanism and returns the opaque handle alongside
 the existing JSON string and URI/version. The environment remains server-side,
 in a session-scoped RPC object rather than a persistent module extension. Drop
@@ -75,13 +69,16 @@ RPC session's reference lifecycle. Keep the reference in the native RPC envelope
 do not put it through the document String codec, clone its reserved fields or
 reconstruct it from an object ID.
 
-Place the opt-in server helper and checked-page record in
-`VersoCast.Manual.Preview.Server`, and the stable React factory in
-`VersoCast.Manual.Preview`. Keep both out of core and ordinary Manual imports.
+The opt-in server helper and `Page` record live in
+`VersoCast.Manual.Preview.Server`. `VersoCast.Manual.Preview.create` returns a
+stable `Bridge {decode, view}`. Native React composes `usePage(selection,
+bridge.decode)` and `renderPage(bridge, state)` from `verso-cast/preview`.
+Neither optional module enters core or ordinary Manual imports.
 Reference-manual-specific roles remain consumer-owned.
 
 `program` accepts that checked-page reference, checks its page identity and the
-current requested version, then selects an entry from its admitted Run blocks.
+current requested version using `requireErrorFree` / `requireMatchingVersion`,
+then selects an entry from its admitted Run blocks.
 It resolves the document/declaration to its `Experiment.callable`.
 It then uses VIR's snapshot analyzer and binary emitter. The expected callable
 signature comes independently from the admitted Run form, as it does in site
@@ -151,9 +148,8 @@ same selection contract, extract a shared selector then.
 
 Use the existing RPC-reference protocol for the snapshot handle. No custom
 server-side snapshot registry, raw Environment serialization or new reference
-transport is required. Cast's shared refresh component must refresh/revalidate
-its page after server-session replacement and page reprocessing, as well as
-ordinary source edits. Imported-module preparation remains Lean's responsibility.
+transport is required. The native host aborts and replaces its selection after
+server-session replacement, processing and ordinary source edits. Imported-module preparation remains Lean's responsibility.
 
 Cancellation polling around asset reads, package emission and base64 encoding
 would be a small improvement to the existing VIR handlers. It should preserve
@@ -180,6 +176,18 @@ of the Lean decoder/view and demo chrome. The renderer receives immutable
 the replacement merely because its URI/version are equal. Native execution guards
 also check the captured signal directly, even if the Wasm view has not rerendered.
 
+In native React, bind the displayed snapshot's `state.lastGood.selection` around
+`renderPage`, for example through a context consumed by the native Run placement.
+Do not bind the replacement `selection` around retained old prose. The placement
+keeps that original signal and the `PageInfo` session/reference; its effect
+subscribes native disposal directly to abort and also disposes on unmount.
+Check the signal before invocation and after asynchronous acquisition, and keep
+the independent runnable-entry/signature checks on the server and loader.
+The derived rendering flag alone is insufficient: synchronous abort can precede
+a React commit, so a retained event handler must already refuse execution.
+An error-bearing page may match the selection and remain visible; its native
+controls also check `PageInfo.hasErrors`. Server admission remains authoritative.
+
 Mandatory cleanup belongs to native placement ownership: stop workers, abort
 acquisition and release native resources even if a Wasm callback is unavailable
 or fails. A best-effort Cast/Lean UI callback must not be the only path to
@@ -197,9 +205,8 @@ isolation policy.
 
 ### Run source decoder
 
-Cast's existing Manual Lean-block decoder does not cover the source constructor
-that Run emits. Add the standard external-code decoder to Cast's Manual adapter
-(or temporarily the Run adapter until an upstream candidate is consumable):
+Cast's successor adds the external-code decoder needed for the source
+constructor that Run emits, alongside the distinct inline Lean decoder:
 
 | Constructor | Stored JSON |
 | --- | --- |
@@ -218,7 +225,7 @@ Create component factories once, as Cast's extension contract requires. Preserve
 Cast's supplied identity/focus attributes. Repeated placements of one callable
 remain independent. Use explicit authored identities when available and Cast's
 positional fallback otherwise; do not invent an identity from only a declaration
-name. A snapshot version is an execution freshness token, not a React key.
+name. Use the snapshot version in request checks, never as the React key.
 
 On a document edit, immediately stop pending/running execution and mark retained
 content stale. The last successful document can remain visible while the new
@@ -366,9 +373,9 @@ Wasm/package bytes; it needs no relative module imports. Actual VS Code worker
 and CSP behavior must be tested, not inferred from a localhost browser harness.
 
 Cast already has the renderer extension point. No Cast traversal fork or new
-document interchange format is needed for this design. Promote the existing
-checked-page acquisition into an optional Cast infoview module, separating it
-from reference-manual-specific roles and demo chrome. The host supplies the
+document interchange format is needed for this design. Its successor provides
+optional checked-page acquisition separately from reference-manual-specific
+roles and demo chrome. The host supplies the
 selection lifetime; renderer factories stay stable and late acquisition results
 are ignored after abort. Keep reference routing and last-successful prose without
 a second stored freshness flag or precommit loaded callback.
@@ -383,135 +390,89 @@ The useful upstream changes are therefore specific:
 | Consumer | Qualify the existing registered widget-module import | Reuses the VIR shell without a new npm export or copied loader. |
 | VIR | Cooperative cancellation checkpoints in existing byte/package RPC handlers | Useful bounded follow-up; not a new protocol or a prerequisite for worker Stop. |
 
-These are proposed changes, not findings that upstream implementations are
-broken. The compatibility/worker experiment should determine the exact API
-signatures before any of these library surfaces is committed.
+The Cast successor supplies both Cast changes; its source gate passes below.
+VIR's owned-program API still needs a matched immutable implementation checkpoint.
+No additional Cast RPC or client hook is required by this ownership review.
 
-## Dependency baseline
+## Dependency baseline and source gates
 
 The isolated task is `feat/cast-infoview` in `.worktree/cast-infoview`. Its root
-Lean, Verso, VIR, Illuminate and Slides pins remain unchanged.
+Lean, Verso, VIR, Illuminate and Slides pins remain unchanged. The selected Cast
+source is `9701d6f1794c20a6ad8966bd92f6ebba12872f62` from
+[Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1).
+Cast's own pins remain Lean 4.36.0-rc1 / Verso `f7a4dc6` / VIR `5a5614b`;
+this consumer uses Lean 4.36.0-rc1 / Verso `d0a5f92` / VIR `bf8b6a8`.
+Matching Lean versions alone does not establish binary compatibility.
 
-Public Cast main is `5fc470057e929c849840919b0294e7e2418461ad`, using Lean
-4.35.0-rc4. The separately owned local Cast checkout is clean at `0e2bc83`, three
-commits ahead; it uses Lean 4.36.0-rc1, Verso `f7a4dc6` and VIR `5a5614b`.
-verso-run uses Lean 4.36.0-rc1, Verso `d0a5f92` and VIR `bf8b6a8`.
-Matching Lean versions alone does not establish compatibility.
+### Current successor gate
 
-The exact local Cast source candidate is
-`0e2bc830bc43a88fc3ceea55616911924a0a83d6`; its existing qualification does not
-establish compatibility with verso-run's pair. A read-only VIR diff suggests its
-React/Infoview/Js/JSX APIs are unchanged between the two VIR revisions, but native
-extern and runtime resources differ. That is source evidence, not permission to
-copy runtime/SDK artifacts between those revisions.
-
-First compile the needed Cast core/Manual modules against verso-run's existing
-pins in an independently owned experimental consumer. Do not share writable
-dependency or build directories. If incompatibilities require an upstream
-change, make that change in a separate task worktree and qualify an immutable
-published revision before adding the adapter dependency. The generated Manual
-codec is optional and must not force a VIR upgrade for the initial integration.
-Do not modify the existing Cast checkout or the documentation/presenter branches.
-
-### Isolated source compatibility gate
-
-`scripts/cast-compatibility.py` extracts only the exact Cast revision's Lean
-sources into an ignored consumer under this task's `_out/`. The consumer owns
-all eight dependency checkouts and their build directories. Its resolved
-manifest/checkout revisions must equal this checkout's pins, and the extracted
-Cast sources must retain their recorded hashes.
+`scripts/cast-compatibility.py` extracts exact Cast Lean and JavaScript sources
+plus the public npm export map into a fresh ignored consumer. Each consumer
+owns all eight dependency checkouts and build directories. The driver checks
+the resolved manifest and checkout revisions against this worktree's pins and
+records extracted-source hashes. It refuses an existing consumer at preparation
+and refuses mismatched revisions or edited editor templates on later steps.
+No Cast runtime, SDK or compiled output is copied.
 
 ```sh
 python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --prepare
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --build
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --preview
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --editor
 ```
 
-On Cast `0e2bc830bc43a88fc3ceea55616911924a0a83d6`, the batch build of
-`Compatibility:olean` passes on the unchanged verso-run pins. The fixture imports
-the complete core/Manual renderer and evaluates an assertion against the real
-`ExternalCode.leanBlock` producer, confirming its constructor, three-field data
-and empty children. No Cast source patch, runtime or SDK was copied. The report
-and logs are under `_out/cast-compatibility/`; the fixture is in
-[the experiment directory](../experiments/cast-compatibility/Compatibility.lean).
-This establishes source compilation, not rendering of actual Run blocks,
-runtime/native extern compatibility or a working editor connection.
+The defaults select exactly `9701d6f` and `_out/cast-preview-9701d6f/`.
+The public Preview client/server build passes on the unchanged consumer pins
+(771 jobs in the fresh consumer). `PreviewCompatibility.lean` configures
+`Bridge {decode, view}` without reference-manual roles. Its typed consumer RPC
+accepts `WithRpcRef Page`, calls `requireErrorFree` before its work and
+`requireMatchingVersion` afterward. The captured session/reference remain native
+values. Beam reports no errors or warnings; its workspace is dropped before
+batch validation. This gate compiles the RPC but does not invoke it.
 
-### Registered shell import gate
+The replacement editor fixture also compiles (878 jobs including its asset
+preparer). `EditorHost.mjs` uses native `usePage` / `renderPage`, resolved through
+the exact package's public `verso-cast/preview` export. Its bundle contains that
+helper and consumer host only; React, infoview and the registered VIR shell stay
+external. `EditorPreview.widget` derives the shell hash from the pinned public
+widget. The Lake input tracks the generated wrapper bundle. The native host
+anchors `EnvPosContext` at the imported header and aborts before clearing or
+replacing its selection on edits, processing and server stop/restart.
+This event mapping follows the upstream reference host; our actual editor
+behavior has not yet been observed.
 
-After the source gate, build the registered wrapper and test the official
-infoview loader:
+The asset preparer acquires this consumer's locked bf8 runtime and checks its
+compiler identity. Open the prepared example with:
 
 ```sh
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --shell
-UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python scripts/cast-widget-import.py
+code --new-window _out/cast-preview-9701d6f/consumer --goto _out/cast-preview-9701d6f/consumer/EditorDemo.lean:15
 ```
 
-`WidgetComposition.lean` registers the wrapper and derives its shell import from
-the actual dependency's `javascriptHash`. Its batch build passes. The browser
-driver uses the locked official infoview loader and React import map, with
-controlled widget-source replies containing Lean's emitted modules. It checks
-recursive hash-import loading, exact shell component identity, unchanged native
-props, one stable supplied component factory, shared React hooks/state across
-rerendering, and unmount of that test component. All six checks pass.
+Edit a sentence and observe the infoview; press Ctrl+Shift+Enter in the Lean
+file if the panel is closed. The page labels execution as unconnected and uses
+ordinary Lean source. Preparation does not establish rendering of `leanRun` /
+`leanRunAnchor`, worker/CSP behavior, runtime/native-extern compatibility, or
+cursor-only no-fetch behavior. Upstream's native LSP session/admission tests are
+source-owner evidence, separate from our compile result and editor acceptance.
+Exact hashes, revisions, bundle inputs and logs remain under the consumer output.
 
-The wrapper source contains no private import or copied VIR loader. The shell
-source is transported as a registered module, just as the infoview requests it.
-Results and hashes are in `_out/cast-compatibility/widget-import.json`. The
-experiment does not mount the VIR shell or open its runtime, connect to an
-editor/LSP server, establish snapshot freshness, or qualify worker/CSP behavior.
+### Historical gates
 
-### Public preview handoff gate
+These results apply only to their recorded source revisions. The current
+fixtures do not provide an adapter for the superseded Preview API. Earlier
+instructions and fixture versions are preserved in
+[the prior design snapshot](https://github.com/ejgallego/verso-run/blob/feefd40/docs/cast-infoview-design.md).
 
-Historical gate for the superseded client shape; adoption is held pending PR #1's
-qualified successor. This result must not be reused as successor qualification.
+| Candidate / gate | Result | Retained evidence |
+| --- | --- | --- |
+| Cast `0e2bc83` core/Manual source | 761-job build; actual `ExternalCode.leanBlock` constructor/data/children assertion | `_out/cast-compatibility/` |
+| Registered wrapper through locked official infoview loader | Six controlled-browser checks: shell and native-prop identity, stable factory, shared React state and unmount | `_out/cast-compatibility/widget-import.json` |
+| Cast `27085ea` public Preview imports | 845-job source/API build | `_out/cast-preview-27085ea/` |
+| Cast `27085ea` editor smoke | 883-job build, runtime identity check and CLI launch; rendered panel not observed | Same consumer; preserve the open file and any local edits |
 
-[Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1) supplies exact source
-`27085eaea49ee0c510335747212756391096deba`, including the external-code source
-decoder and optional public client/server modules. Extend the same source-only
-gate in a fresh consumer:
-
-```sh
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --cast-revision 27085eaea49ee0c510335747212756391096deba --output _out/cast-preview-27085ea --prepare
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --output _out/cast-preview-27085ea --preview
-```
-
-On the unchanged d0a5/bf8 pins, the new public imports and
-`PreviewCompatibility:olean` batch build pass (845 jobs). The fixture configures
-the public factory without reference-manual roles and compiles a consumer RPC
-that accepts the native `WithRpcRef CheckedPage`, refuses error-bearing pages,
-and calls `requireCurrent` before and after its work. The fixture keeps the
-captured native session/reference as native values. Beam reports no errors or
-warnings; its workspace is dropped before the batch build.
-
-This proves source/API compilation only. It does not execute that RPC, test
-stale-ref refusal or runtime/compiler compatibility, establish the host's real
-reprocessing/session mapping, or adopt Cast as a root dependency. Exact source
-hashes, all eight resolved/checked-out revisions and logs are retained under
-`_out/cast-preview-27085ea/`. No runtime/SDK is copied between Cast's pair and ours.
-
-### VS Code document-preview smoke test
-
-Historical read-only smoke using `27085ea`. Keep the open consumer and any edits;
-do not silently update it to the successor or add dual-API compatibility.
-
-After the public-preview gate, prepare and open a read-only editor example:
-
-```sh
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --output _out/cast-preview-27085ea --editor
-code --new-window _out/cast-preview-27085ea/consumer --goto _out/cast-preview-27085ea/consumer/EditorDemo.lean:15
-```
-
-The editor files and locked bf8 runtime are prepared inside that consumer. The
-entrypoint and widget package compile successfully (883 batch jobs); the asset
-preparer checks the runtime's compiler identity. This enables a hands-on Cast
-document preview with highlighted ordinary Lean source. Edit a sentence and
-observe the infoview; press Ctrl+Shift+Enter in the Lean file if the panel is closed.
-
-The page explicitly labels execution as unconnected. It has no Run blocks or
-invocation backend, and uses a minimal position-specific read-only host. It
-does not qualify the production session/generation mapping, actual Run controls,
-worker Stop, or real-editor rendering merely by building or launching VS Code.
-Report those observations separately from preparation.
+The controlled loader test transports Lean-emitted registered sources; it does
+not mount VIR or connect to an editor. None of these historical results qualifies
+the successor's editor lifecycle or executable Run controls. The new default
+consumer is separate from the old open smoke consumer.
 
 ## Implementation slices and acceptance
 

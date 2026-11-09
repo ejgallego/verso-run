@@ -17,23 +17,29 @@ namespace EditorPreview
 open Lean.Vir Lean.Vir.React
 open scoped Lean.Vir.Js
 
--- Read-only smoke host. It intentionally does not claim the production
--- cursor-independent session/reprocessing mapping required for Run execution.
+-- Supplied by the registered native wrapper below. Preserve its identity.
+private def pageHost (value : Js.Any) : FunctionComponent Props := by
+  unfold FunctionComponent Js.Function1 Js.Any Js at *
+  exact value
+
+-- Native React owns the selection, request and cleanup. The Lean factory only
+-- decodes and renders; it does not retarget controls through a global callback.
 @[vir_export]
 def View : RuntimeM (FunctionComponent Infoview.PanelWidgetProps) := do
-  let preview ← VersoCast.Manual.Preview.create
-  let generation ← JsValue.ofFloat 0
+  let bridge ← VersoCast.Manual.Preview.create
   FunctionComponent.ofLean fun props => do
-    let session ← Infoview.useRpcSession
     let pos ← Infoview.PanelWidgetProps.pos props
     let uri ← Infoview.PanelPosition.uri pos
-    let calculate ← Js.Function.ofLean0 do
-      let input ← Props.WithData.make (← LeanRef.toJSL
-        ({ session, uri, generation := Js.erase generation } : VersoCast.Manual.Preview.Input))
-      Node.functionComponent preview input (← Js.Array.empty)
-    Hooks.useMemo calculate (← js#[Js.erase session, Js.erase uri])
+    let host := pageHost (← Js.Object.get props (← js#"pageHost"))
+    let input ← js%{ "uri" := uri, "decode" := bridge.decode, "view" := bridge.view }
+    Node.functionComponent host input (← Js.Array.empty)
 
 vir_proof_widget View
+
+@[widget_module]
+def widget : Lean.Widget.Module where
+  javascript := (include_str "EditorHostBundle.mjs").replace "__VIR_SHELL__"
+    ("widget_module:hash," ++ toString Lean.Vir.Infoview.widget.javascriptHash.val)
 
 def preparedWidgetProps : Infoview.WidgetProps :=
   { widgetProps with

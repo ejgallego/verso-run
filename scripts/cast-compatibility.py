@@ -5,7 +5,8 @@ runtime or SDK are copied. This is a source-compatibility gate, not editor/runti
 acceptance. Run --prepare first when using an interactive Lean checker, close that
 workspace, then run --build for batch evidence. --shell compiles a registered
 wrapper using the existing infoview hash-import route; a separate browser driver
-checks the official loader with controlled source replies.
+checks the official loader with controlled source replies. --preview checks the
+selected public Bridge/Page APIs; --editor prepares a separate native host.
 """
 import argparse
 import hashlib
@@ -19,8 +20,8 @@ import tarfile
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--cast-source', type=Path, required=True, help='Git checkout containing the source commit')
-parser.add_argument('--cast-revision', default='0e2bc830bc43a88fc3ceea55616911924a0a83d6')
-parser.add_argument('--output', type=Path, default=ROOT / '_out/cast-compatibility')
+parser.add_argument('--cast-revision', default='9701d6f1794c20a6ad8966bd92f6ebba12872f62')
+parser.add_argument('--output', type=Path, default=ROOT / '_out/cast-preview-9701d6f')
 parser.add_argument('--prepare', action='store_true', help='acquire the isolated consumer without compiling')
 parser.add_argument('--build', action='store_true', help='build an already prepared consumer')
 parser.add_argument('--shell', action='store_true', help='compile and extract a registered shell wrapper')
@@ -33,6 +34,11 @@ assert output.is_relative_to(ROOT / '_out'), 'Keep experimental outputs inside t
 project = output / 'consumer'
 report_path = output / 'results.json'
 output.mkdir(parents=True, exist_ok=True)
+if not args.prepare:
+    selected = json.loads(report_path.read_text())
+    assert selected['castRevision'] == subprocess.check_output(
+        ['git', 'rev-parse', '--verify', args.cast_revision + '^{commit}'],
+        cwd=args.cast_source, text=True).strip(), 'Select the prepared consumer\'s exact Cast revision'
 
 
 def git(*parts, cwd=args.cast_source):
@@ -74,13 +80,15 @@ if args.prepare:
     source = project / 'cast-source'
     source.mkdir()
     archive = subprocess.check_output(['git', 'archive', '--format=tar', revision,
-                                      'VersoCast.lean', 'VersoCast'], cwd=args.cast_source)
+                                      'VersoCast.lean', 'VersoCast', 'js', 'package.json',
+                                      'LICENSE', 'ORIGIN.md'], cwd=args.cast_source)
     inventory = {}
     with tarfile.open(fileobj=io.BytesIO(archive)) as members:
         for member in members:
             if member.isdir():
                 continue
-            assert member.isfile() and member.name.endswith('.lean'), member.name
+            assert member.isfile() and (member.name.endswith(('.lean', '.mjs', '.json')) or
+                                        member.name in ['LICENSE', 'ORIGIN.md']), member.name
             target = source / member.name
             assert target.resolve().is_relative_to(source)
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -199,7 +207,9 @@ else:
     report = json.loads(report_path.read_text())
     assert report.get('preview', {}).get('status') == 'public-imports-compiled'
     check_dependencies(report['expectedManifest'])
-    for name in ['EditorPreview.lean', 'EditorDemo.lean', 'EditorAssets.lean']:
+    for name, digest in report['sourceFiles'].items():
+        assert hashlib.sha256((project / 'cast-source' / name).read_bytes()).hexdigest() == digest
+    for name in ['EditorPreview.lean', 'EditorDemo.lean', 'EditorAssets.lean', 'EditorHost.mjs']:
         template = ROOT / 'experiments/cast-compatibility' / name
         target = project / name
         if target.exists() and target.read_bytes() != template.read_bytes():
@@ -207,8 +217,12 @@ else:
         shutil.copyfile(template, target)
     lakefile = project / 'lakefile.lean'
     addition = '''
+input_file editorHostBundle where
+  path := "EditorHostBundle.mjs"
+
 lean_lib EditorPreview where
   requiresModuleSystem := true
+  needs := #[editorHostBundle]
 
 lean_lib EditorDemo where
   requiresModuleSystem := true
@@ -219,6 +233,8 @@ lean_exe editor_assets where
     if addition not in lakefile.read_text():
         lakefile.write_text(lakefile.read_text() + addition)
     try:
+        run(['node', str(ROOT / 'experiments/cast-compatibility/bundle-editor.mjs'), str(project)],
+            'editor-bundle.log')
         run(['lake', '--no-cache', 'build', '+EditorDemo:olean', 'editor_assets'], 'editor-build.log')
         run(['lake', 'exe', 'editor_assets'], 'editor-assets.log')
         settings = project / '.vscode/settings.json'
@@ -228,6 +244,13 @@ lean_exe editor_assets where
         settings.write_text(json.dumps(values, indent=2) + '\n')
         report['editorSmoke'] = {'status': 'prepared', 'entry': str(project / 'EditorDemo.lean'),
                                  'executionConnected': False, 'actualEditorObserved': False,
+                                 'fixtureSha256': {
+                                     name: hashlib.sha256((project / name).read_bytes()).hexdigest()
+                                     for name in ['EditorPreview.lean', 'EditorDemo.lean',
+                                                  'EditorAssets.lean', 'EditorHost.mjs']},
+                                 'bundleSha256': hashlib.sha256(
+                                     (project / 'EditorHostBundle.mjs').read_bytes()).hexdigest(),
+                                 'bundle': json.loads((project / 'editor-bundle.json').read_text()),
                                  'runtime': json.loads((project / '.vir/runtime.json').read_text())}
     except Exception as error:
         report['editorSmoke'] = {'status': 'preparation-failed', 'error': str(error)}
