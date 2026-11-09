@@ -1,8 +1,9 @@
 # Run blocks in the infoview
 
-Implementation design, based on verso-run `2365399`. Cast core/Manual source
-compilation on these pins passes the isolated gate below. The adapter, package
-integration and actual infoview execution remain unqualified.
+Implementation design, based on verso-run `2365399`. Cast core/Manual and the
+optional Preview public imports compile on these pins in the isolated gates
+below. The adapter, package integration and actual infoview execution remain
+unqualified.
 
 ## Author experience
 
@@ -42,7 +43,7 @@ The public Cast namespace below is proposed: today's implementation lives under
 `tests/reference-manual/CastManualPreview`, not in Cast's library API.
 
 ```text
-Cast.Manual.Preview.document({ expectedVersion? })
+VersoCast.Manual.Preview.Server.document({ expectedVersion? })
     -> { uri, version, snapshotRef, documentJson }
 VersoLeanRun.Cast.program({ snapshotRef, version, document, declaration })
     -> { uri, version, callable, fingerprint, expectedExport, packageBase64 }
@@ -139,6 +140,15 @@ result DOM inside that container, and returns its existing disposal handle.
 React must not also reconcile nodes mutated by the enhancer or presenter.
 Component effects attach and dispose the enhancer; Cast rendering callbacks
 remain hook-free.
+
+The public preview's `PageInfo` retains the native reference and its owning
+session. Each stable Run child binds to that captured `PageInfo` in its own
+effect and sends program requests through that exact session. `onLoaded` is a
+precommit reply notification, not a React commit or permission to retarget old
+controls. Last-good content receives `isCurrent = false` during refresh; that
+flag is local display state rather than a server freshness lease. The host must
+stop owners before changing `Input.generation`, and supply a cursor-independent
+session whose position makes the imported RPC methods available.
 
 The console's markup comes from the existing `renderControls experiment`,
 serialized into its imperative DOM slot. The source remains a separate,
@@ -392,6 +402,32 @@ source is transported as a registered module, just as the infoview requests it.
 Results and hashes are in `_out/cast-compatibility/widget-import.json`. The
 experiment does not mount the VIR shell or open its runtime, connect to an
 editor/LSP server, establish snapshot freshness, or qualify worker/CSP behavior.
+
+### Public preview handoff gate
+
+[Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1) supplies exact source
+`27085eaea49ee0c510335747212756391096deba`, including the external-code source
+decoder and optional public client/server modules. Extend the same source-only
+gate in a fresh consumer:
+
+```sh
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --cast-revision 27085eaea49ee0c510335747212756391096deba --output _out/cast-preview-27085ea --prepare
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --output _out/cast-preview-27085ea --preview
+```
+
+On the unchanged d0a5/bf8 pins, the new public imports and
+`PreviewCompatibility:olean` batch build pass (845 jobs). The fixture configures
+the public factory without reference-manual roles and compiles a consumer RPC
+that accepts the native `WithRpcRef CheckedPage`, refuses error-bearing pages,
+and calls `requireCurrent` before and after its work. The fixture keeps the
+captured native session/reference as native values. Beam reports no errors or
+warnings; its workspace is dropped before the batch build.
+
+This proves source/API compilation only. It does not execute that RPC, test
+stale-ref refusal or runtime/compiler compatibility, establish the host's real
+reprocessing/session mapping, or adopt Cast as a root dependency. Exact source
+hashes, all eight resolved/checked-out revisions and logs are retained under
+`_out/cast-preview-27085ea/`. No runtime/SDK is copied between Cast's pair and ours.
 
 ## Implementation slices and acceptance
 

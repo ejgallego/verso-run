@@ -18,7 +18,7 @@ def externalSource : Verso.Doc.Block Manual :=
       | _ => false
   | _ => false
 
--- These are distinct producers; Cast's existing decoder handles only the latter.
+-- These distinct source producers require separate decoders.
 #check Verso.Genre.Manual.Block.lean
 #check Verso.Genre.Manual.InlineLean.Block.lean
 #check VersoCast.Manual.createRenderers

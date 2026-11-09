@@ -24,8 +24,9 @@ parser.add_argument('--output', type=Path, default=ROOT / '_out/cast-compatibili
 parser.add_argument('--prepare', action='store_true', help='acquire the isolated consumer without compiling')
 parser.add_argument('--build', action='store_true', help='build an already prepared consumer')
 parser.add_argument('--shell', action='store_true', help='compile and extract a registered shell wrapper')
+parser.add_argument('--preview', action='store_true', help='compile public Preview client/server consumer APIs')
 args = parser.parse_args()
-assert sum([args.prepare, args.build, args.shell]) == 1, 'Select --prepare, --build or --shell'
+assert sum([args.prepare, args.build, args.shell, args.preview]) == 1, 'Select --prepare, --build, --shell or --preview'
 output = args.output.resolve()
 assert output.is_relative_to(ROOT / '_out'), 'Keep experimental outputs inside this task worktree'
 project = output / 'consumer'
@@ -133,7 +134,7 @@ elif args.build:
     finally:
         write_report(report)
     print('PASS exact Cast core/Manual source compile; runtime/editor remain unqualified', flush=True)
-else:
+elif args.shell:
     report = json.loads(report_path.read_text())
     assert report['status'] == 'source-compile-passed'
     check_dependencies(report['expectedManifest'])
@@ -162,3 +163,34 @@ else:
     finally:
         write_report(report)
     print('PASS registered wrapper compiles; loader/runtime/editor remain unqualified', flush=True)
+else:
+    report = json.loads(report_path.read_text())
+    assert report['status'] in ['prepared', 'build-failed', 'source-compile-passed']
+    check_dependencies(report['expectedManifest'])
+    for name, digest in report['sourceFiles'].items():
+        assert hashlib.sha256((project / 'cast-source' / name).read_bytes()).hexdigest() == digest
+    assert (project / 'cast-source/VersoCast/Manual/Preview.lean').is_file()
+    fixture = ROOT / 'experiments/cast-compatibility/PreviewCompatibility.lean'
+    shutil.copyfile(fixture, project / fixture.name)
+    shutil.copyfile(ROOT / 'experiments/cast-compatibility/Compatibility.lean', project / 'Compatibility.lean')
+    lakefile = project / 'lakefile.lean'
+    addition = '\nlean_lib PreviewCompatibility where\n  requiresModuleSystem := true\n'
+    if addition not in lakefile.read_text():
+        lakefile.write_text(lakefile.read_text() + addition)
+    vir = project / '.lake/packages/lean_vir'
+    lock = (vir / 'package-lock.json').read_bytes()
+    try:
+        run(['npm', 'ci', '--cache', str(project / '.cache/npm')], 'preview-npm.log', cwd=vir)
+        assert (vir / 'package-lock.json').read_bytes() == lock
+        run(['lake', '--no-cache', 'build', '+PreviewCompatibility:olean'], 'preview-build.log')
+        report['resolvedManifest'] = check_dependencies(report['expectedManifest'])
+        report['status'] = 'source-compile-passed'
+        report['preview'] = {'status': 'public-imports-compiled',
+                             'fixtureSha256': hashlib.sha256(fixture.read_bytes()).hexdigest(),
+                             'lifecycleQualified': False}
+    except Exception as error:
+        report['preview'] = {'status': 'compile-failed', 'error': str(error)}
+        raise
+    finally:
+        write_report(report)
+    print('PASS public Preview client/server API compile; lifecycle/editor/runtime remain unqualified', flush=True)
