@@ -1,7 +1,8 @@
 # Run blocks in the infoview
 
-Implementation design, based on verso-run `2365399`. This is a proposed adapter;
-no infoview execution or dependency compatibility has been qualified yet.
+Implementation design, based on verso-run `2365399`. Cast core/Manual source
+compilation on these pins passes the isolated gate below. The adapter, package
+integration and actual infoview execution remain unqualified.
 
 ## Author experience
 
@@ -21,7 +22,7 @@ with their own Cast extension decoders.
 | Responsibility | Existing implementation | Integration |
 | --- | --- | --- |
 | Checked document and edits | Cast's reference-manual preview RPC and refresh effect | Use the end-of-document checked snapshot; keep its URI and version with the response. |
-| Document rendering | `VersoCast.Manual.createRenderers`, `Renderer.Renderers.renderBlock?` | Recognize `VersoLeanRun.Block.leanRun`, decode its `Experiment`, and render its children through Cast. Delegate other extensions to the Manual renderer. |
+| Document rendering | `VersoCast.Manual.createRenderers`, `Renderer.Renderers.renderBlock?` | Decode the Run wrapper and add the missing `Manual.Block.lean` source decoder described below; reuse Cast's highlighting and delegate other supported extensions. |
 | Runnable metadata | `Experiment`, `Experiment.browserDescription`, `Collect.experiments` | Select callables from the checked document rather than accepting arbitrary names from the browser. |
 | Current executable code | VIR `prepareWidgetPackage`, built on `prepareSnapshotInput` and imported-owner resolution | Analyze the selected callable in the same live environment as the document. Emit package bytes on demand. |
 | Infoview byte transport | VIR `readAsset`, `base64Encode`, RPC cancellation | Load the locked runtime through RPC and send current package bytes through an execution RPC. |
@@ -58,7 +59,14 @@ Lean's existing `WithRpcRef` mechanism and returns the opaque handle alongside
 the existing JSON string and URI/version. The environment remains server-side,
 in a session-scoped RPC object rather than a persistent module extension. Drop
 old client references when replacing or unmounting the page, using the existing
-RPC session's reference lifecycle.
+RPC session's reference lifecycle. Keep the reference in the native RPC envelope:
+do not put it through the document String codec, clone its reserved fields or
+reconstruct it from an object ID.
+
+Place the opt-in server helper and checked-page record in
+`VersoCast.Manual.Preview.Server`, and the stable React factory in
+`VersoCast.Manual.Preview`. Keep both out of core and ordinary Manual imports.
+Reference-manual-specific roles remain consumer-owned.
 
 `program` accepts that checked-page reference, checks its page identity and the
 current requested version, then selects an entry from its admitted Run blocks.
@@ -66,16 +74,30 @@ It resolves the document/declaration to its `Experiment.callable`.
 It then uses VIR's snapshot analyzer and binary emitter. The expected callable
 signature comes independently from the admitted Run form, as it does in site
 publication. The client checks the response identity before worker creation.
-It does not re-evaluate a different environment by looking up only the version:
-a document version alone does not identify a snapshot across server sessions or
-import reprocessing. A retired RPC session requires a new preview/reference.
+It does not re-evaluate a different environment by looking up only the version.
+The reference identifies captured data; it does not establish that the captured
+page is still current. The program handler must refuse a retired snapshot after
+same-version reprocessing or session retirement, including an invalidation that
+occurs during package preparation. Establish the server's authoritative
+freshness check in the compatibility/lifecycle experiment before enabling Run.
+
+Waiting for `env.checked` does not establish that the page has no errors. The
+initial execution policy requires a completed page with no error-severity
+diagnostics; warnings alone do not disable Run. Capture admission with the
+checked page, revalidate freshness when packaging, and refuse error-bearing or
+incomplete pages. Keep last-good prose visible with execution disabled. The
+diagnostic/admission check and how it observes the full page require a real
+server test; successful document evaluation is not a substitute.
 
 A changed document version produces a refresh response/error, never code from
 a different revision under the old visible source. The handler must not re-run
 the Lean frontend, start Lake, change compiler scheduling, or read the current
 module's saved IR in place of its live IR. Initial implementation may analyze
-on every Run; add caching only after measurements justify it. Cursor motion
-alone must not fetch or package the page again.
+on every Run; add caching only after measurements justify it. Cursor-only
+no-fetch behavior is a goal requiring a real-editor observation. RPC sessions
+are position-specific: a different `RpcSession` object is not by itself evidence
+that the server restarted. Use observed reprocessing/session-retirement events,
+rather than object inequality, to invalidate execution.
 
 Presenter acquisition selects the existing fixed presenter roots, with their
 existing expected signatures. It uses the same runtime identity and program
@@ -125,6 +147,25 @@ Only the Run wrapper connects these two pieces. Do not maintain a second JSX
 implementation of the form, a second source highlighter or a second HTML-result
 isolation policy.
 
+### Run source decoder
+
+Cast's existing Manual Lean-block decoder does not cover the source constructor
+that Run emits. Add the standard external-code decoder to Cast's Manual adapter
+(or temporarily the Run adapter until an upstream candidate is consumable):
+
+| Constructor | Stored JSON |
+| --- | --- |
+| `Verso.Genre.Manual.Block.lean` (Run source) | `[CodeConfig, Highlighted, definedNames]` |
+| `Verso.Genre.Manual.InlineLean.Block.lean` (existing Cast decoder) | `[Highlighted, _, _, _]` |
+
+Match the constructor and three-field layout explicitly, decode the stored
+`Highlighted` value, and pass it to the existing `Highlighting.render` with
+Cast's normal attributes/styles. Preserve the other constructor's decoder.
+Both inline `leanRun` and `leanRunAnchor` emit the external-code form. Its
+children are empty, so rendering fallback children cannot recover the source.
+Malformed data should retain the ordinary visible fallback. Test the actual
+producer output from both authoring paths, not just hand-written JSON fixtures.
+
 Create component factories once, as Cast's extension contract requires. Preserve
 Cast's supplied identity/focus attributes. Repeated placements of one callable
 remain independent. Use explicit authored identities when available and Cast's
@@ -137,6 +178,10 @@ page elaborates, but its controls cannot run until its version is current.
 This conservative first policy also stops examples after prose edits. Cursor
 updates preserve controls and input. Page changes and unmount dispose owners;
 stale RPC replies cannot restore them. Refresh never starts an example.
+Apply the same immediate stop/disable notification on observed page reprocessing
+and session retirement, before awaiting replacement prose. Until these events
+and server-side stale refusal are qualified, URI/version/ref equality must not
+be treated as permission to keep execution enabled.
 
 ## Small shared boundaries
 
@@ -180,6 +225,9 @@ package bytes, independently expected contracts and prepared runtime input.
 The backend performs RPC before posting to the worker. Workers do not receive an
 RPC session or a React handle. The worker's program-opening helper consumes the
 variant; its invocation/session/normalization loop remains shared.
+The opaque `snapshotRef` stays in the RPC session; it is not cloned into the
+worker payload. Only ordinary identity metadata and executable bytes cross that
+worker boundary.
 
 `release` is idempotent and releases an acquisition interest, including a pending
 RPC. It does not dispose a successfully handed-off program. `ExperimentHost`
@@ -216,21 +264,31 @@ isolated modules/outputs. Agree this surface and the implementation writer with
 the selected #22 revision, or rebase onto its landed squash. A separate preview
 controller or a fork of `ResultView` is not part of this proposal.
 
-Two VIR seams need a focused experiment before deciding on upstream changes:
+The VIR disposition narrows the shared work to program admission and an
+existing shell-consumption experiment:
 
 1. **In-memory program opening with expected contracts.** The public runtime
    factory already accepts `wasmModule` and package bytes. The site's higher-level
    `createProgram` additionally checks independently expected signatures and
    returns an owned program facade, but requires HTTP(S) resource manifests.
-   Prefer a small public in-memory entry sharing that contract validation,
-   installation and disposal code. Its compatibility check must bind the package
-   compiler identity to the selected runtime. Do not weaken the site loader's URL
-   policy or copy its signature comparison into verso-run.
-2. **Composing the infoview shell.** VIR already constructs a compiled React
-   component with native infoview props. The Run component can be supplied as a
-   native React prop to the Cast factory. If consumers cannot import the shell
-   through a supported package export, expose that entry upstream. Keep its
-   runtime lifecycle in VIR rather than copying the widget loader into verso-run.
+   Prefer an owned-program operation on the existing factory, sharing the site's
+   contract validation, installation and disposal code. Initial inputs should
+   use matched Wasm bytes and the existing runtime descriptor/build identity;
+   verify the payload and compare package compiler metadata before initialization.
+   A bare precompiled module plus a caller-provided identity string is not proof
+   of that association. Reuse compiled modules only while preserving verified
+   provenance. Settle this input contract with VIR before coding. Do not weaken
+   the site loader's URL policy or copy its signature comparison into verso-run.
+2. **Composing the registered infoview widget.** The locked infoview supports
+   `importWidgetModule` and `widget_module:hash,<decimal hash>` imports. Qualify a
+   registered wrapper that imports `Lean.Vir.Infoview.widget`'s default shell,
+   with the import hash generated from that exact module's `javascriptHash`.
+   The wrapper supplies the stable native Run component through props; the shell
+   already forwards those props to its compiled root. This route needs no new
+   npm export or copied loader. Actual wrapper/editor acceptance remains pending.
+   Normal shell unmount releases UI ownership without forcing disposal of
+   callback/JSL-retained runtimes; preserve that behavior. Our explicitly owned
+   workers and presenter programs retain their separate disposal owners.
 
 Build the infoview module and worker from the selected VIR dependency's public
 JavaScript entry points. Keep React and infoview external through the editor's
@@ -252,8 +310,9 @@ The useful upstream changes are therefore specific:
 | Project | Improvement | Priority |
 | --- | --- | --- |
 | Cast | Public checked-page/refresh component, with versioned responses and extension configuration | Enables reuse of the existing test-consumer preview without copying it. |
+| Cast | Decoder for standard `Manual.Block.lean` source data | Required to show inline and anchored Run source through existing highlighting. |
 | VIR | Public in-memory program opening sharing expected-signature validation and owned-program disposal | Keeps editor and site execution on one callable contract. |
-| VIR | Supported infoview shell/component package export | Avoids importing private paths or copying the runtime loader. |
+| Consumer | Qualify the existing registered widget-module import | Reuses the VIR shell without a new npm export or copied loader. |
 | VIR | Cooperative cancellation checkpoints in existing byte/package RPC handlers | Useful bounded follow-up; not a new protocol or a prerequisite for worker Stop. |
 
 These are proposed changes, not findings that upstream implementations are
@@ -271,6 +330,13 @@ commits ahead; it uses Lean 4.36.0-rc1, Verso `f7a4dc6` and VIR `5a5614b`.
 verso-run uses Lean 4.36.0-rc1, Verso `d0a5f92` and VIR `bf8b6a8`.
 Matching Lean versions alone does not establish compatibility.
 
+The exact local Cast source candidate is
+`0e2bc830bc43a88fc3ceea55616911924a0a83d6`; its existing qualification does not
+establish compatibility with verso-run's pair. A read-only VIR diff suggests its
+React/Infoview/Js/JSX APIs are unchanged between the two VIR revisions, but native
+extern and runtime resources differ. That is source evidence, not permission to
+copy runtime/SDK artifacts between those revisions.
+
 First compile the needed Cast core/Manual modules against verso-run's existing
 pins in an independently owned experimental consumer. Do not share writable
 dependency or build directories. If incompatibilities require an upstream
@@ -278,6 +344,29 @@ change, make that change in a separate task worktree and qualify an immutable
 published revision before adding the adapter dependency. The generated Manual
 codec is optional and must not force a VIR upgrade for the initial integration.
 Do not modify the existing Cast checkout or the documentation/presenter branches.
+
+### Isolated source compatibility gate
+
+`scripts/cast-compatibility.py` extracts only the exact Cast revision's Lean
+sources into an ignored consumer under this task's `_out/`. The consumer owns
+all eight dependency checkouts and their build directories. Its resolved
+manifest/checkout revisions must equal this checkout's pins, and the extracted
+Cast sources must retain their recorded hashes.
+
+```sh
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --prepare
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --build
+```
+
+On Cast `0e2bc830bc43a88fc3ceea55616911924a0a83d6`, the batch build of
+`Compatibility:olean` passes on the unchanged verso-run pins. The fixture imports
+the complete core/Manual renderer and evaluates an assertion against the real
+`ExternalCode.leanBlock` producer, confirming its constructor, three-field data
+and empty children. No Cast source patch, runtime or SDK was copied. The report
+and logs are under `_out/cast-compatibility/`; the fixture is in
+[the experiment directory](../experiments/cast-compatibility/Compatibility.lean).
+This establishes source compilation, not rendering of actual Run blocks,
+runtime/native extern compatibility or a working editor connection.
 
 ## Implementation slices and acceptance
 
@@ -287,13 +376,20 @@ Do not modify the existing Cast checkout or the documentation/presenter branches
    unsaved edit, a signature mismatch, explicit Stop during a long call, and
    retry. Use this result to settle the two VIR API seams above.
 2. **Manual adapter.** Add optional `src/cast` modules for rendering, preview RPC
-   and widget setup; keep their Lake ownership separate. Display actual inline
-   and imported sources. Qualify scalar and escaped HTML results in the real
+   and widget setup; keep their Lake ownership separate. The first rendering
+   check must show highlighted source from real `leanRun` and `leanRunAnchor`
+   blocks with no unsupported-extension placeholder. Also cover malformed
+   source data. Qualify scalar and escaped HTML results in the real
    infoview, with no HTTP server and no document website build.
 3. **Existing views and lifetimes.** Connect `ViewHost` to the backend; qualify a
    finite sequence and a live automaton. Check independent repeated placements,
    held loading, Stop/retry, document edits, page switches, visibility and
    unmount. Late results must never commit into the replacement document.
+   Require explicit checks for an error-bearing page, incomplete elaboration,
+   same-version reprocessing, session retirement and position-only session
+   changes. Observe immediate invalidation before a held replacement response,
+   and server refusal of stale package requests. Real-editor evidence must
+   establish cursor-only behavior; the controlled harness cannot prove it.
 4. **Consumer acceptance.** A fresh consumer owns its source, dependencies and
    outputs. Record exact source/runtime/package identities and exercise a real
    editor/LSP connection. Controlled browser replay supplements that check;
@@ -312,6 +408,8 @@ live compilation infrastructure is already present.
 - [Pinned VIR snapshot and package API](https://github.com/ejgallego/lean-vir/blob/bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668/Vir/Infoview/Package.lean),
   [asset RPC](https://github.com/ejgallego/lean-vir/blob/bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668/Vir/Infoview/Assets.lean),
   and [live-snapshot fixtures](https://github.com/ejgallego/lean-vir/blob/bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668/fixtures/infoview/Smoke.lean).
+- [Pinned Verso external-code constructor and encoding](https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-manual/VersoManual/ExternalLean.lean#L32-L37)
+  and [Manual instance](https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-manual/VersoManual/ExternalLean.lean#L212-L220).
 - [Run block metadata](../src/authoring/VersoLeanRun/Model.lean),
   [Manual block](../src/manual/VersoLeanRun/Manual.lean),
   [execution host](../web/host.js), [worker](../web/worker.js),
