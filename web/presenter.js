@@ -1,4 +1,4 @@
-import { waitForSignal } from "./lifetime.js";
+import { siteBackend } from "./backend.js";
 // The Lean/VIR presenter owns selection, controls and event listeners.
 // This bridge owns asynchronous acquisition and the placement's lifetime.
 // The visible document stays untouched until its replacement has loaded and
@@ -34,7 +34,8 @@ function waitForPreview(frame, signal) {
 }
 
 export class ViewHost {
-  constructor(element, kind, onError) {
+  constructor(element, kind, onError, backend = siteBackend) {
+    this.backend = backend;
     if (!["html", "sequence", "automaton"].includes(kind)) throw new Error("Unsupported Lean view");
     this.element = element;
     this.kind = kind;
@@ -102,29 +103,16 @@ export class ViewHost {
     const deadline = setTimeout(() => controller.abort(
       new Error("View loading timed out. Try Run again.")), 15000);
     try {
-      const response = await fetch(new URL("./publication.json", import.meta.url), { signal: controller.signal });
-      if (!response.ok) throw new Error(`View publication: HTTP ${response.status}`);
-      const plan = await response.json();
-      const presenter = plan.presenters?.[this.kind];
-      if (!presenter?.expectedExport) throw new Error(`No published ${this.kind} presenter contract`);
-      if (this.kind === "automaton" && !presenter.commit?.expectedExport) {
-        throw new Error("No published automaton commit contract");
-      }
-      const expectedExports = { [presenter.declaration]: presenter.expectedExport };
-      if (this.kind === "automaton") expectedExports[presenter.commit.declaration] = presenter.commit.expectedExport;
-      const url = path => new URL(path, new URL("../", import.meta.url));
-      const { createProgram } = await waitForSignal(
-        import(url(plan.runtimeModule).href), controller.signal);
-      if (generation !== this.generation) return false;
-      if (controller.signal.aborted) throw controller.signal.reason;
-      program = await createProgram({ runtimeManifestUrl: url(plan.runtimeManifest),
-        programManifestUrl: url(presenter.manifest), signal: controller.signal,
-        expectedExports });
-      if (generation !== this.generation) { program.dispose(); return false; }
+      const acquisition = this.backend.acquireView(this.kind, controller.signal);
+      let resources;
+      try { resources = await acquisition.promise; }
+      finally { acquisition.release(); }
+      program = resources.program;
+      if (generation !== this.generation || controller.signal.aborted) { program.dispose(); return false; }
       this.program = program;
-      this.declaration = presenter.declaration;
-      this.commit = presenter.commit?.declaration;
-      const cleanup = program.call(presenter.declaration, this.element, data);
+      this.declaration = resources.declaration;
+      this.commit = resources.commitDeclaration;
+      const cleanup = program.call(this.declaration, this.element, data);
       if (this.kind === "sequence") {
         if (typeof cleanup !== "function") throw new Error("Sequence presenter did not return its cleanup callback");
         this.cleanup = cleanup;

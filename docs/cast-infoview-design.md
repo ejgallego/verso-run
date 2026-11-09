@@ -1,16 +1,17 @@
 # Run blocks in the infoview
 
-Implementation design, based on verso-run `2365399`. Exact Cast successor
-`6bee7e7e06546cef75ee873bbe7e6252151e0432` compiles on the unchanged consumer
-pins, including its public Preview client/server APIs and a registered native
-editor wrapper. Actual editor rendering, Run source rendering and execution
-remain unqualified. Cast is not yet a root dependency.
+The optional `VersoLeanRun.Cast` adapter previews Manual pages and connects Run
+controls to live-snapshot package generation. This implementation is stacked on
+#22's native placement owner at `189514025eec7ad8b644e985d7f9c826bffdb131`.
+The current demo covers scalar calls, including imported source anchors.
+[Demo preparation and validation](../demo/infoview/README.md) describe the local
+rc2 runtime selection and the remaining editor acceptance work. The PR stays a
+draft until these gates and portable dependency acquisition are resolved.
 
-The current fixtures use only this successor: one host-owned selection lifetime
-represented by an ordinary abort signal, a native React request hook, and a Lean
-decoder/view bridge. Immutable page metadata describes the displayed snapshot;
-`matchesSelection` is derived. Earlier `27085ea` and `9701d6f` results remain
-historical, and their consumers are preserved with any local edits.
+Cast owns page acquisition, decoding and document rendering. The native host
+owns one selected page's abort signal; Run owns independent execution workers.
+The implementation uses Cast's `Bridge {decode, view}` and public native request
+hook. Earlier preview contracts remain historical evidence only.
 
 ## Author experience
 
@@ -20,8 +21,9 @@ controls. Editing a function updates the code that Run executes after the page
 elaborates successfully. Authors do not need to generate a website or start an
 HTTP server for this loop. Imported modules still need Lean's normal preparation.
 
-The first acceptance example contains a scalar function, an HTML function and an
-imported function. Then qualify finite and live models using the same adapter.
+The first demo contains inline scalar calls, an imported function and repeated
+placements. HTML, finite and live views require presenter acquisition through
+the same backend before they can be qualified in the editor.
 Manual is the first genre; Blog and Slides can reuse the execution transport
 with their own Cast extension decoders.
 
@@ -51,7 +53,7 @@ The native reference stays outside the document JSON codec.
 ```text
 VersoCast.Manual.Preview.Server.document({ expectedVersion? })
     -> { uri, version, snapshotRef, documentJson, hasErrors }
-VersoLeanRun.Cast.program({ snapshotRef, version, document, declaration })
+VersoLeanRun.Cast.Server.program({ snapshotRef, document, declaration })
     -> { uri, version, callable, fingerprint, expectedExport, packageBase64 }
 ```
 
@@ -254,8 +256,8 @@ the host retains request IDs, cancellation and UI state. The site backend keeps
 the current publication plan and URLs. The infoview backend uses RPC, a bundled
 worker bootstrap and a compiled Wasm module. Worker code keeps input decoding,
 invocation, session handling and result formatting; only program opening varies.
-Freeze the final backend surface after the scalar experiment rather than
-generalizing it in advance.
+The scalar experiment selects the backend surface below; presenter acquisition
+remains a separate qualification gate.
 
 ### Contract against typed result presenters
 
@@ -313,11 +315,9 @@ the `CustomResult` type marker alone does not identify JavaScript assets. Previe
 setup must supply those registrations before claiming custom-result support.
 The first scalar/HTML slice does not invent a second registration mechanism.
 
-The design branch can remain based on main. Compatibility experiments stay in
-isolated modules/outputs. Agree this surface and the implementation writer with
-#22's owner before changing the shared files; then stack the runtime patch on
-the selected #22 revision, or rebase onto its landed squash. A separate preview
-controller or a fork of `ResultView` is not part of this proposal.
+The implementation is stacked on the agreed #22 revision above. The integration
+lane owns the bounded backend changes; #22 remains frozen for coordinator
+landing. A separate placement controller or fork of `ResultView` is unnecessary.
 
 The VIR disposition narrows the shared work to program admission and an
 existing shell-consumption experiment:
@@ -348,12 +348,10 @@ existing shell-consumption experiment:
    Snapshot the runtime inputs at factory construction and per-call package
    bytes/contracts at operation entry, before asynchronous work. Keep the
    verified bytes/module association private and shared only as immutable input;
-   every operation owns a separate program instance. This API is selected for
-   upstream implementation, not available on the current consumer pin. VIR's
-   source branch is based on a different compiler pair; a matched immutable
-   source/runtime/SDK checkpoint still needs qualification before consumption.
-   Do not weaken
-   the site loader's URL policy or copy its signature comparison into verso-run.
+   every operation owns a separate program instance. VIR `a41f9257` supplies this
+   API. Actual inline and anchored packages execute through it on rc2 with the
+   source-paired runtime below. Keep the site loader's URL policy and reuse
+   VIR's signature checks.
 2. **Composing the registered infoview widget.** The locked infoview supports
    `importWidgetModule` and `widget_module:hash,<decimal hash>` imports. Qualify a
    registered wrapper that imports `Lean.Vir.Infoview.widget`'s default shell,
@@ -390,153 +388,60 @@ The useful upstream changes are therefore specific:
 | Consumer | Qualify the existing registered widget-module import | Reuses the VIR shell without a new npm export or copied loader. |
 | VIR | Cooperative cancellation checkpoints in existing byte/package RPC handlers | Useful bounded follow-up; not a new protocol or a prerequisite for worker Stop. |
 
-The Cast successor supplies both Cast changes; its source gate passes below.
-VIR's owned-program API still needs a matched immutable implementation checkpoint.
-No additional Cast RPC or client hook is required by this ownership review.
+Cast supplies the preview API. Real producer tests exposed a flat-array decoder
+bug in `6bee7e7`; the frozen source correction renders both producer forms in the
+actual editor, while publication remains an adoption gate. VIR's owned-program
+API passes the actual-byte execution gate below. No additional Cast RPC or client
+hook is required by this ownership review.
 
-## Dependency baseline and source gates
+## Dependency baseline and acceptance
 
-The isolated task is `feat/cast-infoview` in `.worktree/cast-infoview`. Its root
-Lean, Verso, VIR, Illuminate and Slides pins remain unchanged. The selected Cast
-source is `6bee7e7e06546cef75ee873bbe7e6252151e0432` from
-[Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1).
-Cast's own pins remain Lean 4.36.0-rc1 / Verso `f7a4dc6` / VIR `5a5614b`;
-this consumer uses Lean 4.36.0-rc1 / Verso `d0a5f92` / VIR `bf8b6a8`.
-Matching Lean versions alone does not establish binary compatibility.
+This task lives in `.worktree/cast-infoview` on `feat/cast-infoview`.
+The selected compiler is Lean **4.36.0-rc2**, revision
+`b35cb10cf2ced51a2fd1880cfdbf75c71ab7a35a`. Verso `d0a5f92`, Illuminate
+`d22e76e` and Slides `e7705d5` remain unchanged. VIR is
+`a41f9257f5d34911d5b1f53dba37c2e1bc022aae` from
+[VIR PR #278](https://github.com/ejgallego/lean-vir/pull/278).
+Cast's selected preview API is from [Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1),
+base `6bee7e7e06546cef75ee873bbe7e6252151e0432`. Its flat source decoder and
+reference-host status-clear corrections are qualified from the owner's frozen
+source snapshot: patch SHA256
+`61292bad52a03611058aa22fa126c6cac9d866fb045e920ef3d3612828077765`, archive SHA256
+`b012bb7cd1984b717e374cfedeab37b09cdca7d9b9850cd2038bc1d4908e2e0a`.
+Their signed publication remains pending. The source compiles against this
+consumer's dependencies; no Cast binary outputs, runtime or SDK is copied.
 
-### Current successor gate
+The matched local runtime has content ID
+`a5001decce3979891e263a0843e8c76392c493ee9daf88ad1b2fbdd3233b8666`, pack SHA256
+`9ef8cf1012250cd47cb09eff65f5ad8493e8a7ba8225756769bec4972f6c80a7` and release
+Wasm SHA256 `1ab2ecd05abdaaac3dd2e3c704200892b78caa918a97d67a7e212220f85db6a5`.
+This is an exact-source local qualification input. The selected public VIR lock
+still names an unavailable release; local demo preparation uses a private source
+clone at lock-only local commit `3d01e51718307165e02c0c66178b9360fb4d5f19`,
+whose direct parent is the selected API source, and Lake's supported workspace
+package override. The SDK/API identity remains `a41f9257`; the local commit only
+selects the qualified relative runtime input. Normal public acquisition remains
+a landing gate.
 
-`scripts/cast-compatibility.py` extracts exact Cast Lean and JavaScript sources
-plus the public npm export map and native regression sources into a fresh
-ignored consumer. Each consumer owns all eight dependency checkouts and build
-directories. The driver checks the resolved manifest and checkout revisions
-against this worktree's pins and
-records extracted-source hashes. It refuses an existing consumer at preparation
-and refuses mismatched revisions or edited editor templates on later steps.
-No Cast runtime, SDK or compiled output is copied.
+The new tests distinguish these results:
 
-```sh
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --prepare
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --preview
-python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --editor
-UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python scripts/cast-preview-client.py --cast-source /path/to/verso-cast
-```
+| Gate | Evidence and scope |
+| --- | --- |
+| rc2 source builds | Verso, preview server, compiled adapter and real Run producer fixture compile. |
+| Actual producer layout | `CastSources.lean` checks the flat external-source payloads from both `leanRun` and `leanRunAnchor`. A nested product decoder is insufficient. |
+| Actual package generation | `CastPackages.lean` uses VIR's public analyzer/emitter for the real inline and imported roots. |
+| Actual Wasm calls | `cast-byte-program.mjs` invokes both packages, checks pre-await input snapshots, independent disposal and post-disposal refusal. |
+| Native placement lifetime | Controlled Chromium tests use the production native wrapper and hosts: exact captured ref routing, pending Stop, late replies, independent workers, edits, unbound reconciliation and cleanup after a failing Lean view. The peer and worker are controlled. |
+| Site behavior | `lake build` and all 101 checks in `lake test -- --mutations` pass with the disclosed local selections. The focused sequence suite also passes all 28 checks, including signature mismatch/retry. |
+| Actual VS Code | Real inline/anchor source highlighting, scalar calls, repeated placements, cursor movement without a new header-session RPC and long-running worker Stop pass. Interactive assertions also observed unsaved execution, stale/unadmitted-root refusal and error-bearing preview/admission. The complete edit/recovery driver timed out during final restoration; same-version close/reopen and recovery remain open consumer gates. |
 
-The defaults select exactly `6bee7e7` and `_out/cast-preview-6bee7e7/`.
-The public Preview client/server build passes on the unchanged consumer pins
-(771 jobs in the fresh consumer). `PreviewCompatibility.lean` configures
-`Bridge {decode, view}` without reference-manual roles. Its typed consumer RPC
-accepts `WithRpcRef Page`, calls `requireErrorFree` before its work and
-`requireMatchingVersion` afterward. The captured session/reference remain native
-values. This gate compiles the RPC but does not invoke it. The Lean API/wire
-modules and dependency pins are byte-identical to `9701d6f`.
+Generated logs, packages and results live under `_out/rc2-demo/`,
+`_out/cast-demo/` and `_out/cast-placement/`. Generated widget/runtime files stay
+out of Git. These are qualification outputs, rather than a public runtime release.
 
-The replacement editor fixture also compiles (878 jobs including its asset
-preparer). `EditorHost.mjs` uses native `usePage` / `renderPage`, resolved through
-the exact package's public `verso-cast/preview` export. Its bundle contains that
-helper and consumer host only; React, infoview and the registered VIR shell stay
-external. `EditorPreview.widget` derives the shell hash from the pinned public
-widget. The Lake input tracks the generated wrapper bundle. The native host
-anchors `EnvPosContext` at the imported header and aborts before clearing or
-replacing its selection on edits, processing and server stop/restart.
-The host also preserves invalidation when busy/finished notifications batch
-back to the same processing flag, and ignores empty edits like Lean. Actual
-editor behavior has not yet been observed.
-
-The native browser gate replays Cast's exact `6bee7e7` hook and editor-owner
-regressions against our `EditorHost.mjs`, the public helper, and this consumer's
-locked React. A controlled Infoview peer supplies notifications and held replies;
-it replaces transport hooks and stubs the shell, so it does not exercise the
-actual editor or LSP. The current host/helper pass StrictMode, batched and
-duplicate progress, empty/nonempty edits, late replies, decoder replacement,
-server stop/restart, unmount, and native request cleanup under decoder failure.
-Two negative controls must fail: the `9701d6f` host strands the selection after
-batched busy/finished, and its helper accepts an obsolete decoder's reply in the
-commit/cleanup gap. Test source hashes, bundle inputs, console observations and
-control outcomes are retained in `preview-client.json` and `client-*-bundle.log`.
-This qualifies the native preview boundary under controlled scheduling; Run
-worker cleanup still needs its own integration check.
-
-The asset preparer acquires this consumer's locked bf8 runtime and checks its
-compiler identity. Open the prepared example with:
-
-```sh
-code --new-window _out/cast-preview-6bee7e7/consumer --goto _out/cast-preview-6bee7e7/consumer/EditorDemo.lean:15
-```
-
-Edit a sentence and observe the infoview; press Ctrl+Shift+Enter in the Lean
-file if the panel is closed. The page labels execution as unconnected and uses
-ordinary Lean source. Preparation does not establish rendering of `leanRun` /
-`leanRunAnchor`, worker/CSP behavior, runtime/native-extern compatibility, or
-cursor-only no-fetch behavior. Upstream's native LSP session/admission tests are
-source-owner evidence, separate from our compile result and editor acceptance.
-Exact hashes, revisions, bundle inputs and logs remain under the consumer output.
-
-### Historical gates
-
-These results apply only to their recorded source revisions. The current
-fixtures do not provide an adapter for the superseded Preview API. Earlier
-instructions and fixture versions are preserved in
-[the prior design snapshot](https://github.com/ejgallego/verso-run/blob/feefd40/docs/cast-infoview-design.md).
-
-| Candidate / gate | Result | Retained evidence |
-| --- | --- | --- |
-| Cast `0e2bc83` core/Manual source | 761-job build; actual `ExternalCode.leanBlock` constructor/data/children assertion | `_out/cast-compatibility/` |
-| Registered wrapper through locked official infoview loader | Six controlled-browser checks: shell and native-prop identity, stable factory, shared React state and unmount | `_out/cast-compatibility/widget-import.json` |
-| Cast `9701d6f` public Preview imports and native editor fixture | 771/878-job builds, Beam no errors/warnings; superseded native race behavior | `_out/cast-preview-9701d6f/` |
-| Cast `27085ea` public Preview imports | 845-job source/API build | `_out/cast-preview-27085ea/` |
-| Cast `27085ea` editor smoke | 883-job build, runtime identity check and CLI launch; rendered panel not observed | Same consumer; preserve the open file and any local edits |
-
-The controlled loader test transports Lean-emitted registered sources; it does
-not mount VIR or connect to an editor. None of these historical results qualifies
-the successor's editor lifecycle or executable Run controls. The new default
-consumer is separate from the old open smoke consumer.
-
-## Implementation slices and acceptance
-
-1. **Compatibility and transport experiment.** Compile the minimal Cast renderer
-   against the selected pins. Open a checked live scalar package in a worker
-   using RPC-delivered bytes and an independently expected signature. Check an
-   unsaved edit, a signature mismatch, explicit Stop during a long call, and
-   retry. Use this result to settle the two VIR API seams above.
-2. **Manual adapter.** Add optional `src/cast` modules for rendering, preview RPC
-   and widget setup; keep their Lake ownership separate. The first rendering
-   check must show highlighted source from real `leanRun` and `leanRunAnchor`
-   blocks with no unsupported-extension placeholder. Also cover malformed
-   source data. Qualify scalar and escaped HTML results in the real
-   infoview, with no HTTP server and no document website build.
-3. **Existing views and lifetimes.** Connect `ViewHost` to the backend; qualify a
-   finite sequence and a live automaton. Check independent repeated placements,
-   held loading, Stop/retry, document edits, page switches, visibility and
-   unmount. Late results must never commit into the replacement document.
-   Require explicit checks for an error-bearing page, incomplete elaboration,
-   same-version close/reopen worker restart, session retirement and position-only
-   session changes. Observe immediate invalidation before a held replacement
-   response and failure of old captured session/reference requests after restart;
-   a fresh pair must recover. Verify native cleanup with a failing Wasm callback,
-   and ignore late replies after abort. Real-editor evidence must
-   establish cursor-only behavior; the controlled harness cannot prove it.
-4. **Consumer acceptance.** A fresh consumer owns its source, dependencies and
-   outputs. Record exact source/runtime/package identities and exercise a real
-   editor/LSP connection. Controlled browser replay supplements that check;
-   it does not replace it. Run `lake build`, then `lake test -- --mutations`
-   sequentially, plus focused infoview checks, before marking implementation
-   ready. Add Blog/Slides decoders after this shared path works.
-
-No implementation size or latency is claimed yet. The evidence narrows the work
-to a rendering adapter, an editor execution backend and small shared VIR seams;
-live compilation infrastructure is already present.
-
-## Source references
-
-- [Cast renderer extension contract](https://github.com/ejgallego/verso-cast/blob/5fc470057e929c849840919b0294e7e2418461ad/doc/RENDERING.md)
-  and [checked-page RPC](https://github.com/ejgallego/verso-cast/blob/5fc470057e929c849840919b0294e7e2418461ad/tests/reference-manual/CastManualPreview/Server.lean).
-- [Pinned VIR snapshot and package API](https://github.com/ejgallego/lean-vir/blob/bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668/Vir/Infoview/Package.lean),
-  [asset RPC](https://github.com/ejgallego/lean-vir/blob/bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668/Vir/Infoview/Assets.lean),
-  and [live-snapshot fixtures](https://github.com/ejgallego/lean-vir/blob/bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668/fixtures/infoview/Smoke.lean).
-- [Pinned Verso external-code constructor and encoding](https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-manual/VersoManual/ExternalLean.lean#L32-L37)
-  and [Manual instance](https://github.com/leanprover/verso/blob/d0a5f92ee585a92d2cd4c4904469c123f5ae5f10/src/verso-manual/VersoManual/ExternalLean.lean#L212-L220).
-- [Run block metadata](../src/authoring/VersoLeanRun/Model.lean),
-  [Manual block](../src/manual/VersoLeanRun/Manual.lean),
-  [execution host](../web/host.js), [worker](../web/worker.js),
-  and [presenter host](../web/presenter.js).
+Historical source-only consumers remain under `_out/cast-compatibility/` and
+`_out/cast-preview-{27085ea,9701d6f,6bee7e7}/`. Their recorded rc1 results apply
+only to their own revisions; any local edits are preserved. Their source-only drivers remain in the
+[historical checkpoint](https://github.com/ejgallego/verso-run/tree/9d0b403e39bee29c9ab8368d8311571035c3413d/experiments/cast-compatibility).
+The current branch replaces that scaffolding with the optional adapter and
+focused tests. Use the [demo setup](../demo/infoview/README.md) for rc2.

@@ -38,7 +38,9 @@ async function fixture({ honorAbort = true, holdWorker = false, experiment = des
     terminate() { this.terminated = true; }
   };
   const { ExperimentHost } = await import(`../web/host.js?lifecycle=${++caseId}`);
-  return { requests, workers, host: onState => new ExperimentHost(experiment, onState) };
+  const { createSiteBackend } = await import("../web/backend.js");
+  const backend = createSiteBackend();
+  return { requests, workers, host: onState => new ExperimentHost(experiment, onState, backend) };
 }
 async function test(name, run) { await run(); checks.push(name); console.log("PASS", name); }
 
@@ -175,9 +177,9 @@ await test("Custom result registration supplies worker and renderer modules; mis
   first.requests[0].reply({...plan, resultPresenters:{"Fixture.Packet":{
     workerModule:"lean-run/packet/normalize.js", rendererModule:"lean-run/packet/render.js"}}});
   assert.equal(await promptly(pending), "input");
-  assert.match(first.workers[0].messages[0].publication.resultModule, /lean-run\/packet\/normalize.js$/);
+  assert.match(first.workers[0].messages[0].programRequest.resultModule, /lean-run\/packet\/normalize.js$/);
   assert.match(h.resultRendererUrl, /lean-run\/packet\/render.js$/);
-  assert.deepEqual(first.workers[0].messages[0].publication.expectedExport, signature);
+  assert.deepEqual(first.workers[0].messages[0].programRequest.expectedExport, signature);
   h.dispose();
   const missing = await fixture({experiment});
   const no = missing.host(), failed = outcome(no.invoke("input"));

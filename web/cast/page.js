@@ -3,18 +3,16 @@ import React from "react";
 import { EditorContext, EnvPosContext, useClientNotificationEffect,
   useServerNotificationEffect, useEvent, useRpcSession } from "@leanprover/infoview";
 import { usePage, renderPage } from "verso-cast/preview";
-import VirShell from "__VIR_SHELL__";
 
-// Consumer-owned event mapping, following Cast 6bee7e7's reference host. The
-// acquisition/decoder/view and VIR shell remain their public implementations.
-// This host has no Run workers; execution acceptance belongs to the next gate.
+// One native selection lifetime for the displayed Manual page. Anchor RPC at
+// the imported header so ordinary cursor movement does not select a new session.
 export function PageHost({ uri, ...bridge }) {
   const anchor = React.useMemo(() => ({ uri, line: 0, character: 0 }), [uri]);
   return React.createElement(EnvPosContext.Provider, { value: anchor },
     React.createElement(PageAtUri, { key: uri, uri, ...bridge }));
 }
 
-function PageAtUri({ uri, decode, view }) {
+function PageAtUri({ uri, decode, view, renderSnapshot = renderPage }) {
   const session = useRpcSession();
   const editor = React.useContext(EditorContext);
   const owner = React.useRef(null);
@@ -35,6 +33,10 @@ function PageAtUri({ uri, decode, view }) {
     setVersion(event.textDocument.version);
     setProcessing(true);
   }, [uri]);
+  useClientNotificationEffect("textDocument/didClose", event => {
+    if (event.textDocument.uri !== uri) return;
+    invalidate(); setStopped(true); setProcessing(false); setVersion(undefined);
+  }, [uri]);
   useServerNotificationEffect("$/lean/fileProgress", event => {
     if (event.textDocument.uri !== uri) return;
     const busy = event.processing.length > 0;
@@ -46,8 +48,11 @@ function PageAtUri({ uri, decode, view }) {
     }
     setProcessing(busy);
   }, [uri]);
-  useEvent(editor.events.serverStopped, () => {
-    invalidate(); setStopped(true);
+  useEvent(editor.events.serverStopped, reason => {
+    // The real editor also sends undefined to clear status on cursor movement.
+    // Only a stopped reason retires execution; clearing it permits recovery.
+    if (reason) { invalidate(); setStopped(true); }
+    else setStopped(false);
   }, [uri]);
   useEvent(editor.events.serverRestarted, () => {
     invalidate(); setStopped(false); setProcessing(false); setVersion(undefined);
@@ -60,19 +65,15 @@ function PageAtUri({ uri, decode, view }) {
     setSelection(Object.freeze({ session, uri, expectedVersion: version, signal: controller.signal }));
     return () => { controller.abort(); owner.current = null; };
   }, [session, uri, version, processing, stopped, refresh]);
-  return React.createElement(Preview, { selection, decode, view });
+  return React.createElement(Preview, { selection, decode, view, renderSnapshot });
 }
 
-function Preview({ selection, decode, view }) {
+function Preview({ selection, decode, view, renderSnapshot }) {
   const state = usePage(selection, decode);
   const message = state.status.kind === "loading" ? "Loading page…" :
     state.status.kind === "error" ? state.status.message :
     state.status.kind === "idle" ? "Waiting for a checked page…" : "";
   return React.createElement("section", { "data-cast-preview-current": state.matchesSelection },
     React.createElement("p", { role: "status" }, message),
-    renderPage({ view }, state));
-}
-
-export default function Widget(props) {
-  return React.createElement(VirShell, { ...props, pageHost: PageHost });
+    renderSnapshot({ view }, state));
 }

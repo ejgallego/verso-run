@@ -52,15 +52,15 @@ let runtime = moduleUrl(`export async function createProgram(options) {
   return {call(){return globalThis.fixtureRaw},dispose(){globalThis.fixtureDisposed=true}};
 }`);
 await import("../web/worker.js?custom-result-fixture");
-const publication = {runtimeModule:runtime, runtimeManifest:"https://fixture/runtime.json",
+const programRequest = {runtimeModule:runtime, runtimeManifest:"https://fixture/runtime.json",
   programManifest:"https://fixture/program.json", expectedExport:{independent:true},resultModule:normalizer};
-await globalThis.onmessage({data:{operation:"invoke",requestId:1,description,publication,input:"255"}});
+await globalThis.onmessage({data:{operation:"invoke",requestId:1,description,programRequest,input:"255"}});
 assert.deepEqual(globalThis.fixtureOptions.expectedExports, {"Fixture.packet":{independent:true}});
 assert.equal(messages.at(-1).state, "success");
 assert.deepEqual([...messages.at(-1).result.bytes], [255,0]);
 assert.deepEqual([...original.bytes], [255,0]);
 await globalThis.onmessage({data:{operation:"invoke",requestId:2,
-  description:{...description,form:{input:"uint64",presenter:"Other"}},publication,input:"1"}});
+  description:{...description,form:{input:"uint64",presenter:"Other"}},programRequest,input:"1"}});
 assert.equal(messages.at(-1).state, "failed");
 assert.match(messages.at(-1).error, /identity changed/);
 assert.equal(globalThis.fixtureDisposed, true);
