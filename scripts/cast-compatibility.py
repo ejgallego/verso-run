@@ -25,8 +25,9 @@ parser.add_argument('--prepare', action='store_true', help='acquire the isolated
 parser.add_argument('--build', action='store_true', help='build an already prepared consumer')
 parser.add_argument('--shell', action='store_true', help='compile and extract a registered shell wrapper')
 parser.add_argument('--preview', action='store_true', help='compile public Preview client/server consumer APIs')
+parser.add_argument('--editor', action='store_true', help='prepare a read-only VS Code document-preview smoke test')
 args = parser.parse_args()
-assert sum([args.prepare, args.build, args.shell, args.preview]) == 1, 'Select --prepare, --build, --shell or --preview'
+assert sum([args.prepare, args.build, args.shell, args.preview, args.editor]) == 1, 'Select one experiment step'
 output = args.output.resolve()
 assert output.is_relative_to(ROOT / '_out'), 'Keep experimental outputs inside this task worktree'
 project = output / 'consumer'
@@ -163,7 +164,7 @@ elif args.shell:
     finally:
         write_report(report)
     print('PASS registered wrapper compiles; loader/runtime/editor remain unqualified', flush=True)
-else:
+elif args.preview:
     report = json.loads(report_path.read_text())
     assert report['status'] in ['prepared', 'build-failed', 'source-compile-passed']
     check_dependencies(report['expectedManifest'])
@@ -194,3 +195,39 @@ else:
     finally:
         write_report(report)
     print('PASS public Preview client/server API compile; lifecycle/editor/runtime remain unqualified', flush=True)
+else:
+    report = json.loads(report_path.read_text())
+    assert report.get('preview', {}).get('status') == 'public-imports-compiled'
+    check_dependencies(report['expectedManifest'])
+    for name in ['EditorPreview.lean', 'EditorDemo.lean', 'EditorAssets.lean']:
+        shutil.copyfile(ROOT / 'experiments/cast-compatibility' / name, project / name)
+    lakefile = project / 'lakefile.lean'
+    addition = '''
+lean_lib EditorPreview where
+  requiresModuleSystem := true
+
+lean_lib EditorDemo where
+  requiresModuleSystem := true
+
+lean_exe editor_assets where
+  root := `EditorAssets
+'''
+    if addition not in lakefile.read_text():
+        lakefile.write_text(lakefile.read_text() + addition)
+    try:
+        run(['lake', '--no-cache', 'build', '+EditorDemo:olean', 'editor_assets'], 'editor-build.log')
+        run(['lake', 'exe', 'editor_assets'], 'editor-assets.log')
+        settings = project / '.vscode/settings.json'
+        settings.parent.mkdir(exist_ok=True)
+        values = json.loads(settings.read_text()) if settings.exists() else {}
+        values['lean4.infoview.autoOpen'] = True
+        settings.write_text(json.dumps(values, indent=2) + '\n')
+        report['editorSmoke'] = {'status': 'prepared', 'entry': str(project / 'EditorDemo.lean'),
+                                 'executionConnected': False, 'actualEditorObserved': False,
+                                 'runtime': json.loads((project / '.vir/runtime.json').read_text())}
+    except Exception as error:
+        report['editorSmoke'] = {'status': 'preparation-failed', 'error': str(error)}
+        raise
+    finally:
+        write_report(report)
+    print(f'Read-only smoke test prepared: code --new-window {project} --goto {project}/EditorDemo.lean:15', flush=True)

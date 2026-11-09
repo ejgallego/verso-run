@@ -449,6 +449,27 @@ reprocessing/session mapping, or adopt Cast as a root dependency. Exact source
 hashes, all eight resolved/checked-out revisions and logs are retained under
 `_out/cast-preview-27085ea/`. No runtime/SDK is copied between Cast's pair and ours.
 
+### VS Code document-preview smoke test
+
+After the public-preview gate, prepare and open a read-only editor example:
+
+```sh
+python3 scripts/cast-compatibility.py --cast-source /path/to/verso-cast --output _out/cast-preview-27085ea --editor
+code --new-window _out/cast-preview-27085ea/consumer --goto _out/cast-preview-27085ea/consumer/EditorDemo.lean:15
+```
+
+The editor files and locked bf8 runtime are prepared inside that consumer. The
+entrypoint and widget package compile successfully (883 batch jobs); the asset
+preparer checks the runtime's compiler identity. This enables a hands-on Cast
+document preview with highlighted ordinary Lean source. Edit a sentence and
+observe the infoview; press Ctrl+Shift+Enter in the Lean file if the panel is closed.
+
+The page explicitly labels execution as unconnected. It has no Run blocks or
+invocation backend, and uses a minimal position-specific read-only host. It
+does not qualify the production session/generation mapping, actual Run controls,
+worker Stop, or real-editor rendering merely by building or launching VS Code.
+Report those observations separately from preparation.
+
 ## Implementation slices and acceptance
 
 1. **Compatibility and transport experiment.** Compile the minimal Cast renderer
