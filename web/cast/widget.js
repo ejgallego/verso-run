@@ -3,12 +3,16 @@ import css from "../lean-run.css";
 import VirShell from "__VIR_SHELL__";
 import { renderPage } from "verso-cast/preview";
 import workerSource from "__RUN_WORKER__";
+import katex from "__KATEX__";
+import mathCss from "__KATEX_CSS__";
+import { createMathComponent } from "verso-cast/katex";
 import { PageHost } from "./page.js";
 import { bindBackend, enhance } from "../renderer.js";
 import { editorBackend, decodeBase64 } from "./backend.js";
 
 const SnapshotContext = React.createContext(null);
 const RuntimeContext = React.createContext(null);
+const MathFormula = createMathComponent(katex);
 
 // Bind retained prose to its original selection, including during replacement.
 function renderSnapshot(bridge, state) {
@@ -78,5 +82,7 @@ export default function Widget(props) {
   }), [manifestJson, props.wasmPath]);
   return React.createElement(RuntimeContext.Provider, { value: runtime },
     React.createElement("style", null, css),
-    React.createElement(VirShell, { ...props, pageHost: RunPage, runPlacement: RunPlacement }));
+    React.createElement("style", null, mathCss),
+    React.createElement(VirShell, { ...props, pageHost: RunPage, runPlacement: RunPlacement,
+      mathComponent: MathFormula }));
 }

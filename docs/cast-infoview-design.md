@@ -446,11 +446,15 @@ The new tests distinguish these results:
 | Actual package generation | `CastPackages.lean` uses VIR's public analyzer/emitter for the real inline and imported roots. |
 | Actual Wasm calls | `cast-byte-program.mjs` invokes both packages, checks pre-await input snapshots, independent disposal and post-disposal refusal. |
 | Native placement lifetime | Controlled Chromium tests use the production native wrapper and hosts: exact captured ref routing, pending Stop, late replies, independent workers, edits, unbound reconciliation and cleanup after a failing Lean view. The peer and worker are controlled. |
+| Math rendering | `cast-math.py` runs the actual compiled Lean adapter with real Manual math nodes. Cast's public KaTeX leaf renders inline/display math, retains TeX source, recovers malformed input and loads bundled fonts. Editor transport is controlled; actual VS Code math/CSP acceptance remains open. |
 | Site behavior | `lake build` and all 101 checks in `lake test -- --mutations` pass with the disclosed local selections. The focused sequence suite also passes all 28 checks, including signature mismatch/retry. |
 | Actual VS Code | Real inline/anchor source highlighting, scalar calls, repeated placements, cursor movement without a new header-session RPC and long-running worker Stop pass. Interactive assertions also observed unsaved execution, stale/unadmitted-root refusal and error-bearing preview/admission. The complete edit/recovery driver timed out during final restoration; same-version close/reopen and recovery remain open consumer gates. |
 
 Generated logs, packages and results live under `_out/rc2-demo/`,
-`_out/cast-demo/` and `_out/cast-placement/`. Generated widget/runtime files stay
+`_out/cast-demo/`, `_out/cast-placement/` and `_out/cast-math/`. Checking profiles
+and controlled timing comparisons are under `_out/performance/preview-math-anchor/`;
+their [measurement scope](../demo/infoview/README.md#checking-latency) is separate
+from actual editor latency. Generated widget/runtime files stay
 out of Git. These are qualification outputs, rather than a public runtime release.
 
 Historical source-only consumers remain under `_out/cast-compatibility/` and

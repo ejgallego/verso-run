@@ -5,6 +5,19 @@ source, and scalar Run controls in the Lean infoview. Each placement owns its
 worker. Editing the page stops execution; after checking finishes, choose Run to
 execute the new code.
 
+Inline and display math use Cast's public KaTeX component, configured by the
+Lean renderer. KaTeX and its fonts come from the pinned Verso assets and are
+bundled into the widget; the preview needs no remote font server. Invalid TeX
+remains visible.
+
+For example, add these lines inside the document:
+
+```lean
+Inline: $`a + x \alpha`
+
+Display: $$`\frac{a}{b}`
+```
+
 The demo is under active qualification in [PR #23](https://github.com/ejgallego/verso-run/pull/23).
 The native browser lifetime checks and actual rc2/Wasm scalar calls pass.
 The real VS Code panel renders source and runs scalar examples in independent
@@ -18,6 +31,25 @@ the editor backend yet. Their site implementation keeps the existing behavior.
 The current JavaScript preview helper and editor host are provisional. The
 intended preview state and UI are Lean/VIR-authored; migration awaits the agreed
 upstream lifetime contract. The existing demo remains the acceptance baseline.
+
+## Checking latency
+
+Asset preparation writes a small runtime manifest for the document and resolves
+the registered VIR shell in the widget bundle. Document checking reads those
+prepared values instead of reconstructing the Wasm payload or rewriting the
+bundled JavaScript on every edit.
+
+On the local rc2 demo, the same frozen file took 5.03 seconds before this change
+and 2.52 seconds afterward in warm, instrumented frontend runs. A separate
+six-run comparison isolated the runtime-manifest change: median time fell from
+3.53 to 2.47 seconds with the same imports and widget. These measurements include
+`lake env lean` startup; they do not measure VS Code edit-to-preview latency.
+
+The imported anchor still asks Verso to check its external source through two
+nested Lake commands. That took 1.34–1.83 seconds in these profiles, even with
+warm outputs. The current consumer preserves those dependency checks. The
+highlighted-source target already depends on the extractor, so eliminating the
+separate extractor command is a candidate improvement in Verso.
 
 ## Prepare and open
 
@@ -80,7 +112,13 @@ lake build +CastSourceGate:olean
 lake env lean tests/CastSources.lean
 lake env lean tests/CastPackages.lean
 UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python tests/cast-placement.py
+UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python tests/cast-math.py
 ```
+
+The math check runs the actual compiled Lean adapter and real Manual math nodes
+against a controlled editor transport. It checks inline/display math, malformed
+TeX, source preservation and embedded fonts. Its screenshot and result are under
+`_out/cast-math/`; actual VS Code math/CSP acceptance remains separate.
 
 `tests/CastRuntime.lean` and `tests/cast-byte-program.mjs` additionally inspect an
 explicit source-paired pack and execute the real producer packages through the

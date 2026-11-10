@@ -26,11 +26,12 @@ private def nativeComponent (value : Js.Any) : FunctionComponent Props := by
   unfold FunctionComponent Js.Function1 Js.Any Js at *
   exact value
 
-private def create (placement : FunctionComponent Props) : RuntimeM VersoCast.Manual.Preview.Bridge :=
+private def create (placement math : FunctionComponent Props) : RuntimeM VersoCast.Manual.Preview.Bridge :=
   VersoCast.Manual.Preview.create {
     createRenderers := fun styles => do
       let manual ← VersoCast.Manual.createRenderers styles
       pure fun page matchesSelection => { manual with
+        mathComponent? := some math
         renderBlock? := fun key attributes block children => do
           if block.name != `VersoLeanRun.Block.leanRun then
             return ← manual.renderBlock? key attributes block children
@@ -55,10 +56,11 @@ private def create (placement : FunctionComponent Props) : RuntimeM VersoCast.Ma
 def View : RuntimeM (FunctionComponent Infoview.PanelWidgetProps) := do
   FunctionComponent.ofLean fun props => do
     let placement := nativeComponent (← Js.Object.get props (← js#"runPlacement"))
+    let math := nativeComponent (← Js.Object.get props (← js#"mathComponent"))
     let build ← Js.Function.ofLean0 do
-      let bridge ← create placement
+      let bridge ← create placement math
       js%{ "decode" := bridge.decode, "view" := bridge.view }
-    let bridge ← Hooks.useMemo build (← js#[Js.erase placement])
+    let bridge ← Hooks.useMemo build (← js#[Js.erase placement, Js.erase math])
     let pos ← Infoview.PanelWidgetProps.pos props
     let uri ← Infoview.PanelPosition.uri pos
     let host := nativeComponent (← Js.Object.get props (← js#"pageHost"))
@@ -69,10 +71,18 @@ def View : RuntimeM (FunctionComponent Infoview.PanelWidgetProps) := do
 
 vir_proof_widget View
 
+open Lean Elab Term in
+elab "preparedCastWidget%" : term => do
+  let source := System.FilePath.mk (← readThe Core.Context).fileName
+  let script ← IO.FS.readFile (source.parent.getD "." / "../../../.vir-generated/CastWidget.mjs")
+  -- Resolve the registered shell once while preparing this module. Repeating
+  -- replacement over the embedded fonts during each document edit is costly.
+  return mkStrLit <| script.replace "__VIR_SHELL__"
+    ("widget_module:hash," ++ toString Lean.Vir.Infoview.widget.javascriptHash.val)
+
 @[widget_module]
 def widget : Lean.Widget.Module where
-  javascript := (include_str "../../../.vir-generated/CastWidget.mjs").replace "__VIR_SHELL__"
-    ("widget_module:hash," ++ toString Lean.Vir.Infoview.widget.javascriptHash.val)
+  javascript := preparedCastWidget%
 
 structure Props where
   wasmPath : String

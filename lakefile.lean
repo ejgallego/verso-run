@@ -239,6 +239,10 @@ script test (args) do
 input_file castWidgetBundle where
   path := ".vir-generated/CastWidget.mjs"
 
+input_file castRuntimeManifest where
+  path := ".vir/infoview-runtime.json"
+  text := true
+
 lean_lib VersoLeanRunCast where
   srcDir := "src/cast"
   roots := #[`VersoLeanRun.Cast]
@@ -248,8 +252,14 @@ lean_lib VersoLeanRunCast where
 
 lean_lib LeanRunInfoviewDemo where
   srcDir := "demo/infoview"
-  roots := #[`LeanRunInfoview.Demo, `LeanRunInfoview.Helper, `LeanRunInfoview.Setup]
+  roots := #[`LeanRunInfoview.Demo, `LeanRunInfoview.Helper]
   requiresModuleSystem := true
+
+lean_lib LeanRunInfoviewSetup where
+  srcDir := "demo/infoview-resources"
+  roots := #[`LeanRunInfoview.Setup]
+  requiresModuleSystem := true
+  needs := #[castRuntimeManifest]
 
 lean_exe «lean-run-infoview-assets» where
   srcDir := "demo/infoview"
@@ -257,5 +267,5 @@ lean_exe «lean-run-infoview-assets» where
 
 lean_lib LeanRunInfoviewSourceGate where
   srcDir := "tests/cast"
-  roots := #[`CastSourceGate]
+  roots := #[`CastSourceGate, `CastMathDoc]
   requiresModuleSystem := true
