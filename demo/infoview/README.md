@@ -15,6 +15,10 @@ prototype stays a draft.
 HTML, sequence, automaton and custom-result presentation are not connected to
 the editor backend yet. Their site implementation keeps the existing behavior.
 
+The current JavaScript preview helper and editor host are provisional. The
+intended preview state and UI are Lean/VIR-authored; migration awaits the agreed
+upstream lifetime contract. The existing demo remains the acceptance baseline.
+
 ## Prepare and open
 
 Run these commands in the task worktree. It requires the selected Lean rc2

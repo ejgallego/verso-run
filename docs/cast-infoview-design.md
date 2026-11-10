@@ -13,6 +13,20 @@ owns one selected page's abort signal; Run owns independent execution workers.
 The implementation uses Cast's `Bridge {decode, view}` and public native request
 hook. Earlier preview contracts remain historical evidence only.
 
+## Preview state and lifetime direction
+
+Cast application state and UI should remain Lean/VIR-authored. The current
+JavaScript `usePage` helper and copied editor host are provisional qualification
+scaffolding; they are not the preview interface to stabilize. Keep their scope
+fixed while retaining the existing demo and editor acceptance as baseline evidence.
+
+The canonical VIR request `CAST-VIR-LEAN-PREVIEW-LIFETIME-20261109-001` seeks an
+existing-API example, or the smallest missing native cleanup/retired-callback
+primitive, for Lean-authored React effects. It does not request a whole-preview
+service or framework. Mandatory worker cleanup must still work without a healthy
+Wasm callback. Consumer migration follows an agreed immutable upstream handoff;
+this direction does not select new pins or a parallel upstream implementation.
+
 ## Author experience
 
 An optional `VersoLeanRun.Cast` import enables a Cast preview of a Manual page.
