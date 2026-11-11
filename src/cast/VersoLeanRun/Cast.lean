@@ -26,7 +26,7 @@ private def nativeComponent (value : Js.Any) : FunctionComponent Props := by
   unfold FunctionComponent Js.Function1 Js.Any Js at *
   exact value
 
-private def create (placement math : FunctionComponent Props) : RuntimeM VersoCast.Manual.Preview.Bridge :=
+private def create (placement math : FunctionComponent Props) : RuntimeM (FunctionComponent Props) :=
   VersoCast.Manual.Preview.create {
     createRenderers := fun styles => do
       let manual ← VersoCast.Manual.createRenderers styles
@@ -38,7 +38,7 @@ private def create (placement math : FunctionComponent Props) : RuntimeM VersoCa
           let .ok (entry : Experiment) := Lean.fromJson? block.data | return none
           let props ← attributes "lean-run" styles.part
           let provenance ← js%{
-            "session" := page.session, "snapshotRef" := page.snapshotRef,
+            "session" := page.session, "signal" := page.signal, "snapshotRef" := page.snapshotRef,
             "uri" := (← JsValue.ofString page.uri),
             "version" := (← JsValue.ofFloat page.version.toFloat),
             "hasErrors" := (← JsValue.ofBool page.hasErrors) }
@@ -58,15 +58,12 @@ def View : RuntimeM (FunctionComponent Infoview.PanelWidgetProps) := do
     let placement := nativeComponent (← Js.Object.get props (← js#"runPlacement"))
     let math := nativeComponent (← Js.Object.get props (← js#"mathComponent"))
     let build ← Js.Function.ofLean0 do
-      let bridge ← create placement math
-      js%{ "decode" := bridge.decode, "view" := bridge.view }
-    let bridge ← Hooks.useMemo build (← js#[Js.erase placement, Js.erase math])
+      return Js.erase (← create placement math)
+    let preview ← Hooks.useMemo build (← js#[Js.erase placement, Js.erase math])
     let pos ← Infoview.PanelWidgetProps.pos props
     let uri ← Infoview.PanelPosition.uri pos
     let host := nativeComponent (← Js.Object.get props (← js#"pageHost"))
-    let input ← js%{ "uri" := uri,
-      "decode" := (← Js.Object.get bridge (← js#"decode")),
-      "view" := (← Js.Object.get bridge (← js#"view")) }
+    let input ← js%{ "uri" := uri, "preview" := preview }
     Node.functionComponent host input (← Js.Array.empty)
 
 vir_proof_widget View

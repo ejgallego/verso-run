@@ -10,22 +10,16 @@ draft until these gates and portable dependency acquisition are resolved.
 
 Cast owns page acquisition, decoding and document rendering. The native host
 owns one selected page's abort signal; Run owns independent execution workers.
-The implementation uses Cast's `Bridge {decode, view}` and public native request
-hook. Earlier preview contracts remain historical evidence only.
+Cast's `Preview.create` returns a Lean-authored native React component. It owns
+page requests, decoding, retained snapshots, status and Debug UI. The native Run
+host owns editor invalidation and independent worker cleanup.
 
-## Preview state and lifetime direction
-
-Cast application state and UI should remain Lean/VIR-authored. The current
-JavaScript `usePage` helper and copied editor host are provisional qualification
-scaffolding; they are not the preview interface to stabilize. Keep their scope
-fixed while retaining the existing demo and editor acceptance as baseline evidence.
-
-The canonical VIR request `CAST-VIR-LEAN-PREVIEW-LIFETIME-20261109-001` seeks an
-existing-API example, or the smallest missing native cleanup/retired-callback
-primitive, for Lean-authored React effects. It does not request a whole-preview
-service or framework. Mandatory worker cleanup must still work without a healthy
-Wasm callback. Consumer migration follows an agreed immutable upstream handoff;
-this direction does not select new pins or a parallel upstream implementation.
+The host supplies immutable `{session, uri, expectedVersion?, signal}` selection
+props and a native `onFatal` callback. Cast retains the exact session, reference
+and originating signal in `PageInfo`; Run passes `page.signal` directly to each
+placement. There is no copied request hook, snapshot context or global latest
+reference. VIR supplies abortable native effects, native object identity and
+signal composition for Cast's Lean-authored component.
 
 ## Author experience
 
@@ -45,11 +39,11 @@ with their own Cast extension decoders.
 
 | Responsibility | Existing implementation | Integration |
 | --- | --- | --- |
-| Checked document and edits | Cast's optional `Preview.Server.document` and native `usePage` helper | Use the final checked snapshot; the native host owns edit/restart invalidation. |
+| Checked document and edits | Cast's optional `Preview.Server.document` and Lean preview component | Use the final checked snapshot; the native host owns edit/restart invalidation. |
 | Document rendering | `VersoCast.Manual.createRenderers`, `Renderer.Renderers.renderBlock?` | Decode the Run wrapper; reuse the successor's `Manual.Block.lean` decoder and existing highlighting. |
 | Runnable metadata | `Experiment`, `Experiment.browserDescription`, `Collect.experiments` | Select callables from the checked document rather than accepting arbitrary names from the browser. |
 | Current executable code | VIR `prepareWidgetPackage`, built on `prepareSnapshotInput` and imported-owner resolution | Analyze the selected callable in the same live environment as the document. Emit package bytes on demand. |
-| Infoview byte transport | VIR `readAsset`, `base64Encode`, RPC cancellation | Load the locked runtime through RPC and send current package bytes through an execution RPC. |
+| Infoview byte transport | VIR `readAsset`, `base64Encode`, RPC cancellation | Read locked runtime bytes through `readAsset`; return the current package through Run's `program` RPC for worker execution. |
 | Invocation and Stop | `ExperimentHost`, `worker.js`, `contract.js` | Supply an editor transport to the existing host; keep one worker per running placement. |
 | Result presentation | `ViewHost`, compiled Lean presenter, `AutomatonPlayer` | Supply presenter acquisition through the same editor transport. Keep current HTML isolation and playback semantics. |
 
@@ -87,8 +81,9 @@ reconstruct it from an object ID.
 
 The opt-in server helper and `Page` record live in
 `VersoCast.Manual.Preview.Server`. `VersoCast.Manual.Preview.create` returns a
-stable `Bridge {decode, view}`. Native React composes `usePage(selection,
-bridge.decode)` and `renderPage(bridge, state)` from `verso-cast/preview`.
+stable native `FunctionComponent Props`. Its `selection` prop is null or one
+immutable native selection, and `onFatal` is a native callback that returns
+normally. The former JavaScript preview export is removed.
 Neither optional module enters core or ordinary Manual imports.
 Reference-manual-specific roles remain consumer-owned.
 
@@ -186,17 +181,17 @@ Run children bind to that captured selection and send program requests through
 that exact session. The host owns one ordinary abort signal for the selection;
 source/reprocessing/session invalidation aborts it before replacement acquisition.
 Cast consumes that lifetime rather than maintaining a second didChange/generation
-state machine. Acquisition and request cleanup live in native React, independently
-of the Lean decoder/view and demo chrome. The renderer receives immutable
+state machine. Cast owns acquisition and preview state in Lean, using VIR's
+abortable native effect scope. Its request signal combines that scope with the caller's signal;
+request cleanup never aborts the caller's selection. The renderer receives immutable
 `PageInfo` and a derived `matchesSelection`; the old selected page must not match
 the replacement merely because its URI/version are equal. Native execution guards
 also check the captured signal directly, even if the Wasm view has not rerendered.
 
-In native React, bind the displayed snapshot's `state.lastGood.selection` around
-`renderPage`, for example through a context consumed by the native Run placement.
-Do not bind the replacement `selection` around retained old prose. The placement
-keeps that original signal and the `PageInfo` session/reference; its effect
-subscribes native disposal directly to abort and also disposes on unmount.
+Cast passes the displayed snapshot's immutable `PageInfo` to the configured
+renderer. The native Run placement subscribes directly to `page.signal` and
+disposes its owner on abort or unmount. Retained old prose keeps its original
+session, reference and signal, including while a replacement is pending.
 Check the signal before invocation and after asynchronous acquisition, and keep
 the independent runnable-entry/signature checks on the server and loader.
 The derived rendering flag alone is insufficient: synchronous abort can precede
@@ -212,6 +207,14 @@ lifetime, so stopping one example does not retire the other examples. Keep a
 cursor-independent session at a position where imported RPC methods are available;
 position-session object identity is not a freshness signal.
 
+A stable native fatal callback captures the committed selection/component pair.
+It records a matching live failure and schedules React boundary handling after
+returning normally to Lean. Both the scheduled work and queued updater recheck
+the captured owner; a retired failure cannot affect a replacement. Operational
+RPC/envelope/parse errors stay in Cast's recoverable status UI. Actual dead-Wasm
+terminal observation remains the public shell's policy. Worker termination does
+not depend on either fatal callback or a later Lean render.
+
 The console's markup comes from the existing `renderControls experiment`,
 serialized into its imperative DOM slot. The source remains a separate,
 React-managed child rendered by Cast's existing Manual/highlighting adapter.
@@ -221,12 +224,12 @@ isolation policy.
 
 ### Run source decoder
 
-Cast's successor adds the external-code decoder needed for the source
+Cast's selected source snapshot adds the external-code decoder needed for the source
 constructor that Run emits, alongside the distinct inline Lean decoder:
 
 | Constructor | Stored JSON |
 | --- | --- |
-| `Verso.Genre.Manual.Block.lean` (Run source) | `[CodeConfig, Highlighted, definedNames]` |
+| `Verso.Genre.Manual.Block.lean` (Run source) | `[CodeConfig, Highlighted, definedNames]` (flat three-element array) |
 | `Verso.Genre.Manual.InlineLean.Block.lean` (existing Cast decoder) | `[Highlighted, _, _, _]` |
 
 Match the constructor and three-field layout explicitly, decode the stored
@@ -416,26 +419,33 @@ The selected compiler is Lean **4.36.0-rc2**, revision
 `d22e76e` and Slides `e7705d5` remain unchanged. VIR is
 `a41f9257f5d34911d5b1f53dba37c2e1bc022aae` from
 [VIR PR #278](https://github.com/ejgallego/lean-vir/pull/278).
-Cast's selected preview API is from [Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1),
-base `6bee7e7e06546cef75ee873bbe7e6252151e0432`. Its flat source decoder and
-reference-host status-clear corrections are qualified from the owner's frozen
-source snapshot: patch SHA256
-`61292bad52a03611058aa22fa126c6cac9d866fb045e920ef3d3612828077765`, archive SHA256
-`b012bb7cd1984b717e374cfedeab37b09cdca7d9b9850cd2038bc1d4908e2e0a`.
-Their signed publication remains pending. The source compiles against this
-consumer's dependencies; no Cast binary outputs, runtime or SDK is copied.
+Cast's public base is `6bee7e7e06546cef75ee873bbe7e6252151e0432` from
+[Cast PR #1](https://github.com/ejgallego/verso-cast/pull/1). The local source
+selection includes its Lean-first component, flat source decoder and status-clear
+corrections: patch SHA256
+`a9d4b3c955abff7be6b0286e1c5e24bae16fc7a9d2a7c19cba23627c12ac7a96`, archive SHA256
+`34fd3d3b51441d6f4f8898b0b4a51e0401254e81604988bf1f8ed8bf1b5cd01f`.
+Archive and patch hashes are checked before extraction; all 124 source-file
+hashes are checked afterward. No Cast binary outputs are
+adopted, and signed publication remains pending.
 
-The matched local runtime has content ID
-`a5001decce3979891e263a0843e8c76392c493ee9daf88ad1b2fbdd3233b8666`, pack SHA256
-`9ef8cf1012250cd47cb09eff65f5ad8493e8a7ba8225756769bec4972f6c80a7` and release
+The matched VIR source is API `46fd2952b3a1dc05772f637b5f2f9c69d3e0bc9f`,
+with lock-only child `dbc7035763b04bbb42f86e2e7a41c51df0cc8779`.
+Its SDK archive SHA256 is
+`0b7bc82b10667b90ff121c74782ff3b0c219bd4dbecb025e10d122c0d09e687d`.
+The runtime content ID is
+`95ab8d16354121d094ac0ffa8908385534ba23b244fc81952a0d4d29f2881b59`, pack SHA256
+`e770a23741e5468eabd8d9738a663fd51d89ad006ada8d8a15c6bf74115c7394`, and release
 Wasm SHA256 `1ab2ecd05abdaaac3dd2e3c704200892b78caa918a97d67a7e212220f85db6a5`.
-This is an exact-source local qualification input. The selected public VIR lock
-still names an unavailable release; local demo preparation uses a private source
-clone at lock-only local commit `3d01e51718307165e02c0c66178b9360fb4d5f19`,
-whose direct parent is the selected API source, and Lake's supported workspace
-package override. The SDK/API identity remains `a41f9257`; the local commit only
-selects the qualified relative runtime input. Normal public acquisition remains
-a landing gate.
+The unchanged Wasm retains its recorded native build provenance; these gates
+qualify this exact source/SDK/runtime combination.
+
+Setup uses the kit's self-contained Git bundle and ordinary preparation to make
+an independent local source clone, installs its exact SDK, and selects it through
+Lake's workspace package override. SDK metadata identifies the API commit; the
+lock-only child differs only in `vir-resources/runtime.json`. The public VIR pin
+remains `a41f9257`, and the public Cast pin remains `6bee7e7`. These local sources
+are qualification inputs; public acquisition and adoption remain landing gates.
 
 The new tests distinguish these results:
 
@@ -445,10 +455,10 @@ The new tests distinguish these results:
 | Actual producer layout | `CastSources.lean` checks the flat external-source payloads from both `leanRun` and `leanRunAnchor`. A nested product decoder is insufficient. |
 | Actual package generation | `CastPackages.lean` uses VIR's public analyzer/emitter for the real inline and imported roots. |
 | Actual Wasm calls | `cast-byte-program.mjs` invokes both packages, checks pre-await input snapshots, independent disposal and post-disposal refusal. |
-| Native placement lifetime | Controlled Chromium tests use the production native wrapper and hosts: exact captured ref routing, pending Stop, late replies, independent workers, edits, unbound reconciliation and cleanup after a failing Lean view. The peer and worker are controlled. |
+| Native placement lifetime | Chromium loads the actual compiled Lean adapter and preview. It checks exact captured signal/session/ref, pending Stop, late replies, independent workers, edit/restart boundaries, retained DOM/Debug, operational errors/recovery, live and retired fatal callbacks, and native cleanup after disposing the View runtime. Transport and workers are controlled; disposal is not a real trap test. |
 | Math rendering | `cast-math.py` runs the actual compiled Lean adapter with real Manual math nodes. Cast's public KaTeX leaf renders inline/display math, retains TeX source, recovers malformed input and loads bundled fonts. Editor transport is controlled; actual VS Code math/CSP acceptance remains open. |
 | Site behavior | `lake build` and all 101 checks in `lake test -- --mutations` pass with the disclosed local selections. The focused sequence suite also passes all 28 checks, including signature mismatch/retry. |
-| Actual VS Code | Real inline/anchor source highlighting, scalar calls, repeated placements, cursor movement without a new header-session RPC and long-running worker Stop pass. Interactive assertions also observed unsaved execution, stale/unadmitted-root refusal and error-bearing preview/admission. The complete edit/recovery driver timed out during final restoration; same-version close/reopen and recovery remain open consumer gates. |
+| Earlier actual VS Code baseline | Real inline/anchor source highlighting, scalar calls, repeated placements, cursor movement without a new header-session RPC and long-running worker Stop pass. Interactive assertions also observed unsaved execution, stale/unadmitted-root refusal and error-bearing preview/admission. The complete edit/recovery driver timed out during final restoration; same-version close/reopen and recovery remain open consumer gates. A fresh editor run of the Lean-first source selection is still required. |
 
 Generated logs, packages and results live under `_out/rc2-demo/`,
 `_out/cast-demo/`, `_out/cast-placement/` and `_out/cast-math/`. Checking profiles

@@ -8,16 +8,14 @@ const vir = process.argv[2] ? resolve(process.argv[2]) : await selectedPackage("
 const require = createRequire(resolve(vir, "package.json"));
 const { build } = require("esbuild");
 const cast = await selectedPackage("verso-cast");
-const [virManifest, castManifest] = await Promise.all([vir, cast].map(async path =>
-  JSON.parse(await readFile(resolve(path, "package.json"), "utf8"))));
+const virManifest = JSON.parse(await readFile(resolve(vir, "package.json"), "utf8"));
 const runtime = JSON.parse(await readFile(resolve(root, ".vir/infoview-runtime.json"), "utf8"));
 if (!/^[0-9a-f]{64}$/.test(runtime.contentId)) throw Error("Prepare the selected runtime before bundling");
 const lock = JSON.parse(await readFile(resolve(vir, "vir-resources/runtime.json"), "utf8"));
 if (runtime.contentId !== lock.contentId) throw Error("Prepared runtime does not match the selected VIR lock");
-const aliases = { "lean-vir": resolve(vir, virManifest.exports["."]),
-  "verso-cast/preview": resolve(cast, castManifest.exports["./preview"]) };
+const aliases = { "lean-vir": resolve(vir, virManifest.exports["."]) };
 const selected = { name: "selected-public-exports", setup(build) {
-  build.onResolve({ filter: /^(lean-vir|verso-cast\/preview)$/ }, args => ({ path: aliases[args.path] }));
+  build.onResolve({ filter: /^lean-vir$/ }, args => ({ path: aliases[args.path] }));
 } };
 const worker = await build({ absWorkingDir: root, entryPoints: ["web/cast/worker.js"],
   bundle: true, format: "esm", platform: "browser", write: false, plugins: [selected] });

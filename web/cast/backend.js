@@ -3,13 +3,12 @@ import { waitForSignal } from "../lifetime.js";
 export const decodeBase64 = value => Uint8Array.from(atob(value), c => c.charCodeAt(0));
 
 // This backend retains the displayed snapshot, never a global latest reference.
-export function editorBackend(page, selection, runtime, worker) {
-  const current = () => !!selection && !selection.signal.aborted && !page.hasErrors &&
-    page.session === selection.session && page.uri === selection.uri;
+export function editorBackend(page, runtime, worker) {
+  const current = () => !!page.signal && !page.signal.aborted && !page.hasErrors;
   return {
     acquireCall(description, signal) {
       const controller = new AbortController();
-      const joined = AbortSignal.any([signal, controller.signal, ...(selection ? [selection.signal] : [])]);
+      const joined = AbortSignal.any([signal, controller.signal, page.signal]);
       const promise = (async () => {
         if (!current()) throw new Error("Wait for an error-free current page before running this example");
         const reply = await page.session.call("VersoLeanRun.Cast.Server.program", {

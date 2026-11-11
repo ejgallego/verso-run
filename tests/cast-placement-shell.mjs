@@ -1,16 +1,22 @@
-// Controlled Lean/VIR view boundary; native placement ownership remains real.
+// Only the widget-loading shell is controlled; the View and Cast component are real Lean/Wasm.
 import React from "react";
-const decode = (session, reply) => ({ ok: true, value: { page: {
-  session, snapshotRef: reply.snapshotRef, uri: reply.uri, version: reply.version, hasErrors: reply.hasErrors,
-} } });
-function View({ data, matchesSelection }) {
-  const f = globalThis.castFixture;
-  if (f.unhealthy) throw Error("Lean view unavailable");
-  return React.createElement(React.Fragment, null, ...["a", "b"].map(key =>
-    React.createElement(f.placement, { key, page: data.page, matchesSelection,
-      description: f.description, controlsHtml: f.controls })));
+import { PageHost } from "../web/cast/page.js";
+
+function ObservedHost({ preview, ...props }) {
+  const observed = React.useMemo(() => function ObservedPreview(input) {
+    React.useLayoutEffect(() => {
+      if (input.selection) {
+        globalThis.castFixture.selections.push(input.selection);
+        globalThis.castFixture.inputs.push(input);
+      }
+    }, [input.selection, input.onFatal]);
+    return React.createElement(preview, input);
+  }, [preview]);
+  return React.createElement(PageHost, { ...props, preview: observed });
 }
-export default function Shell({ pageHost: PageHost, runPlacement }) {
-  globalThis.castFixture.placement = runPlacement;
-  return React.createElement(PageHost, { uri: "file:///Demo.lean", decode, view: View });
+export default function Shell(props) {
+  if (globalThis.castFixture.unhealthy) throw Error("Lean view unavailable");
+  return React.createElement(globalThis.castPlacementView, {
+    ...props, pageHost: ObservedHost, pos: { uri: "file:///Demo.lean", line: 5, character: 0 },
+  });
 }

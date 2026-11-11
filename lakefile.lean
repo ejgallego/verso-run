@@ -267,5 +267,5 @@ lean_exe «lean-run-infoview-assets» where
 
 lean_lib LeanRunInfoviewSourceGate where
   srcDir := "tests/cast"
-  roots := #[`CastSourceGate, `CastMathDoc]
+  roots := #[`CastSourceGate, `CastMathDoc, `CastEditorFixture]
   requiresModuleSystem := true

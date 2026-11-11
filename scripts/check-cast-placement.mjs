@@ -20,7 +20,6 @@ await build({ absWorkingDir: root, entryPoints: [math ? "tests/cast-math.browser
   nodePaths: [resolve(vir, "node_modules")], plugins: [await mathPlugin(build, cast), { name: "controlled-editor", setup(build) {
     build.onResolve({ filter: /^(@leanprover\/infoview|@cast-test\/infoview-peer)$/ }, () => ({ path: peer }));
     build.onResolve({ filter: /^lean-vir(?:\/(?:host-bindings|react-host-bindings))?$/ }, args => ({ path: runtimeExports[args.path] }));
-    build.onResolve({ filter: /^verso-cast\/preview$/ }, () => ({ path: resolve(cast, "js/preview.mjs") }));
     build.onResolve({ filter: /^__VIR_SHELL__$/ }, () => ({ path: resolve(root, math ? "tests/cast-math-shell.mjs" : "tests/cast-placement-shell.mjs") }));
     build.onResolve({ filter: /^__RUN_WORKER__$/ }, () => ({ path: "worker", namespace: "fixture" }));
     build.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({ contents: 'export default "controlled worker"' }));

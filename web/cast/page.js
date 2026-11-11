@@ -2,20 +2,21 @@
 import React from "react";
 import { EditorContext, EnvPosContext, useClientNotificationEffect,
   useServerNotificationEffect, useEvent, useRpcSession } from "@leanprover/infoview";
-import { usePage, renderPage } from "verso-cast/preview";
 
 // One native selection lifetime for the displayed Manual page. Anchor RPC at
 // the imported header so ordinary cursor movement does not select a new session.
-export function PageHost({ uri, ...bridge }) {
+export function PageHost({ uri, preview }) {
   const anchor = React.useMemo(() => ({ uri, line: 0, character: 0 }), [uri]);
   return React.createElement(EnvPosContext.Provider, { value: anchor },
-    React.createElement(PageAtUri, { key: uri, uri, ...bridge }));
+    React.createElement(PageAtUri, { key: uri, uri, preview }));
 }
 
-function PageAtUri({ uri, decode, view, renderSnapshot = renderPage }) {
+function PageAtUri({ uri, preview }) {
   const session = useRpcSession();
   const editor = React.useContext(EditorContext);
   const owner = React.useRef(null);
+  const committed = React.useRef(null);
+  const [failure, setFailure] = React.useState(null);
   const [processing, setProcessing] = React.useState(false);
   const [version, setVersion] = React.useState(undefined);
   const [refresh, setRefresh] = React.useState(0);
@@ -65,15 +66,25 @@ function PageAtUri({ uri, decode, view, renderSnapshot = renderPage }) {
     setSelection(Object.freeze({ session, uri, expectedVersion: version, signal: controller.signal }));
     return () => { controller.abort(); owner.current = null; };
   }, [session, uri, version, processing, stopped, refresh]);
-  return React.createElement(Preview, { selection, decode, view, renderSnapshot });
-}
-
-function Preview({ selection, decode, view, renderSnapshot }) {
-  const state = usePage(selection, decode);
-  const message = state.status.kind === "loading" ? "Loading page…" :
-    state.status.kind === "error" ? state.status.message :
-    state.status.kind === "idle" ? "Waiting for a checked page…" : "";
-  return React.createElement("section", { "data-cast-preview-current": state.matchesSelection },
-    React.createElement("p", { role: "status" }, message),
-    renderSnapshot({ view }, state));
+  React.useLayoutEffect(() => {
+    const current = { selection, preview };
+    committed.current = current;
+    return () => { if (committed.current === current) committed.current = null; };
+  }, [selection, preview]);
+  const onFatal = React.useMemo(() => {
+    const current = () => selection && !selection.signal.aborted &&
+      committed.current?.selection === selection && committed.current?.preview === preview;
+    // Schedule native React boundary handling after callVoid returns normally.
+    // Both checks retain the captured owner; an old failure cannot select a new one.
+    return reason => {
+      if (!current()) return;
+      queueMicrotask(() => {
+        if (!current()) return;
+        setFailure(previous => current() ? { selection, preview, reason } : previous);
+      });
+    };
+  }, [selection, preview]);
+  if (failure && failure.selection === selection && failure.preview === preview &&
+      selection && !selection.signal.aborted) throw failure.reason;
+  return React.createElement(preview, { selection, onFatal });
 }

@@ -5,15 +5,23 @@ import { readFile, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { selectedPackage } from "../scripts/selected-package.mjs";
 const root = resolve(new URL("..", import.meta.url).pathname);
 const [directory, expectedContentId, expectedSource] = process.argv.slice(2);
 assert(directory && /^[0-9a-f]{64}$/.test(expectedContentId ?? "") && /^[0-9a-f]{40}$/.test(expectedSource ?? ""),
   "usage: cast-byte-program RUNTIME_DIRECTORY EXPECTED_CONTENT_ID EXPECTED_VIR_REVISION");
-const vir = resolve(root, ".lake/packages/lean_vir");
-const actualSource = execFileSync("git", ["rev-parse", "HEAD"], { cwd: vir, encoding: "utf8" }).trim();
-assert.equal(actualSource, expectedSource);
-const manifest = JSON.parse(await readFile(resolve(vir, "package.json"), "utf8"));
-const { createVirRuntimeFactory } = await import(pathToFileURL(resolve(vir, manifest.exports["./vir-runtime-node"])));
+const vir = await selectedPackage("lean_vir");
+const git = args => execFileSync("git", args, { cwd: vir, encoding: "utf8" }).trim();
+const checkoutRevision = git(["rev-parse", "HEAD"]);
+if (checkoutRevision !== expectedSource) {
+  assert.equal(git(["rev-parse", "HEAD^"]), expectedSource);
+  assert.equal(git(["diff", "--name-only", expectedSource, "HEAD"]), "vir-resources/runtime.json");
+}
+const sdk = resolve(vir, ".lake/build/vir/sdk");
+const metadata = JSON.parse(await readFile(resolve(sdk, "lean-vir-artifact.json"), "utf8"));
+assert.equal(metadata.gitCommit, expectedSource);
+assert.equal(metadata.gitDirty, false);
+const { createVirRuntimeFactory } = await import(pathToFileURL(resolve(sdk, "js/vir-runtime-node.js")));
 const runtimeManifest = JSON.parse(await readFile(resolve(directory, "envelope.json"), "utf8"));
 assert.equal(runtimeManifest.contentId, expectedContentId);
 const factory = createVirRuntimeFactory({ wasmBytes: new Uint8Array(await readFile(resolve(directory, "runtime.wasm"))),
@@ -42,7 +50,7 @@ try {
   assert.equal(programs[0].status, "disposed");
   assert.throws(() => programs[0].call(contracts[0].description.callable, "Ada"), /disposed/);
   assert.equal(programs[1].call(contracts[1].description.callable, 9n), 18n);
-  const result = { virRevision: actualSource, runtimeContentId: expectedContentId,
+  const result = { virRevision: metadata.gitCommit, checkoutRevision, runtimeContentId: expectedContentId,
     leanRevision: runtimeManifest.descriptor.compatibility.leanRevision,
     checks: ["actual leanRun call", "actual leanRunAnchor call", "pre-await input snapshots",
       "independent program disposal", "post-disposal refusal"], actualEditorObserved: false };
