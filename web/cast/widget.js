@@ -24,6 +24,11 @@ export function RunPlacement({ page, matchesSelection, description, controlsHtml
       // Unbind before disposal so the global observer cannot reattach a stale owner.
       unbind?.();
       for (const button of element.querySelectorAll("button")) button.disabled = true;
+      const status = element.querySelector(".lean-run-status");
+      const currentError = matchesSelection && page.hasErrors && page.signal && !page.signal.aborted;
+      if (status) status.textContent = currentError ?
+        "Fix Lean errors in this page before running." :
+        "Waiting for a current checked page…";
     };
     if (matchesSelection && page.signal && !page.signal.aborted && !page.hasErrors) {
       const backend = editorBackend(page, runtime, () => {

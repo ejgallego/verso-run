@@ -128,7 +128,9 @@ window.checkPlacement = async () => {
       peer.notify("textDocument/didChange", { textDocument: { uri, version }, contentChanges: [{ text: "edit" }] });
       check(workers[1].terminated, "edit terminates worker synchronously before a replacement render");
     });
-    check(placements().every(p => p.querySelector('button').disabled), "retained old prose has disabled controls");
+    check(placements().every(p => p.querySelector('button').disabled &&
+      p.querySelector('.lean-run-status').textContent === "Waiting for a current checked page…"),
+      "retained old prose explains why controls are disabled");
     await act(() => peer.notify("$/lean/fileProgress", { textDocument: { uri }, processing: [] }));
     await act(() => last().resolve());
     await act(() => submit(0));
@@ -198,9 +200,12 @@ window.checkPlacement = async () => {
     await refreshPage();
     last().reply.hasErrors = true;
     await act(() => last().resolve());
-    check(!caught && propsOf(placements()[0]).page.hasErrors && placements()[0].querySelector('button').disabled,
-      "recovered checked prose is visible without whole-page execution admission");
+    check(!caught && propsOf(placements()[0]).page.hasErrors && placements()[0].querySelector('button').disabled &&
+      placements()[0].querySelector('.lean-run-status').textContent === "Fix Lean errors in this page before running.",
+      "error-bearing prose explains whole-page execution refusal");
     await refreshPage();
+    check(placements().every(p => p.querySelector('.lean-run-status').textContent ===
+      "Waiting for a current checked page…"), "retired error-bearing controls explain pending recovery");
     await act(() => last().resolve());
     check(debug().checked && !placements()[0].querySelector('button').disabled, "error recovery restores fresh explicit execution");
     await act(() => submit(0));

@@ -23,8 +23,9 @@ The native browser lifetime checks and actual rc2/Wasm scalar calls pass.
 In the earlier VS Code baseline, the panel rendered source and ran scalar
 examples in independent workers. Its blob worker and Stop path were exercised
 in the infoview.
-Interactive assertions also observed unsaved execution and error refusal, but
-the complete edit/recovery and same-version restart gates remain open. This
+A focused real-editor readiness check now covers whole-page error refusal and
+recovery with actual inline/anchor worker calls. Broader lifecycle and
+same-version restart gates remain open. This
 prototype stays a draft.
 HTML, sequence, automaton and custom-result presentation are not connected to
 the editor backend yet. Their site implementation keeps the existing behavior.
@@ -33,7 +34,7 @@ Cast's Lean component owns page requests, retained prose, status and Debug UI.
 The native editor host supplies a selected page's session and abort signal. Each
 Run placement receives that exact captured signal and owns its worker cleanup,
 so edits and unmount can stop execution even when the Lean view is unavailable.
-The current Lean-first integration still needs a fresh VS Code acceptance run.
+Broader VS Code lifecycle acceptance of the Lean-first integration remains open.
 
 ## Checking latency
 
@@ -98,6 +99,18 @@ input and choose Stop while it computes; the greeting controls remain usable.
 Change the greeting's body without rebuilding the website: old execution must
 stop immediately, and the next explicit Run must use the newly checked body.
 
+Every Run control requires an error-free checked page. A Lean error anywhere in
+the page disables all its examples, while recovered prose can remain visible.
+The controls explain this with “Fix Lean errors in this page before running.”
+Open **All Messages** in the infoview or VS Code's Problems panel to find the
+error. Removing a function's definition also requires removing its remaining
+`leanRun` references. During checking or after selection retirement, controls
+say “Waiting for a current checked page…”.
+
+After rebuilding preview dependencies with an editor already open, choose
+**Restart File** in the infoview to reload its imports. This preserves unsaved
+source edits.
+
 The generated `.vir/` assets, `.vir-generated/` widget, build outputs and local
 runtime selection stay outside Git. This local preparation does not publish a
 runtime or make the public lock usable. Public dependency adoption remains a
@@ -141,3 +154,22 @@ explicit source-paired pack and execute the real producer packages through the
 public byte loader. These checks cover actual Wasm calls, independently admitted
 contracts and disposal, rather than real editor behavior. See the
 [design and evidence scope](../../docs/cast-infoview-design.md).
+
+The opt-in real-editor readiness check uses a **separate diagnostic VS Code
+instance** with the clean fixture selected and no unsaved edits. Start that
+instance with the same SDK environment as the generated launcher and add
+`--remote-debugging-port=9449` with a different `--user-data-dir`. Complete any
+initial welcome screen and open the Lean infoview before running:
+
+```sh
+UV_CACHE_DIR="$PWD/.cache/uv" uv run --with playwright python tests/cast-editor-readiness.py \
+  --cdp http://127.0.0.1:9449
+```
+
+This check renames the greeting definition in the editor buffer, observes the
+actual missing-entry diagnostic and disabled-control explanation, reverts its
+own buffer changes without saving, and runs the restored inline and anchored
+examples through real workers. It checks the exact fixture URI and refuses
+unsaved tabs. The recorded run used Lean extension 0.0.240 in an extension
+development host on Xvfb. It is separate from the controlled transport suite
+and does not qualify every editor lifecycle or CSP configuration.
