@@ -1,5 +1,7 @@
 .lake/
 .vir-generated/
+.vir/
+.vscode/settings.json
 .beam/
 _out/
 __pycache__/

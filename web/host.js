@@ -1,42 +1,9 @@
-import { validateInput, scalarKind, resultKind, presenterKey } from "./contract.js";
-let publication;
-// Pending acquisition is shared only while a placement still needs it. A stopped
-// placement releases its interest, without aborting another placement's fetch.
-function acquirePublication() {
-  if (!publication) {
-    const controller = new AbortController();
-    const entry = { controller, users: 0, settled: false };
-    publication = entry;
-    const deadline = setTimeout(() => controller.abort(
-      new Error("Lean Run publication timed out. Choose Run to retry.")), 15000);
-    entry.promise = fetch(new URL("./publication.json", import.meta.url),
-      { signal: controller.signal }).then(async response => {
-      if (!response.ok) throw new Error(`Lean Run publication: HTTP ${response.status}`);
-      return response.json();
-    }).catch(error => {
-      // A late failure of abandoned acquisition cannot evict a successful retry.
-      if (publication === entry) publication = undefined;
-      throw error;
-    }).finally(() => {
-      entry.settled = true;
-      clearTimeout(deadline);
-    });
-  }
-  const entry = publication;
-  ++entry.users;
-  let released = false;
-  return { promise: entry.promise, release() {
-    if (released) return;
-    released = true;
-    if (--entry.users === 0 && !entry.settled) {
-      if (publication === entry) publication = undefined;
-      entry.controller.abort();
-    }
-  } };
-}
+import { validateInput, scalarKind, resultKind } from "./contract.js";
+import { siteBackend } from "./backend.js";
 // Each placement owns a host. Resource bytes can be shared; program state never is.
 export class ExperimentHost {
-  constructor(description, onState = () => {}) {
+  constructor(description, onState = () => {}, backend = siteBackend) {
+    this.backend = backend;
     this.description = description;
     this.onState = onState;
     this.worker = null;
@@ -63,30 +30,18 @@ export class ExperimentHost {
     const requestId = ++this.request;
     let resolve, reject;
     const promise = new Promise((ok, fail) => { resolve = ok; reject = fail; });
-    const acquisition = acquirePublication();
-    this.pending = { requestId, operation, resolve, reject, release: acquisition.release };
+    const controller = new AbortController();
+    const acquisition = this.backend.acquireCall(this.description, controller.signal);
+    this.pending = { requestId, operation, resolve, reject, release: acquisition.release, controller };
     this.onState(operation === "advance" ? "advancing" : "loading");
     void (async () => {
       try {
-        const plan = await acquisition.promise;
+        const resources = await acquisition.promise;
         if (generation !== this.generation || this.pending?.requestId !== requestId) return;
-        const binding = plan.programs[this.description.program]?.[this.description.declaration];
-        if (!binding) throw new Error(`No published program for ${this.description.declaration}`);
-        if (!binding.expectedExport) throw new Error(`No published VIR signature for ${this.description.declaration}`);
-        const url = path => new URL(path, new URL("../", import.meta.url)).href;
-        const publication = { runtimeModule: url(plan.runtimeModule),
-          runtimeManifest: url(plan.runtimeManifest), programManifest: url(binding.manifest),
-          expectedExport: binding.expectedExport };
-        const key = presenterKey(this.description.form);
-        if (key) {
-          if (!Object.hasOwn(plan.resultPresenters ?? {}, key))
-            throw new Error(`No registered result presenter for type '${key}'`);
-          const presenter = plan.resultPresenters[key];
-          publication.resultModule = url(presenter.workerModule);
-          this.resultRendererUrl = url(presenter.rendererModule);
-        }
+        const programRequest = resources.programRequest;
+        this.resultRendererUrl = resources.resultRendererUrl;
         if (!this.worker) {
-          const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
+          const worker = this.backend.createWorker();
           this.worker = worker;
           worker.onmessage = ({ data }) => {
             if (worker !== this.worker || generation !== this.generation || data.requestId !== this.pending?.requestId) return;
@@ -109,7 +64,7 @@ export class ExperimentHost {
             this.fail(new Error(event.message || "Lean Run worker failed"));
           };
         }
-        this.worker.postMessage({ operation, requestId, description: this.description, publication, input });
+        this.worker.postMessage({ operation, requestId, description: this.description, programRequest, input });
       } catch (error) {
         if (generation === this.generation && this.pending?.requestId === requestId) this.fail(error);
       } finally {
@@ -122,21 +77,23 @@ export class ExperimentHost {
   fail(error) {
     const pending = this.pending;
     this.pending = null;
+    pending?.controller.abort();
     pending?.release();
     this.worker?.terminate();
     this.worker = null;
-    this.onState("failed", String(error.message ?? error));
-    pending?.reject(error);
+    try { this.onState("failed", String(error.message ?? error)); }
+    finally { pending?.reject(error); }
   }
   stop(state = "stopped") {
     ++this.generation;
     const pending = this.pending;
     this.pending = null;
+    pending?.controller.abort();
     pending?.release();
     this.worker?.terminate();
     this.worker = null;
-    this.onState(state);
-    pending?.reject(new DOMException("Execution stopped", "AbortError"));
+    try { this.onState(state); }
+    finally { pending?.reject(new DOMException("Execution stopped", "AbortError")); }
   }
   dispose() { this.disposed = true; this.stop("stopped"); }
 }

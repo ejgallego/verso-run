@@ -3,9 +3,11 @@ open Lake DSL
 
 -- VIR's source revision also selects its locked browser runtime.
 require verso from git "https://github.com/leanprover/verso.git" @ "d0a5f92ee585a92d2cd4c4904469c123f5ae5f10"
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "a41f9257f5d34911d5b1f53dba37c2e1bc022aae"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "d22e76ef3d2a925132315af902ea432233b4a44a"
 require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "e7705d546f7432bd8a32adda035310376db79839"
+
+require «verso-cast» from git "https://github.com/ejgallego/verso-cast" @ "6bee7e7e06546cef75ee873bbe7e6252151e0432"
 
 package verso_run
 
@@ -31,7 +33,7 @@ lean_lib VersoLeanRunAuthoring where
   roots := #[]
   globs := #[.one `VersoLeanRun.Model, .one `VersoLeanRun.Callable,
     .one `VersoLeanRun.Anchored, .one `VersoLeanRun.Inline,
-    .one `VersoLeanRun.Render, .one `VersoLeanRun.Collect]
+    .one `VersoLeanRun.Render, .one `VersoLeanRun.Collect, .one `VersoLeanRun.Contract]
 
 -- Genre authoring and native publication retain their public imports.
 
@@ -232,3 +234,38 @@ script test (args) do
     args := #["run", "--with", "playwright", "python", "tests/acceptance.py"] ++ args.toArray
   }
   result.wait
+
+-- Optional editor preview; the setup command prepares its native wrapper first.
+input_file castWidgetBundle where
+  path := ".vir-generated/CastWidget.mjs"
+
+input_file castRuntimeManifest where
+  path := ".vir/infoview-runtime.json"
+  text := true
+
+lean_lib VersoLeanRunCast where
+  srcDir := "src/cast"
+  roots := #[`VersoLeanRun.Cast]
+  globs := #[.andSubmodules `VersoLeanRun.Cast]
+  requiresModuleSystem := true
+  needs := #[leanRunWeb, castWidgetBundle]
+
+lean_lib LeanRunInfoviewDemo where
+  srcDir := "demo/infoview"
+  roots := #[`LeanRunInfoview.Demo, `LeanRunInfoview.Helper]
+  requiresModuleSystem := true
+
+lean_lib LeanRunInfoviewSetup where
+  srcDir := "demo/infoview-resources"
+  roots := #[`LeanRunInfoview.Setup]
+  requiresModuleSystem := true
+  needs := #[castRuntimeManifest]
+
+lean_exe «lean-run-infoview-assets» where
+  srcDir := "demo/infoview"
+  root := `Prepare
+
+lean_lib LeanRunInfoviewSourceGate where
+  srcDir := "tests/cast"
+  roots := #[`CastSourceGate, `CastMathDoc, `CastEditorFixture]
+  requiresModuleSystem := true

@@ -151,12 +151,14 @@ with serve_directory(server_root) as base:
         def start_publication_calls(name, count):
             loading.evaluate('''async ({name, count}) => {
                 const {ExperimentHost} = await import(new URL('lean-run/host.js?' + name, location.href).href);
+                const {createSiteBackend} = await import(new URL('lean-run/backend.js', location.href).href);
+                const backend = createSiteBackend();
                 const description = JSON.parse(document.querySelector(
                     '.lean-run[data-experiment*="LeanRunGate.greet"]').dataset.experiment);
                 const test = globalThis.loadingCase = {hosts: [], outcomes: [], states: []};
                 for (let i = 0; i < count; ++i) {
                     test.outcomes[i] = {pending: true};
-                    const host = new ExperimentHost(description, state => test.states[i] = state);
+                    const host = new ExperimentHost(description, state => test.states[i] = state, backend);
                     test.hosts.push(host);
                     host.invoke('placement ' + i).then(value => test.outcomes[i] = {value},
                         error => test.outcomes[i] = {error: error.name});

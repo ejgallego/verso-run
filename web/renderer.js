@@ -1,9 +1,23 @@
+import { siteBackend } from "./backend.js";
 import { ExperimentHost } from "./host.js";
 import { AutomatonPlayer } from "./automaton.js";
 import { ViewHost } from "./presenter.js";
 import { ResultView } from "./result-view.js";
 import { validateInput, scalarKind } from "./contract.js";
 const owners = new Map();
+const backends = new WeakMap();
+// Bind before enabling an infoview placement. Reconciliation never guesses a
+// site backend for editor controls, and cannot retarget an existing owner.
+export function bindBackend(element, backend) {
+  if (owners.has(element) && backends.get(element) !== backend)
+    throw new Error("Dispose the placement before changing its backend");
+  backends.set(element, backend);
+  return () => {
+    if (backends.get(element) !== backend) return;
+    backends.delete(element);
+    owners.get(element)?.dispose();
+  };
+}
 const retired = new WeakSet();
 const initialized = new WeakSet();
 let observing = false;
@@ -34,7 +48,8 @@ addEventListener("visibilitychange", () => {
   }
 });
 let instance = 0;
-export function enhance(element) {
+export function enhance(element, backend = backends.get(element) ?? siteBackend) {
+  if (element.dataset.leanRunContext === "infoview" && !backends.has(element)) return null;
   // Reveal can clone the marker without cloning a placement's ownership.
   const existing = owners.get(element);
   if (!observing) {
@@ -42,7 +57,10 @@ export function enhance(element) {
     observing = true;
   }
   if (!element.isConnected) { existing?.dispose(); return null; }
-  if (existing) return existing;
+  if (existing) {
+    if (existing.backend !== backend) throw new Error("Dispose the placement before changing its backend");
+    return existing;
+  }
   const lifetime = new AbortController();
   const binding = { signal: lifetime.signal };
   const description = JSON.parse(element.dataset.experiment);
@@ -109,7 +127,7 @@ export function enhance(element) {
     emit("failed");
   };
   const view = resultElement ? new ResultView(resultElement, lifetime.signal, displayError) :
-    pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", displayError) : null;
+    pane ? new ViewHost(pane, automatonElement ? "automaton" : sequenceElement ? "sequence" : "html", displayError, backend) : null;
   let viewControls = null;
   const clearResult = () => {
     viewControls?.abort();
@@ -164,7 +182,7 @@ export function enhance(element) {
       });
       if (resultElement && view.paused) setState("paused");
     } else emit(state, state === "success" ? value : null);
-  });
+  }, backend);
   if (automatonElement) {
     player = new AutomatonPlayer(async () => {
       await host.advance();
@@ -174,6 +192,7 @@ export function enhance(element) {
   // A placement owns execution, presentation and pending playback intent.
   // Hiding it cancels automatic resumption even while Restart is loading.
   const owner = {
+    backend,
     signal: lifetime.signal,
     stop: state => { if (!lifetime.signal.aborted) host.stop(state); },
     dispose: (notify = true) => {
