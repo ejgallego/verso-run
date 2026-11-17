@@ -1,9 +1,9 @@
 import Lake
 open Lake DSL
 
--- VIR's source revision also selects its locked browser runtime.
+-- VIR's source revision also selects its matching browser runtime.
 require verso from git "https://github.com/leanprover/verso.git" @ "d0a5f92ee585a92d2cd4c4904469c123f5ae5f10"
-require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "bf8b6a80a5d4011ffd6804fb7a395b9cd2d0d668"
+require lean_vir from git "https://github.com/ejgallego/lean-vir" @ "de184e6565d47d3e8d085d397e67c8f048d8d9f0"
 require illuminate from git "https://github.com/leanprover/illuminate" @ "d22e76ef3d2a925132315af902ea432233b4a44a"
 require «verso-slides» from git "https://github.com/ejgallego/verso-slides" @ "e7705d546f7432bd8a32adda035310376db79839"
 
