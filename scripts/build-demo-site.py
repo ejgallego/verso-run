@@ -27,7 +27,7 @@ if reference.exists():
 shutil.copytree(root / ".lake/build/literate-html", reference)
 manifest = json.loads((root / "lake-manifest.json").read_text())
 publication = json.loads((site / "lean-run/publication.json").read_text())
-runtime = json.loads((site / "lean-run" / publication["runtimeManifest"]).read_text())
+runtime = json.loads((site / publication["runtimeManifest"]).read_text())
 identity = {
     "source": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
     "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip()),

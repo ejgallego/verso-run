@@ -42,7 +42,7 @@ with ExitStack() as servers:
             assert contents == (root / '_out/html-multi' / path / 'lean-run' / name).read_bytes(), (genre, name)
             shared_hashes[genre][name] = hashlib.sha256(contents).hexdigest()
     plan = plans['Manual']
-    runtime_path = 'lean-run/' + plan['runtimeManifest']
+    runtime_path = plan['runtimeManifest']
     local_runtime = json.loads((root / '_out/html-multi' / runtime_path).read_text())
     with urlopen(base + runtime_path) as response:
         assert json.load(response) == local_runtime

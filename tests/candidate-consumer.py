@@ -106,7 +106,7 @@ try:
     assert bindings['Consumer.increment']['expectedExport']['effect'] == 'pure'
     assert set(plan['presenters']) == {'sequence', 'automaton'}
     vir = project / '.lake/packages/lean_vir'
-    runtime = json.loads((site / 'lean-run' / plan['runtimeManifest']).read_text())
+    runtime = json.loads((site / plan['runtimeManifest']).read_text())
     vir_revision = next(p['rev'] for p in manifest['packages'] if p['name'] == 'lean_vir')
     assert runtime['descriptor']['logicalId'] == 'lean-vir/runtime/' + vir_revision
     report['runtimeContentId'] = runtime['contentId']
