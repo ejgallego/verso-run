@@ -26,11 +26,13 @@ if reference.exists():
     shutil.rmtree(reference)
 shutil.copytree(root / ".lake/build/literate-html", reference)
 manifest = json.loads((root / "lake-manifest.json").read_text())
+publication = json.loads((site / "lean-run/publication.json").read_text())
+runtime = json.loads((site / publication["runtimeManifest"]).read_text())
 identity = {
     "source": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
     "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip()),
     "dependencies": {p["name"]: p["rev"] for p in manifest["packages"]},
-    "runtime": json.loads((root / ".lake/packages/lean_vir/vir-resources/runtime.json").read_text())["contentId"],
+    "runtime": runtime["contentId"],
 }
 (site / "verso-run-build.json").write_text(json.dumps(identity, indent=2) + "\n")
 print(f"Combined demo: {site}")

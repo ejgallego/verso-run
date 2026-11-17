@@ -28,8 +28,6 @@ with ExitStack() as servers:
         assert build_identity['dirty'] is False, build_identity
     local_manifest = json.loads((root / 'lake-manifest.json').read_text())
     assert build_identity['dependencies'] == {p['name']: p['rev'] for p in local_manifest['packages']}
-    runtime_lock = json.loads((root / '.lake/packages/lean_vir/vir-resources/runtime.json').read_text())
-    assert build_identity['runtime'] == runtime_lock['contentId']
     plans = {}
     for genre, path in [('Manual', ''), ('Blog', 'blog/'), ('Slides', 'slides/')]:
         with urlopen(base + path + 'lean-run/publication.json') as response:
@@ -44,6 +42,11 @@ with ExitStack() as servers:
             assert contents == (root / '_out/html-multi' / path / 'lean-run' / name).read_bytes(), (genre, name)
             shared_hashes[genre][name] = hashlib.sha256(contents).hexdigest()
     plan = plans['Manual']
+    runtime_path = plan['runtimeManifest']
+    local_runtime = json.loads((root / '_out/html-multi' / runtime_path).read_text())
+    with urlopen(base + runtime_path) as response:
+        assert json.load(response) == local_runtime
+    assert build_identity['runtime'] == local_runtime['contentId']
     checks = ['Manual, Blog, and Slides publications match validated local programs and runtime',
               'all three genres serve the exact accepted host, worker, codec, renderer and sequence bridge bytes']
 

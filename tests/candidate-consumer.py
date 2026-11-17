@@ -106,10 +106,12 @@ try:
     assert bindings['Consumer.increment']['expectedExport']['effect'] == 'pure'
     assert set(plan['presenters']) == {'sequence', 'automaton'}
     vir = project / '.lake/packages/lean_vir'
-    runtime_lock = json.loads((vir / 'vir-resources/runtime.json').read_text())
-    report['runtimeContentId'] = runtime_lock['contentId']
+    runtime = json.loads((site / plan['runtimeManifest']).read_text())
+    vir_revision = next(p['rev'] for p in manifest['packages'] if p['name'] == 'lean_vir')
+    assert runtime['descriptor']['logicalId'] == 'lean-vir/runtime/' + vir_revision
+    report['runtimeContentId'] = runtime['contentId']
     report['runtimePackSha256'] = hashlib.sha256((vir / '.vir-generated/VirResourceRuntime.virres').read_bytes()).hexdigest()
-    assert runtime_lock['contentId'] in plan['runtimeManifest']
+    assert runtime['contentId'] in plan['runtimeManifest']
     assert (project / '.lake/build/lib/lean/vir-assets/Consumer/Chapter.virres').is_file()
     assert (extension_dir / '.lake/build/lib/lean/vir-assets/VersoLeanRunPresenter.virres').is_file()
     record('public Manual/publisher imports prepare consumer and dependency presenter resources through ordinary Lake needs')
